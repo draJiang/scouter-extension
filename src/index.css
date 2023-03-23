@@ -1,0 +1,28 @@
+#LearningEnglish2023 {
+    width: 340px;
+    height: 480px;
+    color: #333;
+}
+
+#myBox #LearningEnglish2023 {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    top: 10px;
+    right: 10px;
+    font-size: 14px;
+    background-color: #fff;
+    z-index: 9999;
+    overflow: scroll;
+    box-shadow: 2px 4px 16px rgba(0, 0, 0, 0.1), -1px 10px 10px rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+}
+
+#LearningEnglish2023 .openAIAnswer {
+    line-height: 30px;
+}
+
+#LearningEnglish2023 .userInput {
+    margin: 10px 0;
+}

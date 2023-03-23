@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+#MyOptions {
+    width: 340px;
+}
+
+#MyOptions h2 {
+    margin-top: 0;
+}
