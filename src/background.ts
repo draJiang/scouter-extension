@@ -1,6 +1,7 @@
+import browser from 'webextension-polyfill'
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
-chrome.runtime.onInstalled.addListener(function () {
+browser.runtime.onInstalled.addListener(function () {
   console.log("插件已被安装");
 
   // 创建右键菜单
@@ -51,7 +52,7 @@ chrome.runtime.onInstalled.addListener(function () {
             method: "POST",
             body: JSON.stringify({
               "model": "gpt-3.5-turbo",
-              "messages": [{"role": "system", "content": "You are an English teacher. Please answer questions about English grammar and vocabulary in Chinese.."},{ "role": "user", "content": msg.prompt }],
+              "messages": [{"role": "system", "content": "You are an English teacher. Please answer questions about English grammar and vocabulary in Chinese."},{ "role": "user", "content": msg.prompt }],
               "temperature": 0,
               "top_p": 0.52,
               "frequency_penalty": 0.87,
@@ -72,7 +73,7 @@ chrome.runtime.onInstalled.addListener(function () {
             if (response.status === 401) {
               // API KEY Error
               console.log('401');
-              port.postMessage({'status':'erro','content':'API Key Error'})
+              port.postMessage({'status':'erro','content':'🥲 API Key error. Please modify and try again..'})
               return
             }
 
@@ -133,7 +134,7 @@ chrome.runtime.onInstalled.addListener(function () {
               console.log('error');
               console.log(error);
               //
-              port.postMessage({'status':'erro','content':'🥲 Something Error'})
+              port.postMessage({'status':'erro','content':"🥲 Encountered some issues, please try again later."})
 
             })
 

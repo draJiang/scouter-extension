@@ -46,13 +46,22 @@ export function PopupCard(props: any) {
     // 选中文字所在的段落
     let sentens = props.selection.anchorNode.data
 
-    let prompt = "我想学习有关 '" + keyWord + "'相关的英语知识\
-    * 请解释 '"+ keyWord + "' 在下面句子中的作用\
-    * 请使用 CEFR A2 级别的英语解释单词（注意这个解释要用英文）\
-    * 使用图像记忆法描述单词\
-    * 请提供 3 个例句。 \
-    * 最后提供 '"+ keyWord + "' 相关的 2 道将中文翻译为英文的测试题，(你作为 AI 模型不要提供测试题的答案)。\
-    这个句子是：'"+ sentens + "'"
+    let prompt = `我想学习有关'${keyWord}'相关的英语知识
+    * 请解释'${keyWord}'在下面句子中的作用
+    * 请使用 CEFR A2 级别的英语解释单词（注意这个解释要用英文）
+    * 使用图像记忆法描述单词
+    * 请提供 3 个例句。
+    * 最后提供'${keyWord}'相关的 2 道测试题，要求将中文短句翻译为英文，(你作为 AI 模型不要提供测试题的答案)。\
+    这个句子是：'${sentens}'
+    请用下面的格式回复：
+    <词性>（如果是单词）<使用中文解释> <使用英文解释>
+    # 图像记忆：
+    <图像记忆法描述>
+    # 例句：
+    <例句>
+    # 测试：
+    <测试题>
+    `
 
     getGPTMsg(prompt)
     console.log(props);

@@ -3,7 +3,7 @@
 
     "name": "Scouter",
     "description": "Make your language more relevant to your life",
-    "version": "0.2",
+    "version": "0.4",
 
     "action": {
         "default_icon": "icon48.png",
@@ -12,11 +12,11 @@
 
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["js/vendor.js", "js/content_script.js"]
+        "js": ["js/vendor.js", "js/content_script.js", "browser-polyfill.js"]
     }],
 
     "background": {
-        "service_worker": "js/background.js"
+        "service_worker": ["js/background.js", "browser-polyfill.js"]
     },
     "icons": {
         "16": "icon16.png",
