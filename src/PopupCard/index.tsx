@@ -61,132 +61,51 @@ export function PopupCard(props: any) {
 
   const getGPTMsg = async (prompt: string, type = 'as1') => {
     console.log('getGPTMsg:');
-    console.log(type);
-
-    console.log(isAnswerDone2);
-    console.log(isAnswerDone1);
-    console.log(isLoading);
 
     // 设置加载状态
     setIsLoading(true)
 
-    chrome.storage.sync.get(["openApiKey"]).then((result) => {
-      console.log(result);
+    // 请求 background 获取数据
+    // 使用长连接
+    // 使用长连接
+    let port = chrome.runtime.connect({
+      name: 'popup-name'
+    })
 
-      fetch('https://api.openai.com/v1/chat/completions', {
+    // 使用postMs 发送信息
+    port.postMessage({ 'type': 'getGPTMsg', 'msg': '给 background 传递信息~', 'prompt': prompt })
 
-        method: "POST",
-        body: JSON.stringify({
-          "model": "gpt-3.5-turbo",
-          "messages": [{ "role": "user", "content": prompt }],
-          "temperature": 0,
-          "top_p": 0.52,
-          "frequency_penalty": 0.87,
-          "presence_penalty": 0.3,
-          "stream": true
-        }),
-        headers: { 'Authorization': 'Bearer ' + result.openApiKey, 'Content-Type': 'application/json', }
+    // 接收信息
+    port.onMessage.addListener(msg => {
 
-      }).then(async (response) => {
+      if (msg.status === 'erro') {
+        type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
+      }
 
-        console.log('response:');
-        console.log(response);
-        console.log(response.status);
-        console.log(response.status === 401);
-        if (response.status === 401) {
-          // API KEY Error
-          setIsLoading(false)
-          if (type === 'as2') {
-            setopenApiAnser2('API Key Error')
-          } else {
-            setopenApiAnser('API Key Error')
-          }
+      if (msg.status === 'end') {
 
-          return
+        type === 'as2' ? setAnswerDone2(true) : setAnswerDone1(true)
+
+      }
+
+      if (msg.status === 'begin') {
+
+        type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
+        setIsLoading(false)
+
+      }
+
+      if (msg.status === 'process') {
+        // 渲染内容
+        if (type === 'as2') {
+          setopenApiAnser2(oa => oa += msg.content)
+        } else {
+          setopenApiAnser(oa => oa += msg.content)
         }
-
-        // 处理 server-sent events
-        const parser = createParser((event) => {
-          if (event.type === 'event') {
-            // console.log('createParser:');
-            try {
-              console.log(JSON.parse(event.data)['choices'][0]['delta']['content']);
-              let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
-              if (new_msg !== undefined) {
-
-                // 渲染内容
-                if (type === 'as2') {
-                  setopenApiAnser2(oa => oa += JSON.parse(event.data)['choices'][0]['delta']['content'])
-                } else {
-                  setopenApiAnser(oa => oa += JSON.parse(event.data)['choices'][0]['delta']['content'])
-                }
+      }
 
 
-              }
-
-            } catch {
-              console.log(' createParser JSON.parse errow')
-            }
-
-          }
-        })
-
-        const reader = response.body?.getReader();
-        if (reader !== undefined) {
-          try {
-
-            // eslint-disable-next-line no-constant-condition
-            if (type === 'as2') {
-              setopenApiAnser2('')
-            } else {
-              setopenApiAnser('')
-            }
-
-            setIsLoading(false)
-
-            while (true) {
-              const { done, value } = await reader.read()
-
-              if (done) {
-                if (type === 'as2') {
-                  setAnswerDone2(true)
-                } else {
-                  setAnswerDone1(true)
-                }
-
-                break
-
-              }
-
-              const str = new TextDecoder().decode(value)
-              parser.feed(str)
-
-
-            }
-          } finally {
-            reader.releaseLock()
-          }
-          parser.reset()
-        }
-
-
-      })
-        .catch((error) => {
-          console.log('error');
-          console.log(error);
-
-          setIsLoading(false)
-
-          if (type === 'as2') {
-            setopenApiAnser2('🥲 Something Error')
-          } else {
-            setopenApiAnser('🥲 Something Error')
-          }
-
-
-        })
-
-    });
+    })
 
 
 
@@ -199,7 +118,7 @@ export function PopupCard(props: any) {
     const a = 'hello'
     // 同时按下 Shirt 时，不提交答案
     if (!event.shiftKey && event.target.defaultValue.replace(/(\r\n|\n|\r)/gm, '') !== '') {
-      let prompt = `请检查我的语法和单词是否有误 "${event.target.defaultValue} "`
+      let prompt = `请检查我的语法和单词是否有误："${event.target.defaultValue} "`
 
       console.log(prompt);
 
@@ -210,25 +129,27 @@ export function PopupCard(props: any) {
 
   return (
     <div id="LearningEnglish2023">
-      <Nav title={keyWord} />
-      {/* <Selection /> */}
 
-      <Divider style={{ margin: '20px 0' }} />
+      <Nav title='Scouter' />
+      <div className="contentBox">
+        <Selection title={keyWord} />
 
-      {isLoading && !isAnswerDone1 ? <Skeleton active /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
-        {openApiAnser.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
-      </div>}
+        {/* <Divider style={{ margin: '10px 0' }} /> */}
 
-      {isAnswerDone1 ? <div className="userInput">
-        <TextArea rows={3} placeholder="Press Enter to " onPressEnter={onPressEnter} disabled={isLoading || isAnswerDone2} />
-      </div> : ''}
+        {isLoading && !isAnswerDone1 ? <Skeleton active /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
+          {openApiAnser.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
+        </div>}
 
-      {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
-        {openApiAnser2.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
-      </div>}
+        {isAnswerDone1 ? <div className="userInput">
+          <TextArea rows={3} placeholder="Press the Enter ⏎ key to submit." onPressEnter={onPressEnter} disabled={isLoading || isAnswerDone2} />
+        </div> : ''}
 
-      <Options />
-      
+        {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
+          {openApiAnser2.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
+        </div>}
+
+        {/* <Options /> */}
+      </div>
     </div>
   );
 };

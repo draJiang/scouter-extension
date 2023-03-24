@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 // import { Button } from 'antd';
 
+import Icon from "../assets/icon48.png"
+
 interface NavProps {
     title: string;
 }
@@ -22,7 +24,9 @@ export function Nav(props: NavProps) {
 
     return (
         <>
-            <div>{props.title}</div>
+            <div id="ScouterNav">
+                <img src={Icon} />
+                <span> {props.title}</span></div>
         </>
     );
 }

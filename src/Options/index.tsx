@@ -78,7 +78,7 @@ export const Options = () => {
           // initialValue={openApiKey}
           // help="Should be combination of numbers & alphabets"
           >
-            <Input placeholder="Basic usage" type="password" />
+            <Input placeholder="We will not use your Key for any other purposes." type="password" />
           </Form.Item>
 
           <Form.Item
@@ -91,8 +91,20 @@ export const Options = () => {
         </Form>
 
         <Divider />
+        <div className="instructions">
+          <h2>Usage</h2>
+          <ul>
+            <li>
+              <p><a target={"_blank"} href="https://platform.openai.com/account/api-keys">Get Open API Key</a></p>
+            </li>
+            <li>
+              <p>Select text, then right-click and choose Scouter.</p>
+              <img src={Usage}></img>
+            </li>
+          </ul>
 
-        <img src={Usage}></img>
+        </div>
+
 
       </div>
     </>

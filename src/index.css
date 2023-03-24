@@ -1,6 +1,6 @@
 #LearningEnglish2023 {
-    width: 340px;
-    height: 480px;
+    width: 380px;
+    height: 500px;
     color: #333;
 }
 
@@ -8,13 +8,12 @@
     position: fixed;
     display: flex;
     flex-direction: column;
-    padding: 20px;
     top: 10px;
     right: 10px;
     font-size: 14px;
     background-color: #fff;
     z-index: 9999;
-    overflow: scroll;
+    overflow: hidden;
     box-shadow: 2px 4px 16px rgba(0, 0, 0, 0.1), -1px 10px 10px rgba(0, 0, 0, 0.06);
     border-radius: 4px;
 }
@@ -25,4 +24,34 @@
 
 #LearningEnglish2023 .userInput {
     margin: 10px 0;
+}
+
+#LearningEnglish2023 .contentBox {
+    padding: 20px;
+    overflow: scroll;
+}
+
+#LearningEnglish2023 #ScouterNav {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(5, 5, 5, .06);
+}
+
+#LearningEnglish2023 #ScouterNav img {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+}
+
+#LearningEnglish2023 #ScouterSelection span {
+    background-color: rgba(0, 0, 0, .04);
+    /* border: 1px solid #d9d9d9; */
+    padding: 4px 8px;
+    border-radius: 2px;
+}
+
+#LearningEnglish2023 #ScouterSelection {
+    margin-bottom: 10px;
 }

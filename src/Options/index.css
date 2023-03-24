@@ -5,9 +5,14 @@ body {
 }
 
 #MyOptions {
-    width: 340px;
+    width: 380px;
 }
 
 #MyOptions h2 {
     margin-top: 0;
+}
+
+#MyOptions img {
+    width: 68%;
+    border-radius: 4px;
 }
