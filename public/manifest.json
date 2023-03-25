@@ -12,11 +12,11 @@
 
     "content_scripts": [{
         "matches": ["<all_urls>"],
-        "js": ["js/vendor.js", "js/content_script.js", "browser-polyfill.js"]
+        "js": ["js/vendor.js", "js/content_script.js"]
     }],
 
     "background": {
-        "service_worker": ["js/background.js", "browser-polyfill.js"]
+        "service_worker": "js/background.js"
     },
     "icons": {
         "16": "icon16.png",

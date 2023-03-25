@@ -1,3 +1,5 @@
+import browser from 'webextension-polyfill'
+
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
@@ -22,42 +24,47 @@ export const Options = () => {
 
     console.log('options useEffect:');
 
-    chrome.storage.sync.get(
-      {
-        openApiKey
-      },
-      (items) => {
+    // 获取配置信息
+    getSettings().then(items => {
+      setOpenApiKey(items.openApiKey ?? null);
+      console.log(openApiKey);
+      console.log(items.openApiKey);
 
-        setOpenApiKey(items.openApiKey ?? null);
-        console.log(openApiKey);
-        console.log(items.openApiKey);
-
-        form.setFieldsValue({ openApiKey: items.openApiKey });
-      }
-    )
-
-
+      // 更新 input 文本框的默认值
+      form.setFieldsValue({ openApiKey: items.openApiKey });
+    })
 
   }, []);
 
-  const saveOptions = (values: any) => {
+  async function getSettings() {
+    let items = await browser.storage.sync.get(
+      {
+        openApiKey
+      }
+    )
+    return items
+  }
+
+  async function saveOptions(values: any) {
     console.log('Options save');
     console.log(values);
 
     // Saves options to chrome.storage.sync.
-    chrome.storage.sync.set(
+    let setStorage = await browser.storage.sync.set(
       {
         openApiKey: values['openApiKey'],
-      },
-      () => {
-        // Update status to let user know options were saved.
-        setStatus(' ✅ Saved')
-        setTimeout(() => {
-          setStatus('')
-        }, 2000);
       }
-    );
+    ).then(item => {
+      
+      // Update status to let user know options were saved.
 
+      console.log('browser');
+      setStatus(' ✅ Saved')
+      setTimeout(() => {
+        setStatus('')
+      }, 2000);
+
+    })
 
   };
 

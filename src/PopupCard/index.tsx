@@ -1,3 +1,5 @@
+import browser from 'webextension-polyfill'
+
 import React, { useEffect, useState } from "react";
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 import ReactDOM from "react-dom";
@@ -30,7 +32,6 @@ export function PopupCard(props: any) {
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
 
-
   useEffect(() => {
     // New Task
     console.log('## PopupCard useEffect')
@@ -46,15 +47,14 @@ export function PopupCard(props: any) {
     // 选中文字所在的段落
     let sentens = props.selection.anchorNode.data
 
-    let prompt = `我想学习有关'${keyWord}'相关的英语知识
-    * 请解释'${keyWord}'在下面句子中的作用
+    let prompt = `
+    * 请解释'${keyWord}'在下面句子中的作用，这个句子是：'${sentens}'
     * 请使用 CEFR A2 级别的英语解释单词（注意这个解释要用英文）
     * 使用图像记忆法描述单词
     * 请提供 3 个例句。
-    * 最后提供'${keyWord}'相关的 2 道测试题，要求将中文短句翻译为英文，(你作为 AI 模型不要提供测试题的答案)。\
-    这个句子是：'${sentens}'
+    * 最后结合你描述的知识提供'${keyWord}'相关的 2 道测试题，要求将中文短句翻译为英文，(你作为 AI 模型不要提供测试题的答案)。\
     请用下面的格式回复：
-    <词性>（如果是单词）<使用中文解释> <使用英文解释>
+    <词性>（如果是单词）<使用中文解释单词在句子中的作用> <使用英文解释>
     # 图像记忆：
     <图像记忆法描述>
     # 例句：
@@ -63,12 +63,12 @@ export function PopupCard(props: any) {
     <测试题>
     `
 
-    getGPTMsg(prompt)
-    console.log(props);
+    getGPTMsg([{ "role": "user", "content": prompt }])
 
   }, [props]);
 
-  const getGPTMsg = async (prompt: string, type = 'as1') => {
+  // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
+  const getGPTMsg = async (prompt:Array<object>, type = 'as1') => {
     console.log('getGPTMsg:');
 
     // 设置加载状态
@@ -76,27 +76,29 @@ export function PopupCard(props: any) {
 
     // 请求 background 获取数据
     // 使用长连接
-    // 使用长连接
-    let port = chrome.runtime.connect({
+    let port = browser.runtime.connect({
       name: 'popup-name'
     })
 
-    // 使用postMs 发送信息
-    port.postMessage({ 'type': 'getGPTMsg', 'msg': '给 background 传递信息~', 'prompt': prompt })
+    // 使用 postMs 发送信息
+    port.postMessage({ 'type': 'getGPTMsg', 'messages':prompt })
 
     // 接收信息
     port.onMessage.addListener(msg => {
 
+      // 请求 GPT 数据失败
       if (msg.status === 'erro') {
         type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
       }
 
+      // 请求 GPT 数据成功且数据流结束传输
       if (msg.status === 'end') {
 
         type === 'as2' ? setAnswerDone2(true) : setAnswerDone1(true)
 
       }
 
+      // 请求 GPT 数据成功且数据流开始传输
       if (msg.status === 'begin') {
 
         type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
@@ -104,19 +106,14 @@ export function PopupCard(props: any) {
 
       }
 
+      // 请求 GPT 数据成功且数据流传输中
       if (msg.status === 'process') {
         // 渲染内容
-        if (type === 'as2') {
-          setopenApiAnser2(oa => oa += msg.content)
-        } else {
-          setopenApiAnser(oa => oa += msg.content)
-        }
+        type === 'as2' ? setopenApiAnser2(oa => oa += msg.content) : setopenApiAnser(oa => oa += msg.content)
+        
       }
 
-
     })
-
-
 
   };
 
@@ -124,14 +121,12 @@ export function PopupCard(props: any) {
   const onPressEnter = (event: any) => {
     console.log(event);
 
-    const a = 'hello'
     // 同时按下 Shirt 时，不提交答案
     if (!event.shiftKey && event.target.defaultValue.replace(/(\r\n|\n|\r)/gm, '') !== '') {
-      let prompt = `请检查我的语法和单词是否有误："${event.target.defaultValue} "`
+      let prompt = `针对你提供的测试题，请检查我的回答，如果有误请指出错误的原因，最后提供正确答案，我的回答是："${event.target.defaultValue} "，如果回答和测试题无关，请直接提供测试题的答案`
 
-      console.log(prompt);
+      getGPTMsg([{ "role": "assistant", "content": openApiAnser },{ "role": "user", "content": prompt }], 'as2')
 
-      getGPTMsg(prompt, 'as2')
     }
 
   }
@@ -140,20 +135,24 @@ export function PopupCard(props: any) {
     <div id="LearningEnglish2023">
 
       <Nav title='Scouter' />
+
       <div className="contentBox">
+
+        {/* 当前查询的文字 */}
         <Selection title={keyWord} />
 
-        {/* <Divider style={{ margin: '10px 0' }} /> */}
-
-        {isLoading && !isAnswerDone1 ? <Skeleton active /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
+        {/* 第一个回答 */}
+        {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
           {openApiAnser.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
         </div>}
 
+        {/* 文本域，用来提交测试题的答案 */}
         {isAnswerDone1 ? <div className="userInput">
           <TextArea rows={3} placeholder="Press the Enter ⏎ key to submit." onPressEnter={onPressEnter} disabled={isLoading || isAnswerDone2} />
         </div> : ''}
 
-        {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
+        {/* 第二个回答，针对文本域提交的回答进行评价 */}
+        {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
           {openApiAnser2.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
         </div>}
 
@@ -162,38 +161,3 @@ export function PopupCard(props: any) {
     </div>
   );
 };
-
-function ConversationItem(props: any) {
-  console.log('hello');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    console.log('## ConversationItem useEffect');
-    console.log(props);
-
-  }, [props]);
-
-  return (
-
-    <li>{props.isLoading ?
-      <Skeleton active /> : props.type === 'ai' ?
-        props.content : <HumanInput content={props.content} />}</li>
-  )
-
-}
-
-function HumanInput(props: any) {
-
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    console.log('## ConversationItem useEffect');
-    console.log(props);
-
-  }, [props]);
-
-  return (
-    <span>human input</span>
-  )
-
-}

@@ -1,14 +1,16 @@
+import browser from 'webextension-polyfill'
+
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 import { PopupCard } from "./PopupCard"
 
 // 接收消息
-chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   console.log('content script onMessage:');
   console.log(msg);
 
-  sendResponse('Hello Background, I am content_script')
+  // sendResponse('Hello Background, I am content_script')
 
   // 用户选中的文字
   console.log(window.getSelection());
@@ -46,8 +48,6 @@ chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   // document.addEventListener('click', HidePopup(event))
 
   document.onclick = function (event) {
-    console.log('document click');
-    console.log(event);
 
     if (MyBox !== undefined && MyBox !== null) {
       // 如果点击的不是插件窗口，则关闭窗口

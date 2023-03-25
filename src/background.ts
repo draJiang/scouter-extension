@@ -5,58 +5,59 @@ browser.runtime.onInstalled.addListener(function () {
   console.log("插件已被安装");
 
   // 创建右键菜单
-  chrome.contextMenus.create({
+  browser.contextMenus.create({
     id: "1",
     title: "Scouter",
     contexts: ["selection"],
   });
 
   // 右键菜单点击事件
-  chrome.contextMenus.onClicked.addListener(function (info, tab) {
+  browser.contextMenus.onClicked.addListener(function (info, tab) {
     console.log("My Context Menu was clicked!");
 
     // 发送消息给 content script
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       const tab = tabs[0];
       if (tab.id) {
-        chrome.tabs.sendMessage(
+        browser.tabs.sendMessage(
           tab.id,
           {
             say: "sendMessage hello From background"
-          },
-          (msg) => {
-            console.log("result message:", msg);
           }
-        );
+        ).then(results => {
+
+        })
       }
     });
 
   });
 
 
-  chrome.runtime.onConnect.addListener(port => {
+  browser.runtime.onConnect.addListener(port => {
     console.log('连接中------------')
 
     // 接收 content script 的消息
     port.onMessage.addListener(msg => {
       console.log('接收消息：', msg)
-
+      
+      // 请求  GPT 数据
       if (msg.type === 'getGPTMsg') {
-        // 请求  GPT 数据
-        chrome.storage.sync.get(["openApiKey"]).then((result) => {
+        // 获取存储的 API Key  
+        browser.storage.sync.get(["openApiKey"]).then((result) => {
           console.log(result);
-
+          let messages = msg.messages
+          messages.unshift({ "role": "system", "content": "You are an English teacher. Please answer questions about English grammar and vocabulary in Chinese." })
 
           fetch('https://api.openai.com/v1/chat/completions', {
 
             method: "POST",
             body: JSON.stringify({
               "model": "gpt-3.5-turbo",
-              "messages": [{"role": "system", "content": "You are an English teacher. Please answer questions about English grammar and vocabulary in Chinese."},{ "role": "user", "content": msg.prompt }],
+              "messages": messages,
               "temperature": 0,
-              "top_p": 0.52,
-              "frequency_penalty": 0.87,
-              "presence_penalty": 0.3,
+              "top_p": 0,
+              "frequency_penalty": 0.8,
+              "presence_penalty": 0.8,
               "stream": true
             }),
             headers: { 'Authorization': 'Bearer ' + result.openApiKey, 'Content-Type': 'application/json', }
@@ -68,12 +69,12 @@ browser.runtime.onInstalled.addListener(function () {
             console.log(response.status);
             console.log(response.status === 401);
 
-            port.postMessage({'status':'begin','content':''})
+            port.postMessage({ 'status': 'begin', 'content': '' })
 
             if (response.status === 401) {
               // API KEY Error
               console.log('401');
-              port.postMessage({'status':'erro','content':'🥲 API Key error. Please modify and try again..'})
+              port.postMessage({ 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
               return
             }
 
@@ -87,9 +88,8 @@ browser.runtime.onInstalled.addListener(function () {
                   if (new_msg !== undefined) {
 
                     // 渲染内容
-                    port.postMessage({'status':'process','content':JSON.parse(event.data)['choices'][0]['delta']['content']})
+                    port.postMessage({ 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'] })
                     console.log(JSON.parse(event.data)['choices'][0]['delta']['content']);
-
 
                   }
 
@@ -111,8 +111,9 @@ browser.runtime.onInstalled.addListener(function () {
                   const { done, value } = await reader.read()
 
                   if (done) {
+                    // 数据传输结束
                     console.log('Done');
-                    port.postMessage({'status':'end','content':''})
+                    port.postMessage({ 'status': 'end', 'content': '' })
                     break
 
                   }
@@ -134,7 +135,7 @@ browser.runtime.onInstalled.addListener(function () {
               console.log('error');
               console.log(error);
               //
-              port.postMessage({'status':'erro','content':"🥲 Encountered some issues, please try again later."})
+              port.postMessage({ 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
             })
 
