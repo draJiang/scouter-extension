@@ -1,5 +1,9 @@
 # Scouter
 
+<p align="center">
+    <br> <a href="README.md">English</a> | 中文
+</p>
+
 ## 是什么
 
 Scouter 是一款针对语言学习者的浏览器插件，目标是帮助你在真实的语言环境中获取语言知识，更好得在实践环境中**学习语言**。

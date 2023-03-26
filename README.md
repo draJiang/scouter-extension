@@ -1,5 +1,9 @@
 # Scouter
 
+<p align="center">
+    <br> English | <a href="README-zh.md">中文</a>
+</p>
+
 ## What is it?
 
 Scouter is a browser extension designed for language learners, with the goal of helping you acquire language knowledge in real language environments and better **learn languages** through practice.
