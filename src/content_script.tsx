@@ -5,42 +5,13 @@ import ReactDOM from "react-dom";
 
 import { PopupCard } from "./PopupCard"
 
+console.log('before browser.runtime.onMessage.addListener');
 
-
-
-// 接收消息
-// require('webextension-polyfill').then(async (browser: any) => {
-//   const port = await browser.runtime.connect({ name: 'background-fetch' })
-
-//   port.onMessage.addListener(
-//     (msg: { error: { message: string; name: string }; status: number; response: string }) => {
-//       if (msg.error) {
-//         const error = new Error()
-//         error.message = msg.error.message
-//         error.name = msg.error.name
-//         // reject(error)
-//         return
-//       }
-//       if (msg.status !== 200) {
-//         // onError(msg)
-//         console.log(200);
-
-//       } else {
-//         // onMessage(msg.response)
-//       }
-//     }
-//   )
-// })
-
-
-
+// 接收 background 消息
 browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-
 
   console.log('content script onMessage:');
   console.log(msg);
-
-  // sendResponse('Hello Background, I am content_script')
 
   // 用户选中的文字
   if (window.getSelection() !== null) {
@@ -51,8 +22,6 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
   let MyBox: HTMLElement | null = document.getElementById('__jiang-souter');
   let shadowBox = document.createElement('div')
-
-  
 
   if (MyBox !== null && MyBox !== undefined) {
     // 如果已存在容器

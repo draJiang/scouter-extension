@@ -7,63 +7,69 @@ let isContinue = true
 browser.runtime.onInstalled.addListener(function () {
   console.log("插件已被安装");
 
+  // browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+  //   console.log(tabs);
+
+  //   const activeTab = tabs[0]
+
+  //   if (activeTab && activeTab.id !== undefined) {
+
+  //     chrome.scripting.executeScript({
+  //       target: { tabId: activeTab.id },
+  //       files: ["js/vendor.js", "js/content_script.js"],
+  //     }).then(() => {
+  //       console.log('chrome.scripting.executeScript');
+
+  //     })
+
+  //   }
+  // })
+
   // 创建右键菜单
+  
   browser.contextMenus.create({
     id: "1",
     title: "Scouter",
     contexts: ["selection"],
   });
 
-  browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    console.log('browser.tabs.onUpdated');
-
-    console.log(changeInfo);
-
-
-    // 检查页面是否已经完成加载
-    if (changeInfo.status === 'complete') {
-      // 发送消息到指定的标签页
-
-    }
-  });
-
-  browser.contextMenus.onClicked.addListener(async function (info, _tab) {
-    const [tab] = await chrome.tabs.query({ active: true })
-    tab.id &&
-        browser.tabs.sendMessage(tab.id, {
-            type: 'open-souter',
-            info,
-        })
-})
 
   // 右键菜单点击事件
-  // browser.contextMenus.onClicked.addListener(function (info, tab) {
-  //   console.log("My Context Menu was clicked!");
+  browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
-  //   // 发送消息给 content script
-  //   // chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-  //   //   const tab = tabs[0];
-  //   //   console.log('chrome.tabs.query');
+    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+      console.log(tabs);
+      const activeTab = tabs[0]
+      let tID = activeTab.id ?? -1
 
-  //   //   if (tab.id) {
-  //   //     console.log('if (tab.id)');
+      if (activeTab && activeTab.id !== undefined) {
 
-  //   //     browser.tabs.sendMessage(
-  //   //       tab.id,
-  //   //       {
-  //   //         say: "sendMessage hello From background"
-  //   //       }
-  //   //     ).then(results => {
-  //   //       console.log('background browser.tabs.sendMessage then');
+        let b = browser.tabs.sendMessage(tID, { type: 'open-souter', info, })
 
-  //   //     })
-  //   //   }
-  //   // });
-  //   browser.runtime.sendMessage(`Saved document title for`);
+        // 已知情况时，刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
+        b.catch(e => {
+          console.log(e);
+          console.log('catch');
+
+          chrome.scripting.executeScript({
+            target: { tabId: tID },
+            files: ["js/vendor.js", "js/content_script.js"],
+          }).then(() => {
+            console.log('chrome.scripting.executeScript');
+          }).then(() => {
+            browser.tabs.sendMessage(tID, { type: 'open-souter', info, })
+          })
+
+        })
+
+      }
 
 
-  // });
+    })
 
+  })
+
+  // 接收 content script 的消息
   browser.runtime.onConnect.addListener(port => {
     console.log('连接中------------')
 
@@ -98,11 +104,6 @@ browser.runtime.onInstalled.addListener(function () {
             headers: { 'Authorization': 'Bearer ' + result.openApiKey, 'Content-Type': 'application/json', }
 
           }).then(async (response) => {
-
-            console.log('response:');
-            console.log(response);
-            console.log(response.status);
-            console.log(response.status === 401);
 
             port.postMessage({ 'status': 'begin', 'content': '' })
 
@@ -188,10 +189,12 @@ browser.runtime.onInstalled.addListener(function () {
       //   isContinue = false
       // }
 
-      port.postMessage('popup，我收到了你的信息~')
+      // 保存到 Anki
+
     })
   })
 
+  // 接收 content 消息用来停止渲染 GPT 数据
   // browser.runtime.onMessage.addListener(async (msg, sender) => {
   //   console.log("BG page received message", msg, "from", sender);
   //   // 停止渲染数据
@@ -200,7 +203,8 @@ browser.runtime.onInstalled.addListener(function () {
   //   }
   // });
 
-  function invoke(action: any, version: any, params = {}) {
+  // 将信息添加到 Anki
+  function ankiAction(action: any, version: any, params = {}) {
     return new Promise((resolve, reject) => {
       fetch('http://127.0.0.1:8765', {
         method: "POST",
@@ -240,7 +244,7 @@ browser.runtime.onInstalled.addListener(function () {
 
   }
 
-  // invoke('addNotes', 6, p).then((result) => {
+  // ankiAction('addNotes', 6, p).then((result) => {
   //   console.log(`got list of decks: ${result}`);
   // })
 
