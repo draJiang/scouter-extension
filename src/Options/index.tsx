@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { Button, Input, Form, Divider } from 'antd';
+import { Button, Input, Form, Divider, ConfigProvider } from 'antd';
 
 import "./index.css"
 import Usage from "../assets/usage.png"
@@ -55,7 +55,7 @@ export const Options = () => {
         openApiKey: values['openApiKey'],
       }
     ).then(item => {
-      
+
       // Update status to let user know options were saved.
 
       console.log('browser');
@@ -71,48 +71,55 @@ export const Options = () => {
   return (
     <>
       <div id="MyOptions">
-        <Form
-          onFinish={saveOptions}
-          layout='vertical'
-          form={form}
-
+        <ConfigProvider
+          theme={{
+            token: {
+              colorPrimary: '#FEB825',
+            },
+          }}
         >
+          <Form
+            onFinish={saveOptions}
+            layout='vertical'
+            form={form}
 
-          <Form.Item
-            name="openApiKey"
-            // style={{ margin: '0 0 20px 0' }}
-            label="Your Open API Key"
-          // initialValue={openApiKey}
-          // help="Should be combination of numbers & alphabets"
           >
-            <Input placeholder="We will not use your Key for any other purposes." type="password" />
-          </Form.Item>
 
-          <Form.Item
-            style={{ margin: '0' }}
-          >
-            <Button type="primary" htmlType="submit">Save</Button>
-            <span>{status}</span>
-          </Form.Item>
+            <Form.Item
+              name="openApiKey"
+              // style={{ margin: '0 0 20px 0' }}
+              label="Your Open API Key"
+            // initialValue={openApiKey}
+            // help="Should be combination of numbers & alphabets"
+            >
+              <Input placeholder="We will not use your Key for any other purposes." type="password" />
+            </Form.Item>
 
-        </Form>
+            <Form.Item
+              style={{ margin: '0' }}
+            >
+              <Button type="primary" htmlType="submit">Save</Button>
+              <span>{status}</span>
+            </Form.Item>
 
-        <Divider />
-        <div className="instructions">
-          <h2>Usage</h2>
-          <ul>
-            <li>
-              <p><a target={"_blank"} href="https://platform.openai.com/account/api-keys">Get Open API Key</a></p>
-            </li>
-            <li>
-              <p>Select text, then right-click and choose Scouter.</p>
-              <img src={Usage}></img>
-            </li>
-          </ul>
+          </Form>
 
-        </div>
+          <Divider />
+          <div className="instructions">
+            <h2>Usage</h2>
+            <ul>
+              <li>
+                <p><a target={"_blank"} href="https://platform.openai.com/account/api-keys">Get Open API Key</a></p>
+              </li>
+              <li>
+                <p>Select text, then right-click and choose Scouter.</p>
+                <img src={Usage}></img>
+              </li>
+            </ul>
 
+          </div>
 
+        </ConfigProvider>
       </div>
     </>
   );

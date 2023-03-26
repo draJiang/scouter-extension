@@ -1,70 +1,23 @@
-# Chrome Extension TypeScript Starter
+# Scouter
 
-![build](https://github.com/chibat/chrome-extension-typescript-starter/workflows/build/badge.svg)
+## What is it?
 
-Chrome Extension, TypeScript and Visual Studio Code
+Scouter is a browser extension designed for language learners, with the goal of helping you acquire language knowledge in real language environments and better **learn languages** through practice.
 
-## Prerequisites
+- [x] Provides relevant example sentences and quizzes.
+- [x] Users can participate in quizzes.
+- [ ] Importable to Anki.
+- [ ] Multilingual support
 
-* [node + npm](https://nodejs.org/) (Current Version)
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204520230326151323.png)
 
-## Option
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204720230326151342.png)
 
-* [Visual Studio Code](https://code.visualstudio.com/)
+## What it isn't
 
-## Includes the following
+- Scouter is not a translation tool. Its goal is to help you learn to use foreign languages independently.
+- Scouter is not a conversation tool. It only supports one-time quiz answering based on the questions provided by AI.
 
-* TypeScript
-* Webpack
-* React
-* Jest
-* Example Code
-    * Chrome Storage
-    * Options Version 2
-    * content script
-    * count up badge number
-    * background
+## Why develop Scouter?
 
-## Project Structure
-
-* src/typescript: TypeScript source files
-* src/assets: static files
-* dist: Chrome Extension directory
-* dist/js: Generated JavaScript files
-
-## Setup
-
-```
-npm install
-```
-
-## Import as Visual Studio Code project
-
-...
-
-## Build
-
-```
-npm run build
-```
-
-## Build in watch mode
-
-### terminal
-
-```
-npm run watch
-```
-
-### Visual Studio Code
-
-Run watch mode.
-
-type `Ctrl + Shift + B`
-
-## Load extension to chrome
-
-Load `dist` directory
-
-## Test
-`npx jest` or `npm run test`
+I've been studying English since before ChatGPT was available, and I prefer to learn in real language environments, such as reading articles and participating in English community discussions. However, I had been unable to find a tool that could analyze and explain the grammar of target sentences until I encountered ChatGPT. Although ChatGPT can help me analyze and practice grammar, I still need to manually copy and paste sentences and switch to the ChatGPT window to ask questions each time.

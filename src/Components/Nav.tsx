@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 // import { Button } from 'antd';
 
-import Icon from "../assets/icon48.png"
+import Icon from "../assets/Logo.png"
 
 interface NavProps {
     title: string;
@@ -26,7 +26,8 @@ export function Nav(props: NavProps) {
         <>
             <div id="ScouterNav">
                 <img src={Icon} />
-                <span> {props.title}</span></div>
+                {/* <span> {props.title}</span> */}
+            </div>
         </>
     );
 }

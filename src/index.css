@@ -1,4 +1,10 @@
+@font-face {
+    font-family: 'OPPOSans-R';
+    src: url('../public/font/OPPOSans-R.ttf') format('truetype');
+}
+
 #LearningEnglish2023 {
+    font-family: 'OPPOSans-R';
     width: 380px;
     height: 500px;
     color: #333;
@@ -35,14 +41,14 @@
     display: flex;
     justify-content: start;
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px 19px;
     border-bottom: 1px solid rgba(5, 5, 5, .06);
     font-weight: bold;
 }
 
 #LearningEnglish2023 #ScouterNav img {
-    width: 20px;
-    height: 20px;
+    width: auto;
+    height: 24px;
     margin-right: 6px;
 }
 
