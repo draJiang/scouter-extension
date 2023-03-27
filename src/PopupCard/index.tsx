@@ -13,7 +13,7 @@ import { Options } from "../Options"
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
-import { Divider, Skeleton, Input, ConfigProvider } from 'antd';
+import { Divider, Skeleton, Input, ConfigProvider, message } from 'antd';
 
 const { TextArea } = Input;
 
@@ -23,6 +23,10 @@ export function PopupCard(props: any) {
   const [openApiAnser2, setopenApiAnser2] = useState('');
 
   const [isLoading, setIsLoading] = useState(true);
+
+  // standby,normal,loading,success
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('standby');
+
 
   const [isAnswerDone1, setAnswerDone1] = useState(false);
   const [isUserAnswered, setIsUserAnswered] = useState(false);
@@ -91,6 +95,7 @@ export function PopupCard(props: any) {
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
   const getGPTMsg = async (prompt: Array<object>, type = 'as1') => {
+    // return
     console.log('getGPTMsg:');
 
     // 请求 background 获取数据
@@ -110,12 +115,18 @@ export function PopupCard(props: any) {
       // 请求 GPT 数据失败
       if (msg.status === 'erro') {
         type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
+        setIsLoading(false)
       }
 
       // 请求 GPT 数据成功且数据流结束传输
       if (msg.status === 'end') {
 
-        type === 'as2' ? setAnswerDone2(true) : setAnswerDone1(true)
+        if (type === 'as2') {
+          setAnswerDone2(true)
+        } else {
+          setAnswerDone1(true)
+          setAddToAnkiStatus('normal')
+        }
 
       }
 
@@ -152,10 +163,58 @@ export function PopupCard(props: any) {
 
   }
 
+  // 点击保存到 Anki
+  const handleSaveToAnkiBtnClick = () => {
+    console.log('Popup:handleSaveToAnkiBtnClick');
+
+    setAddToAnkiStatus('loading')
+
+
+    // 请求 background 将数据保存到 Anki
+
+    const p = {
+      "notes": [
+        {
+          "deckName": "Default",
+          "modelName": "Basic",
+          "fields": {
+            "Front": keyWord,
+            "Back": openApiAnser
+          },
+          "tags": [
+            "yomichan"
+          ],
+          "picture": [{
+            "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/A_black_cat_named_Tilly.jpg/220px-A_black_cat_named_Tilly.jpg",
+            "filename": "black_cat.jpg",
+            "skipHash": "8d6e4646dfae812bf39651b59d7429ce",
+            "fields": [
+              "Back"
+            ]
+          }]
+        }
+      ]
+
+    }
+    let sending = browser.runtime.sendMessage({ 'type': 'addToAnki', 'messages': p })
+    sending.then(handleResponse, handleError);
+
+    function handleResponse(message: any) {
+      setAddToAnkiStatus('success')
+      console.log(message);
+    }
+
+    function handleError(erro: any) {
+      setAddToAnkiStatus('normal')
+      console.log(erro);
+    }
+
+  }
+
   return (
     <div id="LearningEnglish2023">
 
-      <Nav title='Scouter' />
+      <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} title='Scouter' />
 
       <div className="contentBox">
         <ConfigProvider

@@ -12,42 +12,43 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
   console.log('content script onMessage:');
   console.log(msg);
+  if (msg.type === 'open-souter') {
 
-  // 用户选中的文字
-  if (window.getSelection() !== null) {
+    // 用户选中的文字
+    if (window.getSelection() !== null) {
 
-    console.log(window.getSelection()?.toString());
+      console.log(window.getSelection()?.toString());
 
-  }
+    }
 
-  let MyBox: HTMLElement | null = document.getElementById('__jiang-souter');
-  let shadowBox = document.createElement('div')
+    let MyBox: HTMLElement | null = document.getElementById('__jiang-souter');
+    let shadowBox = document.createElement('div')
 
-  if (MyBox !== null && MyBox !== undefined) {
-    // 如果已存在容器
-    console.log('已存在 Box 容器');
-    // 移除旧容器
-    MyBox.parentNode?.removeChild(MyBox);
-  }
+    if (MyBox !== null && MyBox !== undefined) {
+      // 如果已存在容器
+      console.log('已存在 Box 容器');
+      // 移除旧容器
+      MyBox.parentNode?.removeChild(MyBox);
+    }
 
-  // 创建容器
-  MyBox = document.createElement('div')
-  MyBox.id = '__jiang-souter'
-  document.getElementsByTagName('html')[0].appendChild(MyBox);
+    // 创建容器
+    MyBox = document.createElement('div')
+    MyBox.id = '__jiang-souter'
+    document.getElementsByTagName('html')[0].appendChild(MyBox);
 
-  const shadow = MyBox?.attachShadow({ mode: 'open' });
+    const shadow = MyBox?.attachShadow({ mode: 'open' });
 
-  shadow.appendChild(shadowBox)
+    shadow.appendChild(shadowBox)
 
-  // Ant 组件样式
-  const antStylesheet = document.createElement('link');
-  antStylesheet.rel = 'stylesheet';
-  antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
-  shadow.appendChild(antStylesheet);
+    // Ant 组件样式
+    const antStylesheet = document.createElement('link');
+    antStylesheet.rel = 'stylesheet';
+    antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
+    shadow.appendChild(antStylesheet);
 
-  // 在 Shadow DOM 中添加样式：
-  const style = document.createElement('style');
-  style.textContent = `
+    // 在 Shadow DOM 中添加样式：
+    const style = document.createElement('style');
+    style.textContent = `
     @font-face {
       font-family: 'OPPOSans-R';
       src: url('../public/font/OPPOSans-R.ttf') format('truetype');
@@ -63,7 +64,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         flex-direction: column;
         top: 10px;
         right: 10px;
-
+        font-size: 13px;
         background-color: #fff;
         z-index: 9999;
         overflow: hidden;
@@ -72,7 +73,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     }
 
     #LearningEnglish2023,#LearningEnglish2023 textarea {
-      font-size: 13px;
+      
     }
 
     #LearningEnglish2023 .openAIAnswer {
@@ -114,28 +115,30 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         margin-bottom: 14px;
     }
   `
-  shadow.appendChild(style);
+    shadow.appendChild(style);
 
-  // 显示窗口
-  showPopupCard(window.getSelection(), shadowBox)
+    // 显示窗口
+    showPopupCard(window.getSelection(), shadowBox)
 
-  // 监听页面点击事件
-  document.onclick = function (event) {
+    // 监听页面点击事件
+    document.onclick = function (event) {
 
-    if (MyBox !== undefined && MyBox !== null) {
-      // 如果点击的不是插件窗口，则关闭窗口
-      if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
-        console.log('点击窗口外区域');
-        // 隐藏窗口
-        MyBox.style.display = 'none'
+      if (MyBox !== undefined && MyBox !== null) {
+        // 如果点击的不是插件窗口，则关闭窗口
+        if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
+          console.log('点击窗口外区域');
+          // 隐藏窗口
+          MyBox.style.display = 'none'
 
-        MyBox.parentNode?.removeChild(MyBox);
+          MyBox.parentNode?.removeChild(MyBox);
 
-        // 通知 background 停止处理数据
-        browser.runtime.sendMessage({ 'type': 'windowClosed', 'messages': '' });
+          // 通知 background 停止处理数据
+          // browser.runtime.sendMessage({ 'type': 'windowClosed', 'messages': '' });
 
+        }
       }
     }
+
   }
 
 

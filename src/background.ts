@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill'
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
+import { ankiAction } from "./util";
 
 // [暂时废弃]content script 关闭窗口时，将此值设为 false 以中断数据渲染
 let isContinue = true
@@ -26,7 +27,7 @@ browser.runtime.onInstalled.addListener(function () {
   // })
 
   // 创建右键菜单
-  
+
   browser.contextMenus.create({
     id: "1",
     title: "Scouter",
@@ -37,7 +38,7 @@ browser.runtime.onInstalled.addListener(function () {
   // 右键菜单点击事件
   browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
-    browser.tabs.query({ active: true}).then((tabs) => {
+    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       console.log(tabs);
       const activeTab = tabs[0]
       let tID = activeTab.id ?? -1
@@ -69,8 +70,9 @@ browser.runtime.onInstalled.addListener(function () {
 
   })
 
-  // 接收 content script 的消息
+  // 长连接，处理 GPT 数据
   browser.runtime.onConnect.addListener(port => {
+    // 收到 content script 消息
     console.log('连接中------------')
 
     // 接收 content script 的消息
@@ -105,12 +107,12 @@ browser.runtime.onInstalled.addListener(function () {
 
           }).then(async (response) => {
 
-            port.postMessage({ 'status': 'begin', 'content': '' })
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
 
             if (response.status === 401) {
               // API KEY Error
               console.log('401');
-              port.postMessage({ 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
               return
             }
 
@@ -124,7 +126,7 @@ browser.runtime.onInstalled.addListener(function () {
                   if (new_msg !== undefined) {
 
                     // 将数据发送给 UI 以渲染内容
-                    port.postMessage({ 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'] })
+                    port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'] })
 
                   }
 
@@ -146,7 +148,7 @@ browser.runtime.onInstalled.addListener(function () {
                   if (done) {
                     // 数据传输结束
                     console.log('Done');
-                    port.postMessage({ 'status': 'end', 'content': '' })
+                    port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
                     break
 
                   }
@@ -176,7 +178,7 @@ browser.runtime.onInstalled.addListener(function () {
               console.log('error');
               console.log(error);
 
-              port.postMessage({ 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
             })
 
@@ -189,64 +191,140 @@ browser.runtime.onInstalled.addListener(function () {
         isContinue = false
       }
 
-      // 保存到 Anki
-
     })
   })
 
-  // 接收 content 消息用来停止渲染 GPT 数据
-  browser.runtime.onMessage.addListener(async (msg, sender) => {
-    console.log("BG page received message", msg, "from", sender);
-    // 停止渲染数据
-    if (msg.type === 'windowClosed') {
-      isContinue = false
-    }
-  });
+  // 接收 UI 消息
+  // browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  //   console.log("BG page received message", request, "from", sender);
+  //   // 停止渲染数据
+  //   // if (msg.type === 'windowClosed') {
+  //   //   isContinue = false
+  //   // }
+  //   sendResponse({ response: "Response from background script" });
 
-  // 将信息添加到 Anki
-  function ankiAction(action: any, version: any, params = {}) {
-    return new Promise((resolve, reject) => {
-      fetch('http://127.0.0.1:8765', {
-        method: "POST",
-        body: JSON.stringify({ "action": action, "version": version, "params": params })
-      }).then(response => response.json()).then((data) => {
 
-        console.log(data);
-        resolve(data)
+  //   if (request.type === 'addToAnki') {
+  //     console.log('addToAnki');
 
+  //     const p = {
+  //       "notes": [
+  //         {
+  //           "deckName": "Default",
+  //           "modelName": "Basic",
+  //           "fields": {
+  //             "Front": "front content2",
+  //             "Back": "back content2"
+  //           },
+  //           "tags": [
+  //             "yomichan"
+  //           ],
+  //           "picture": [{
+  //             "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/A_black_cat_named_Tilly.jpg/220px-A_black_cat_named_Tilly.jpg",
+  //             "filename": "black_cat.jpg",
+  //             "skipHash": "8d6e4646dfae812bf39651b59d7429ce",
+  //             "fields": [
+  //               "Back"
+  //             ]
+  //           }]
+  //         }
+  //       ]
+
+  //     }
+
+
+
+  //     ankiAction('addNotes', 6, p).then((result) => {
+  //       console.log(`got list of decks: ${result}`);
+  //       // 反馈处理结果
+  //       console.log(sendResponse);
+  //       if (sendResponse !== undefined) {
+  //         // sendResponse({ type: 'addToAnki', result: 'success' })
+  //       }
+
+
+  //       // browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+  //       //   console.log(tabs);
+  //       //   const activeTab = tabs[0]
+  //       //   let tID = activeTab.id ?? -1
+
+  //       //   if (activeTab && activeTab.id !== undefined) {
+
+  //       //     let b = browser.tabs.sendMessage(tID, { type: 'anki-result',msg:result})
+
+  //       //     // 已知情况时，刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
+  //       //     b.catch(e => {
+
+  //       //       console.log(e);
+  //       //       console.log('catch');
+
+  //       //     })
+
+  //       //   }
+
+
+  //       // })
+
+  //     })
+
+  //   }
+
+  // });
+
+  browser.runtime.onMessage.addListener(handleMessage);
+
+  function handleMessage(request: any, sender: any, sendResponse: any) {
+    console.log("Message from the content script: " +
+      request.type);
+
+
+    if (request.type === 'addToAnki') {
+      console.log('addToAnki');
+
+      const p = request.messages
+
+
+      // Define sendResponse as an async function
+      const asyncSendResponse = async (response: any) => {
+        try {
+          await sendResponse(response);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      ankiAction('addNotes', 6, p).then((result) => {
+        console.log(`got list of decks: ${result}`);
+        // 反馈处理结果
+        asyncSendResponse({ type: 'addToAnki', result: 'success' });
       })
+        .catch((error) => {
+          console.error(error);
+          asyncSendResponse({ type: 'addToAnki', result: 'failure' });
+        });
 
-    });
-  }
+      // Return true to inform sendResponse that you will be calling it asynchronously
+      return true;
 
-  const p = {
-    "notes": [
-      {
-        "deckName": "Default",
-        "modelName": "Basic",
-        "fields": {
-          "Front": "front content2",
-          "Back": "back content2"
-        },
-        "tags": [
-          "yomichan"
-        ],
-        "picture": [{
-          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/A_black_cat_named_Tilly.jpg/220px-A_black_cat_named_Tilly.jpg",
-          "filename": "black_cat.jpg",
-          "skipHash": "8d6e4646dfae812bf39651b59d7429ce",
-          "fields": [
-            "Back"
-          ]
-        }]
-      }
-    ]
+
+
+
+      // ankiAction('addNotes', 6, p).then((result) => {
+      //   console.log(`got list of decks: ${result}`);
+      //   // 反馈处理结果
+      //   // sendResponse({ type: 'addToAnki', result: result })
+
+      // })
+
+      // sendResponse({ type: 'addToAnki', result: 'success123' })
+
+    }
+
 
   }
 
-  // ankiAction('addNotes', 6, p).then((result) => {
-  //   console.log(`got list of decks: ${result}`);
-  // })
+
+
 
 
 });
