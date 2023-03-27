@@ -1,0 +1,34 @@
+{
+    "manifest_version": 3,
+
+    "name": "Scouter",
+    "description": "Make your language more relevant to your life",
+    "version": "0.5",
+
+    "action": {
+        "default_icon": "icon48.png",
+        "default_popup": "popup.html"
+    },
+
+    "content_scripts": [{
+        "matches": ["<all_urls>"],
+        "js": ["js/vendor.js", "js/content_script.js"]
+    }],
+
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+    },
+
+    "permissions": [
+        "storage", "contextMenus", "scripting", "activeTab"
+    ],
+
+    "host_permissions": [
+        "<all_urls>"
+    ]
+}

@@ -293,10 +293,12 @@ browser.runtime.onInstalled.addListener(function () {
         }
       };
 
-      ankiAction('addNotes', 6, p).then((result) => {
+      ankiAction('addNote', 6, p).then((result: any) => {
         console.log(`got list of decks: ${result}`);
         // 反馈处理结果
-        asyncSendResponse({ type: 'addToAnki', result: 'success' });
+        asyncSendResponse({ type: 'addToAnki', result: 'success', error: result.error });
+
+
       })
         .catch((error) => {
           console.error(error);

@@ -33,8 +33,9 @@ export function Nav(props: NavProps) {
                 <img src={Icon} />
                 {/* <span> {props.title}</span> */}
                 <div className="rightBtnBox" style={{ flex: 1, textAlign: 'right' }}>
-                    {props.addToAnkiStatus == 'success' ? 'OK' :
+                    {props.addToAnkiStatus == 'success' ? '✅ Added to Anki' :
                         <Button size="small"
+                            type='link'
                             loading={props.addToAnkiStatus === 'loading' ? true : false}
                             disabled={props.addToAnkiStatus === 'standby' ? true : false}
                             onClick={handleSaveToAnkiBtnClick}>Add to Anki</Button>}

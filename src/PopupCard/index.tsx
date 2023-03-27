@@ -25,7 +25,7 @@ export function PopupCard(props: any) {
   const [isLoading, setIsLoading] = useState(true);
 
   // standby,normal,loading,success
-  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('standby');
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('normal');
 
 
   const [isAnswerDone1, setAnswerDone1] = useState(false);
@@ -66,18 +66,21 @@ export function PopupCard(props: any) {
     
     请使用以下格式回复：
     
-    \`\`\`md
-    <词性>（如果是单词）<使用中文解释单词在句子中的作用> <使用英文解释>
+    <p><词性>（如果是单词）<使用中文解释单词在句子中的作用> <使用英文解释></p>
     
-    # 图像记忆法描述：
-    <图像记忆法描述>
+    <h2>图像记忆法描述</h2>
+    <p><图像记忆法描述></p>
     
-    # 例句：
-    <例句及翻译>
+    <h2>例句</h2>：
+    <ul>
+    <li><例句及翻译></li>
+    </ul>
     
-    # 测试：
-    <测试题>
-    \`\`\`
+    <h2>测试</h2>
+    <ul>
+    <li><测试题></li>
+    </ul>
+    
     `;
 
     // 设置加载状态
@@ -173,35 +176,38 @@ export function PopupCard(props: any) {
     // 请求 background 将数据保存到 Anki
 
     const p = {
-      "notes": [
-        {
-          "deckName": "Default",
-          "modelName": "Basic",
-          "fields": {
-            "Front": keyWord,
-            "Back": openApiAnser
-          },
-          "tags": [
-            "yomichan"
-          ],
-          "picture": [{
-            "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/A_black_cat_named_Tilly.jpg/220px-A_black_cat_named_Tilly.jpg",
-            "filename": "black_cat.jpg",
-            "skipHash": "8d6e4646dfae812bf39651b59d7429ce",
-            "fields": [
-              "Back"
-            ]
-          }]
-        }
-      ]
-
+      "note": {
+        "deckName": "Default",
+        "modelName": "Basic",
+        "fields": {
+          "Front": keyWord,
+          "Back": openApiAnser
+        },
+        "tags": [
+          "Scouter"
+        ]
+      }
     }
+
     let sending = browser.runtime.sendMessage({ 'type': 'addToAnki', 'messages': p })
     sending.then(handleResponse, handleError);
 
     function handleResponse(message: any) {
-      setAddToAnkiStatus('success')
+
       console.log(message);
+
+      if (message.error === null) {
+
+        setAddToAnkiStatus('success')
+
+      } else {
+        alert(message.error)
+        setTimeout(() => {
+          setAddToAnkiStatus('normal')
+        }, 1000);
+      }
+
+
     }
 
     function handleError(erro: any) {
@@ -228,8 +234,8 @@ export function PopupCard(props: any) {
           <Selection title={keyWord} />
 
           {/* 第一个回答 */}
-          {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
-            {openApiAnser.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
+          {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser}} style={{}}>
+            {/* {openApiAnser.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")} */}
           </div>}
 
           {/* 文本域，用来提交测试题的答案 */}
@@ -238,8 +244,8 @@ export function PopupCard(props: any) {
           </div> : ''}
 
           {/* 第二个回答，针对文本域提交的回答进行评价 */}
-          {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{ whiteSpace: 'pre-wrap' }}>
-            {openApiAnser2.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")}
+          {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser2}} style={{}}>
+            {/* {openApiAnser2.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")} */}
           </div>}
 
           {/* <Options /> */}
