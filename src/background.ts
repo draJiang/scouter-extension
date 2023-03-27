@@ -37,7 +37,7 @@ browser.runtime.onInstalled.addListener(function () {
   // 右键菜单点击事件
   browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
-    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+    browser.tabs.query({ active: true}).then((tabs) => {
       console.log(tabs);
       const activeTab = tabs[0]
       let tID = activeTab.id ?? -1
@@ -51,7 +51,7 @@ browser.runtime.onInstalled.addListener(function () {
           console.log(e);
           console.log('catch');
 
-          chrome.scripting.executeScript({
+          browser.scripting.executeScript({
             target: { tabId: tID },
             files: ["js/vendor.js", "js/content_script.js"],
           }).then(() => {
@@ -185,9 +185,9 @@ browser.runtime.onInstalled.addListener(function () {
       }
 
       // 停止渲染数据
-      // if (msg.type === 'windowClosed') {
-      //   isContinue = false
-      // }
+      if (msg.type === 'windowClosed') {
+        isContinue = false
+      }
 
       // 保存到 Anki
 
@@ -195,13 +195,13 @@ browser.runtime.onInstalled.addListener(function () {
   })
 
   // 接收 content 消息用来停止渲染 GPT 数据
-  // browser.runtime.onMessage.addListener(async (msg, sender) => {
-  //   console.log("BG page received message", msg, "from", sender);
-  //   // 停止渲染数据
-  //   if (msg.type === 'windowClosed') {
-  //     isContinue = false
-  //   }
-  // });
+  browser.runtime.onMessage.addListener(async (msg, sender) => {
+    console.log("BG page received message", msg, "from", sender);
+    // 停止渲染数据
+    if (msg.type === 'windowClosed') {
+      isContinue = false
+    }
+  });
 
   // 将信息添加到 Anki
   function ankiAction(action: any, version: any, params = {}) {

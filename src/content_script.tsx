@@ -26,27 +26,28 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (MyBox !== null && MyBox !== undefined) {
     // 如果已存在容器
     console.log('已存在 Box 容器');
-  } else {
-    // 如果不存在容器
+    // 移除旧容器
+    MyBox.parentNode?.removeChild(MyBox);
+  }
 
-    console.log('不存在 Box 容器');
-    MyBox = document.createElement('div')
-    MyBox.id = '__jiang-souter'
-    document.getElementsByTagName('html')[0].appendChild(MyBox);
+  // 创建容器
+  MyBox = document.createElement('div')
+  MyBox.id = '__jiang-souter'
+  document.getElementsByTagName('html')[0].appendChild(MyBox);
 
-    const shadow = MyBox?.attachShadow({ mode: 'open' });
+  const shadow = MyBox?.attachShadow({ mode: 'open' });
 
-    shadow.appendChild(shadowBox)
+  shadow.appendChild(shadowBox)
 
-    // Ant 组件样式
-    const antStylesheet = document.createElement('link');
-    antStylesheet.rel = 'stylesheet';
-    antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
-    shadow.appendChild(antStylesheet);
+  // Ant 组件样式
+  const antStylesheet = document.createElement('link');
+  antStylesheet.rel = 'stylesheet';
+  antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
+  shadow.appendChild(antStylesheet);
 
-    // 在 Shadow DOM 中添加样式：
-    const style = document.createElement('style');
-    style.textContent = `
+  // 在 Shadow DOM 中添加样式：
+  const style = document.createElement('style');
+  style.textContent = `
     @font-face {
       font-family: 'OPPOSans-R';
       src: url('../public/font/OPPOSans-R.ttf') format('truetype');
@@ -113,9 +114,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         margin-bottom: 14px;
     }
   `
-    shadow.appendChild(style);
-
-  }
+  shadow.appendChild(style);
 
   // 显示窗口
   showPopupCard(window.getSelection(), shadowBox)
@@ -133,8 +132,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         MyBox.parentNode?.removeChild(MyBox);
 
         // 通知 background 停止处理数据
-        // browser.runtime.sendMessage({ 'type': 'windowClosed', 'messages': '' });
-
+        browser.runtime.sendMessage({ 'type': 'windowClosed', 'messages': '' });
 
       }
     }

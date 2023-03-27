@@ -38,10 +38,13 @@ export function PopupCard(props: any) {
     console.log('## PopupCard useEffect')
 
     // 初始化
-    setAnswerDone1(false)
-    setAnswerDone2(false)
-    setopenApiAnser('')
-    setopenApiAnser2('')
+    // setAnswerDone1(false)
+    // setAnswerDone2(false)
+    // setopenApiAnser(oa1 => {
+    //   oa1 = ''
+    //   return oa1
+    // })
+    // setopenApiAnser2('')
 
     // 当前选中的文字
     let keyWord = props.selection.toString()
@@ -80,11 +83,11 @@ export function PopupCard(props: any) {
   }, [props]);
 
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    console.log('useFeefect isAnswerDone1');
+  //   console.log('useFeefect isAnswerDone1');
 
-  }, [isAnswerDone1])
+  // }, [isAnswerDone1])
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
   const getGPTMsg = async (prompt: Array<object>, type = 'as1') => {
@@ -101,7 +104,9 @@ export function PopupCard(props: any) {
 
     // 接收信息
     port.onMessage.addListener(msg => {
-      
+
+      console.log('port.onMessage.addListener');
+
       // 请求 GPT 数据失败
       if (msg.status === 'erro') {
         type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
