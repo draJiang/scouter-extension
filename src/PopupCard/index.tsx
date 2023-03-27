@@ -25,7 +25,7 @@ export function PopupCard(props: any) {
   const [isLoading, setIsLoading] = useState(true);
 
   // standby,normal,loading,success
-  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('normal');
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('standby');
 
 
   const [isAnswerDone1, setAnswerDone1] = useState(false);
@@ -68,15 +68,15 @@ export function PopupCard(props: any) {
     
     <p><词性>（如果是单词）<使用中文解释单词在句子中的作用> <使用英文解释></p>
     
-    <h2>图像记忆法描述</h2>
+    <h3>图像记忆法描述</h3>
     <p><图像记忆法描述></p>
     
-    <h2>例句</h2>：
+    <h3>例句</h3>：
     <ul>
     <li><例句及翻译></li>
     </ul>
     
-    <h2>测试</h2>
+    <h3>测试</h3>
     <ul>
     <li><测试题></li>
     </ul>
