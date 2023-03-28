@@ -81,7 +81,34 @@ export function PopupCard(props: any) {
     <li><测试题></li>
     </ul>
     
-    `;
+    `
+
+    // 关键字长度较长时，按照句子进行处理
+    if (keyWord.length > 20) {
+      prompt = `Please use Chinese to respond. Analyze the following sentence, explain the grammar knowledge involved, and provide two examples for each knowledge point:
+      "${keyWord}"
+      
+        Finally, create 2 test questions based on the grammar knowledge you've described. These questions should ask for the translation of a Chinese phrase to English, but don't provide the answers.
+        Please respond in the following format:
+
+        <h3><Grammar Knowledge Point></h3>
+        <p><Description of the grammar knowledge></p>
+        <ul>
+        <li><Example sentence><translation></li>
+        <li><Another example sentence><translation></li>
+        </ul>
+
+        ...
+
+        <h3>Test Questions</h3>
+        <ul>
+        <li><Test question 1></li>
+        <li><Test question 2></li>
+        </ul>
+
+        Please reply in Chinese.`
+    }
+
 
     // 设置加载状态
     setIsLoading(true)
@@ -233,7 +260,7 @@ export function PopupCard(props: any) {
           <Selection title={keyWord} />
 
           {/* 第一个回答 */}
-          {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser}} style={{}}></div>}
+          {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{ __html: openApiAnser }} style={{}}></div>}
 
           {/* 文本域，用来提交测试题的答案 */}
           {isAnswerDone1 ? <div className="userInput">
@@ -241,7 +268,7 @@ export function PopupCard(props: any) {
           </div> : ''}
 
           {/* 第二个回答，针对文本域提交的回答进行评价 */}
-          {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser2}} style={{}}></div>}
+          {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{ __html: openApiAnser2 }} style={{}}></div>}
 
         </ConfigProvider>
       </div>
