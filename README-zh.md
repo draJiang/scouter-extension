@@ -20,6 +20,8 @@ Scouter 是一款针对语言学习者的浏览器插件，目标是帮助你在
 
 ![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204720230326151342.png)
 
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/dm8ymX20230328112205.jpg)
+
 ## 不是什么
 
 * Scouter 不是翻译工具，它的目标是帮助你学习以独立运用外语。

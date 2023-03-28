@@ -10,7 +10,11 @@ export function ankiAction(action: any, version: any, params = {}) {
             console.log(data);
             resolve(data)
 
-        })
+        }).catch((error) => {
+            console.log('error');
+            console.log(error);
+            reject({'result':[],'error':'Please open the Anki client and install the Anki-Connect plugin before trying again.'})
+          })
 
     });
 }

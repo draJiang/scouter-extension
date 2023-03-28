@@ -203,9 +203,7 @@ export function PopupCard(props: any) {
 
       } else {
         alert(message.error)
-        setTimeout(() => {
-          setAddToAnkiStatus('normal')
-        }, 1000);
+        setAddToAnkiStatus('normal')
       }
 
 

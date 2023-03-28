@@ -205,7 +205,7 @@ browser.runtime.onInstalled.addListener(function () {
       })
         .catch((error) => {
           console.error(error);
-          asyncSendResponse({ type: 'addToAnki', result: 'failure' });
+          asyncSendResponse({ type: 'addToAnki', result: 'failure', error: error.error });
         });
 
       // Return true to inform sendResponse that you will be calling it asynchronously
