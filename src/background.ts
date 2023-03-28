@@ -8,24 +8,6 @@ let isContinue = true
 browser.runtime.onInstalled.addListener(function () {
   console.log("插件已被安装");
 
-  // browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-  //   console.log(tabs);
-
-  //   const activeTab = tabs[0]
-
-  //   if (activeTab && activeTab.id !== undefined) {
-
-  //     chrome.scripting.executeScript({
-  //       target: { tabId: activeTab.id },
-  //       files: ["js/vendor.js", "js/content_script.js"],
-  //     }).then(() => {
-  //       console.log('chrome.scripting.executeScript');
-
-  //     })
-
-  //   }
-  // })
-
   // 创建右键菜单
 
   browser.contextMenus.create({
@@ -47,7 +29,7 @@ browser.runtime.onInstalled.addListener(function () {
 
         let b = browser.tabs.sendMessage(tID, { type: 'open-souter', info, })
 
-        // 已知情况时，刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
+        // 已知情况：刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
         b.catch(e => {
           console.log(e);
           console.log('catch');
@@ -194,83 +176,6 @@ browser.runtime.onInstalled.addListener(function () {
     })
   })
 
-  // 接收 UI 消息
-  // browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  //   console.log("BG page received message", request, "from", sender);
-  //   // 停止渲染数据
-  //   // if (msg.type === 'windowClosed') {
-  //   //   isContinue = false
-  //   // }
-  //   sendResponse({ response: "Response from background script" });
-
-
-  //   if (request.type === 'addToAnki') {
-  //     console.log('addToAnki');
-
-  //     const p = {
-  //       "notes": [
-  //         {
-  //           "deckName": "Default",
-  //           "modelName": "Basic",
-  //           "fields": {
-  //             "Front": "front content2",
-  //             "Back": "back content2"
-  //           },
-  //           "tags": [
-  //             "yomichan"
-  //           ],
-  //           "picture": [{
-  //             "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/A_black_cat_named_Tilly.jpg/220px-A_black_cat_named_Tilly.jpg",
-  //             "filename": "black_cat.jpg",
-  //             "skipHash": "8d6e4646dfae812bf39651b59d7429ce",
-  //             "fields": [
-  //               "Back"
-  //             ]
-  //           }]
-  //         }
-  //       ]
-
-  //     }
-
-
-
-  //     ankiAction('addNotes', 6, p).then((result) => {
-  //       console.log(`got list of decks: ${result}`);
-  //       // 反馈处理结果
-  //       console.log(sendResponse);
-  //       if (sendResponse !== undefined) {
-  //         // sendResponse({ type: 'addToAnki', result: 'success' })
-  //       }
-
-
-  //       // browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-  //       //   console.log(tabs);
-  //       //   const activeTab = tabs[0]
-  //       //   let tID = activeTab.id ?? -1
-
-  //       //   if (activeTab && activeTab.id !== undefined) {
-
-  //       //     let b = browser.tabs.sendMessage(tID, { type: 'anki-result',msg:result})
-
-  //       //     // 已知情况时，刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
-  //       //     b.catch(e => {
-
-  //       //       console.log(e);
-  //       //       console.log('catch');
-
-  //       //     })
-
-  //       //   }
-
-
-  //       // })
-
-  //     })
-
-  //   }
-
-  // });
-
   browser.runtime.onMessage.addListener(handleMessage);
 
   function handleMessage(request: any, sender: any, sendResponse: any) {
@@ -297,8 +202,6 @@ browser.runtime.onInstalled.addListener(function () {
         console.log(`got list of decks: ${result}`);
         // 反馈处理结果
         asyncSendResponse({ type: 'addToAnki', result: 'success', error: result.error });
-
-
       })
         .catch((error) => {
           console.error(error);
@@ -308,25 +211,8 @@ browser.runtime.onInstalled.addListener(function () {
       // Return true to inform sendResponse that you will be calling it asynchronously
       return true;
 
-
-
-
-      // ankiAction('addNotes', 6, p).then((result) => {
-      //   console.log(`got list of decks: ${result}`);
-      //   // 反馈处理结果
-      //   // sendResponse({ type: 'addToAnki', result: result })
-
-      // })
-
-      // sendResponse({ type: 'addToAnki', result: 'success123' })
-
     }
 
-
   }
-
-
-
-
 
 });

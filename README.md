@@ -10,12 +10,14 @@ Scouter is a browser extension designed for language learners, with the goal of 
 
 - [x] Provides relevant example sentences and quizzes.
 - [x] Users can participate in quizzes.
-- [ ] Importable to Anki.
+- [x] Importable to Anki.
 - [ ] Multilingual support
 
 ![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204520230326151323.png)
 
 ![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204720230326151342.png)
+
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/dm8ymX20230328112205.jpg)
 
 ## What it isn't
 

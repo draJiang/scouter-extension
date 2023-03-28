@@ -61,7 +61,7 @@ export function PopupCard(props: any) {
     
     - 使用 **CEFR A2** 级别的英语解释单词（请使用英文）
     - 使用图像记忆法描述单词
-    - 提供三个例句以及对应的翻译，其中必须包含'${keyWord}'。
+    - 提供两个例句以及对应的翻译，其中必须包含'${keyWord}'。
     - 最后结合你描述的知识提供'${keyWord}'相关的两个测试题。这些测试题应该将中文短语翻译为英文，但不要提供测试题的答案。
     
     请使用以下格式回复：
@@ -189,9 +189,10 @@ export function PopupCard(props: any) {
       }
     }
 
+    // 发送消息给 background
     let sending = browser.runtime.sendMessage({ 'type': 'addToAnki', 'messages': p })
     sending.then(handleResponse, handleError);
-
+    // 接收 background 的回复
     function handleResponse(message: any) {
 
       console.log(message);
@@ -234,9 +235,7 @@ export function PopupCard(props: any) {
           <Selection title={keyWord} />
 
           {/* 第一个回答 */}
-          {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser}} style={{}}>
-            {/* {openApiAnser.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")} */}
-          </div>}
+          {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser}} style={{}}></div>}
 
           {/* 文本域，用来提交测试题的答案 */}
           {isAnswerDone1 ? <div className="userInput">
@@ -244,11 +243,7 @@ export function PopupCard(props: any) {
           </div> : ''}
 
           {/* 第二个回答，针对文本域提交的回答进行评价 */}
-          {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser2}} style={{}}>
-            {/* {openApiAnser2.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")} */}
-          </div>}
-
-          {/* <Options /> */}
+          {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{__html:openApiAnser2}} style={{}}></div>}
 
         </ConfigProvider>
       </div>
