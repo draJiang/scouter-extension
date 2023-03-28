@@ -36,7 +36,6 @@ export function PopupCard(props: any) {
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
-
   useEffect(() => {
     // New Task
     console.log('## PopupCard useEffect')
@@ -201,14 +200,13 @@ export function PopupCard(props: any) {
 
 
     // 请求 background 将数据保存到 Anki
-
     const p = {
       "note": {
         "deckName": "Default",
         "modelName": "Basic",
         "fields": {
           "Front": keyWord,
-          "Back": openApiAnser
+          "Back": openApiAnser+'<a href="'+window.location.href+'">Source</a>'
         },
         "tags": [
           "Scouter"
