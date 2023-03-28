@@ -85,7 +85,7 @@ export function PopupCard(props: any) {
 
     // 关键字长度较长时，按照句子进行处理
     if (keyWord.length > 20) {
-      prompt = `Please use Chinese to respond. Analyze the following sentence, explain the grammar knowledge involved, and provide two examples for each knowledge point:
+      prompt = `Please use Chinese to respond. Analyze the following sentence, explain the grammar involved in the original sentence, and provide two examples for each knowledge point:
       "${keyWord}"
       
         Finally, create 2 test questions based on the grammar knowledge you've described. These questions should ask for the translation of a Chinese phrase to English, but don't provide the answers.
