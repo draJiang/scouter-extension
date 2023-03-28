@@ -53,10 +53,15 @@ export function PopupCard(props: any) {
     let keyWord = props.selection.toString()
     setKeyWord(keyWord)
     // 选中文字所在的段落
-    let sentens = props.selection.anchorNode.data
+    let sentence = props.selection.anchorNode.data
+
+    // 如果 keyWord 和 sentence 值相同，可能是选中的 keyWord 在 strong、code 等特殊标签内
+    if(keyWord===sentence){
+      sentence = props.selection.anchorNode.parentNode.parentNode.innerText
+    }
 
     let prompt = `
-    请解释以下句子中的'${keyWord}'，句子为：'${sentens}'
+    请解释以下句子中的'${keyWord}'，句子为：'${sentence}'
     
     - 使用 **CEFR A2** 级别的英语解释单词（请使用英文）
     - 使用图像记忆法描述单词
@@ -124,6 +129,7 @@ export function PopupCard(props: any) {
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
   const getGPTMsg = async (prompt: Array<object>, type = 'as1') => {
+    // console.log(prompt);
     // return
     console.log('getGPTMsg:');
 
@@ -198,7 +204,7 @@ export function PopupCard(props: any) {
 
     setAddToAnkiStatus('loading')
 
-    let sentence = keyWord.length <= 20 ? props.selection.anchorNode.data : ''
+    const sentence = keyWord.length <= 20 ? props.selection.anchorNode.data : ''
 
     // 请求 background 将数据保存到 Anki
     const p = {
