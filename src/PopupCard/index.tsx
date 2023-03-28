@@ -198,6 +198,7 @@ export function PopupCard(props: any) {
 
     setAddToAnkiStatus('loading')
 
+    let sentence = keyWord.length <= 20 ? props.selection.anchorNode.data : ''
 
     // 请求 background 将数据保存到 Anki
     const p = {
@@ -206,7 +207,7 @@ export function PopupCard(props: any) {
         "modelName": "Basic",
         "fields": {
           "Front": keyWord,
-          "Back": openApiAnser+'<a href="'+window.location.href+'">Source</a>'
+          "Back": sentence + openApiAnser + '<a href="' + window.location.href + '">Source</a>'
         },
         "tags": [
           "Scouter"
