@@ -3,21 +3,39 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { Button, Input, Form, Divider, ConfigProvider } from 'antd';
+import { Button, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 
 import "./index.css"
 import Usage from "../assets/usage.png"
 
 export const Options = () => {
 
-  const [openApiKey, setOpenApiKey] = useState<string | null>(null);
-  const [status, setStatus] = useState<string>("");
+  const [openApiKey, setOpenApiKey] = useState < string | null > (null);
+  const [status, setStatus] = useState < string > ("");
 
   const [form] = Form.useForm();
+  const { Option } = Select;
 
 
   // Restores select box and checkbox state using the preferences
   // stored in chrome.storage.
+
+  const LANGUAGES = [
+    "Simplified Chinese",
+    "Traditional Chinese",
+    "English",
+    "Japanese",
+    "Spanish",
+    "Korean"
+  ]
+
+  const onSelectChange = (value: string) => {
+    console.log(`selected ${value}`);
+  };
+
+  const onSelectSearch = (value: string) => {
+    console.log('search:', value);
+  };
 
 
   useEffect(() => {
@@ -26,33 +44,28 @@ export const Options = () => {
 
     // 获取配置信息
     getSettings().then(items => {
-      setOpenApiKey(items.openApiKey ?? null);
-      console.log(openApiKey);
-      console.log(items.openApiKey);
+      // setOpenApiKey(items.openApiKey ?? null);
 
       // 更新 input 文本框的默认值
-      form.setFieldsValue({ openApiKey: items.openApiKey });
+      form.setFieldsValue({ openApiKey: items.openApiKey, currentLanguage: items.currentLanguage, targetLanguage: items.targetLanguage });
     })
 
   }, []);
 
   async function getSettings() {
-    let items = await browser.storage.sync.get(
-      {
-        openApiKey
-      }
-    )
+    let items = await browser.storage.sync.get(["openApiKey", "currentLanguage", "targetLanguage"])
     return items
   }
 
   async function saveOptions(values: any) {
     console.log('Options save');
     console.log(values);
-
     // Saves options to chrome.storage.sync.
     let setStorage = await browser.storage.sync.set(
       {
         openApiKey: values['openApiKey'],
+        currentLanguage: values['currentLanguage'],
+        targetLanguage: values['targetLanguage']
       }
     ).then(item => {
 
@@ -93,6 +106,35 @@ export const Options = () => {
             // help="Should be combination of numbers & alphabets"
             >
               <Input placeholder="We will not use your Key for any other purposes." type="password" />
+            </Form.Item>
+
+            <Form.Item
+              name="currentLanguage"
+              label="Current Language"
+            >
+              <Select
+                placeholder="What language do you use?"
+              // onChange={onGenderChange}
+              // allowClear
+              >
+                
+                {LANGUAGES.map((item) => <Option value={item}>{item}</Option>)}
+
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="targetLanguage"
+              label="What language do you want to learn"
+            >
+              <Select
+                placeholder="What do you want to learn"
+              // onChange={onGenderChange}
+              // allowClear
+              >
+                {LANGUAGES.map((item) => <Option value={item}>{item}</Option>)}
+
+              </Select>
             </Form.Item>
 
             <Form.Item

@@ -68,10 +68,12 @@ browser.runtime.onInstalled.addListener(function () {
         isContinue = true
 
         // 获取存储的 API Key  
-        browser.storage.sync.get(["openApiKey"]).then((result) => {
-
+        browser.storage.sync.get(["openApiKey","currentLanguage","targetLanguage"]).then((result) => {
+          
           let messages = msg.messages
-          messages.unshift({ "role": "system", "content": "You are an English teacher. Please answer questions about English grammar and vocabulary in Chinese." })
+          messages.unshift({ "role": "system", "content": `You are an ${result.targetLanguage} teacher. Please answer questions about ${result.targetLanguage} grammar and vocabulary in ${result.currentLanguage}.` })
+          console.log(messages)
+          // return
 
           fetch('https://api.openai.com/v1/chat/completions', {
 
@@ -79,10 +81,10 @@ browser.runtime.onInstalled.addListener(function () {
             body: JSON.stringify({
               "model": "gpt-3.5-turbo",
               "messages": messages,
-              "temperature": 0,
-              "top_p": 0,
-              "frequency_penalty": 0.8,
-              "presence_penalty": 0.8,
+              "temperature": 0.5,
+              "top_p": 0.9,
+              "frequency_penalty": 0.6,
+              "presence_penalty": 0.4,
               "stream": true
             }),
             headers: { 'Authorization': 'Bearer ' + result.openApiKey, 'Content-Type': 'application/json', }

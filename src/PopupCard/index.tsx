@@ -13,7 +13,7 @@ import { Options } from "../Options"
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
-import { Divider, Skeleton, Input, ConfigProvider, message } from 'antd';
+import { Divider, Skeleton, Input, ConfigProvider, message, Result, Select } from 'antd';
 
 const { TextArea } = Input;
 
@@ -25,7 +25,7 @@ export function PopupCard(props: any) {
   const [isLoading, setIsLoading] = useState(true);
 
   // standby,normal,loading,success
-  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('standby');
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState < string > ('standby');
 
 
   const [isAnswerDone1, setAnswerDone1] = useState(false);
@@ -34,20 +34,47 @@ export function PopupCard(props: any) {
 
   const [keyWord, setKeyWord] = useState('');
 
+  const contries = [
+    {
+      value: 'A',
+      title: 'A',
+      children: [
+        {
+          value: 'A - 1',
+          title: 'A - 2',
+        }
+      ]
+    }, {
+      value: 'B',
+      title: 'B',
+      children: [
+        {
+          value: 'B - 1',
+          title: 'B - 2',
+        }
+      ]
+    }, {
+      value: 'C',
+      title: 'c',
+      children: [
+        {
+          value: 'china',
+          title: 'China',
+        },
+        {
+          value: 'chile',
+          title: 'Chile',
+        }
+      ]
+    }
+  ]
+
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
+
 
   useEffect(() => {
     // New Task
     console.log('## PopupCard useEffect')
-
-    // 初始化
-    // setAnswerDone1(false)
-    // setAnswerDone2(false)
-    // setopenApiAnser(oa1 => {
-    //   oa1 = ''
-    //   return oa1
-    // })
-    // setopenApiAnser2('')
 
     // 当前选中的文字
     let keyWord = props.selection.toString()
@@ -56,67 +83,68 @@ export function PopupCard(props: any) {
     let sentence = props.selection.anchorNode.data
 
     // 如果 keyWord 和 sentence 值相同，可能是选中的 keyWord 在 strong、code 等特殊标签内
-    if(keyWord===sentence){
+    if (keyWord === sentence) {
       sentence = props.selection.anchorNode.parentNode.parentNode.innerText
     }
 
-    let prompt = `
-    请解释以下句子中的'${keyWord}'，句子为：'${sentence}'
-    
-    - 使用 **CEFR A2** 级别的英语解释单词（请使用英文）
-    - 使用图像记忆法描述单词
-    - 提供两个例句以及对应的翻译，其中必须包含'${keyWord}'。
-    - 最后结合你描述的知识提供'${keyWord}'相关的两个测试题。这些测试题应该将中文短语翻译为英文，但不要提供测试题的答案。
-    
-    请使用以下格式回复：
-    
-    <p><词性>（如果是单词）<使用中文解释单词在句子中的作用> <使用英文解释></p>
-    
-    <h3>图像记忆法描述</h3>
-    <p><图像记忆法描述></p>
-    
-    <h3>例句</h3>：
-    <ul>
-    <li><例句及翻译></li>
-    </ul>
-    
-    <h3>测试</h3>
-    <ul>
-    <li><测试题></li>
-    </ul>
-    
-    `
-
-    // 关键字长度较长时，按照句子进行处理
-    if (keyWord.length > 20) {
-      prompt = `Please use Chinese to respond. Analyze the following sentence, explain the grammar involved in the original sentence, and provide two examples for each knowledge point:
-      "${keyWord}"
-      
-        Finally, create 2 test questions based on the grammar knowledge you've described. These questions should ask for the translation of a Chinese phrase to English, but don't provide the answers.
-        Please respond in the following format:
-
-        <h3><Grammar Knowledge Point></h3>
-        <p><Description of the grammar knowledge></p>
-        <ul>
-        <li><Example sentence><translation></li>
-        <li><Another example sentence><translation></li>
-        </ul>
-
-        ...
-
-        <h3>Test Questions</h3>
-        <ul>
-        <li><Test question 1></li>
-        <li><Test question 2></li>
-        </ul>
-
-        Please reply in Chinese.`
-    }
-
-
     // 设置加载状态
     setIsLoading(true)
-    getGPTMsg([{ "role": "user", "content": prompt }])
+
+    browser.storage.sync.get(["currentLanguage", "targetLanguage"]).then((result) => {
+      console.log(result);
+
+      let prompt = `Please provide your responses in ${result.currentLanguage} for all of the following:
+      - Please explain the meaning of the word '${keyWord}' in the following sentence using ${result.currentLanguage}:
+      "${sentence}"
+      - Provide two example sentences, both of which must contain the word '${keyWord}', along with their translations. Please provide the sentences first in ${result.targetLanguage}, followed by the translations in ${result.currentLanguage}.
+      - Provide two ${result.currentLanguage} to ${result.targetLanguage} translation test questions based on appeals, both of which must contain the word '${keyWord}'. Please do not provide the answers to the test questions.
+
+      sentence is sentence
+
+      Please format your responses as follows:
+      
+      <Explanation in ${result.currentLanguage}>
+      <h3>Example Sentences</h3>
+      <ul>
+        <li><Sentence 1 in ${result.targetLanguage}> - <Translation 1 in ${result.currentLanguage}></li>
+        <li><Sentence 2 in ${result.targetLanguage}> - <Translation 2 in ${result.currentLanguage}></li>
+      </ul>
+      <h3>Translation Test Questions</h3>
+      <ul>
+        <li><Test Question 1 in ${result.currentLanguage}></li>
+        <li><Test Question 2 in ${result.currentLanguage}></li>
+      </ul>
+      `
+
+      // 关键字长度较长时，按照句子进行处理
+      if (keyWord.length > 20) {
+        prompt = `Please provide your responses in ${result.currentLanguage} for all of the following:
+          - Analyze the following sentence, explain the grammar involved in the original sentence, and provide two examples for each knowledge point:
+          "${keyWord}"
+          - Finally, create 2 test questions based on the grammar knowledge you've described. These questions should ask for the translation of a ${result.currentLanguage} phrase to ${result.targetLanguage}, but don't provide the answers.
+          Please respond in the following format:
+  
+          <h3><Grammar Knowledge Point></h3>
+          <p><Description of the grammar knowledge></p>
+          <ul>
+          <li><Example sentence><translation></li>
+          <li><Another example sentence><translation></li>
+          </ul>
+  
+          ...
+  
+          <h3>Test Questions</h3>
+          <ul>
+          <li><Test question 1></li>
+          <li><Test question 2></li>
+          </ul>`
+      }
+
+      getGPTMsg([{ "role": "user", "content": prompt }])
+
+    })
+
+
 
   }, [props]);
 
@@ -126,6 +154,7 @@ export function PopupCard(props: any) {
   //   console.log('useFeefect isAnswerDone1');
 
   // }, [isAnswerDone1])
+
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
   const getGPTMsg = async (prompt: Array<object>, type = 'as1') => {
