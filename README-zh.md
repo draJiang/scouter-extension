@@ -14,13 +14,16 @@ Scouter 是一款针对语言学习者的浏览器插件，目标是帮助你在
 
 * [x] 导入到 Anki
 
-* [ ] 多语言支持
+* [x] 多语言支持
+
+[🚀 在 Chrome 商店中安装](https://chrome.google.com/webstore/detail/scouter/mncfcjnabpfoagocanfjglfcpmmnkicb?hl=zh-CN&authuser=0)
 
 ![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204520230326151323.png)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204720230326151342.png)
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/05DN0z20230330111850.jpg)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/dm8ymX20230328112205.jpg)
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/JhHv0B20230330111942.jpg)
+
 
 ## 不是什么
 
@@ -29,14 +32,17 @@ Scouter 是一款针对语言学习者的浏览器插件，目标是帮助你在
 * Scouter 不是对话工具，它只支持对 AI 提供的测试题进行一次性的答题
 
 ## 使用方法
-目前插件还在 Chrome 商店审核中，可以先通过下述方式先行体验
-1. 下载项目，解压后获得 dist 文件夹
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/qNLZfh20230327223027.png)
-2. 在浏览器中载入 dist 文件夹
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/AAGOyy20230327223010.png)
 
-3. 设置你的 API Key
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/ragzvH20230327222941.jpg)
+1. 设置你的 API Key 和语言
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/j9cVoy20230330112929.jpg)
+
+2. 使用「Add to Anki」功能
+
+    这是一个可选项，如果你需要将知识添加到 Anki 中需要完成以下步骤
+    - 安装 [Anki 客户端](https://apps.ankiweb.net/)
+    - 安装 [AnkiConnect](https://ankiweb.net/shared/info/2055492159) 插件
+
+    在开启 Anki 客户端的状态下才能使用「Add to Anki」功能
 
 ## 为什么要开发 Scouter
 

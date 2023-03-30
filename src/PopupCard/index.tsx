@@ -33,41 +33,7 @@ export function PopupCard(props: any) {
   const [isAnswerDone2, setAnswerDone2] = useState(false);
 
   const [keyWord, setKeyWord] = useState('');
-
-  const contries = [
-    {
-      value: 'A',
-      title: 'A',
-      children: [
-        {
-          value: 'A - 1',
-          title: 'A - 2',
-        }
-      ]
-    }, {
-      value: 'B',
-      title: 'B',
-      children: [
-        {
-          value: 'B - 1',
-          title: 'B - 2',
-        }
-      ]
-    }, {
-      value: 'C',
-      title: 'c',
-      children: [
-        {
-          value: 'china',
-          title: 'China',
-        },
-        {
-          value: 'chile',
-          title: 'Chile',
-        }
-      ]
-    }
-  ]
+  const [sentence, setSentence] = useState('');
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
@@ -78,19 +44,23 @@ export function PopupCard(props: any) {
 
     // 当前选中的文字
     let keyWord = props.selection.toString()
-    setKeyWord(keyWord)
+    
     // 选中文字所在的段落
     let sentence = props.selection.anchorNode.data
 
+
     // 如果 keyWord 和 sentence 值相同，可能是选中的 keyWord 在 strong、code 等特殊标签内
-    if (keyWord === sentence) {
+    if (sentence.length <= keyWord.length) {
       sentence = props.selection.anchorNode.parentNode.parentNode.innerText
     }
+
+    setKeyWord(keyWord)
+    setSentence(sentence)
 
     // 设置加载状态
     setIsLoading(true)
 
-    browser.storage.sync.get(["currentLanguage", "targetLanguage"]).then((result) => {
+    browser.storage.sync.get({'currentLanguage':'English','targetLanguage':'Spanish'}).then((result) => {
       console.log(result);
 
       let prompt = `Please provide your responses in ${result.currentLanguage} for all of the following:
@@ -119,7 +89,7 @@ export function PopupCard(props: any) {
       // 关键字长度较长时，按照句子进行处理
       if (keyWord.length > 20) {
         prompt = `Please provide your responses in ${result.currentLanguage} for all of the following:
-          - Analyze the following sentence, explain the grammar involved in the original sentence, and provide two examples for each knowledge point:
+          - Analyze the following sentence, explain the grammar involved in the original sentence using ${result.currentLanguage}, and provide two examples for each knowledge point:
           "${keyWord}"
           - Finally, create 2 test questions based on the grammar knowledge you've described. These questions should ask for the translation of a ${result.currentLanguage} phrase to ${result.targetLanguage}, but don't provide the answers.
           Please respond in the following format:
@@ -233,7 +203,7 @@ export function PopupCard(props: any) {
 
     setAddToAnkiStatus('loading')
 
-    const sentence = keyWord.length <= 20 ? props.selection.anchorNode.data : ''
+    const stc = keyWord.length <= 20 ? sentence : ''
 
     // 请求 background 将数据保存到 Anki
     const p = {
@@ -242,7 +212,7 @@ export function PopupCard(props: any) {
         "modelName": "Basic",
         "fields": {
           "Front": keyWord,
-          "Back": sentence + openApiAnser + '<a href="' + window.location.href + '">Source</a>'
+          "Back": '<p>'+stc+'</p>' + openApiAnser + '<a href="' + window.location.href + '">Source</a>'
         },
         "tags": [
           "Scouter"

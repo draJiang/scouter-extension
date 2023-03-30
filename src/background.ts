@@ -68,7 +68,7 @@ browser.runtime.onInstalled.addListener(function () {
         isContinue = true
 
         // 获取存储的 API Key  
-        browser.storage.sync.get(["openApiKey","currentLanguage","targetLanguage"]).then((result) => {
+        browser.storage.sync.get({'openApiKey':'','currentLanguage':'English','targetLanguage':'Spanish'}).then((result) => {
           
           let messages = msg.messages
           messages.unshift({ "role": "system", "content": `You are an ${result.targetLanguage} teacher. Please answer questions about ${result.targetLanguage} grammar and vocabulary in ${result.currentLanguage}.` })

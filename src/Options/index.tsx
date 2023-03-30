@@ -117,7 +117,7 @@ export const Options = () => {
               // onChange={onGenderChange}
               // allowClear
               >
-                
+
                 {LANGUAGES.map((item) => <Option value={item}>{item}</Option>)}
 
               </Select>
@@ -149,6 +149,7 @@ export const Options = () => {
           <Divider />
           <div className="instructions">
             <h2>Usage</h2>
+            <h3>Set up your API Key</h3>
             <ul>
               <li>
                 <p><a target={"_blank"} href="https://platform.openai.com/account/api-keys">Get Open API Key</a></p>
@@ -158,7 +159,13 @@ export const Options = () => {
                 <img src={Usage}></img>
               </li>
             </ul>
-
+            <h3>Use the "Add to Anki" feature</h3>
+            <p>This is an optional step if you need to add knowledge to Anki, you need to complete the following steps:</p>
+            <ul>
+              <li>Install the<a href='https://apps.ankiweb.net/'>Anki client</a></li>
+              <li>Install the<a href='https://ankiweb.net/shared/info/2055492159'>AnkiConnect plugin</a></li>
+            </ul>
+            <p>The "Add to Anki" feature can only be used when the Anki client is open.</p>
           </div>
 
         </ConfigProvider>

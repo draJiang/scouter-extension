@@ -11,13 +11,15 @@ Scouter is a browser extension designed for language learners, with the goal of 
 - [x] Provides relevant example sentences and quizzes.
 - [x] Users can participate in quizzes.
 - [x] Importable to Anki.
-- [ ] Multilingual support
+- [x] Multilingual support
+
+[🚀 Install in the Chrome Store](https://chrome.google.com/webstore/detail/scouter/mncfcjnabpfoagocanfjglfcpmmnkicb?hl=zh-CN&authuser=0)
 
 ![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204520230326151323.png)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204720230326151342.png)
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/05DN0z20230330111850.jpg)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/dm8ymX20230328112205.jpg)
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/JhHv0B20230330111942.jpg)
 
 ## What it isn't
 
@@ -26,16 +28,16 @@ Scouter is a browser extension designed for language learners, with the goal of 
 
 ## Usage
 
-Currently, the extension is still under review in the Chrome Web Store. You can experience it in advance through the following steps:
+1. Set up your API Key and language.
+![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/j9cVoy20230330112929.jpg)
 
-1. Download the project and unzip it to obtain the dist folder.
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/qNLZfh20230327223027.png)
+2. Use the "Add to Anki" feature
 
-2. Load the dist folder in your browser.
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/AAGOyy20230327223010.png)
+    This is an optional step if you need to add knowledge to Anki, you need to complete the following steps:
+    - Install the [Anki client](https://apps.ankiweb.net/)
+    - Install the [AnkiConnect plugin](https://ankiweb.net/shared/info/2055492159)
 
-3. Set up your API Key.
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/ragzvH20230327222941.jpg)
+    The "Add to Anki" feature can only be used when the Anki client is open.
 
 ## Why develop Scouter?
 
