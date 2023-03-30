@@ -44,7 +44,7 @@ export function PopupCard(props: any) {
 
     // 当前选中的文字
     let keyWord = props.selection.toString()
-    
+
     // 选中文字所在的段落
     let sentence = props.selection.anchorNode.data
 
@@ -60,57 +60,63 @@ export function PopupCard(props: any) {
     // 设置加载状态
     setIsLoading(true)
 
-    browser.storage.sync.get({'currentLanguage':'English','targetLanguage':'Spanish'}).then((result) => {
+    browser.storage.sync.get({ 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
       console.log(result);
 
-      let prompt = `Please provide your responses in ${result.currentLanguage} for all of the following:
-      - Please explain the meaning of the word '${keyWord}' in the following sentence using ${result.currentLanguage}:
-      "${sentence}"
-      - Provide two example sentences, both of which must contain the word '${keyWord}', along with their translations. Please provide the sentences first in ${result.targetLanguage}, followed by the translations in ${result.currentLanguage}.
-      - Provide two ${result.currentLanguage} to ${result.targetLanguage} translation test questions based on appeals, both of which must contain the word '${keyWord}'. Please do not provide the answers to the test questions.
-
-      sentence is sentence
-
+      let systemPrompt = { "role": "system", "content": `As an AI language expert, analyze the word "${keyWord}" in the given sentence using ${result.currentLanguage}. Provide an example sentence and two test questions (one ${result.targetLanguage}  to ${result.currentLanguage}, one ${result.currentLanguage} to ${result.targetLanguage} ).` }
+      let userPrompt = {
+        "role": "user", "content": `Please analyze the role of the word "${keyWord}" in the following sentence using the target language, and provide an example sentence in ${result.targetLanguage} with the same meaning along with its translation in the target language. Additionally, provide two test questions for this word and its role in the sentence, one translating from the target language to ${result.targetLanguage}, and the other translating from ${result.targetLanguage} to the target language. Please do not include the answers to the test questions in the response.
       Please format your responses as follows:
-      
       <Explanation in ${result.currentLanguage}>
       <h3>Example Sentences</h3>
       <ul>
-        <li><Sentence 1 in ${result.targetLanguage}> - <Translation 1 in ${result.currentLanguage}></li>
-        <li><Sentence 2 in ${result.targetLanguage}> - <Translation 2 in ${result.currentLanguage}></li>
+        <li><${result.targetLanguage} Sentence> - <Translation></li>
+        <li><${result.targetLanguage} Sentence> - <Translation></li>
       </ul>
       <h3>Translation Test Questions</h3>
       <ul>
-        <li><Test Question 1 in ${result.currentLanguage}></li>
-        <li><Test Question 2 in ${result.currentLanguage}></li>
+        <li><${result.currentLanguage} Sentence></li>
+        <li><${result.currentLanguage} Sentence></li>
       </ul>
-      `
+
+      Sentence: ${sentence}
+      Target language: ${result.currentLanguage}`
+      }
+
 
       // 关键字长度较长时，按照句子进行处理
       if (keyWord.length > 20) {
-        prompt = `Please provide your responses in ${result.currentLanguage} for all of the following:
+
+        systemPrompt = { "role": "system", "content": `As an AI language expert, analyze the original sentence and explain the grammar involved using ${result.currentLanguage}. Provide two examples for each grammar knowledge point and create two test questions based on the grammar knowledge. The test questions should ask for the translation of a ${result.currentLanguage} phrase to ${result.targetLanguage}. ` }
+        userPrompt = {
+          "role": "user", "content": `Please provide your responses in ${result.currentLanguage} for all of the following:
           - Analyze the following sentence, explain the grammar involved in the original sentence using ${result.currentLanguage}, and provide two examples for each knowledge point:
           "${keyWord}"
           - Finally, create 2 test questions based on the grammar knowledge you've described. These questions should ask for the translation of a ${result.currentLanguage} phrase to ${result.targetLanguage}, but don't provide the answers.
           Please respond in the following format:
-  
+
           <h3><Grammar Knowledge Point></h3>
           <p><Description of the grammar knowledge></p>
           <ul>
           <li><Example sentence><translation></li>
           <li><Another example sentence><translation></li>
           </ul>
-  
+
           ...
-  
+
           <h3>Test Questions</h3>
           <ul>
           <li><Test question 1></li>
           <li><Test question 2></li>
           </ul>`
+        }
+
       }
 
-      getGPTMsg([{ "role": "user", "content": prompt }])
+      let prompt = [systemPrompt, userPrompt]
+
+
+      getGPTMsg(prompt)
 
     })
 
@@ -212,7 +218,7 @@ export function PopupCard(props: any) {
         "modelName": "Basic",
         "fields": {
           "Front": keyWord,
-          "Back": '<p>'+stc+'</p>' + openApiAnser + '<a href="' + window.location.href + '">Source</a>'
+          "Back": '<p>' + stc + '</p>' + openApiAnser + '<a href="' + window.location.href + '">Source</a>'
         },
         "tags": [
           "Scouter"

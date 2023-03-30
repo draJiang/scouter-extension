@@ -20,14 +20,18 @@ export const Options = () => {
   // Restores select box and checkbox state using the preferences
   // stored in chrome.storage.
 
-  const LANGUAGES = [
-    "Simplified Chinese",
-    "Traditional Chinese",
-    "English",
-    "Japanese",
-    "Spanish",
-    "Korean"
-  ]
+  const LANGUAGES = ["Arabic",
+  "English",
+  "German",
+  "Hindi",
+  "Japanese",
+  "Korean",
+  "Portuguese",
+  "Russian",
+  "Simplified Chinese",
+  "Spanish",
+  "Traditional Chinese"]
+
 
   const onSelectChange = (value: string) => {
     console.log(`selected ${value}`);
