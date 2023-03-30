@@ -83,7 +83,6 @@ export function PopupCard(props: any) {
       Target language: ${result.currentLanguage}`
       }
 
-
       // 关键字长度较长时，按照句子进行处理
       if (keyWord.length > 20) {
 
@@ -203,6 +202,12 @@ export function PopupCard(props: any) {
 
   }
 
+  // 事件处理函数，用于阻止事件冒泡
+  const handleKeyDown = (event: any) => {
+    console.log(event);
+    event.stopPropagation()
+  }
+
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
     console.log('Popup:handleSaveToAnkiBtnClick');
@@ -274,7 +279,7 @@ export function PopupCard(props: any) {
 
           {/* 文本域，用来提交测试题的答案 */}
           {isAnswerDone1 ? <div className="userInput">
-            <TextArea rows={3} placeholder="Press the Enter ⏎ key to submit." onPressEnter={onPressEnter} disabled={isUserAnswered} />
+            <TextArea rows={3} placeholder="Press the Enter ⏎ key to submit." onPressEnter={onPressEnter} onKeyDown={handleKeyDown} disabled={isUserAnswered} />
           </div> : ''}
 
           {/* 第二个回答，针对文本域提交的回答进行评价 */}
