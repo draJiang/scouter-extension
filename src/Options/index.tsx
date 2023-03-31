@@ -90,7 +90,7 @@ export const Options = () => {
         <ConfigProvider
           theme={{
             token: {
-              colorPrimary: '#FEB825',
+              colorPrimary: '#F08A24',
             },
           }}
         >

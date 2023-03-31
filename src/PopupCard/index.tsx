@@ -39,6 +39,10 @@ export function PopupCard(props: any) {
 
 
   useEffect(() => {
+
+    setAnswerDone1(false)
+    setAnswerDone2(false)
+
     // New Task
     console.log('## PopupCard useEffect')
 
@@ -259,17 +263,18 @@ export function PopupCard(props: any) {
 
   return (
     <div id="LearningEnglish2023">
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: '#F08A24',
+          },
+        }}
+      >
 
-      <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} title='Scouter' />
+        <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} title='Scouter' />
 
-      <div className="contentBox">
-        <ConfigProvider
-          theme={{
-            token: {
-              colorPrimary: '#FEB825',
-            },
-          }}
-        >
+        <div className="contentBox">
+
           {/* 当前查询的文字 */}
           <Selection title={keyWord} />
 
@@ -284,8 +289,8 @@ export function PopupCard(props: any) {
           {/* 第二个回答，针对文本域提交的回答进行评价 */}
           {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" dangerouslySetInnerHTML={{ __html: openApiAnser2 }} style={{}}></div>}
 
-        </ConfigProvider>
-      </div>
+        </div>
+      </ConfigProvider>
     </div>
   );
 };

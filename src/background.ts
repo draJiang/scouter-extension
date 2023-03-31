@@ -60,7 +60,7 @@ browser.runtime.onInstalled.addListener(function () {
     // 接收 content script 的消息
     port.onMessage.addListener(msg => {
       console.log('接收消息：', msg)
-      return
+      // return
       // 请求  GPT 数据
       if (msg.type === 'getGPTMsg') {
 
