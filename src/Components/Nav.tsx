@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { Button } from 'antd';
 
-import Icon from "../assets/Logo.png"
+import Icon from "../assets/icon128.png"
 
 
 

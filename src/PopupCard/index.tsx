@@ -204,7 +204,6 @@ export function PopupCard(props: any) {
 
   // 事件处理函数，用于阻止事件冒泡
   const handleKeyDown = (event: any) => {
-    console.log(event);
     event.stopPropagation()
   }
 

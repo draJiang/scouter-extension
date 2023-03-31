@@ -41,7 +41,6 @@ export const Options = () => {
     console.log('search:', value);
   };
 
-
   useEffect(() => {
 
     console.log('options useEffect:');
