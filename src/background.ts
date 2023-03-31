@@ -82,10 +82,10 @@ browser.runtime.onConnect.addListener(port => {
         console.log(messages)
 
         //下面 4 行代码用于调试使用，正式环境需要注释掉
-        port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
-        port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
-        port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
-        return
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
+        // return
         //
 
         fetch('https://api.openai.com/v1/chat/completions', {
