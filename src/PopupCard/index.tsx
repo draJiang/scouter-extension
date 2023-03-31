@@ -40,9 +40,6 @@ export function PopupCard(props: any) {
 
   useEffect(() => {
 
-    setAnswerDone1(false)
-    setAnswerDone2(false)
-
     // New Task
     console.log('## PopupCard useEffect')
 
