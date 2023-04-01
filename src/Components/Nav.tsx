@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill'
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { Button,ConfigProvider } from 'antd';
+import { Button, ConfigProvider } from 'antd';
 
 import Icon from "../assets/icon128.png"
 
@@ -9,8 +9,9 @@ import Icon from "../assets/icon128.png"
 
 interface NavProps {
     title: string;
-    handleSaveToAnkiBtnClick: Function;
+    handleSaveToAnkiBtnClick: () => void;
     addToAnkiStatus: string;
+    onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export function Nav(props: NavProps) {
@@ -18,7 +19,8 @@ export function Nav(props: NavProps) {
     const [currentURL, setCurrentURL] = useState < string > ();
 
     useEffect(() => {
-
+        console.log('Nav props:');
+        console.log(props);
     }, []);
 
     const handleSaveToAnkiBtnClick = () => {
@@ -27,18 +29,24 @@ export function Nav(props: NavProps) {
         props.handleSaveToAnkiBtnClick()
     };
 
+    // const onNavMouseDown = (event:any)=>{
+    //     console.log('Nav:onMouseDown');
+    //     props.onMouseDown(event)
+    // }
+
     return (
         <>
-            {/* <ConfigProvider
+            <ConfigProvider
                 theme={{
                     token: {
                         colorPrimary: '#F08A24',
                     },
                 }}
-            > */}
-                <div id="ScouterNav">
+            >
+                <div id="ScouterNav"
+                    style={{ cursor: 'move' }}
+                    onMouseDown={props.onMouseDown}>
                     <img src={Icon} />
-                    {/* <span> {props.title}</span> */}
                     <div className="rightBtnBox" style={{ flex: 1, textAlign: 'right' }}>
                         {props.addToAnkiStatus == 'success' ? '✅ Added to Anki' :
                             <Button size="small"
@@ -49,7 +57,7 @@ export function Nav(props: NavProps) {
                     </div>
 
                 </div>
-            {/* </ConfigProvider> */}
+            </ConfigProvider >
         </>
     );
 }

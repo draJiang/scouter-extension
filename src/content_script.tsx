@@ -35,6 +35,12 @@ shadowRoot = MyBox?.attachShadow({ mode: 'open' });
 container.className = 'container'
 shadowRoot?.appendChild(container)
 
+// Ant 组件样式
+const antStylesheet = document.createElement('link');
+antStylesheet.rel = 'stylesheet';
+antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
+shadowRoot.appendChild(antStylesheet);
+
 // 在 Shadow DOM 中添加样式：
 const style = document.createElement('style');
 style.textContent = `
@@ -51,8 +57,6 @@ style.textContent = `
   position: fixed;
   display: flex;
   flex-direction: column;
-  top: 10px;
-  right: 10px;
   font-size: 13px;
   background-color: #fff;
   z-index: 9999;
@@ -85,6 +89,7 @@ style.textContent = `
   padding: 10px 19px;
   border-bottom: 1px solid rgba(5, 5, 5, .06);
   font-weight: bold;
+  user-select: none;
   }
 
   #LearningEnglish2023 #ScouterNav img {
@@ -137,7 +142,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     showPopupCard(window.getSelection(), container, shadowRoot)
 
     // 监听页面点击事件
-    document.onclick = function (event) {
+    document.onmousedown = function (event) {
 
       if (MyBox !== undefined && MyBox !== null) {
         // 如果点击的不是插件窗口，则关闭窗口

@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill'
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 import ReactDOM from "react-dom";
 
@@ -25,7 +25,7 @@ export function PopupCard(props: any) {
   const [isLoading, setIsLoading] = useState(true);
 
   // standby,normal,loading,success
-  const [addToAnkiStatus, setAddToAnkiStatus] = useState < string > ('standby');
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('standby');
 
 
   const [isAnswerDone1, setAnswerDone1] = useState(false);
@@ -34,6 +34,15 @@ export function PopupCard(props: any) {
 
   const [keyWord, setKeyWord] = useState('');
   const [sentence, setSentence] = useState('');
+
+  // 窗口拖拽逻辑
+  const [dragging, setDragging] = useState(false);
+  // const [position, setPosition] = useState({ x: 10, y: 10 });
+  // const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  const windowElement = useRef<HTMLDivElement>(null);
+
+
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
@@ -48,6 +57,32 @@ export function PopupCard(props: any) {
 
     // 选中文字所在的段落
     let sentence = props.selection.anchorNode.data
+
+    // 设置窗口的默认位置
+    if (windowElement.current) {
+
+      // Check the boundaries
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      const elementWidth = windowElement.current.clientWidth;
+      const elementHeight = windowElement.current.clientHeight;
+
+      const minX = 0;
+      const minY = 0;
+      const maxX = windowWidth - elementWidth;
+      const maxY = windowHeight - elementHeight;
+
+      const newX = maxX - 20
+      const newY = props.selection.anchorNode.parentElement.offsetTop + props.selection.anchorNode.parentElement.clientHeight
+
+      const clampedX = Math.max(minX, Math.min(newX, maxX));
+      const clampedY = Math.max(minY, Math.min(newY, maxY));
+      console.log(props.selection.getRangeAt(0));
+
+      windowElement.current.style.left = `${clampedX}px`;
+      windowElement.current.style.top = `${clampedY}px`;
+    }
 
 
     // 如果 keyWord 和 sentence 值相同，可能是选中的 keyWord 在 strong、code 等特殊标签内
@@ -124,12 +159,17 @@ export function PopupCard(props: any) {
 
   }, [props]);
 
+  // 窗口拖拽时触发
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
 
-  // useEffect(() => {
-
-  //   console.log('useFeefect isAnswerDone1');
-
-  // }, [isAnswerDone1])
+    return () => {
+      console.log('useEffect return');
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragging]);
 
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
@@ -208,6 +248,82 @@ export function PopupCard(props: any) {
     event.stopPropagation()
   }
 
+  const handleMouseDown = (event: any) => {
+    console.log('PopupCard:handleMouseDown');
+    setDragging(true);
+
+    if (windowElement.current) {
+      const rect = windowElement.current.getBoundingClientRect();
+      const offsetX = event.clientX - rect.left;
+      const offsetY = event.clientY - rect.top;
+      windowElement.current.dataset.offsetX = String(offsetX);
+      windowElement.current.dataset.offsetY = String(offsetY);
+    }
+
+    // setOffset({ x: event.clientX - position.x, y: event.clientY - position.y });
+  };
+
+  const handleMouseMove = (event: any) => {
+    // console.log('PopupCard:handleMouseMove');
+    // console.log(dragging);
+
+
+    if (dragging && windowElement.current) {
+
+      // Use requestAnimationFrame to throttle the mousemove event handling
+      // 鼠标相对窗口左上角的偏移
+      const offsetX = parseFloat(windowElement.current.dataset.offsetX || '');
+      const offsetY = parseFloat(windowElement.current.dataset.offsetY || '');
+
+      const newX = event.clientX - offsetX
+      const newY = event.clientY - offsetY
+
+      // Check the boundaries
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      const elementWidth = windowElement.current.clientWidth;
+      const elementHeight = windowElement.current.clientHeight;
+
+      const minX = 0;
+      const minY = 0;
+      const maxX = windowWidth - elementWidth;
+      const maxY = windowHeight - elementHeight;
+
+      const clampedX = Math.max(minX, Math.min(newX, maxX));
+      const clampedY = Math.max(minY, Math.min(newY, maxY));
+
+      // Only update the position if it's within the boundaries
+      if (newX >= minX && newX <= maxX && newY >= minY && newY <= maxY) {
+        // setPosition({ x: clampedX, y: clampedY });
+        windowElement.current.style.left = `${clampedX}px`;
+        windowElement.current.style.top = `${clampedY}px`;
+
+      } else {
+        // 元素到达边界
+        const rect = windowElement.current.getBoundingClientRect();
+        const offsetX = event.clientX - rect.left;
+        const offsetY = event.clientY - rect.top;
+        windowElement.current.dataset.offsetX = String(offsetX);
+        windowElement.current.dataset.offsetY = String(offsetY);
+      }
+
+    }
+
+
+  };
+
+  // const getBoundaries = ()=>{
+
+  // }
+
+  const handleMouseUp = () => {
+    // console.log('PopupCard:handleMouseUp');
+    setDragging(false);
+  };
+
+
+
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
     console.log('Popup:handleSaveToAnkiBtnClick');
@@ -259,7 +375,14 @@ export function PopupCard(props: any) {
   }
 
   return (
-    <div id="LearningEnglish2023">
+    <div id="LearningEnglish2023"
+      ref={windowElement}
+
+      style={{
+        left: 10,
+        top: 10,
+      }}
+    >
       <ConfigProvider
         theme={{
           token: {
@@ -268,7 +391,7 @@ export function PopupCard(props: any) {
         }}
       >
 
-        <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} title='Scouter' />
+        <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} title='Scouter' />
 
         <div className="contentBox">
 
