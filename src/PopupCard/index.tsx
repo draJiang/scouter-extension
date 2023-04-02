@@ -323,9 +323,16 @@ export function PopupCard(props: any) {
     // console.log('Popup:handleSaveToAnkiBtnClick');
 
     setAddToAnkiStatus('loading')
-
+    
+    let container = ''
     const stc = keyWord.length <= 20 ? sentence : ''
 
+    if(windowElement.current){
+      console.log(windowElement.current);
+      container = windowElement.current.innerHTML
+      container = windowElement.current.getElementsByClassName('openAIAnswer')[0].innerHTML
+    }
+     
     // 请求 background 将数据保存到 Anki
     const p = {
       "note": {
@@ -333,7 +340,7 @@ export function PopupCard(props: any) {
         "modelName": "Basic",
         "fields": {
           "Front": keyWord,
-          "Back": '<p>' + stc + '</p>' + openApiAnser + '<a href="' + window.location.href + '">Source</a>'
+          "Back": '<p>' + stc + '</p>' + container + '<a href="' + window.location.href + '">Source</a>'
         },
         "tags": [
           "Scouter"

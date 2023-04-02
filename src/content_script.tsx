@@ -88,7 +88,6 @@ style.textContent = `
   align-items: center;
   padding: 10px 19px;
   border-bottom: 1px solid rgba(5, 5, 5, .06);
-  font-weight: bold;
   user-select: none;
   }
 

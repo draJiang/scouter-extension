@@ -110,11 +110,12 @@ browser.runtime.onConnect.addListener(port => {
             // "frequency_penalty": 0,
             // "presence_penalty": 1,
 
-            "temperature": 0.7,
-            "max_tokens":520,
+            "temperature": 0,
+            "max_tokens":320,
             "top_p": 1,
             "frequency_penalty": 0,
-            "presence_penalty": 1.4,
+            "presence_penalty": 1,
+
             "stream": true
           }),
           headers: { 'Authorization': 'Bearer ' + result.openApiKey, 'Content-Type': 'application/json', }

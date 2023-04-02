@@ -23,6 +23,7 @@ export function Nav(props: NavProps) {
     }, []);
 
     const handleSaveToAnkiBtnClick = () => {
+        console.log('Nav handleSaveToAnkiBtnClick');
         props.handleSaveToAnkiBtnClick()
     };
 
