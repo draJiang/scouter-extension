@@ -19,13 +19,10 @@ export function Nav(props: NavProps) {
     const [currentURL, setCurrentURL] = useState < string > ();
 
     useEffect(() => {
-        console.log('Nav props:');
-        console.log(props);
+
     }, []);
 
     const handleSaveToAnkiBtnClick = () => {
-        console.log('Nav:handleSaveToAnkiBtnClick');
-
         props.handleSaveToAnkiBtnClick()
     };
 

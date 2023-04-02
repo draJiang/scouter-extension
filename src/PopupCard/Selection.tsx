@@ -8,8 +8,6 @@ interface SelectionProps {
 export function Selection(props: SelectionProps) {
 
   useEffect(() => {
-    console.log('Selection:');
-    console.log(props);
 
   }, []);
 

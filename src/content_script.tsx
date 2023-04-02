@@ -8,7 +8,7 @@ import { PopupCard } from "./PopupCard"
 import { StyleProvider } from '@ant-design/cssinjs';
 
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
-console.log('before browser.runtime.onMessage.addListener');
+// console.log('before browser.runtime.onMessage.addListener');
 
 // 初始化主容器，主容器用来挂在全局样式，包括第三方组件的样式
 let MyBox: HTMLElement | null = document.getElementById('__jiang-souter');
@@ -19,7 +19,7 @@ let shadowRoot: any = undefined
 
 if (MyBox !== null && MyBox !== undefined) {
   // 如果已存在容器
-  console.log('已存在 Box 容器');
+  // console.log('已存在 Box 容器');
   // 移除旧容器，避免出现 2 个主容器会导致 UI 渲染错误
   MyBox.parentNode?.removeChild(MyBox);
 
@@ -115,8 +115,8 @@ shadowRoot?.appendChild(style);
 // 接收 background 消息（目前是通过浏览器的右键菜单触发）
 browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
-  console.log('content script onMessage:');
-  console.log(msg);
+  // console.log('content script onMessage:');
+  // console.log(msg);
   if (msg.type === 'open-souter') {
 
     // 处理窗口
@@ -124,13 +124,13 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (MyBox !== null && MyBox !== undefined) {
       // 如果已存在容器
 
-      console.log('已存在 Box 容器');
+      // console.log('已存在 Box 容器');
       MyBox.style.display = 'block'
       // 移除旧内容，避免 2 次渲染混杂在一起
       container.parentNode?.removeChild(container);
 
     } else {
-      console.log('不存在 Box 容器');
+      // console.log('不存在 Box 容器');
     }
 
 
@@ -147,7 +147,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       if (MyBox !== undefined && MyBox !== null) {
         // 如果点击的不是插件窗口，则关闭窗口
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
-          console.log('点击窗口外区域');
+          // console.log('点击窗口外区域');
           // 隐藏窗口
           // MyBox.style.display = 'none'
           // MyBox.parentNode?.removeChild(MyBox);
@@ -163,8 +163,8 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
 // 显示应用窗口
 function showPopupCard(msg: any, MyBox: any, shadowRoot: any) {
-  console.log('showPopupCard:');
-  console.log(msg);
+  // console.log('showPopupCard:');
+  // console.log(msg);
 
   ReactDOM.render(
     <React.StrictMode>

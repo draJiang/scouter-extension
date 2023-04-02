@@ -83,12 +83,12 @@ browser.runtime.onConnect.addListener(port => {
 
         //==================== 下面 4 行代码用于调试使用，正式环境需要注释掉
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "在这个句子中，“that”是一个关系代词，用来引导一个定语从句，修饰先行词“JavaScript functions”。## 英文例句 React components are JavaScript functions that return markup. ## 中文翻译 React组件是返回标记的JavaScript函数。 ## 翻译问题： 1. React组件是JavaScript函数，它们返回标记。 2. 我们需要一些能够处理大量数据的算法。" })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
         // return
         // ====================
 
-        if(result.openApiKey.length<5){
+        if (result.openApiKey.length < 5) {
           port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
           return
         }
@@ -99,10 +99,22 @@ browser.runtime.onConnect.addListener(port => {
           body: JSON.stringify({
             "model": "gpt-3.5-turbo",
             "messages": messages,
-            "temperature": 0.8,
-            "top_p": 0.9,
-            "frequency_penalty": -0.5,
-            "presence_penalty": 0.5,
+            // "temperature": 0.8,
+            // "top_p": 0.9,
+            // "frequency_penalty": -0.5,
+            // "presence_penalty": 0.5,
+
+            // "temperature": 0,
+            // "max_tokens":520,
+            // "top_p": 1,
+            // "frequency_penalty": 0,
+            // "presence_penalty": 1,
+
+            "temperature": 0.7,
+            "max_tokens":520,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 1.4,
             "stream": true
           }),
           headers: { 'Authorization': 'Bearer ' + result.openApiKey, 'Content-Type': 'application/json', }
