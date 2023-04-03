@@ -18,6 +18,9 @@ import { Divider, Skeleton, Input, ConfigProvider, message, Result, Select } fro
 
 const { TextArea } = Input;
 
+let currentLanguage: string
+let targetLanguage: string
+
 export function PopupCard(props: any) {
 
   const [openApiAnser, setopenApiAnser] = useState('');
@@ -42,9 +45,6 @@ export function PopupCard(props: any) {
   // const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const windowElement = useRef<HTMLDivElement>(null);
-
-  let currentLanguage: string
-  let targetLanguage: string
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
@@ -104,7 +104,8 @@ export function PopupCard(props: any) {
       currentLanguage = result.currentLanguage
       targetLanguage = result.targetLanguage
 
-      let systemPrompt = { "role": "system", "content": `As a language expert, please explain the meaning of the given vocabulary in the context of a sentence.
+      let systemPrompt = {
+        "role": "system", "content": `As a language expert, please explain the meaning of the given vocabulary in the context of a sentence.
       - Please strictly adhere to the language requested by the user when providing your response.
       - Please answer the question using Markdown syntax, including but not limited to: 
         - Headings: ##, ###
@@ -117,13 +118,16 @@ export function PopupCard(props: any) {
       }
 
       let assistantPrompt = { "role": "assistant", "content": 'Yes' }
-      let userPrompt2 = {"role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
-      Reply in ${result.currentLanguage} as requested above.`}
-      
+      let userPrompt2 = {
+        "role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
+      Reply in ${result.currentLanguage} as requested above.`
+      }
+
       // 关键字长度较长时，按照句子进行处理
       if (keyWord.length > 20) {
 
-        systemPrompt = { "role": "system", "content": `As an AI language expert, analyze the original sentence and explain the grammar involved.
+        systemPrompt = {
+          "role": "system", "content": `As an AI language expert, analyze the original sentence and explain the grammar involved.
         - Please strictly adhere to the language requested by the user when providing your response.
       - Please answer the question using Markdown syntax, including but not limited to: 
         - Headings: ##, ###
@@ -136,13 +140,15 @@ export function PopupCard(props: any) {
           Please reply "Yes" if you understand.`
         }
 
-        userPrompt2 = {"role": "user", "content": `Sentence: "${keyWord}"
-        Reply in ${result.currentLanguage} as requested above.`}
+        userPrompt2 = {
+          "role": "user", "content": `Sentence: "${keyWord}"
+        Reply in ${result.currentLanguage} as requested above.`
+        }
 
 
       }
 
-      let prompt = [systemPrompt, userPrompt, assistantPrompt,userPrompt2]
+      let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
 
 
       getGPTMsg(prompt)
@@ -229,9 +235,8 @@ export function PopupCard(props: any) {
 
     // 同时按下 Shirt 时，不提交答案
     if (!event.shiftKey && event.target.defaultValue.replace(/(\r\n|\n|\r)/gm, '') !== '') {
-      let prompt = `
-      Regarding the test question you provided, please review my response. If there are any errors, kindly point out the reasons for the mistakes and provide the correct answer. My response is: "${event.target.defaultValue}" If my answer is unrelated to the test question, please provide the correct answer directly.
-      Target language:${currentLanguage}`
+      let prompt = `As a language expert, please check the sentences I provided. If the sentence is incorrect then point out the error in ${currentLanguage} and provide the correct sentence in ${targetLanguage}
+      Sentence: "${event.target.defaultValue}"`
       setIsUserAnswered(true)
       getGPTMsg([{ "role": "assistant", "content": openApiAnser }, { "role": "user", "content": prompt }], 'as2')
 
@@ -290,28 +295,25 @@ export function PopupCard(props: any) {
       const clampedY = Math.max(minY, Math.min(newY, maxY));
 
       // Only update the position if it's within the boundaries
-      if (newX >= minX && newX <= maxX && newY >= minY && newY <= maxY) {
+      // newX >= minX && newX <= maxX && newY >= minY && newY <= maxY
+      if (true) {
         // setPosition({ x: clampedX, y: clampedY });
         windowElement.current.style.left = `${clampedX}px`;
         windowElement.current.style.top = `${clampedY}px`;
 
       } else {
         // 元素到达边界
-        const rect = windowElement.current.getBoundingClientRect();
-        const offsetX = event.clientX - rect.left;
-        const offsetY = event.clientY - rect.top;
-        windowElement.current.dataset.offsetX = String(offsetX);
-        windowElement.current.dataset.offsetY = String(offsetY);
+        // const rect = windowElement.current.getBoundingClientRect();
+        // const offsetX = event.clientX - rect.left;
+        // const offsetY = event.clientY - rect.top;
+        // windowElement.current.dataset.offsetX = String(offsetX);
+        // windowElement.current.dataset.offsetY = String(offsetY);
       }
 
     }
 
 
   };
-
-  // const getBoundaries = ()=>{
-
-  // }
 
   const handleMouseUp = () => {
     // // console.log('PopupCard:handleMouseUp');
@@ -325,16 +327,16 @@ export function PopupCard(props: any) {
     // console.log('Popup:handleSaveToAnkiBtnClick');
 
     setAddToAnkiStatus('loading')
-    
+
     let container = ''
     const stc = keyWord.length <= 20 ? sentence : ''
 
-    if(windowElement.current){
+    if (windowElement.current) {
       console.log(windowElement.current);
       container = windowElement.current.innerHTML
       container = windowElement.current.getElementsByClassName('openAIAnswer')[0].innerHTML
     }
-     
+
     // 请求 background 将数据保存到 Anki
     const p = {
       "note": {

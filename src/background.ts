@@ -111,7 +111,7 @@ browser.runtime.onConnect.addListener(port => {
             // "presence_penalty": 1,
 
             "temperature": 0,
-            "max_tokens":320,
+            "max_tokens":420,
             "top_p": 1,
             "frequency_penalty": 0,
             "presence_penalty": 1,
