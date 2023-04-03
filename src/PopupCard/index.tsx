@@ -76,7 +76,7 @@ export function PopupCard(props: any) {
       const maxY = windowHeight - elementHeight;
 
       const newX = maxX - 20
-      const newY = props.selection.anchorNode.parentElement.offsetTop + props.selection.anchorNode.parentElement.clientHeight
+      const newY = props.selection.anchorNode.parentElement.offsetTop + props.selection.anchorNode.parentElement.clientHeight - 20
 
       const clampedX = Math.max(minX, Math.min(newX, maxX));
       const clampedY = Math.max(minY, Math.min(newY, maxY));
@@ -110,14 +110,15 @@ export function PopupCard(props: any) {
         - Headings: ##, ###
         -	Lists: -, 1. ` }
       let userPrompt = {
-        "role": "user", "content": `1. Explanation: Using ${result.currentLanguage} explain the meaning and grammatical function of a word in a sentence. 
+        "role": "user", "content": `1. Explanation: Using ${result.currentLanguage} explain the meaning and grammatical function of a word in a sentence and translate the sentences. 
         2. Example sentences: Provide ${result.targetLanguage} example sentences with the same meaning or function, along with their translations.
         3. Translation question: For this word, provide 2 ${result.currentLanguage} sentences that need to be translated into ${result.targetLanguage}.
         Please reply "Yes" if you understand.`
       }
 
       let assistantPrompt = { "role": "assistant", "content": 'Yes' }
-      let userPrompt2 = {"role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"`}
+      let userPrompt2 = {"role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
+      Reply in ${result.currentLanguage} as requested above.`}
       
       // 关键字长度较长时，按照句子进行处理
       if (keyWord.length > 20) {
@@ -135,7 +136,8 @@ export function PopupCard(props: any) {
           Please reply "Yes" if you understand.`
         }
 
-        userPrompt2 = {"role": "user", "content": `Sentence: "${sentence}"`}
+        userPrompt2 = {"role": "user", "content": `Sentence: "${keyWord}"
+        Reply in ${result.currentLanguage} as requested above.`}
 
 
       }

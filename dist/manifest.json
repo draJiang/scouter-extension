@@ -3,7 +3,7 @@
 
     "name": "Scouter",
     "description": "Make your language more relevant to your life",
-    "version": "0.7.5",
+    "version": "0.7.7",
 
     "action": {
         "default_icon": "icon48.png",
