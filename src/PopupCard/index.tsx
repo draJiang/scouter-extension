@@ -14,7 +14,7 @@ import { Options } from "../Options"
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
-import { Divider, Skeleton, Input, ConfigProvider, message, Result, Select } from 'antd';
+import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Select, Form, Button } from 'antd';
 
 const { TextArea } = Input;
 
@@ -36,6 +36,8 @@ export function PopupCard(props: any) {
   const [isUserAnswered, setIsUserAnswered] = useState(false);
   const [isAnswerDone2, setAnswerDone2] = useState(false);
 
+  const [isAnswerInputed, setIsAnswerInputed] = useState(false);
+
   const [keyWord, setKeyWord] = useState('');
   const [sentence, setSentence] = useState('');
 
@@ -45,6 +47,9 @@ export function PopupCard(props: any) {
   // const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const windowElement = useRef<HTMLDivElement>(null);
+
+  const [form] = Form.useForm<{ answer: string }>();
+  const answerValue = Form.useWatch('answer', form);
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
@@ -85,12 +90,6 @@ export function PopupCard(props: any) {
       windowElement.current.style.left = `${clampedX}px`;
       windowElement.current.style.top = `${clampedY}px`;
     }
-
-
-    // 如果 keyWord 和 sentence 值相同，可能是选中的 keyWord 在 strong、code 等特殊标签内
-    // if (sentence.length <= keyWord.length) {
-    //   sentence = props.selection.anchorNode.parentNode.parentNode.innerText
-    // }
 
     setKeyWord(keyWord)
     setSentence(sentence)
@@ -230,22 +229,19 @@ export function PopupCard(props: any) {
   };
 
   // 提交答案
-  const onPressEnter = (event: any) => {
+  const onPressEnter = (values: any) => {
     // console.log(event);
-
-    // 同时按下 Shirt 时，不提交答案
-    if (!event.shiftKey && event.target.defaultValue.replace(/(\r\n|\n|\r)/gm, '') !== '') {
-      let prompt = `As a language expert, please check the sentences I provided. If the sentence is incorrect then point out the error in ${currentLanguage} and provide the correct sentence in ${targetLanguage}
-      Sentence: "${event.target.defaultValue}"`
-      setIsUserAnswered(true)
-      getGPTMsg([{ "role": "assistant", "content": openApiAnser }, { "role": "user", "content": prompt }], 'as2')
-
-    }
+    console.log(values);
+    let prompt = `As a language expert, please check the sentences I provided. If the sentence is incorrect then point out the error in ${currentLanguage} and provide the correct sentence in ${targetLanguage}
+      Sentence: "${values.answer}"`
+    setIsUserAnswered(true)
+    getGPTMsg([{ "role": "assistant", "content": openApiAnser }, { "role": "user", "content": prompt }], 'as2')
 
   }
 
-  // 事件处理函数，用于阻止事件冒泡
+  // 文本框下敲击按键时
   const handleKeyDown = (event: any) => {
+    // 阻止事件冒泡
     event.stopPropagation()
   }
 
@@ -320,7 +316,15 @@ export function PopupCard(props: any) {
     setDragging(false);
   };
 
-
+  // 文本框值变化时
+  const onTextAreaInput = (event: any) => {
+    console.log(event.target.value);
+    if (event.target.value.length > 4) {
+      setIsAnswerInputed(true)
+    } else {
+      setIsAnswerInputed(false)
+    }
+  }
 
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
@@ -395,7 +399,6 @@ export function PopupCard(props: any) {
           },
         }}
       >
-
         <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} title='Scouter' />
 
         <div className="contentBox">
@@ -407,12 +410,42 @@ export function PopupCard(props: any) {
           {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser}</ReactMarkdown></div>}
 
           {/* 文本域，用来提交测试题的答案 */}
-          {isAnswerDone1 ? <div className="userInput">
-            <TextArea rows={3} placeholder="Press the Enter ⏎ key to submit." onPressEnter={onPressEnter} onKeyDown={handleKeyDown} disabled={isUserAnswered} />
-          </div> : ''}
+          {isAnswerDone1 ? <div className="userInput" style={
+            {
+              padding: '10px',
+              borderRadius: '2px',
+              // border:'1px solid #f0f0f0'
+              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+            }
+          }>
+            <Form
+              onFinish={onPressEnter}
+              layout='vertical'
+              form={form}
+            >
+              <Form.Item
+                name="answer"
+                // style={{ margin: '0 0 20px 0' }}
+                label="Your Answer"
+              // initialValue={openApiKey}
+              // help="Should be combination of numbers & alphabets"
+              >
+                <TextArea rows={3} placeholder="Exercises to help you learn better." onKeyDown={handleKeyDown} onInput={onTextAreaInput} disabled={isUserAnswered} />
+              </Form.Item>
+              <Form.Item>
+                <Button
+                  // type="primary"
+                  htmlType="submit"
+                  size='small'
+                  disabled={isUserAnswered || !isAnswerInputed}
+                >Submit</Button>
+              </Form.Item>
+            </Form>
 
-          {/* 第二个回答，针对文本域提交的回答进行评价 */}
-          {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser2}</ReactMarkdown></div>}
+            {/* 第二个回答，针对文本域提交的回答进行评价 */}
+            {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser2}</ReactMarkdown></div>}
+
+          </div> : ''}
 
         </div>
       </ConfigProvider>

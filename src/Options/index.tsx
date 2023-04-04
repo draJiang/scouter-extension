@@ -172,8 +172,8 @@ export const Options = () => {
             <h3>Use the "Add to Anki" feature</h3>
             <p>This is an optional step if you need to add knowledge to Anki, you need to complete the following steps:</p>
             <ul>
-              <li>Install the<a href='https://apps.ankiweb.net/'>Anki client</a></li>
-              <li>Install the<a href='https://ankiweb.net/shared/info/2055492159'>AnkiConnect plugin</a></li>
+              <li>Install the <a href='https://apps.ankiweb.net/'>Anki client</a></li>
+              <li>Install the <a href='https://ankiweb.net/shared/info/2055492159'>AnkiConnect plugin</a></li>
             </ul>
             <p>The "Add to Anki" feature can only be used when the Anki client is open.</p>
           </div>
