@@ -18,6 +18,8 @@ import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Selec
 
 const { TextArea } = Input;
 
+import SettingGuide from "../assets/settingGuide.png"
+
 let currentLanguage: string
 let targetLanguage: string
 
@@ -35,6 +37,8 @@ export function PopupCard(props: any) {
   const [isAnswerDone1, setAnswerDone1] = useState(false);
   const [isUserAnswered, setIsUserAnswered] = useState(false);
   const [isAnswerDone2, setAnswerDone2] = useState(false);
+
+  const [isErro, setIsErro] = useState(false);
 
   const [isAnswerInputed, setIsAnswerInputed] = useState(false);
 
@@ -81,7 +85,7 @@ export function PopupCard(props: any) {
       const maxY = windowHeight - elementHeight;
 
       const newX = maxX - 20
-      const newY = props.selection.anchorNode.parentElement.offsetTop + props.selection.anchorNode.parentElement.clientHeight - 20
+      const newY = props.selection.anchorNode.parentElement.offsetTop + props.selection.anchorNode.parentElement.clientHeight + 20
 
       const clampedX = Math.max(minX, Math.min(newX, maxX));
       const clampedY = Math.max(minY, Math.min(newY, maxY));
@@ -110,7 +114,7 @@ export function PopupCard(props: any) {
         - Headings: ##, ###
         -	Lists: -, 1. ` }
       let userPrompt = {
-        "role": "user", "content": `1. Explanation: Using ${result.currentLanguage} explain the meaning and grammatical function of a word in a sentence and translate the sentences. 
+        "role": "user", "content": `1. Explanation: Using ${result.currentLanguage} explain the meaning and grammatical function of a word in a sentence. 
         2. Example sentences: Provide ${result.targetLanguage} example sentences with the same meaning or function, along with their translations.
         3. Translation question: For this word, provide 2 ${result.currentLanguage} sentences that need to be translated into ${result.targetLanguage}.
         Please reply "Yes" if you understand.`
@@ -133,9 +137,10 @@ export function PopupCard(props: any) {
         -	Lists: -, 1. ` }
 
         userPrompt = {
-          "role": "user", "content": `1. Explanation: Using ${result.currentLanguage} explain the grammar knowledge points
-          2. Example sentences: Provide 2 ${result.targetLanguage} example sentences and show their translations
-          3. Translation question: Based on the grammar knowledge points mentioned, provide 2 translation test questions that require translating from ${result.currentLanguage} to ${result.targetLanguage}.
+          "role": "user", "content": `1. Translation: translation to ${result.currentLanguage}
+          2. Explanation: Using ${result.currentLanguage} explain the grammar knowledge points
+          3. Example sentences: Provide 2 ${result.targetLanguage} example sentences and show their translations
+          4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${result.currentLanguage} sentences into ${result.targetLanguage}.
           Please reply "Yes" if you understand.`
         }
 
@@ -194,6 +199,10 @@ export function PopupCard(props: any) {
       // 请求 GPT 数据失败
       if (msg.status === 'erro') {
         type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
+        if (msg.content.indexOf('API Key error') > -1) {
+          setIsErro(true)
+        }
+
         setIsLoading(false)
       }
 
@@ -318,8 +327,8 @@ export function PopupCard(props: any) {
 
   // 文本框值变化时
   const onTextAreaInput = (event: any) => {
-    console.log(event.target.value);
-    if (event.target.value.length > 4) {
+
+    if (event.target.value.length > 3) {
       setIsAnswerInputed(true)
     } else {
       setIsAnswerInputed(false)
@@ -328,6 +337,7 @@ export function PopupCard(props: any) {
 
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
+
     // console.log('Popup:handleSaveToAnkiBtnClick');
 
     setAddToAnkiStatus('loading')
@@ -422,17 +432,20 @@ export function PopupCard(props: any) {
               onFinish={onPressEnter}
               layout='vertical'
               form={form}
+              style={{ textAlign: 'right' }}
             >
               <Form.Item
                 name="answer"
-                // style={{ margin: '0 0 20px 0' }}
-                label="Your Answer"
+                style={{ margin: '0 0 10px 0' }}
+              // label="Your Answer"
               // initialValue={openApiKey}
               // help="Should be combination of numbers & alphabets"
               >
-                <TextArea rows={3} placeholder="Exercises to help you learn better." onKeyDown={handleKeyDown} onInput={onTextAreaInput} disabled={isUserAnswered} />
+                <TextArea rows={3} placeholder="Your Answer(Exercises to help you learn better)" onKeyDown={handleKeyDown} onInput={onTextAreaInput} disabled={isUserAnswered} />
               </Form.Item>
-              <Form.Item>
+              <Form.Item
+                style={{ margin: '0' }}
+              >
                 <Button
                   // type="primary"
                   htmlType="submit"
@@ -446,6 +459,9 @@ export function PopupCard(props: any) {
             {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser2}</ReactMarkdown></div>}
 
           </div> : ''}
+
+          {isErro ? <img src={SettingGuide} style={{ width: '100%', borderRadius: '4px' }} /> : ''}
+
 
         </div>
       </ConfigProvider>

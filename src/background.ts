@@ -10,6 +10,8 @@ browser.runtime.onInstalled.addListener(function () {
   console.log("插件已被安装");
 });
 
+// 卸载插件后引导填写卸载原因，帮助产品优化
+browser.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSdobGQN3O0Ck4fVrgfvRZMme3de-2OaEp1pFtibZkU0koc37w/viewform?usp=sf_link");
 
 // 创建右键菜单
 browser.contextMenus.create({
@@ -82,6 +84,8 @@ browser.runtime.onConnect.addListener(port => {
         console.log(messages)
 
         //==================== 下面 4 行代码用于调试使用，正式环境需要注释掉
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "在这个句子中，“that”是一个关系代词，用来引导一个定语从句，修饰先行词“JavaScript functions”。## 英文例句 React components are JavaScript functions that return markup. ## 中文翻译 React组件是返回标记的JavaScript函数。 ## 翻译问题： 1. React组件是JavaScript函数，它们返回标记。 2. 我们需要一些能够处理大量数据的算法。" })
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
