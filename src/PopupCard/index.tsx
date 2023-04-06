@@ -116,7 +116,7 @@ export function PopupCard(props: any) {
       let userPrompt = {
         "role": "user", "content": `1. Explanation: Using ${result.currentLanguage} explain the meaning and grammatical function of a word in a sentence. 
         2. Example sentences: Provide ${result.targetLanguage} example sentences with the same meaning or function, along with their translations.
-        3. Translation question: For this word, provide 2 ${result.currentLanguage} sentences that need to be translated into ${result.targetLanguage}.
+        3. Translation question: For this word, Provide 2 simple, basic ${result.currentLanguage} sentences that need to be translated into ${result.targetLanguage}.
         Please reply "Yes" if you understand.`
       }
 
