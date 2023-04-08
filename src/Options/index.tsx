@@ -8,6 +8,8 @@ import { Button, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 import "./index.css"
 import Usage from "../assets/usage.png"
 
+import { lang } from "../lib/lang"
+
 export const Options = () => {
 
   const [openApiKey, setOpenApiKey] = useState < string | null > (null);
@@ -20,25 +22,8 @@ export const Options = () => {
   // Restores select box and checkbox state using the preferences
   // stored in chrome.storage.
 
-  const LANGUAGES = [
-    "Arabic",
-    "Chinese Simplified",
-    "Chinese Traditional",
-    "Dutch",
-    "English",
-    "French",
-    "German",
-    "Hindi",
-    "Indonesian",
-    "Italian",
-    "Japanese",
-    "Korean",
-    "Portuguese",
-    "Russian",
-    "Spanish",
-    "Turkish"
-  ]
 
+  console.log(Object.keys(lang));
 
   const onSelectChange = (value: string) => {
     console.log(`selected ${value}`);
@@ -128,7 +113,7 @@ export const Options = () => {
               // allowClear
               >
 
-                {LANGUAGES.map((item) => <Option value={item}>{item}</Option>)}
+                {Object.keys(lang).map((item) => <Option key={item} value={item}>{item}</Option>)}
 
               </Select>
             </Form.Item>
@@ -142,7 +127,7 @@ export const Options = () => {
               // onChange={onGenderChange}
               // allowClear
               >
-                {LANGUAGES.map((item) => <Option value={item}>{item}</Option>)}
+                {Object.keys(lang).map((item) => <Option key={item} value={item}>{item}</Option>)}
 
               </Select>
             </Form.Item>

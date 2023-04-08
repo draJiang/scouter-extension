@@ -1,11 +1,14 @@
 import browser from 'webextension-polyfill'
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 
 import { PopupCard } from "./PopupCard"
 
 import { StyleProvider } from '@ant-design/cssinjs';
+
+import { fetchcurrentLanguage } from './lib/lang';
+import { CurrentLanguageContext } from './lib/locale'
 
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
@@ -161,17 +164,28 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 });
 
 // 显示应用窗口
-function showPopupCard(msg: any, MyBox: any, shadowRoot: any) {
-  // console.log('showPopupCard:');
-  // console.log(msg);
+async function showPopupCard(msg: any, MyBox: any, shadowRoot: any) {
+  console.log('showPopupCard:');
+  // let a = await fetchcurrentLanguage()
+  // console.log(a);
+  const lang = await fetchcurrentLanguage()
 
   ReactDOM.render(
     <React.StrictMode>
+      <CurrentLanguageContext.Provider value={lang}>
       <StyleProvider container={shadowRoot}>
         <PopupCard selection={msg} />
       </StyleProvider>
+      </CurrentLanguageContext.Provider>
     </React.StrictMode>,
     MyBox
   );
 
 }
+
+// async function getCurrentLanguage() {
+//   const lang = await fetchcurrentLanguage()
+//   console.log(lang);
+  
+//   return lang 
+// }

@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Scouter",
-    "description": "Make your language more relevant to your life",
-    "version": "0.7.8",
+    "description": "Bridging the gap between theory and practice.",
+    "version": "0.7.9",
     "action": {
         "default_icon": "icon48.png",
         "default_popup": "popup.html"

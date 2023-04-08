@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill'
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 import ReactDOM from "react-dom";
 import ReactMarkdown from 'react-markdown'
@@ -19,6 +19,10 @@ import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Selec
 const { TextArea } = Input;
 
 import SettingGuide from "../assets/settingGuide.png"
+
+import { useCurrentLanguage } from '../lib/locale'
+
+
 
 let currentLanguage: string
 let targetLanguage: string
@@ -56,6 +60,11 @@ export function PopupCard(props: any) {
   const answerValue = Form.useWatch('answer', form);
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
+
+  let Lang = useCurrentLanguage()!
+
+  currentLanguage = Lang['current']['name']
+  targetLanguage = Lang['target']['name']
 
 
   useEffect(() => {
@@ -101,63 +110,68 @@ export function PopupCard(props: any) {
     // 设置加载状态
     setIsLoading(true)
 
-    browser.storage.sync.get({ 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
-      // console.log(result);
+    console.log('Lang:');
+    console.log(Lang);
 
-      currentLanguage = result.currentLanguage
-      targetLanguage = result.targetLanguage
 
-      let systemPrompt = {
-        "role": "system", "content": `As a language expert, please explain the meaning of the given vocabulary in the context of a sentence.
+    // browser.storage.sync.get({ 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+    // console.log(result);
+
+
+
+    let systemPrompt = {
+      "role": "system", "content": `As a language expert.
       - Please strictly adhere to the language requested by the user when providing your response.
       - Please answer the question using Markdown syntax, including but not limited to: 
         - Headings: ##, ###
-        -	Lists: -, 1. ` }
-      let userPrompt = {
-        "role": "user", "content": `1. Explanation: Using ${result.currentLanguage} explain the meaning and grammatical function of a word in a sentence. 
-        2. Example sentences: Provide ${result.targetLanguage} example sentences with the same meaning or function, along with their translations.
-        3. Translation question: For this word, Provide 2 simple, basic ${result.currentLanguage} sentences that need to be translated into ${result.targetLanguage}.
+        -	Lists: -, 1. 
+        No additional language` }
+    let userPrompt = {
+      "role": "user", "content": `1. Using ${Lang['current']['name']} explanatory part of speech
+        2. Explanation: ${Lang['current']['Prompt1']['explanation']}. 
+        3. Example sentences: Provide ${Lang['target']['name']} example sentences with the same meaning or function, along with their translations.
+        4. Translation question: Based on the word, Provide 2 simple sentences to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}.
         Please reply "Yes" if you understand.`
-      }
+    }
 
-      let assistantPrompt = { "role": "assistant", "content": 'Yes' }
-      let userPrompt2 = {
-        "role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
-      Reply in ${result.currentLanguage} as requested above.`
-      }
+    let assistantPrompt = { "role": "assistant", "content": 'Yes' }
+    let userPrompt2 = {
+      "role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
+      `
+    }
 
-      // 关键字长度较长时，按照句子进行处理
-      if (keyWord.length > 20) {
 
-        systemPrompt = {
-          "role": "system", "content": `As an AI language expert, analyze the original sentence and explain the grammar involved.
+    // 关键字长度较长时，按照句子进行处理
+    if (keyWord.length > 20) {
+
+      systemPrompt = {
+        "role": "system", "content": `As an AI language expert, translate the sentence, analyze the original sentence and explain the grammar involved.
         - Please strictly adhere to the language requested by the user when providing your response.
       - Please answer the question using Markdown syntax, including but not limited to: 
         - Headings: ##, ###
-        -	Lists: -, 1. ` }
+        -	Lists: -, 1. 
+        No additional language` }
 
-        userPrompt = {
-          "role": "user", "content": `1. Translation: translation to ${result.currentLanguage}
-          2. Explanation: Using ${result.currentLanguage} explain the grammar knowledge points
-          3. Example sentences: Provide 2 ${result.targetLanguage} example sentences and show their translations
-          4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${result.currentLanguage} sentences into ${result.targetLanguage}.
+      userPrompt = {
+        "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
+          3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
+          4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
           Please reply "Yes" if you understand.`
-        }
-
-        userPrompt2 = {
-          "role": "user", "content": `Sentence: "${keyWord}"
-        Reply in ${result.currentLanguage} as requested above.`
-        }
-
-
       }
 
-      let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
+      userPrompt2 = {
+        "role": "user", "content": `Sentence: "${keyWord}"`
+      }
 
 
-      getGPTMsg(prompt)
+    }
 
-    })
+    let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
+
+
+    getGPTMsg(prompt)
+
+    // })
 
 
 
@@ -241,10 +255,9 @@ export function PopupCard(props: any) {
   const onPressEnter = (values: any) => {
     // console.log(event);
     console.log(values);
-    let prompt = `As a language expert, please check the sentences I provided. If the sentence is incorrect then point out the error in ${currentLanguage} and provide the correct sentence in ${targetLanguage}
-      Sentence: "${values.answer}"`
+    let prompt = `${Lang['current']['Prompt3']['validation']}"${values.answer}"`
     setIsUserAnswered(true)
-    getGPTMsg([{ "role": "assistant", "content": openApiAnser }, { "role": "user", "content": prompt }], 'as2')
+    getGPTMsg([{ "role": "user", "content": prompt }], 'as2')
 
   }
 
