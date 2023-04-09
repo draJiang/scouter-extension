@@ -1,3 +1,5 @@
+import browser from 'webextension-polyfill'
+
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
@@ -17,18 +19,28 @@ interface SelectionProps {
   text: string;
 }
 
+
+
 export function Selection(props: SelectionProps) {
 
+  const [targetLanguage, setTargetLanguage] = useState('English');
   const [playStatus, setPlayStatus] = useState(false);
 
   // 获取用户设置的语言信息
   let Lang = useCurrentLanguage()!
-  const currentLanguage = Lang['current']['name']
-  const targetLanguage = Lang['target']['name']
+
 
   useEffect(() => {
+    setTargetLanguage(Lang['target']['name'])
 
-  }, []);
+    browser.storage.onChanged.addListener(onStorageChange)
+
+    return () => {
+      browser.storage.onChanged.removeListener(onStorageChange)
+    };
+
+
+  }, [props]);
 
   // 语音播报
   const speaker = () => {
@@ -44,8 +56,9 @@ export function Selection(props: SelectionProps) {
     const utterance = new SpeechSynthesisUtterance(props.text);
 
     // 语种
-    utterance.lang = languageCodes[targetLanguage]
-    console.log(languageCodes[targetLanguage]);
+    utterance.lang = languageCodes[targetLanguage as keyof typeof languageCodes];
+    console.log(languageCodes[targetLanguage as keyof typeof languageCodes]);
+    console.log(targetLanguage);
 
     // 语速
     if (playStatus) {
@@ -60,6 +73,20 @@ export function Selection(props: SelectionProps) {
     speechSynthesis.speak(utterance);
 
   }
+
+  const onStorageChange = (changes: any, area: any) => {
+
+    console.log(changes);
+
+    // 更新目标语言
+    if ('targetLanguage' in changes) {
+      console.log('changes');
+      console.log(changes['targetLanguage']['newValue']);
+      setTargetLanguage(changes['targetLanguage']['newValue'])
+    }
+
+  }
+
 
   return (
     <>

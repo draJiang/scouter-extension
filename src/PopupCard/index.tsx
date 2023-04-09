@@ -113,65 +113,88 @@ export function PopupCard(props: any) {
     console.log('Lang:');
     console.log(Lang);
 
+    // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
+    browser.storage.sync.get({ "history": [] }).then((item) => {
+      console.log(item.history);
+
+      // 如果记录已存在，则不重复保存
+      let bingo = false
+      for (let i = 0; i < item.history.length; i++) {
+        let obj = item.history[i]
+        if (obj.keyWord === keyWord && obj.sentence === sentence) {
+          bingo = true
+          // 直接显示历史记录中的回答
+          setIsLoading(false)
+          setopenApiAnser(obj.answer)
+          setAnswerDone1(true)
+          setAddToAnkiStatus('normal')
+          break
+        }
+      }
+
+      if (!bingo) {
+
+        let systemPrompt = {
+          "role": "system", "content": `As a language expert.
+          - Please strictly adhere to the language requested by the user when providing your response.
+          - Please answer the question using Markdown syntax, including but not limited to: 
+            - Headings: ##, ###
+            -	Lists: -, 1. 
+            No additional language` }
+        let userPrompt = {
+          "role": "user", "content": `1. Using ${Lang['current']['name']} explanatory part of speech
+            2. Explanation: ${Lang['current']['Prompt1']['explanation']}. 
+            3. Example sentences: Provide ${Lang['target']['name']} example sentences with the same meaning or function, along with their translations.
+            4. Translation question: Based on the word, Provide 2 simple sentences to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}.
+            Please reply "Yes" if you understand.`
+        }
+
+        let assistantPrompt = { "role": "assistant", "content": 'Yes' }
+        let userPrompt2 = {
+          "role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
+          `
+        }
+
+
+        // 关键字长度较长时，按照句子进行处理
+        if (keyWord.length > 20) {
+
+          systemPrompt = {
+            "role": "system", "content": `As an AI language expert, translate the sentence, analyze the original sentence and explain the grammar involved.
+            - Please strictly adhere to the language requested by the user when providing your response.
+          - Please answer the question using Markdown syntax, including but not limited to: 
+            - Headings: ##, ###
+            -	Lists: -, 1. 
+            No additional language` }
+
+          userPrompt = {
+            "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
+              3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
+              4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
+              Please reply "Yes" if you understand.`
+          }
+
+          userPrompt2 = {
+            "role": "user", "content": `Sentence: "${keyWord}"`
+          }
+
+
+        }
+
+        let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
+
+
+        getGPTMsg(prompt)
+
+      }
+
+    })
 
     // browser.storage.sync.get({ 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
     // console.log(result);
 
 
 
-    let systemPrompt = {
-      "role": "system", "content": `As a language expert.
-      - Please strictly adhere to the language requested by the user when providing your response.
-      - Please answer the question using Markdown syntax, including but not limited to: 
-        - Headings: ##, ###
-        -	Lists: -, 1. 
-        No additional language` }
-    let userPrompt = {
-      "role": "user", "content": `1. Using ${Lang['current']['name']} explanatory part of speech
-        2. Explanation: ${Lang['current']['Prompt1']['explanation']}. 
-        3. Example sentences: Provide ${Lang['target']['name']} example sentences with the same meaning or function, along with their translations.
-        4. Translation question: Based on the word, Provide 2 simple sentences to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}.
-        Please reply "Yes" if you understand.`
-    }
-
-    let assistantPrompt = { "role": "assistant", "content": 'Yes' }
-    let userPrompt2 = {
-      "role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
-      `
-    }
-
-
-    // 关键字长度较长时，按照句子进行处理
-    if (keyWord.length > 20) {
-
-      systemPrompt = {
-        "role": "system", "content": `As an AI language expert, translate the sentence, analyze the original sentence and explain the grammar involved.
-        - Please strictly adhere to the language requested by the user when providing your response.
-      - Please answer the question using Markdown syntax, including but not limited to: 
-        - Headings: ##, ###
-        -	Lists: -, 1. 
-        No additional language` }
-
-      userPrompt = {
-        "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
-          3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
-          4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
-          Please reply "Yes" if you understand.`
-      }
-
-      userPrompt2 = {
-        "role": "user", "content": `Sentence: "${keyWord}"`
-      }
-
-
-    }
-
-    let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
-
-
-    getGPTMsg(prompt)
-
-    // })
 
 
 
@@ -188,6 +211,52 @@ export function PopupCard(props: any) {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [dragging]);
+
+  // 保存历史记录
+  useEffect(() => {
+    // 在 openApiAnser 更新后将其保存到浏览器存储中
+    // 将查询记录保存起来
+    const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'answer': openApiAnser, 'source': window.location.href }
+
+    if (keyWord !== '' && sentence !== '' && openApiAnser !== '') {
+      browser.storage.sync.get({ "history": [] }).then((item) => {
+
+        console.log(item.history);
+
+        let newHistoryList: any = []
+        let bingo = false
+        newHistoryList.push(newHistory)
+        if (Array.isArray(item.history)) {
+
+          // 如果记录已存在，则不重复保存
+          for (let i = 0; i < item.history.length; i++) {
+            let obj = item.history[i]
+            if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence']) {
+              bingo = true
+              break
+            }
+          }
+
+          newHistoryList = item.history
+          newHistoryList.unshift(newHistory)
+          newHistoryList.splice(50)
+        }
+
+        if (!bingo) {
+          browser.storage.sync.set(
+            {
+              history: newHistoryList
+            }
+          ).then(() => {
+          })
+        }
+
+      })
+    }
+
+
+
+  }, [isAnswerDone1]);
 
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
@@ -436,7 +505,7 @@ export function PopupCard(props: any) {
           {/* 当前查询的文字 */}
           <Selection text={keyWord} />
 
-          
+
 
           {/* 第一个回答 */}
           {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser}</ReactMarkdown></div>}
