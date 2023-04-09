@@ -108,7 +108,7 @@ export function PopupCard(props: any) {
     setSentence(sentence)
 
     // 设置加载状态
-    setIsLoading(true)
+    // setIsLoading(true)
 
     console.log('Lang:');
     console.log(Lang);
@@ -195,6 +195,9 @@ export function PopupCard(props: any) {
     // // console.log(prompt);
     // return
     // console.log('getGPTMsg:');
+
+
+    setIsLoading(true)
 
     // 请求 background 获取数据
     // 使用长连接
@@ -351,6 +354,10 @@ export function PopupCard(props: any) {
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
 
+
+
+    // return 
+
     // console.log('Popup:handleSaveToAnkiBtnClick');
 
     setAddToAnkiStatus('loading')
@@ -427,7 +434,9 @@ export function PopupCard(props: any) {
         <div className="contentBox">
 
           {/* 当前查询的文字 */}
-          <Selection title={keyWord} />
+          <Selection text={keyWord} />
+
+          
 
           {/* 第一个回答 */}
           {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser}</ReactMarkdown></div>}

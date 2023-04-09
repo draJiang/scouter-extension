@@ -41,6 +41,7 @@ export const lang = {
             'validation': '作為一個語言專家，請檢查我提供的句子。如果句子不正確，那麼用繁體中文指出錯誤，並提供修改後的句子。句子：'
         }
     },
+
     'Dutch': {
         'name': 'Dutch',
         'Prompt1': {
@@ -106,6 +107,8 @@ export const lang = {
             'validation': 'भाषा विशेषज्ञ के रूप में, कृपया मैंने पेश किए गए वाक्यों की जांच करें। यदि वाक्य गलत है, तो कृपया हिंदी में त्रुटि बताएं और सही किए गए वाक्य प्रदान करें। वाक्य:'
         }
     },
+
+
     'Indonesian': {
         'name': 'Indonesian',
         'Prompt1': {
@@ -212,6 +215,25 @@ export const lang = {
     }
 
 }
+
+export const languageCodes = {
+    "Arabic": "ar",
+    "Chinese Simplified": "zh-CN",
+    "Chinese Traditional": "zh-TW",
+    "Dutch": "nl",
+    "English": "en",
+    "French": "fr",
+    "German": "de",
+    "Hindi": "hi",
+    "Indonesian": "id",
+    "Italian": "it",
+    "Japanese": "ja",
+    "Korean": "ko",
+    "Portuguese": "pt",
+    "Russian": "ru",
+    "Spanish": "es",
+    "Turkish": "tr"
+};
 
 // 获取语言
 export const fetchcurrentLanguage = async () => {

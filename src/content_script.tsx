@@ -100,13 +100,6 @@ style.textContent = `
   margin-right: 6px;
   }
 
-  #LearningEnglish2023 #ScouterSelection span {
-  background-color: rgba(0, 0, 0, .04);
-  /* border: 1px solid #d9d9d9; */
-  padding: 4px 8px;
-  border-radius: 2px;
-  }
-
   #LearningEnglish2023 #ScouterSelection {
   margin-bottom: 14px;
   }
