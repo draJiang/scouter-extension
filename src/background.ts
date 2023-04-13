@@ -1,6 +1,8 @@
 import browser from 'webextension-polyfill'
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
-import { ankiAction } from "./util";
+
+
+import { ankiAction, unsplashSearchPhotos } from "./util";
 
 // [暂时废弃]content script 关闭窗口时，将此值设为 false 以中断数据渲染
 let isContinue = true
@@ -28,6 +30,8 @@ browser.contextMenus.create({
 browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
   console.log('右键菜单点击事件');
+
+
 
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
     console.log(tabs);
@@ -67,32 +71,51 @@ browser.runtime.onConnect.addListener(port => {
   console.log('连接中------------')
 
   // 接收 content script 的消息
-  port.onMessage.addListener(msg => {
+  port.onMessage.addListener(async (msg) => {
     console.log('接收消息：', msg)
     // return
     // 请求  GPT 数据
 
     if (msg.type === 'getGPTMsg') {
 
+      console.log('getGPTMsg');
+
+
       // isContinue = true 时才会渲染数据
       isContinue = true
 
       // 获取存储的 API Key  
-      browser.storage.sync.get({ 'openApiKey': '', 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+      browser.storage.sync.get({ 'openApiKey': '', 'unsplashApiKey': '', 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
 
         let messages = msg.messages
-        // messages.unshift({ "role": "system", "content": `You are an ${result.targetLanguage} teacher. Please answer questions about ${result.targetLanguage} grammar and vocabulary in ${result.currentLanguage}.` })
-        console.log(messages)
 
         //==================== 下面 4 行代码用于调试使用，正式环境需要注释掉
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': 'Welcome to the React documentation! This page will give you an introduction to the 80% of React concepts that you will use on a daily basis.' })
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "在这个句子中，“that”是一个关系代词，用来引导一个定语从句，修饰先行词“JavaScript functions”。## 英文例句 React components are JavaScript functions that return markup. ## 中文翻译 React组件是返回标记的JavaScript函数。 ## 翻译问题： 1. React组件是JavaScript函数，它们返回标记。 2. 我们需要一些能够处理大量数据的算法。" })
+        // 获取图片
+        // if (msg.keyWord) {
+        // unsplashSearchPhotos(result['unsplashApiKey'], msg.keyWord).then((imgs: any) => {
+        //   console.log(imgs);
+        //   port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
+        // }).catch((error: any) => {
+        //   console.log(error);
+        // });
 
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-        // return
+        // }
+
+        const now = new Date();
+
+        port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+        port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+
+        for (let i = 0; i < 3; i++) {
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+        }
+
+        port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+
+        return
         // ====================
 
         if (result.openApiKey.length < 5) {
@@ -146,6 +169,8 @@ browser.runtime.onConnect.addListener(port => {
 
           // 处理 server-sent events
           const parser = createParser((event) => {
+
+
             if (event.type === 'event') {
               // console.log('createParser:');
               try {
@@ -209,6 +234,9 @@ browser.runtime.onConnect.addListener(port => {
             port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
           })
+
+
+
 
       })
 

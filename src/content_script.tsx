@@ -54,7 +54,7 @@ style.textContent = `
 
   #LearningEnglish2023 {
   font-family: sans-serif;
-  width: 380px;
+  width: 400px;
   height: 500px;
   color: #333;
   position: fixed;
@@ -140,14 +140,10 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     document.onmousedown = function (event) {
 
       if (MyBox !== undefined && MyBox !== null) {
-        // 如果点击的不是插件窗口，则关闭窗口
+        // 如果点击的不是插件窗口及其子元素，则关闭窗口
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
-          // console.log('点击窗口外区域');
           // 隐藏窗口
-          // MyBox.style.display = 'none'
-          // MyBox.parentNode?.removeChild(MyBox);
           container.parentNode?.removeChild(container);
-
         }
       }
     }

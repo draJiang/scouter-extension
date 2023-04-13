@@ -1,3 +1,4 @@
+import { createApi } from 'unsplash-js';
 
 // 将信息添加到 Anki
 export function ankiAction(action: any, version: any, params = {}) {
@@ -18,3 +19,27 @@ export function ankiAction(action: any, version: any, params = {}) {
 
     });
 }
+
+export function unsplashSearchPhotos(API_KEY: string, query: string) {
+    return new Promise((resolve, reject) => {
+      const unsplash = createApi({
+        accessKey: API_KEY,
+      });
+  
+      unsplash.search.getPhotos({
+        query: query,
+      }).then((data) => {
+        console.log(data);
+  
+        if (data.response?.results.length === 0) {
+          resolve([]);
+        } else {
+          const imageUrl = data.response?.results[0].urls.regular
+          chrome.tabs.create({ url: imageUrl });
+          resolve(data.response?.results);
+        }
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  }

@@ -63,9 +63,9 @@ export function Selection(props: SelectionProps) {
     // 语速
     if (playStatus) {
       // 基数次播放时采用慢速播放，让用户可以听的更清楚
-      utterance.rate = 0.7
+      utterance.rate = 0.6
     } else {
-      utterance.rate = 0.9
+      utterance.rate = 0.85
     }
     setPlayStatus(!playStatus)
 

@@ -5,8 +5,6 @@ import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser
 import ReactDOM from "react-dom";
 import ReactMarkdown from 'react-markdown'
 
-import "../index.css"
-
 import { Nav } from "../Components/Nav"
 
 import { Options } from "../Options"
@@ -14,7 +12,7 @@ import { Options } from "../Options"
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
-import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Select, Form, Button } from 'antd';
+import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Select, Form, Button, Card } from 'antd';
 
 const { TextArea } = Input;
 
@@ -28,6 +26,8 @@ let currentLanguage: string
 let targetLanguage: string
 
 export function PopupCard(props: any) {
+
+  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean }>>([])
 
   const [openApiAnser, setopenApiAnser] = useState('');
   const [openApiAnser2, setopenApiAnser2] = useState('');
@@ -184,19 +184,14 @@ export function PopupCard(props: any) {
         let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
 
 
-        getGPTMsg(prompt)
+        console.log(keyWord);
+
+
+        getGPTMsg(prompt, 'as1', keyWord)
 
       }
 
     })
-
-    // browser.storage.sync.get({ 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
-    // console.log(result);
-
-
-
-
-
 
   }, [props]);
 
@@ -239,7 +234,7 @@ export function PopupCard(props: any) {
 
           newHistoryList = item.history
           newHistoryList.unshift(newHistory)
-          newHistoryList.splice(50)
+          newHistoryList.splice(10)
         }
 
         if (!bingo) {
@@ -260,11 +255,10 @@ export function PopupCard(props: any) {
 
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
-  const getGPTMsg = async (prompt: Array<object>, type = 'as1') => {
-    // // console.log(prompt);
-    // return
-    // console.log('getGPTMsg:');
+  const getGPTMsg = async (prompt: any, type?: string, keyWord?: string) => {
 
+    type = type || 'as1';
+    keyWord = keyWord || '';
 
     setIsLoading(true)
 
@@ -274,8 +268,11 @@ export function PopupCard(props: any) {
       name: 'popup-name'
     })
 
+    // 在消息历史中插入新记录
+    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true }])
+
     // 使用 postMs 发送信息
-    port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt })
+    port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': keyWord })
 
     // 接收信息
     port.onMessage.addListener(msg => {
@@ -301,6 +298,9 @@ export function PopupCard(props: any) {
           setAnswerDone1(true)
           setAddToAnkiStatus('normal')
         }
+        // getGPTDataIsProcess.current = false
+        // console.log(getGPTDataIsProcess);
+
 
       }
 
@@ -310,14 +310,75 @@ export function PopupCard(props: any) {
         type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
         setIsLoading(false)
 
+        // setMessages([])
+        // getGPTDataIsProcess.current = true
+        // console.log(getGPTDataIsProcess);
+        console.log('begin');
+
+
       }
 
       // 请求 GPT 数据成功且数据流传输中
       if (msg.status === 'process') {
+
+
+
+
+        // let newMsg = messages[messages.length - 1]
+        // newMsg['text'] += msg.content
+        // newMsg['role'] = 'xxxx'
+
+        // setMessages([...messages.slice(0, -1), newMsg])
+
+        setMessages(prevMessages => {
+
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          const newMsgList = lastMessage
+          const updatedLastMessage = {
+            ...lastMessage,
+            content: newMsgList.content + msg.content,
+            loading: false
+          };
+          // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
+          return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+        });
+
+
+
+        // setMessages(prevMessages => {
+        //   const lastMessageIndex = prevMessages.length - 1;
+        //   const lastMessage = prevMessages[lastMessageIndex];
+        //   const updatedLastMessage = {
+        //     ...lastMessage,
+        //     text: lastMessage.text + msg.content
+        //   };
+        //   return [...prevMessages.slice(0, lastMessageIndex), updatedLastMessage];
+        // });
+
+
+
+        // const lastMessage = { 'text': '', 'role': '' }
+        // lastMessage['text'] += msg.content;
+        // lastMessage['role'] = "xxxx";
+        // return [lastMessage];
+
+
         // 渲染内容
-        type === 'as2' ? setopenApiAnser2(oa => oa += msg.content) : setopenApiAnser(oa => oa += msg.content)
+        // type === 'as2' ? setopenApiAnser2(oa => oa += msg.content) : setopenApiAnser(oa => oa += msg.content)
 
       }
+
+      if (msg.type === 'sendImgData') {
+        console.log(msg);
+
+        if ('imgs' in msg) {
+          console.log('unsplashSearchPhotos');
+          console.log('imgs:');
+          console.log(msg);
+        }
+      }
+
 
     })
 
@@ -329,7 +390,25 @@ export function PopupCard(props: any) {
     console.log(values);
     let prompt = `${Lang['current']['Prompt3']['validation']}"${values.answer}"`
     setIsUserAnswered(true)
-    getGPTMsg([{ "role": "user", "content": prompt }], 'as2')
+
+    // 将用户发言发送到历史记录中
+    setMessages(prevMessages => {
+
+      const updatedLastMessage = {
+        role: 'user',
+        content: values.answer,
+        'loading': false
+      };
+      // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
+      return [...prevMessages, updatedLastMessage];
+
+    });
+
+    console.log(messages);
+
+    const msgHistory = messages.map((item) => { return { 'role': item.role, 'content': item.content } })
+
+    getGPTMsg([...msgHistory, { "role": "user", "content": values.answer }], 'as2')
 
   }
 
@@ -505,51 +584,43 @@ export function PopupCard(props: any) {
           {/* 当前查询的文字 */}
           <Selection text={keyWord} />
 
+          <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
+            Click me
+          </button>
 
-
-          {/* 第一个回答 */}
-          {isLoading && !isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser}</ReactMarkdown></div>}
-
-          {/* 文本域，用来提交测试题的答案 */}
-          {isAnswerDone1 ? <div className="userInput" style={
-            {
-              padding: '10px',
-              borderRadius: '2px',
-              // border:'1px solid #f0f0f0'
-              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+          <div className='tttttest'>
+            {messages.map((item) => {
+              return item.loading ? <Skeleton active title={false} /> : <div style={item.role === 'assistant' ? { border: '1px solid' } : { border: '1px solid red' }}><ReactMarkdown>{item.content}</ReactMarkdown></div>
             }
-          }>
-            <Form
-              onFinish={onPressEnter}
-              layout='vertical'
-              form={form}
-              style={{ textAlign: 'right' }}
+
+            )}
+          </div>
+
+
+
+          <Form
+            onFinish={onPressEnter}
+            layout='vertical'
+            style={{ textAlign: 'right' }}
+          >
+            <Form.Item
+              name="answer"
+              style={{ margin: '0 0 10px 0' }}
             >
-              <Form.Item
-                name="answer"
-                style={{ margin: '0 0 10px 0' }}
-              // label="Your Answer"
-              // initialValue={openApiKey}
-              // help="Should be combination of numbers & alphabets"
-              >
-                <TextArea rows={3} placeholder="Your Answer(Exercises to help you learn better)" onKeyDown={handleKeyDown} onInput={onTextAreaInput} disabled={isUserAnswered} />
-              </Form.Item>
-              <Form.Item
-                style={{ margin: '0' }}
-              >
-                <Button
-                  // type="primary"
-                  htmlType="submit"
-                  size='small'
-                  disabled={isUserAnswered || !isAnswerInputed}
-                >Submit</Button>
-              </Form.Item>
-            </Form>
+              <TextArea rows={3} placeholder="ask something" onKeyDown={handleKeyDown} onInput={onTextAreaInput} />
+            </Form.Item>
+            <Form.Item
+              style={{ margin: '0' }}
+            >
+              <Button
+                // type="primary"
+                htmlType="submit"
+                size='small'
+              >Submit</Button>
+            </Form.Item>
+          </Form>
 
-            {/* 第二个回答，针对文本域提交的回答进行评价 */}
-            {isLoading && !isAnswerDone2 && isAnswerDone1 ? <Skeleton active title={false} /> : <div className="openAIAnswer" style={{}}><ReactMarkdown>{openApiAnser2}</ReactMarkdown></div>}
 
-          </div> : ''}
 
           {isErro ? <img src={SettingGuide} style={{ width: '100%', borderRadius: '4px' }} /> : ''}
 

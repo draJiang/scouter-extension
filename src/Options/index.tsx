@@ -42,13 +42,13 @@ export const Options = () => {
       // setOpenApiKey(items.openApiKey ?? null);
 
       // 更新 input 文本框的默认值
-      form.setFieldsValue({ openApiKey: items.openApiKey, currentLanguage: items.currentLanguage, targetLanguage: items.targetLanguage });
+      form.setFieldsValue({ openApiKey: items.openApiKey, unsplashApiKey: items.unsplashApiKey, currentLanguage: items.currentLanguage, targetLanguage: items.targetLanguage });
     })
 
   }, []);
 
   async function getSettings() {
-    let items = await browser.storage.sync.get(["openApiKey", "currentLanguage", "targetLanguage"])
+    let items = await browser.storage.sync.get(["openApiKey", "unsplashApiKey", "currentLanguage", "targetLanguage"])
     return items
   }
 
@@ -59,6 +59,7 @@ export const Options = () => {
     let setStorage = await browser.storage.sync.set(
       {
         openApiKey: values['openApiKey'],
+        unsplashApiKey: values['unsplashApiKey'],
         currentLanguage: values['currentLanguage'],
         targetLanguage: values['targetLanguage']
       }
@@ -102,6 +103,13 @@ export const Options = () => {
             >
               <Input placeholder="We will not use your Key for any other purposes." type="password" />
             </Form.Item>
+
+            {/* <Form.Item
+              name="unsplashApiKey"
+              label="Your unsplash Access Key"
+            >
+              <Input placeholder="We will not use your Key for any other purposes." type="password" />
+            </Form.Item> */}
 
             <Form.Item
               name="currentLanguage"
