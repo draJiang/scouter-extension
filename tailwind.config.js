@@ -1,16 +1,18 @@
 module.exports = {
-    mode: 'jit',
-    purge: [
-        './src/**/*.html',
-        './src/**/*.jsx',
-        './src/**/*.js',
-        './src/**/*.ts',
-        './src/**/*.tsx',
-    ],
-    darkMode: false,
-    theme: {
-        extend: {},
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        orange: {
+          100: 'FFF9F7',
+          900: '#F08A24'
+        }
+      },
     },
-    variants: {},
-    plugins: [],
-}
+  },
+  plugins: [],
+  variants: {},
+  corePlugins: {
+    preflight: true,
+  },
+};

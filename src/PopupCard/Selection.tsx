@@ -90,7 +90,7 @@ export function Selection(props: SelectionProps) {
 
   return (
     <>
-      <div id="ScouterSelection">
+      <div id="ScouterSelection" className='p-4'>
         <span>{props.text}</span>
         <Button style={{ display: 'inline-block' }} size="small" type="text" icon={<CustomerServiceOutlined />} onClick={speaker} />
       </div>

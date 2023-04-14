@@ -89,7 +89,7 @@ browser.runtime.onConnect.addListener(port => {
 
         let messages = msg.messages
 
-        //==================== 下面 4 行代码用于调试使用，正式环境需要注释掉
+        //==================== 下面的代码用于调试使用，正式环境需要注释掉
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
@@ -104,18 +104,18 @@ browser.runtime.onConnect.addListener(port => {
 
         // }
 
-        const now = new Date();
+        // const now = new Date();
 
-        port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-        port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
 
-        for (let i = 0; i < 3; i++) {
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-        }
+        // for (let i = 0; i < 3; i++) {
+        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+        // }
 
-        port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
 
-        return
+        // return
         // ====================
 
         if (result.openApiKey.length < 5) {

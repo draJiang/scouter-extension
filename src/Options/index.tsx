@@ -6,6 +6,7 @@ import ReactDOM from "react-dom";
 import { Button, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 
 import "./index.css"
+import "../assets/tailwind.css"
 import Usage from "../assets/usage.png"
 
 import { lang } from "../lib/lang"
@@ -87,6 +88,12 @@ export const Options = () => {
             },
           }}
         >
+
+          <div className="bg-red-500 text-white font-bold p-4">
+            Hello, TailwindCSS!
+          </div>
+          
+
           <Form
             onFinish={saveOptions}
             layout='vertical'

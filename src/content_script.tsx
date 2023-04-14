@@ -10,6 +10,9 @@ import { StyleProvider } from '@ant-design/cssinjs';
 import { fetchcurrentLanguage } from './lib/lang';
 import { CurrentLanguageContext } from './lib/locale'
 
+// import './assets/tailwind.css';
+
+
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
 
@@ -43,6 +46,14 @@ const antStylesheet = document.createElement('link');
 antStylesheet.rel = 'stylesheet';
 antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
 shadowRoot.appendChild(antStylesheet);
+
+
+// Tailwind
+const tailwindStylesheet = document.createElement('link');
+tailwindStylesheet.rel = 'stylesheet';
+tailwindStylesheet.href = 'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css';
+shadowRoot.appendChild(tailwindStylesheet);
+
 
 // 在 Shadow DOM 中添加样式：
 const style = document.createElement('style');
@@ -81,7 +92,6 @@ style.textContent = `
   }
 
   #LearningEnglish2023 .contentBox {
-  padding: 20px;
   overflow: scroll;
   }
 
@@ -98,10 +108,6 @@ style.textContent = `
   width: auto;
   height: 24px;
   margin-right: 6px;
-  }
-
-  #LearningEnglish2023 #ScouterSelection {
-  margin-bottom: 14px;
   }
   `
 shadowRoot?.appendChild(style);

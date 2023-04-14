@@ -13,6 +13,8 @@ import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
 import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Select, Form, Button, Card } from 'antd';
+import { SendOutlined } from '@ant-design/icons';
+
 
 const { TextArea } = Input;
 
@@ -20,7 +22,8 @@ import SettingGuide from "../assets/settingGuide.png"
 
 import { useCurrentLanguage } from '../lib/locale'
 
-
+// import "../assets/tailwind.css"
+import "./index.css"
 
 let currentLanguage: string
 let targetLanguage: string
@@ -55,6 +58,7 @@ export function PopupCard(props: any) {
   // const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const windowElement = useRef<HTMLDivElement>(null);
+  const messagesList = useRef<HTMLDivElement>(null);
 
   const [form] = Form.useForm<{ answer: string }>();
   const answerValue = Form.useWatch('answer', form);
@@ -192,6 +196,16 @@ export function PopupCard(props: any) {
       }
 
     })
+
+    console.log(messagesList);
+
+    messagesList.current?.addEventListener("scroll", handleScroll);
+    return () => {
+      // console.log('useEffect return');
+      messagesList.current?.removeEventListener("scroll", handleScroll);
+    };
+
+
 
   }, [props]);
 
@@ -345,6 +359,7 @@ export function PopupCard(props: any) {
         });
 
 
+        scrollToBottom()
 
         // setMessages(prevMessages => {
         //   const lastMessageIndex = prevMessages.length - 1;
@@ -404,11 +419,15 @@ export function PopupCard(props: any) {
 
     });
 
+
+
     console.log(messages);
 
     const msgHistory = messages.map((item) => { return { 'role': item.role, 'content': item.content } })
 
     getGPTMsg([...msgHistory, { "role": "user", "content": values.answer }], 'as2')
+
+    scrollToBottom(true)
 
   }
 
@@ -561,6 +580,41 @@ export function PopupCard(props: any) {
 
   }
 
+
+  function scrollToBottom(canSroll: boolean = false) {
+    // if (container !== null) {
+    //   container.scrollTop = container.scrollHeight;
+    // }
+
+    if (messagesList.current !== null) {
+      const isAtBottom = messagesList.current?.scrollTop + messagesList.current.clientHeight >= messagesList.current.scrollHeight - 0.5;
+      if (isAtBottom || canSroll) {
+        // 位于底部，需要自动滚动
+        console.log('isAtBottom');
+        messagesList.current.scrollTop = messagesList.current.scrollHeight;
+
+      }
+    }
+
+
+  }
+
+  function handleScroll() {
+    console.log(messagesList);
+
+    if (messagesList.current !== null) {
+      const isAtBottom = messagesList.current?.scrollTop + messagesList.current.clientHeight >= messagesList.current.scrollHeight - 0.5;
+      if (isAtBottom) {
+        // 已经位于底部，不需要自动滚动
+        console.log('isAtBottom');
+        return;
+      }
+    }
+
+
+    // 未位于底部，不执行自动滚动
+  }
+
   return (
     <div id="LearningEnglish2023"
       ref={windowElement}
@@ -579,54 +633,65 @@ export function PopupCard(props: any) {
       >
         <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} title='Scouter' />
 
-        <div className="contentBox">
-
-          {/* 当前查询的文字 */}
-          <Selection text={keyWord} />
-
-          <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">
-            Click me
-          </button>
-
-          <div className='tttttest'>
-            {messages.map((item) => {
-              return item.loading ? <Skeleton active title={false} /> : <div style={item.role === 'assistant' ? { border: '1px solid' } : { border: '1px solid red' }}><ReactMarkdown>{item.content}</ReactMarkdown></div>
-            }
-
-            )}
+        <div className='flex-grow flex flex-col overflow-scroll'>
+          <div className='flex-grow overflow-scroll'
+            ref={messagesList}
+            style={{ paddingTop: '50px' }}
+          >
+            <Selection text={keyWord} />
+            <div
+              style={{ lineHeight: '1.6rem' }}
+            >
+              {messages.map((item) => {
+                return item.loading ? <Skeleton active title={false} /> : <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#FFF9F7' } : {}}><ReactMarkdown>{item.content}</ReactMarkdown></div>
+              }
+              )}
+            </div>
           </div>
 
 
 
+
+        </div>
+
+        <div className='w-full'
+          style={{ borderTop: '1px solid rgba(5, 5, 5, .06)' }}
+        >
           <Form
             onFinish={onPressEnter}
-            layout='vertical'
+            layout='inline'
             style={{ textAlign: 'right' }}
+            className='p-4'
           >
             <Form.Item
               name="answer"
-              style={{ margin: '0 0 10px 0' }}
+              style={{ margin: '0 10px 0 0', flexGrow: '1' }}
             >
-              <TextArea rows={3} placeholder="ask something" onKeyDown={handleKeyDown} onInput={onTextAreaInput} />
+              <TextArea rows={1} placeholder="ask something" onKeyDown={handleKeyDown} onInput={onTextAreaInput} />
             </Form.Item>
             <Form.Item
               style={{ margin: '0' }}
             >
               <Button
-                // type="primary"
+                type="primary"
                 htmlType="submit"
-                size='small'
-              >Submit</Button>
+                icon={<SendOutlined />}
+              // size='small'
+              />
             </Form.Item>
           </Form>
-
-
-
-          {isErro ? <img src={SettingGuide} style={{ width: '100%', borderRadius: '4px' }} /> : ''}
-
-
         </div>
-      </ConfigProvider>
-    </div>
+
+      </ConfigProvider >
+
+      {/* <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+            width="48" height="48"
+            viewBox="0 0 48 48">
+            <path fill="#78909c" d="M40,7v34c0,2.76-2.24,5-5,5H13c-2.76,0-5-2.24-5-5V7c0-2.76,2.24-5,5-5h22C37.76,2,40,4.24,40,7z"></path><path fill="#455a64" d="M40,26.63V41c0,2.76-2.24,5-5,5H13c-2.76,0-5-2.24-5-5V15.8C20.8,17.39,31.98,21.28,40,26.63z"></path><path fill="none" stroke="#1d323a" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M40,7	v34c0,2.76-2.24,5-5,5H13c-2.76,0-5-2.24-5-5V7c0-2.76,2.24-5,5-5h22C37.76,2,40,4.24,40,7z"></path><polygon fill="#42a5f5" points="32.987,7.58 33.194,11.285 36.365,13.215 32.905,14.558 32.049,18.169 29.703,15.293 26.004,15.596 28.014,12.476 26.583,9.051 30.172,9.999"></polygon><path fill="#42a5f5" d="M21.094,22.107l3.15,4.828c0.09,0.138,0.242,0.223,0.406,0.227l5.763,0.142	c0.414,0.01,0.637,0.491,0.377,0.814l-3.618,4.488c-0.103,0.128-0.137,0.299-0.09,0.457l1.646,5.525	c0.118,0.397-0.27,0.758-0.657,0.61l-5.386-2.054c-0.154-0.059-0.327-0.038-0.462,0.056l-4.746,3.273	c-0.341,0.235-0.804-0.023-0.783-0.437l0.289-5.757c0.008-0.164-0.065-0.322-0.196-0.422l-4.579-3.502	c-0.329-0.252-0.227-0.772,0.173-0.88l5.565-1.504c0.159-0.043,0.286-0.161,0.341-0.317l1.915-5.437	C20.341,21.823,20.868,21.76,21.094,22.107z"></path><polygon fill="none" stroke="#f7f7f7" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" points="32.987,7.58 33.194,11.285 36.365,13.215 32.905,14.558 32.049,18.169 29.703,15.293 26.004,15.596 28.014,12.476 26.583,9.051 30.172,9.999"></polygon><path fill="none" stroke="#f7f7f7" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M21.094,22.107l3.15,4.828c0.09,0.138,0.242,0.223,0.406,0.227l5.763,0.142c0.414,0.01,0.637,0.491,0.377,0.814l-3.618,4.488	c-0.103,0.128-0.137,0.299-0.09,0.457l1.646,5.525c0.118,0.397-0.27,0.758-0.657,0.61l-5.386-2.054	c-0.154-0.059-0.327-0.038-0.462,0.056l-4.746,3.273c-0.341,0.235-0.804-0.023-0.783-0.437l0.289-5.757	c0.008-0.164-0.065-0.322-0.196-0.422l-4.579-3.502c-0.329-0.252-0.227-0.772,0.173-0.88l5.565-1.504	c0.159-0.043,0.286-0.161,0.341-0.317l1.915-5.437C20.341,21.823,20.868,21.76,21.094,22.107z"></path>
+          </svg> */}
+
+    </div >
+
+
   );
 };

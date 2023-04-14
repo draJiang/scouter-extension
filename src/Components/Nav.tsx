@@ -42,7 +42,7 @@ export function Nav(props: NavProps) {
                 }}
             >
                 <div id="ScouterNav"
-                    style={{ cursor: 'move' }}
+                    style={{ cursor: 'move', position: 'absolute', width: '100%', top: 0, backdropFilter: 'blur(12px)', zIndex: 9999 }}
                     onMouseDown={props.onMouseDown}>
                     <img src={Icon} />
                     <div className="rightBtnBox" style={{ flex: 1, textAlign: 'right' }}>
