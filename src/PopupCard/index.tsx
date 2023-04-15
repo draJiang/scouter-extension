@@ -1,13 +1,10 @@
 import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
-import ReactDOM from "react-dom";
+// import ReactDOM from "react-dom";
 import ReactMarkdown from 'react-markdown'
 
 import { Nav } from "../Components/Nav"
-
-import { Options } from "../Options"
 
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
@@ -16,13 +13,10 @@ import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Selec
 import { SendOutlined } from '@ant-design/icons';
 
 
-const { TextArea } = Input;
-
 import SettingGuide from "../assets/settingGuide.png"
 
 import { useCurrentLanguage } from '../lib/locale'
 
-// import "../assets/tailwind.css"
 import "./index.css"
 
 let currentLanguage: string
@@ -52,6 +46,8 @@ export function PopupCard(props: any) {
   const [keyWord, setKeyWord] = useState('');
   const [sentence, setSentence] = useState('');
 
+  const [inputValue, setInputValue] = useState('');
+
   // 窗口拖拽逻辑
   const [dragging, setDragging] = useState(false);
   // const [position, setPosition] = useState({ x: 10, y: 10 });
@@ -59,8 +55,9 @@ export function PopupCard(props: any) {
 
   const windowElement = useRef<HTMLDivElement>(null);
   const messagesList = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLDivElement>(null);
 
-  const [form] = Form.useForm<{ answer: string }>();
+  const [form] = Form.useForm();
   const answerValue = Form.useWatch('answer', form);
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
@@ -300,7 +297,7 @@ export function PopupCard(props: any) {
           setIsErro(true)
         }
 
-        setIsLoading(false)
+        // setIsLoading(false)
       }
 
       // 请求 GPT 数据成功且数据流结束传输
@@ -314,7 +311,7 @@ export function PopupCard(props: any) {
         }
         // getGPTDataIsProcess.current = false
         // console.log(getGPTDataIsProcess);
-
+        setIsLoading(false)
 
       }
 
@@ -322,7 +319,6 @@ export function PopupCard(props: any) {
       if (msg.status === 'begin') {
 
         type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
-        setIsLoading(false)
 
         // setMessages([])
         // getGPTDataIsProcess.current = true
@@ -334,15 +330,6 @@ export function PopupCard(props: any) {
 
       // 请求 GPT 数据成功且数据流传输中
       if (msg.status === 'process') {
-
-
-
-
-        // let newMsg = messages[messages.length - 1]
-        // newMsg['text'] += msg.content
-        // newMsg['role'] = 'xxxx'
-
-        // setMessages([...messages.slice(0, -1), newMsg])
 
         setMessages(prevMessages => {
 
@@ -361,27 +348,6 @@ export function PopupCard(props: any) {
 
         scrollToBottom()
 
-        // setMessages(prevMessages => {
-        //   const lastMessageIndex = prevMessages.length - 1;
-        //   const lastMessage = prevMessages[lastMessageIndex];
-        //   const updatedLastMessage = {
-        //     ...lastMessage,
-        //     text: lastMessage.text + msg.content
-        //   };
-        //   return [...prevMessages.slice(0, lastMessageIndex), updatedLastMessage];
-        // });
-
-
-
-        // const lastMessage = { 'text': '', 'role': '' }
-        // lastMessage['text'] += msg.content;
-        // lastMessage['role'] = "xxxx";
-        // return [lastMessage];
-
-
-        // 渲染内容
-        // type === 'as2' ? setopenApiAnser2(oa => oa += msg.content) : setopenApiAnser(oa => oa += msg.content)
-
       }
 
       if (msg.type === 'sendImgData') {
@@ -399,12 +365,15 @@ export function PopupCard(props: any) {
 
   };
 
-  // 提交答案
+  // 发送消息
   const onPressEnter = (values: any) => {
-    // console.log(event);
+    console.log(event);
+
     console.log(values);
     let prompt = `${Lang['current']['Prompt3']['validation']}"${values.answer}"`
     setIsUserAnswered(true)
+
+    form.resetFields();
 
     // 将用户发言发送到历史记录中
     setMessages(prevMessages => {
@@ -427,7 +396,26 @@ export function PopupCard(props: any) {
 
     getGPTMsg([...msgHistory, { "role": "user", "content": values.answer }], 'as2')
 
-    scrollToBottom(true)
+    setTimeout(() => {
+      scrollToBottom(true)
+    }, 10);
+
+    setInputValue(iv => iv += 'hello')
+
+    if (inputRef.current !== null) {
+      // inputRef.current.input.value = ''
+      setTimeout(() => {
+        if (inputRef.current !== null) {
+          // inputRef.current.getElementsByTagName('input')[0].value = ''
+        }
+
+      }, 10);
+
+
+    }
+
+
+    console.log(inputRef.current);
 
   }
 
@@ -535,7 +523,7 @@ export function PopupCard(props: any) {
     if (windowElement.current) {
       console.log(windowElement.current);
       container = windowElement.current.innerHTML
-      container = windowElement.current.getElementsByClassName('openAIAnswer')[0].innerHTML
+      container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
     }
 
     // 请求 background 将数据保存到 Anki
@@ -615,6 +603,12 @@ export function PopupCard(props: any) {
     // 未位于底部，不执行自动滚动
   }
 
+  const handleInputChange = (event: any) => {
+    console.log(event);
+    console.log(event.target.value);
+
+  }
+
   return (
     <div id="LearningEnglish2023"
       ref={windowElement}
@@ -624,6 +618,9 @@ export function PopupCard(props: any) {
         top: 10,
       }}
     >
+
+
+
       <ConfigProvider
         theme={{
           token: {
@@ -633,31 +630,33 @@ export function PopupCard(props: any) {
       >
         <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} title='Scouter' />
 
+
+
         <div className='flex-grow flex flex-col overflow-scroll'>
           <div className='flex-grow overflow-scroll'
             ref={messagesList}
             style={{ paddingTop: '50px' }}
           >
+
             <Selection text={keyWord} />
             <div
+              className='messages'
               style={{ lineHeight: '1.6rem' }}
             >
               {messages.map((item) => {
-                return item.loading ? <Skeleton active title={false} /> : <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#FFF9F7' } : {}}><ReactMarkdown>{item.content}</ReactMarkdown></div>
+                return item.loading ? <div className='p-4'><Skeleton active title={false} /></div> : <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}><ReactMarkdown>{item.content}</ReactMarkdown></div>
               }
               )}
             </div>
           </div>
-
-
-
-
         </div>
 
         <div className='w-full'
+          ref={inputRef}
           style={{ borderTop: '1px solid rgba(5, 5, 5, .06)' }}
         >
           <Form
+            form={form}
             onFinish={onPressEnter}
             layout='inline'
             style={{ textAlign: 'right' }}
@@ -665,19 +664,30 @@ export function PopupCard(props: any) {
           >
             <Form.Item
               name="answer"
-              style={{ margin: '0 10px 0 0', flexGrow: '1' }}
+              style={{ margin: '0', flexGrow: '1' }}
             >
-              <TextArea rows={1} placeholder="ask something" onKeyDown={handleKeyDown} onInput={onTextAreaInput} />
+              <Input placeholder="ask something"
+                value={inputValue}
+                onChange={handleInputChange}
+                suffix={
+                  <Button
+                    type="text"
+                    htmlType="submit"
+                    disabled={isLoading}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    icon={<SendOutlined />}
+                  />
+                }
+                onKeyDown={handleKeyDown} onInput={onTextAreaInput} />
             </Form.Item>
             <Form.Item
               style={{ margin: '0' }}
             >
-              <Button
-                type="primary"
-                htmlType="submit"
-                icon={<SendOutlined />}
-              // size='small'
-              />
+
             </Form.Item>
           </Form>
         </div>

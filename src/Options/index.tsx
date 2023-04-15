@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 import { Button, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 
 import "./index.css"
-import "../assets/tailwind.css"
+// import "../assets/tailwind.css"
 import Usage from "../assets/usage.png"
 
 import { lang } from "../lib/lang"
@@ -89,11 +89,6 @@ export const Options = () => {
           }}
         >
 
-          <div className="bg-red-500 text-white font-bold p-4">
-            Hello, TailwindCSS!
-          </div>
-          
-
           <Form
             onFinish={saveOptions}
             layout='vertical'
@@ -103,10 +98,7 @@ export const Options = () => {
 
             <Form.Item
               name="openApiKey"
-              // style={{ margin: '0 0 20px 0' }}
               label="Your Open API Key"
-            // initialValue={openApiKey}
-            // help="Should be combination of numbers & alphabets"
             >
               <Input placeholder="We will not use your Key for any other purposes." type="password" />
             </Form.Item>
@@ -124,8 +116,6 @@ export const Options = () => {
             >
               <Select
                 placeholder="What language do you use?"
-              // onChange={onGenderChange}
-              // allowClear
               >
 
                 {Object.keys(lang).map((item) => <Option key={item} value={item}>{item}</Option>)}
@@ -157,6 +147,7 @@ export const Options = () => {
           </Form>
 
           <Divider />
+
           <div className="instructions">
             <h2>Usage</h2>
             <h3>Set up your API Key</h3>

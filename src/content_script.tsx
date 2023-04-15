@@ -42,10 +42,10 @@ container.className = 'container'
 shadowRoot?.appendChild(container)
 
 // Ant 组件样式
-const antStylesheet = document.createElement('link');
-antStylesheet.rel = 'stylesheet';
-antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
-shadowRoot.appendChild(antStylesheet);
+// const antStylesheet = document.createElement('link');
+// antStylesheet.rel = 'stylesheet';
+// antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
+// shadowRoot.appendChild(antStylesheet);
 
 
 // Tailwind

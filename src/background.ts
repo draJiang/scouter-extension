@@ -103,19 +103,23 @@ browser.runtime.onConnect.addListener(port => {
         // });
 
         // }
+        setTimeout(() => {
+          const now = new Date();
 
-        // const now = new Date();
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
 
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+          for (let i = 0; i < 3; i++) {
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+          }
+          setTimeout(() => {
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+          }, 2000);
 
-        // for (let i = 0; i < 3; i++) {
-        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-        // }
+        }, 4000);
 
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-
-        // return
+        return
         // ====================
 
         if (result.openApiKey.length < 5) {

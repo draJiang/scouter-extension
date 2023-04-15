@@ -1,7 +1,6 @@
 const webpack = require("webpack");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
-// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const srcDir = path.join(__dirname, "..", "src");
 
 module.exports = {
@@ -41,7 +40,8 @@ module.exports = {
                 },
                 {
                     loader: 'postcss-loader',
-                },],
+                },
+                ],
             }, {
                 test: /\.(png|jpe?g|gif)$/i,
                 use: 'url-loader'
