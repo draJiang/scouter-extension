@@ -27,10 +27,6 @@ export function Nav(props: NavProps) {
         props.handleSaveToAnkiBtnClick()
     };
 
-    // const onNavMouseDown = (event:any)=>{
-    //     console.log('Nav:onMouseDown');
-    //     props.onMouseDown(event)
-    // }
 
     return (
         <>
@@ -42,16 +38,22 @@ export function Nav(props: NavProps) {
                 }}
             >
                 <div id="ScouterNav"
-                    style={{ cursor: 'move', position: 'absolute', width: '100%', top: 0, backdropFilter: 'blur(12px)', zIndex: 9999 }}
+                    style={{
+                        cursor: 'move',
+                        position: 'absolute',
+                        width: '100%', top: 0,
+                        background: 'white',
+                        zIndex: 9999
+                    }}
                     onMouseDown={props.onMouseDown}>
                     <img src={Icon} />
                     <div className="rightBtnBox" style={{ flex: 1, textAlign: 'right' }}>
                         {props.addToAnkiStatus == 'success' ? '✅ Added to Anki' :
                             <Button size="small"
                                 // type='link'
-                                loading={props.addToAnkiStatus === 'loading' ? true : false}
-                                disabled={props.addToAnkiStatus === 'standby' ? true : false}
-                                onClick={handleSaveToAnkiBtnClick}>Add to Anki</Button>}
+                                // loading={props.addToAnkiStatus === 'loading' ? true : false}
+                                disabled={props.addToAnkiStatus === 'standby' || props.addToAnkiStatus === 'loading' ? true : false}
+                                onClick={handleSaveToAnkiBtnClick}>{props.addToAnkiStatus === 'loading' ? 'Adding...' : 'Add to Anki'}</Button>}
                     </div>
 
                 </div>

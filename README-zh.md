@@ -10,7 +10,7 @@ Scouter 是一款针对语言学习者的浏览器插件，目标是帮助你在
 
 * [x] 提供相关例句、测试题
 
-* [x] 用户可参与测试
+* [x] 连续对话
 
 * [x] 导入到 Anki
 
@@ -18,11 +18,11 @@ Scouter 是一款针对语言学习者的浏览器插件，目标是帮助你在
 
 [🚀 在 Chrome 商店中安装](https://chrome.google.com/webstore/detail/scouter/mncfcjnabpfoagocanfjglfcpmmnkicb?hl=zh-CN&authuser=0)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204520230326151323.png)
+![Scouter](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/CleanShot2023-04-1623.18.48@2x20230416231933.png)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/05DN0z20230330111850.jpg)
+![Multilingual support](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/YGWe3e20230416233244.jpg)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/JhHv0B20230330111942.jpg)
+![Add to Anki](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/f4Av4c20230416233309.jpg)
 
 
 ## 不是什么

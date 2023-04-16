@@ -2,18 +2,20 @@ import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef, useContext } from "react";
 // import ReactDOM from "react-dom";
+
 import ReactMarkdown from 'react-markdown'
+import breaks from 'remark-breaks';
+
 
 import { Nav } from "../Components/Nav"
 
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
-import { Divider, Skeleton, Input, ConfigProvider, theme, message, Result, Select, Form, Button, Card } from 'antd';
+import { Skeleton, Input, ConfigProvider, theme, message, Result, Select, Form, Button } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 
-
-import SettingGuide from "../assets/settingGuide.png"
+import settingGuide from '../assets/settingGuide.png'
 
 import { useCurrentLanguage } from '../lib/locale'
 
@@ -21,6 +23,8 @@ import "./index.css"
 
 let currentLanguage: string
 let targetLanguage: string
+
+const { TextArea } = Input;
 
 export function PopupCard(props: any) {
 
@@ -35,18 +39,15 @@ export function PopupCard(props: any) {
   const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('standby');
 
 
-  const [isAnswerDone1, setAnswerDone1] = useState(false);
-  const [isUserAnswered, setIsUserAnswered] = useState(false);
-  const [isAnswerDone2, setAnswerDone2] = useState(false);
+  const [isAnswerDone, setAnswerDone] = useState(false);
 
-  const [isErro, setIsErro] = useState(false);
+  const [isApiErro, setIsApiErro] = useState(false);
 
   const [isAnswerInputed, setIsAnswerInputed] = useState(false);
 
   const [keyWord, setKeyWord] = useState('');
   const [sentence, setSentence] = useState('');
 
-  const [inputValue, setInputValue] = useState('');
 
   // 窗口拖拽逻辑
   const [dragging, setDragging] = useState(false);
@@ -58,7 +59,6 @@ export function PopupCard(props: any) {
   const inputRef = useRef<HTMLDivElement>(null);
 
   const [form] = Form.useForm();
-  const answerValue = Form.useWatch('answer', form);
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
@@ -69,9 +69,6 @@ export function PopupCard(props: any) {
 
 
   useEffect(() => {
-
-    // New Task
-    // console.log('## PopupCard useEffect')
 
     // 当前选中的文字
     let keyWord = props.selection.toString()
@@ -108,26 +105,34 @@ export function PopupCard(props: any) {
     setKeyWord(keyWord)
     setSentence(sentence)
 
-    // 设置加载状态
-    // setIsLoading(true)
-
-    console.log('Lang:');
-    console.log(Lang);
-
     // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
     browser.storage.sync.get({ "history": [] }).then((item) => {
-      console.log(item.history);
+      // console.log(item.history);
 
       // 如果记录已存在，则不重复保存
       let bingo = false
       for (let i = 0; i < item.history.length; i++) {
         let obj = item.history[i]
         if (obj.keyWord === keyWord && obj.sentence === sentence) {
+
           bingo = true
+
           // 直接显示历史记录中的回答
+          setMessages(prevMessages => {
+
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            const updatedLastMessage = {
+              ...lastMessage,
+              content: obj.answer,
+              loading: false
+            };
+
+            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+          })
+
           setIsLoading(false)
-          setopenApiAnser(obj.answer)
-          setAnswerDone1(true)
+          setAnswerDone(true)
           setAddToAnkiStatus('normal')
           break
         }
@@ -137,6 +142,7 @@ export function PopupCard(props: any) {
 
         let systemPrompt = {
           "role": "system", "content": `As a language expert.
+          - When the user types ${Lang['target']['name']}, you need to reply if the grammar is wrong.
           - Please strictly adhere to the language requested by the user when providing your response.
           - Please answer the question using Markdown syntax, including but not limited to: 
             - Headings: ##, ###
@@ -156,14 +162,14 @@ export function PopupCard(props: any) {
           `
         }
 
-
         // 关键字长度较长时，按照句子进行处理
         if (keyWord.length > 20) {
 
           systemPrompt = {
             "role": "system", "content": `As an AI language expert, translate the sentence, analyze the original sentence and explain the grammar involved.
+            - When the user types ${Lang['target']['name']}, you need to reply if the grammar is wrong.
             - Please strictly adhere to the language requested by the user when providing your response.
-          - Please answer the question using Markdown syntax, including but not limited to: 
+            - Please answer the question using Markdown syntax, including but not limited to: 
             - Headings: ##, ###
             -	Lists: -, 1. 
             No additional language` }
@@ -185,7 +191,7 @@ export function PopupCard(props: any) {
         let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
 
 
-        console.log(keyWord);
+        // console.log(keyWord);
 
 
         getGPTMsg(prompt, 'as1', keyWord)
@@ -194,7 +200,7 @@ export function PopupCard(props: any) {
 
     })
 
-    console.log(messagesList);
+    // console.log(messagesList);
 
     messagesList.current?.addEventListener("scroll", handleScroll);
     return () => {
@@ -221,48 +227,58 @@ export function PopupCard(props: any) {
   // 保存历史记录
   useEffect(() => {
     // 在 openApiAnser 更新后将其保存到浏览器存储中
-    // 将查询记录保存起来
-    const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'answer': openApiAnser, 'source': window.location.href }
 
-    if (keyWord !== '' && sentence !== '' && openApiAnser !== '') {
-      browser.storage.sync.get({ "history": [] }).then((item) => {
+    // console.log('openApiAnser:');
 
-        console.log(item.history);
+    // console.log(openApiAnser);
+    // console.log(messages);
 
-        let newHistoryList: any = []
-        let bingo = false
-        newHistoryList.push(newHistory)
-        if (Array.isArray(item.history)) {
+    // 只保留消息记录的第 1 条
+    if (messages.length > 0) {
 
-          // 如果记录已存在，则不重复保存
-          for (let i = 0; i < item.history.length; i++) {
-            let obj = item.history[i]
-            if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence']) {
-              bingo = true
-              break
+      // 将查询记录保存起来
+      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'answer': messages[0]['content'], 'source': window.location.href }
+
+
+      if (keyWord !== '' && sentence !== '' && messages[0]['content'] !== '') {
+        browser.storage.sync.get({ "history": [] }).then((item) => {
+
+          // console.log(item.history);
+
+          let newHistoryList: any = []
+          let bingo = false
+          newHistoryList.push(newHistory)
+          if (Array.isArray(item.history)) {
+
+            // 如果记录已存在，则不重复保存
+            for (let i = 0; i < item.history.length; i++) {
+              let obj = item.history[i]
+              if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence']) {
+                bingo = true
+                break
+              }
             }
+
+            newHistoryList = item.history
+            newHistoryList.unshift(newHistory)
+            newHistoryList.splice(10)
           }
 
-          newHistoryList = item.history
-          newHistoryList.unshift(newHistory)
-          newHistoryList.splice(10)
-        }
+          if (!bingo) {
+            browser.storage.sync.set(
+              {
+                history: newHistoryList
+              }
+            ).then(() => {
+            })
+          }
 
-        if (!bingo) {
-          browser.storage.sync.set(
-            {
-              history: newHistoryList
-            }
-          ).then(() => {
-          })
-        }
+        })
+      }
 
-      })
     }
 
-
-
-  }, [isAnswerDone1]);
+  }, [isAnswerDone]);
 
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
@@ -272,6 +288,7 @@ export function PopupCard(props: any) {
     keyWord = keyWord || '';
 
     setIsLoading(true)
+    setAddToAnkiStatus('standby')
 
     // 请求 background 获取数据
     // 使用长连接
@@ -292,10 +309,30 @@ export function PopupCard(props: any) {
 
       // 请求 GPT 数据失败
       if (msg.status === 'erro') {
-        type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
+
+        // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
+        setIsLoading(false)
+        setAddToAnkiStatus('normal')
+
+        setMessages(prevMessages => {
+
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          // const newMsgList = lastMessage
+          const updatedLastMessage = {
+            ...lastMessage,
+            content: msg.content,
+            loading: false
+          };
+          // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
+          return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+        })
+
         if (msg.content.indexOf('API Key error') > -1) {
-          setIsErro(true)
+          setIsApiErro(true)
         }
+
+        scrollToBottom()
 
         // setIsLoading(false)
       }
@@ -303,14 +340,10 @@ export function PopupCard(props: any) {
       // 请求 GPT 数据成功且数据流结束传输
       if (msg.status === 'end') {
 
-        if (type === 'as2') {
-          setAnswerDone2(true)
-        } else {
-          setAnswerDone1(true)
-          setAddToAnkiStatus('normal')
-        }
-        // getGPTDataIsProcess.current = false
-        // console.log(getGPTDataIsProcess);
+        // 记录消息回答完毕（触发保存历史记录）
+        setAnswerDone(true)
+
+        setAddToAnkiStatus('normal')
         setIsLoading(false)
 
       }
@@ -320,11 +353,7 @@ export function PopupCard(props: any) {
 
         type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
 
-        // setMessages([])
-        // getGPTDataIsProcess.current = true
-        // console.log(getGPTDataIsProcess);
         console.log('begin');
-
 
       }
 
@@ -343,7 +372,7 @@ export function PopupCard(props: any) {
           // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
           return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
-        });
+        })
 
 
         scrollToBottom()
@@ -351,12 +380,12 @@ export function PopupCard(props: any) {
       }
 
       if (msg.type === 'sendImgData') {
-        console.log(msg);
+        // console.log(msg);
 
         if ('imgs' in msg) {
-          console.log('unsplashSearchPhotos');
-          console.log('imgs:');
-          console.log(msg);
+          // console.log('unsplashSearchPhotos');
+          // console.log('imgs:');
+          // console.log(msg);
         }
       }
 
@@ -366,21 +395,23 @@ export function PopupCard(props: any) {
   };
 
   // 发送消息
-  const onPressEnter = (values: any) => {
-    console.log(event);
+  const handleSendMessage = (values: any) => {
 
-    console.log(values);
-    let prompt = `${Lang['current']['Prompt3']['validation']}"${values.answer}"`
-    setIsUserAnswered(true)
+    // console.log(values);
+    let prompt = `${Lang['current']['Prompt3']['validation']}"${values.msg}"`
 
+    // 清空文本框
     form.resetFields();
+    // 禁用发送按钮
+    setIsAnswerInputed(false)
 
-    // 将用户发言发送到历史记录中
+
+    // 将用户发言发送到消息记录中
     setMessages(prevMessages => {
 
       const updatedLastMessage = {
         role: 'user',
-        content: values.answer,
+        content: values.msg,
         'loading': false
       };
       // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
@@ -388,41 +419,43 @@ export function PopupCard(props: any) {
 
     });
 
+    // console.log(messages);
 
+    const msgHistory = messages.slice(-5).map((item) => { return { 'role': item.role, 'content': item.content } })
 
-    console.log(messages);
-
-    const msgHistory = messages.map((item) => { return { 'role': item.role, 'content': item.content } })
-
-    getGPTMsg([...msgHistory, { "role": "user", "content": values.answer }], 'as2')
+    getGPTMsg([...msgHistory, { "role": "user", "content": values.msg }], 'as2')
 
     setTimeout(() => {
       scrollToBottom(true)
     }, 10);
 
-    setInputValue(iv => iv += 'hello')
-
-    if (inputRef.current !== null) {
-      // inputRef.current.input.value = ''
-      setTimeout(() => {
-        if (inputRef.current !== null) {
-          // inputRef.current.getElementsByTagName('input')[0].value = ''
-        }
-
-      }, 10);
-
-
-    }
-
-
-    console.log(inputRef.current);
 
   }
 
   // 文本框下敲击按键时
   const handleKeyDown = (event: any) => {
     // 阻止事件冒泡
+    // console.log('handleKeyDown');
+
     event.stopPropagation()
+
+    if (event.keyCode === 13 && !event.shiftKey) {
+
+
+      // 敲击回车键
+      if (!isLoading && isAnswerInputed) {
+        // 非加载状态、GPT 消息发送完毕时用户可发送消息
+        handleSendMessage({ 'msg': event.target.value })
+      } else {
+        event.preventDefault();
+      }
+
+    }
+  }
+
+  const handleFormKeyDown = (event: any) => {
+    // console.log('handleFormKeyDown');
+
   }
 
   const handleMouseDown = (event: any) => {
@@ -499,7 +532,7 @@ export function PopupCard(props: any) {
   // 文本框值变化时
   const onTextAreaInput = (event: any) => {
 
-    if (event.target.value.length > 3) {
+    if (event.target.value.length > 0) {
       setIsAnswerInputed(true)
     } else {
       setIsAnswerInputed(false)
@@ -509,21 +542,16 @@ export function PopupCard(props: any) {
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
 
-
-
-    // return 
-
-    // console.log('Popup:handleSaveToAnkiBtnClick');
-
     setAddToAnkiStatus('loading')
 
     let container = ''
     const stc = keyWord.length <= 20 ? sentence : ''
 
     if (windowElement.current) {
-      console.log(windowElement.current);
+      // console.log(windowElement.current);
       container = windowElement.current.innerHTML
       container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
+      container = container.replace(/style=/g, '');
     }
 
     // 请求 background 将数据保存到 Anki
@@ -558,7 +586,6 @@ export function PopupCard(props: any) {
         setAddToAnkiStatus('normal')
       }
 
-
     }
 
     function handleError(erro: any) {
@@ -570,15 +597,16 @@ export function PopupCard(props: any) {
 
 
   function scrollToBottom(canSroll: boolean = false) {
-    // if (container !== null) {
-    //   container.scrollTop = container.scrollHeight;
-    // }
 
     if (messagesList.current !== null) {
-      const isAtBottom = messagesList.current?.scrollTop + messagesList.current.clientHeight >= messagesList.current.scrollHeight - 0.5;
+      const isAtBottom = messagesList.current?.scrollTop + messagesList.current.clientHeight >= messagesList.current.scrollHeight - 1;
+
+      // console.log('isAtBottom:');
+      // console.log(isAtBottom);
+
+
       if (isAtBottom || canSroll) {
         // 位于底部，需要自动滚动
-        console.log('isAtBottom');
         messagesList.current.scrollTop = messagesList.current.scrollHeight;
 
       }
@@ -588,7 +616,6 @@ export function PopupCard(props: any) {
   }
 
   function handleScroll() {
-    console.log(messagesList);
 
     if (messagesList.current !== null) {
       const isAtBottom = messagesList.current?.scrollTop + messagesList.current.clientHeight >= messagesList.current.scrollHeight - 0.5;
@@ -596,17 +623,11 @@ export function PopupCard(props: any) {
         // 已经位于底部，不需要自动滚动
         console.log('isAtBottom');
         return;
+      } else {
+        // scrollToBottom()
       }
     }
-
-
     // 未位于底部，不执行自动滚动
-  }
-
-  const handleInputChange = (event: any) => {
-    console.log(event);
-    console.log(event.target.value);
-
   }
 
   return (
@@ -616,10 +637,9 @@ export function PopupCard(props: any) {
       style={{
         left: 10,
         top: 10,
+        color: 'rgba(0, 0, 0, 0.88)',
       }}
     >
-
-
 
       <ConfigProvider
         theme={{
@@ -628,25 +648,51 @@ export function PopupCard(props: any) {
           },
         }}
       >
+
         <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} title='Scouter' />
-
-
 
         <div className='flex-grow flex flex-col overflow-scroll'>
           <div className='flex-grow overflow-scroll'
             ref={messagesList}
-            style={{ paddingTop: '50px' }}
+            style={{ paddingTop: '44px' }}
           >
 
             <Selection text={keyWord} />
+
             <div
               className='messages'
-              style={{ lineHeight: '1.6rem' }}
+              style={{
+                lineHeight: '1.7rem',
+                wordWrap: 'break-word'
+              }}
             >
               {messages.map((item) => {
-                return item.loading ? <div className='p-4'><Skeleton active title={false} /></div> : <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}><ReactMarkdown>{item.content}</ReactMarkdown></div>
+
+                return <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
+                  <Skeleton loading={item.loading} active={true} title={false}>
+
+                    <div
+                      style={{}}
+                    ><ReactMarkdown remarkPlugins={[breaks]} children={item.content} />
+                    </div>
+
+                  </Skeleton>
+
+                </div>
+
+
+                {/* return item.loading ? <div className='p-4'><Skeleton active={true} rows={1} title={false} /></div> : <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}><ReactMarkdown remarkPlugins={[breaks]} children={item.content} />{isApiErro ? <img src={settingGuide} /> : ''}</div> */ }
               }
+
+
+
               )}
+              <div className='p-4'>
+                {isApiErro ? <img src={settingGuide} style={{
+                  borderRadius: '4px'
+                }} /> : ''}
+              </div>
+
             </div>
           </div>
         </div>
@@ -657,33 +703,47 @@ export function PopupCard(props: any) {
         >
           <Form
             form={form}
-            onFinish={onPressEnter}
+            onFinish={handleSendMessage}
+            onKeyDown={handleFormKeyDown}
             layout='inline'
-            style={{ textAlign: 'right' }}
-            className='p-4'
+            style={{ alignItems: 'center' }}
+            className='p-2'
           >
             <Form.Item
-              name="answer"
+              name="msg"
               style={{ margin: '0', flexGrow: '1' }}
             >
-              <Input placeholder="ask something"
-                value={inputValue}
-                onChange={handleInputChange}
-                suffix={
-                  <Button
-                    type="text"
-                    htmlType="submit"
-                    disabled={isLoading}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                    icon={<SendOutlined />}
-                  />
-                }
-                onKeyDown={handleKeyDown} onInput={onTextAreaInput} />
+              <TextArea
+                placeholder="Send a message"
+                bordered={false}
+                autoSize={{ minRows: 1, maxRows: 2 }}
+                // onChange={handleInputChange}
+                style={{
+                  caretColor: '#F08A24',
+                }}
+                onKeyDown={handleKeyDown} onInput={onTextAreaInput}
+
+              />
+
             </Form.Item>
+
+            <Form.Item
+              style={{ marginRight: '0' }}
+            >
+              <Button
+                type="text"
+                htmlType="submit"
+                disabled={isLoading || !isAnswerInputed}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                icon={<SendOutlined />}
+              />
+
+            </Form.Item>
+
             <Form.Item
               style={{ margin: '0' }}
             >
@@ -701,7 +761,6 @@ export function PopupCard(props: any) {
           </svg> */}
 
     </div >
-
 
   );
 };

@@ -26,6 +26,7 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-markdown": "^8.0.6",
+    "remark-breaks": "^3.0.2",
     "unsplash-js": "^7.0.15"
   },
   "devDependencies": {

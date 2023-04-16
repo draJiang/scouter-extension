@@ -9,17 +9,17 @@
 Scouter is a browser extension designed for language learners, with the goal of helping you acquire language knowledge in real language environments and better **learn languages** through practice.
 
 - [x] Provides relevant example sentences and quizzes.
-- [x] Users can participate in quizzes.
+- [x] Continuous Conversation.
 - [x] Importable to Anki.
 - [x] Multilingual support
 
 [🚀 Install in the Chrome Store](https://chrome.google.com/webstore/detail/scouter/mncfcjnabpfoagocanfjglfcpmmnkicb?hl=zh-CN&authuser=0)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame%204520230326151323.png)
+![Scouter](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/CleanShot2023-04-1623.18.48@2x20230416231933.png)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/05DN0z20230330111850.jpg)
+![Multilingual support](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/YGWe3e20230416233244.jpg)
 
-![](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/JhHv0B20230330111942.jpg)
+![Add to Anki](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/f4Av4c20230416233309.jpg)
 
 ## What it isn't
 

@@ -57,8 +57,8 @@ export function Selection(props: SelectionProps) {
 
     // 语种
     utterance.lang = languageCodes[targetLanguage as keyof typeof languageCodes];
-    console.log(languageCodes[targetLanguage as keyof typeof languageCodes]);
-    console.log(targetLanguage);
+    // console.log(languageCodes[targetLanguage as keyof typeof languageCodes]);
+    // console.log(targetLanguage);
 
     // 语速
     if (playStatus) {
@@ -76,12 +76,12 @@ export function Selection(props: SelectionProps) {
 
   const onStorageChange = (changes: any, area: any) => {
 
-    console.log(changes);
+    // console.log(changes);
 
     // 更新目标语言
     if ('targetLanguage' in changes) {
-      console.log('changes');
-      console.log(changes['targetLanguage']['newValue']);
+      // console.log('changes');
+      // console.log(changes['targetLanguage']['newValue']);
       setTargetLanguage(changes['targetLanguage']['newValue'])
     }
 
@@ -90,9 +90,16 @@ export function Selection(props: SelectionProps) {
 
   return (
     <>
-      <div id="ScouterSelection" className='p-4'>
+      <div id="ScouterSelection" className='p-4'
+
+      >
         <span>{props.text}</span>
-        <Button style={{ display: 'inline-block' }} size="small" type="text" icon={<CustomerServiceOutlined />} onClick={speaker} />
+        <Button style={{
+          display: 'inline-block',
+          position: 'relative',
+          bottom: '2px'
+        }}
+          size="small" type="text" icon={<CustomerServiceOutlined />} onClick={speaker} />
       </div>
     </>
   );

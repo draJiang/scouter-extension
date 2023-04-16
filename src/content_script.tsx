@@ -109,6 +109,10 @@ style.textContent = `
   height: 24px;
   margin-right: 6px;
   }
+  .messages ul,.messages ol{
+    list-style:auto;
+    padding-left: 20px;
+  }
   `
 shadowRoot?.appendChild(style);
 
