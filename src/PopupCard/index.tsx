@@ -115,6 +115,14 @@ export function PopupCard(props: any) {
         let obj = item.history[i]
         if (obj.keyWord === keyWord && obj.sentence === sentence) {
 
+          if ('role' in obj) {
+
+          } else {
+            // 旧版本中因为没有存储 role ，直接显示历史数据时会导致后续流程异常
+            bingo = false
+            break
+          }
+
           bingo = true
 
           // 直接显示历史记录中的回答
@@ -123,6 +131,7 @@ export function PopupCard(props: any) {
             const lastMessage = prevMessages[prevMessages.length - 1];
             const updatedLastMessage = {
               ...lastMessage,
+              role: obj.role,
               content: obj.answer,
               loading: false
             };
@@ -166,20 +175,49 @@ export function PopupCard(props: any) {
         if (keyWord.length > 20) {
 
           systemPrompt = {
-            "role": "system", "content": `As an AI language expert, translate the sentence, analyze the original sentence and explain the grammar involved.
-            - When the user types ${Lang['target']['name']}, you need to reply if the grammar is wrong.
-            - Please strictly adhere to the language requested by the user when providing your response.
-            - Please answer the question using Markdown syntax, including but not limited to: 
-            - Headings: ##, ###
-            -	Lists: -, 1. 
-            No additional language` }
-
-          userPrompt = {
-            "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
-              3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
-              4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
-              Please reply "Yes" if you understand.`
+            "role": "system", "content": `作为语言老师，给你一个句子，你需要：
+            - 解释句子的语法知识
+            - 提供例句
+            - 提供测试题测试学生的理解程度。
+            
+            让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
+            - 翻译部分需要翻译为 B 语言。
+            - 分析**用户提供的句子**
+            - 提供 A 语言的例句并显示其 B 语言的翻译。
+            
+            
+            下面是一个案例：
+            用户提供的句子：My parents are busier than my grandparents.
+            
+            ## 翻译
+            我的父母比我的祖父母更忙。
+            
+            ## 分析
+            - 主语：[My parents]
+            - 谓语：[are busier]
+            - 比较结构：[than my grandparents]
+            
+            ## 例句
+            1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
+            2. This car is faster than that one. - 这辆车比那辆车跑得快。
+            
+            ## 练习题
+            1. 翻译句子。
+            The new restaurant is much busier than the old one.
+            2. 把下面的句子改写为否定句和疑问句。
+            My sister is taller than my brother.
+            
+            ---
+            
+            现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
           }
+
+          // userPrompt = {
+          //   "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
+          //     3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
+          //     4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
+          //     Please reply "Yes" if you understand.`
+          // }
 
           userPrompt2 = {
             "role": "user", "content": `Sentence: "${keyWord}"`
@@ -188,7 +226,7 @@ export function PopupCard(props: any) {
 
         }
 
-        let prompt = [systemPrompt, userPrompt, assistantPrompt, userPrompt2]
+        let prompt = [systemPrompt, userPrompt2]
 
 
         // console.log(keyWord);
@@ -237,13 +275,13 @@ export function PopupCard(props: any) {
     if (messages.length > 0) {
 
       // 将查询记录保存起来
-      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'answer': messages[0]['content'], 'source': window.location.href }
+      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href }
 
 
       if (keyWord !== '' && sentence !== '' && messages[0]['content'] !== '') {
         browser.storage.sync.get({ "history": [] }).then((item) => {
 
-          // console.log(item.history);
+          console.log(item.history);
 
           let newHistoryList: any = []
           let bingo = false
@@ -252,10 +290,16 @@ export function PopupCard(props: any) {
 
             // 如果记录已存在，则不重复保存
             for (let i = 0; i < item.history.length; i++) {
+
               let obj = item.history[i]
+
+
+
               if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence']) {
+
                 bingo = true
                 break
+
               }
             }
 

@@ -89,7 +89,9 @@ browser.runtime.onConnect.addListener(port => {
 
         let messages = msg.messages
 
+
         //==================== 下面的代码用于调试使用，正式环境需要注释掉
+        
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
