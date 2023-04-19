@@ -75,7 +75,7 @@ style.textContent = `
   position: fixed;
   display: flex;
   flex-direction: column;
-  font-size: 13px;
+  font-size: 13.4px;
   background-color: #fff;
   z-index: 9999;
   overflow: hidden;
@@ -117,6 +117,11 @@ style.textContent = `
     list-style:auto;
     padding-left: 20px;
   }
+  
+  #LearningEnglish2023 .messages * {
+    margin-bottom: 1em;
+  }
+
   `
 shadowRoot?.appendChild(style);
 

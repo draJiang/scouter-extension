@@ -91,7 +91,7 @@ browser.runtime.onConnect.addListener(port => {
 
 
         //==================== 下面的代码用于调试使用，正式环境需要注释掉
-        
+
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
@@ -151,7 +151,7 @@ browser.runtime.onConnect.addListener(port => {
             // "frequency_penalty": 0,
             // "presence_penalty": 1,
 
-            "temperature": 0,
+            "temperature": 0.7,
             "max_tokens": 420,
             "top_p": 1,
             "frequency_penalty": 0,

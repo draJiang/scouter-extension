@@ -150,23 +150,45 @@ export function PopupCard(props: any) {
       if (!bingo) {
 
         let systemPrompt = {
-          "role": "system", "content": `As a language expert.
-          - When the user types ${Lang['target']['name']}, you need to reply if the grammar is wrong.
-          - Please strictly adhere to the language requested by the user when providing your response.
-          - Please answer the question using Markdown syntax, including but not limited to: 
-            - Headings: ##, ###
-            -	Lists: -, 1. 
-            No additional language` }
-        let userPrompt = {
-          "role": "user", "content": `1. Using ${Lang['current']['name']} explanatory part of speech
-            2. Explanation: ${Lang['current']['Prompt1']['explanation']}. 
-            3. Example sentences: Provide ${Lang['target']['name']} example sentences with the same meaning or function, along with their translations.
-            4. Translation question: Based on the word, Provide 2 simple sentences to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}.
-            Please reply "Yes" if you understand.`
+          "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
+          - 说明单词的词性
+          - 解释单词在句子中的含义
+          - 提供例句
+          - 提供简单的翻译题
+          
+          让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
+          - 说明部分需要使用 B 语言。
+          - 提供 A 语言的例句并显示其 B 语言的翻译。
+          - 翻译题显示 B 语言的句子，要求翻译为 A 语言，句子尽量简单，翻译后的句子需要包含上述单词。
+          - ## 表示标题，你需要使用 B 语言表示。
+          
+          ---
+          
+          下面是一个例子：
+          单词：called
+          句子：This syntax is called “destructuring”
+          
+          called 是一个动词的过去分词形式，也可以作为形容词或名词使用。
+          
+          ## 在句子中的含义
+          这里的 called 是一个被动语态的形式，表示“被称作”或“被叫做”的意思。句子的意思是“这种语法结构被称作‘解构’”。
+          
+          ## 例句
+          
+          - The movie is called “The Godfather”. - 这部电影叫做“教父”
+          - I was called to the principal’s office this morning. - 我今天早上被叫去校长办公室了。
+          
+          ## 翻译题
+          - 我刚刚打电话给我的姐姐。
+          - 她的朋友们都叫她 "小兔子"。
+          
+          ---
+          
+          A 语言：${Lang['target']['name']}
+          B 语言：${Lang['current']['name']}`
         }
 
-        let assistantPrompt = { "role": "assistant", "content": 'Yes' }
-        let userPrompt2 = {
+        let userPrompt = {
           "role": "user", "content": `Word:"${keyWord}", sentence: "${sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence}"
           `
         }
@@ -219,14 +241,14 @@ export function PopupCard(props: any) {
           //     Please reply "Yes" if you understand.`
           // }
 
-          userPrompt2 = {
+          userPrompt = {
             "role": "user", "content": `Sentence: "${keyWord}"`
           }
 
 
         }
 
-        let prompt = [systemPrompt, userPrompt2]
+        let prompt = [systemPrompt, userPrompt]
 
 
         // console.log(keyWord);
@@ -706,7 +728,7 @@ export function PopupCard(props: any) {
             <div
               className='messages'
               style={{
-                lineHeight: '1.7rem',
+                lineHeight: '1.7em',
                 wordWrap: 'break-word'
               }}
             >
@@ -715,10 +737,7 @@ export function PopupCard(props: any) {
                 return <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
                   <Skeleton loading={item.loading} active={true} title={false}>
 
-                    <div
-                      style={{}}
-                    ><ReactMarkdown remarkPlugins={[breaks]} children={item.content} />
-                    </div>
+                    <ReactMarkdown remarkPlugins={[breaks]} children={item.content} />
 
                   </Skeleton>
 
