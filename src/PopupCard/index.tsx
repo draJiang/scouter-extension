@@ -8,6 +8,7 @@ import breaks from 'remark-breaks';
 
 
 import { Nav } from "../Components/Nav"
+import { Images } from "../Components/Images"
 
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
@@ -29,6 +30,7 @@ const { TextArea } = Input;
 export function PopupCard(props: any) {
 
   const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean }>>([])
+  const [images, setImages] = useState([])
 
   const [openApiAnser, setopenApiAnser] = useState('');
   const [openApiAnser2, setopenApiAnser2] = useState('');
@@ -163,10 +165,13 @@ export function PopupCard(props: any) {
           - ## 表示标题，你需要使用 B 语言表示。
           
           ---
+          例子：
           
-          下面是一个例子：
+          用户输入：
           单词：called
           句子：This syntax is called “destructuring”
+
+          示例回复：
           
           called 是一个动词的过去分词形式，也可以作为形容词或名词使用。
           
@@ -446,12 +451,13 @@ export function PopupCard(props: any) {
       }
 
       if (msg.type === 'sendImgData') {
-        // console.log(msg);
+        console.log('sendImgData');
 
         if ('imgs' in msg) {
           // console.log('unsplashSearchPhotos');
-          // console.log('imgs:');
-          // console.log(msg);
+          console.log('imgs:');
+          console.log(msg);
+          setImages(msg.imgs)
         }
       }
 
@@ -611,6 +617,7 @@ export function PopupCard(props: any) {
     setAddToAnkiStatus('loading')
 
     let container = ''
+    let images = ''
     const stc = keyWord.length <= 20 ? sentence : ''
 
     if (windowElement.current) {
@@ -618,6 +625,9 @@ export function PopupCard(props: any) {
       container = windowElement.current.innerHTML
       container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
       container = container.replace(/style=/g, '');
+      
+      images = windowElement.current.getElementsByClassName('images')[0].innerHTML
+
     }
 
     // 请求 background 将数据保存到 Anki
@@ -627,7 +637,7 @@ export function PopupCard(props: any) {
         "modelName": "Basic",
         "fields": {
           "Front": keyWord,
-          "Back": '<p>' + stc + '</p>' + container + '<a href="' + window.location.href + '">Source</a>'
+          "Back": '<p>' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>'
         },
         "tags": [
           "Scouter"
@@ -724,6 +734,8 @@ export function PopupCard(props: any) {
           >
 
             <Selection text={keyWord} />
+
+            <Images images={images} />
 
             <div
               className='messages'

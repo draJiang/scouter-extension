@@ -35,7 +35,7 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
           resolve([]);
         } else {
           const imageUrl = data.response?.results[0].urls.regular
-          chrome.tabs.create({ url: imageUrl });
+          // chrome.tabs.create({ url: imageUrl });
           resolve(data.response?.results);
         }
       }).catch((error) => {

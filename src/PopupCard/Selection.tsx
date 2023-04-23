@@ -91,7 +91,9 @@ export function Selection(props: SelectionProps) {
   return (
     <>
       <div id="ScouterSelection" className='p-4'
-
+        style={{
+          paddingBottom: 0
+        }}
       >
         <span>{props.text}</span>
         <Button style={{

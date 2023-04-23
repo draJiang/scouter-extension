@@ -58,6 +58,38 @@ shadowRoot.appendChild(tailwindStylesheet);
 // 在 Shadow DOM 中添加样式：
 const style = document.createElement('style');
 style.textContent = `
+  .slick-arrow::before{
+    content:"" !important;
+  }
+
+  .ant-carousel .slick-prev,
+  .ant-carousel .slick-next,
+  .ant-carousel .slick-prev:hover,
+  .ant-carousel .slick-next:hover {
+    font-size: inherit;
+    color: currentColor;
+  }
+
+  .ant-carousel .slick-prev,
+  .ant-carousel .slick-prev:hover {
+    left: 10px;
+    z-index: 2;
+    color: white;
+  }
+
+  .ant-carousel .slick-next,
+  .ant-carousel .slick-next:hover {
+    right: 10px;
+    z-index: 2;
+    color: white;
+  }
+
+  .images img {
+    object-fit: cover;
+    border-radius: 2px;
+  }
+
+
   @font-face {
   font-family: 'OPPOSans-R';
   src: url('../public/font/OPPOSans-R.ttf') format('truetype');
@@ -119,7 +151,7 @@ style.textContent = `
   }
   
   #LearningEnglish2023 .messages * {
-    margin-bottom: 1em;
+    
   }
 
   `
