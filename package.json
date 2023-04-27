@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "antd": "^5.3.2",
+    "dotenv-webpack": "^8.0.1",
     "eventsource-parser": "^0.1.0",
     "franc": "^6.1.0",
     "langs": "^2.0.0",
@@ -40,6 +41,7 @@
     "autoprefixer": "^10.4.14",
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.7.3",
+    "dotenv": "^16.0.3",
     "file-loader": "^6.2.0",
     "glob": "^7.1.6",
     "jest": "^27.2.1",

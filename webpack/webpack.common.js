@@ -3,6 +3,9 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
 
+const DotenvWebpackPlugin = require('dotenv-webpack');
+
+
 module.exports = {
     entry: {
         popup: path.join(srcDir, 'popup.tsx'),
@@ -57,6 +60,9 @@ module.exports = {
             patterns: [{ from: ".", to: "../", context: "public" }
                 , { from: "src/assets", to: "../images" }],
             options: {},
+        }),
+        new DotenvWebpackPlugin({
+            path:'./.env'
         }),
     ],
 };

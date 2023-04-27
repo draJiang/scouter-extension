@@ -263,6 +263,8 @@ export function PopupCard(props: any) {
 
       }
 
+      getUnsplashImages(keyWord)
+
     })
 
     // console.log(messagesList);
@@ -293,13 +295,11 @@ export function PopupCard(props: any) {
   useEffect(() => {
     // 在 openApiAnser 更新后将其保存到浏览器存储中
 
-    // console.log('openApiAnser:');
-
-    // console.log(openApiAnser);
-    // console.log(messages);
-
     // 只保留消息记录的第 1 条
-    if (messages.length > 0) {
+    if (messages.length > 0 && isAnswerDone) {
+
+      console.log('Save');
+
 
       // 将查询记录保存起来
       const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href }
@@ -351,6 +351,34 @@ export function PopupCard(props: any) {
 
   }, [isAnswerDone]);
 
+  const getUnsplashImages = (keyWord: string) => {
+    // 请求 background 获取数据
+    // 使用长连接
+    let port = browser.runtime.connect({
+      name: 'popup-name'
+    })
+
+    // 使用 postMs 发送信息
+    port.postMessage({ 'type': 'getUnsplashImages', 'messages': '', 'keyWord': keyWord })
+
+    // 接收信息
+    port.onMessage.addListener(msg => {
+
+      console.log(msg);
+      if (msg.type === 'sendImgData') {
+        console.log('sendImgData');
+
+        if ('imgs' in msg) {
+          // console.log('unsplashSearchPhotos');
+          console.log('imgs:');
+          console.log(msg);
+          setImages(msg.imgs)
+        }
+      }
+
+    })
+
+  }
 
   // 使用 type 来区分当前请求的是第 1 个答案还是 第 2 个答案，根据不同的 type 渲染不同的 UI
   const getGPTMsg = async (prompt: any, type?: string, keyWord?: string) => {
@@ -359,6 +387,7 @@ export function PopupCard(props: any) {
     keyWord = keyWord || '';
 
     setIsLoading(true)
+    setAnswerDone(false)
     setAddToAnkiStatus('standby')
 
     // 请求 background 获取数据
@@ -377,89 +406,91 @@ export function PopupCard(props: any) {
     port.onMessage.addListener(msg => {
 
       // console.log('port.onMessage.addListener');
+      if (msg.type === 'sendGPTData') {
+        // 请求 GPT 数据失败
+        if (msg.status === 'erro') {
 
-      // 请求 GPT 数据失败
-      if (msg.status === 'erro') {
+          // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
+          setIsLoading(false)
+          setAddToAnkiStatus('normal')
 
-        // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
-        setIsLoading(false)
-        setAddToAnkiStatus('normal')
+          setMessages(prevMessages => {
 
-        setMessages(prevMessages => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            // const newMsgList = lastMessage
+            const updatedLastMessage = {
+              ...lastMessage,
+              content: msg.content,
+              loading: false
+            };
+            // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
+            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
-          const lastMessage = prevMessages[prevMessages.length - 1];
-          // const newMsgList = lastMessage
-          const updatedLastMessage = {
-            ...lastMessage,
-            content: msg.content,
-            loading: false
-          };
-          // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
-          return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+          })
 
-        })
+          if (msg.content.indexOf('API Key error') > -1) {
+            setIsApiErro(true)
+          }
 
-        if (msg.content.indexOf('API Key error') > -1) {
-          setIsApiErro(true)
+          scrollToBottom()
+
+          // setIsLoading(false)
         }
 
-        scrollToBottom()
+        // 请求 GPT 数据成功且数据流结束传输
+        if (msg.status === 'end') {
 
-        // setIsLoading(false)
-      }
+          // 记录消息回答完毕（触发保存历史记录）
+          setAnswerDone(true)
 
-      // 请求 GPT 数据成功且数据流结束传输
-      if (msg.status === 'end') {
+          setAddToAnkiStatus('normal')
+          setIsLoading(false)
 
-        // 记录消息回答完毕（触发保存历史记录）
-        setAnswerDone(true)
+        }
 
-        setAddToAnkiStatus('normal')
-        setIsLoading(false)
+        // 请求 GPT 数据成功且数据流开始传输
+        if (msg.status === 'begin') {
 
-      }
+          type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
 
-      // 请求 GPT 数据成功且数据流开始传输
-      if (msg.status === 'begin') {
+          console.log('begin');
 
-        type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
+        }
 
-        console.log('begin');
+        // 请求 GPT 数据成功且数据流传输中
+        if (msg.status === 'process') {
 
-      }
+          setMessages(prevMessages => {
 
-      // 请求 GPT 数据成功且数据流传输中
-      if (msg.status === 'process') {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            const newMsgList = lastMessage
+            const updatedLastMessage = {
+              ...lastMessage,
+              content: newMsgList.content + msg.content,
+              loading: false
+            };
+            // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
+            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
-        setMessages(prevMessages => {
-
-          const lastMessage = prevMessages[prevMessages.length - 1];
-          const newMsgList = lastMessage
-          const updatedLastMessage = {
-            ...lastMessage,
-            content: newMsgList.content + msg.content,
-            loading: false
-          };
-          // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
-          return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
-
-        })
+          })
 
 
-        scrollToBottom()
+          scrollToBottom()
 
-      }
-
-      if (msg.type === 'sendImgData') {
-        console.log('sendImgData');
-
-        if ('imgs' in msg) {
-          // console.log('unsplashSearchPhotos');
-          console.log('imgs:');
-          console.log(msg);
-          setImages(msg.imgs)
         }
       }
+
+
+      // if (msg.type === 'sendImgData') {
+      //   console.log('sendImgData');
+
+      //   if ('imgs' in msg) {
+      //     // console.log('unsplashSearchPhotos');
+      //     console.log('imgs:');
+      //     console.log(msg);
+      //     setImages(msg.imgs)
+      //   }
+      // }
 
 
     })
@@ -618,17 +649,29 @@ export function PopupCard(props: any) {
 
     let container = ''
     let images = ''
+    let unsplash_download_location
     const stc = keyWord.length <= 20 ? sentence : ''
 
     if (windowElement.current) {
       // console.log(windowElement.current);
       container = windowElement.current.innerHTML
       container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
+      // 处理样式，避免 Anki 内显示异常
       container = container.replace(/style=/g, '');
-      
+
       images = windowElement.current.getElementsByClassName('images')[0].innerHTML
+      // 处理样式，避免 Anki 内显示异常
+      images = images.replace(/style=/gi, '');
+      images = images.replace(/width/gi, '');
+
+      // 获取 unsplashApi 的 download_location
+      unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadLocation')
+      console.log(windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadLocation'));
 
     }
+
+
+
 
     // 请求 background 将数据保存到 Anki
     const p = {
@@ -646,7 +689,7 @@ export function PopupCard(props: any) {
     }
 
     // 发送消息给 background
-    let sending = browser.runtime.sendMessage({ 'type': 'addToAnki', 'messages': p })
+    let sending = browser.runtime.sendMessage({ 'type': 'addToAnki', 'messages': { 'anki_arguments': p, 'unsplash_download_location': unsplash_download_location }, })
     sending.then(handleResponse, handleError);
     // 接收 background 的回复
     function handleResponse(message: any) {

@@ -110,8 +110,6 @@ export function Images(props: ImagesProps) {
     };
 
     const handleImagesBoxHover = (e: any) => {
-        console.log('handleImagesBoxHover');
-        console.log(e);
 
         if (e.type === 'mouseenter') {
             setShowControl(true)
@@ -133,6 +131,7 @@ export function Images(props: ImagesProps) {
                 {images.length === 0 ? '' : <>
                     <div onMouseEnter={handleImagesBoxHover} onMouseLeave={handleImagesBoxHover}>
                         <Image
+                            data-downloadLocation={images[imageIndex].links.download_location}
                             src={images[imageIndex].urls.small}
                             alt={images[imageIndex]['description']}
                             height={250}
@@ -184,7 +183,7 @@ export function Images(props: ImagesProps) {
                             color: 'rgba(0, 0, 0, 0.4)'
                         }}
                     >
-                        <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].links.html}>By {images[imageIndex].user.name} on Unsplash</a>
+                        By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash
                     </div>
                 </>
                 }
