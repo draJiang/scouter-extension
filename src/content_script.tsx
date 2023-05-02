@@ -102,7 +102,7 @@ style.textContent = `
   #LearningEnglish2023 {
   font-family: sans-serif;
   width: 400px;
-  height: 500px;
+  height: 570px;
   color: #333;
   position: fixed;
   display: flex;
@@ -119,6 +119,10 @@ style.textContent = `
 
   }
 
+  #LearningEnglish2023 .p-4 {
+    padding:0.4em 1.1em;
+  }
+
   #LearningEnglish2023 .openAIAnswer {
   line-height: 30px;
   }
@@ -129,6 +133,10 @@ style.textContent = `
 
   #LearningEnglish2023 .contentBox {
   overflow: scroll;
+  }
+
+  #LearningEnglish2023 .messages > * > * {
+    margin: 0.7em 0;
   }
 
   #LearningEnglish2023 #ScouterNav {
@@ -145,6 +153,7 @@ style.textContent = `
   height: 24px;
   margin-right: 6px;
   }
+
   .messages ul,.messages ol{
     list-style:auto;
     padding-left: 20px;

@@ -29,7 +29,7 @@ const { TextArea } = Input;
 
 export function PopupCard(props: any) {
 
-  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean }>>([])
+  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string }>>([])
   const [images, setImages] = useState([])
 
   const [openApiAnser, setopenApiAnser] = useState('');
@@ -133,6 +133,7 @@ export function PopupCard(props: any) {
             const lastMessage = prevMessages[prevMessages.length - 1];
             const updatedLastMessage = {
               ...lastMessage,
+              chatId: Date.now().toString(),
               role: obj.role,
               content: obj.answer,
               loading: false
@@ -173,7 +174,8 @@ export function PopupCard(props: any) {
 
           示例回复：
           
-          called 是一个动词的过去分词形式，也可以作为形容词或名词使用。
+          含义：“被称作”或“被叫做”
+          词性：动词的过去分词形式，也可以作为形容词或名词使用
           
           ## 在句子中的含义
           这里的 called 是一个被动语态的形式，表示“被称作”或“被叫做”的意思。句子的意思是“这种语法结构被称作‘解构’”。
@@ -302,13 +304,13 @@ export function PopupCard(props: any) {
 
 
       // 将查询记录保存起来
-      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href }
+      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href}
 
 
       if (keyWord !== '' && sentence !== '' && messages[0]['content'] !== '') {
         browser.storage.sync.get({ "history": [] }).then((item) => {
 
-          console.log(item.history);
+          // console.log(item.history);
 
           let newHistoryList: any = []
           let bingo = false
@@ -332,7 +334,10 @@ export function PopupCard(props: any) {
 
             newHistoryList = item.history
             newHistoryList.unshift(newHistory)
-            newHistoryList.splice(10)
+            newHistoryList.splice(8)
+            
+            // console.log(newHistoryList);
+            
           }
 
           if (!bingo) {
@@ -340,8 +345,7 @@ export function PopupCard(props: any) {
               {
                 history: newHistoryList
               }
-            ).then(() => {
-            })
+            )
           }
 
         })
@@ -364,14 +368,12 @@ export function PopupCard(props: any) {
     // 接收信息
     port.onMessage.addListener(msg => {
 
-      console.log(msg);
       if (msg.type === 'sendImgData') {
         console.log('sendImgData');
 
         if ('imgs' in msg) {
           // console.log('unsplashSearchPhotos');
           console.log('imgs:');
-          console.log(msg);
           setImages(msg.imgs)
         }
       }
@@ -397,7 +399,7 @@ export function PopupCard(props: any) {
     })
 
     // 在消息历史中插入新记录
-    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true }])
+    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '' }])
 
     // 使用 postMs 发送信息
     port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': keyWord })
@@ -420,6 +422,7 @@ export function PopupCard(props: any) {
             // const newMsgList = lastMessage
             const updatedLastMessage = {
               ...lastMessage,
+              chatId: msg.chatId,
               content: msg.content,
               loading: false
             };
@@ -451,7 +454,7 @@ export function PopupCard(props: any) {
         // 请求 GPT 数据成功且数据流开始传输
         if (msg.status === 'begin') {
 
-          type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
+          // type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
 
           console.log('begin');
 
@@ -466,6 +469,7 @@ export function PopupCard(props: any) {
             const newMsgList = lastMessage
             const updatedLastMessage = {
               ...lastMessage,
+              chatId: msg.chatId,
               content: newMsgList.content + msg.content,
               loading: false
             };
@@ -514,6 +518,7 @@ export function PopupCard(props: any) {
 
       const updatedLastMessage = {
         role: 'user',
+        chatId: Date.now().toString(),
         content: values.msg,
         'loading': false
       };
@@ -659,18 +664,17 @@ export function PopupCard(props: any) {
       // 处理样式，避免 Anki 内显示异常
       container = container.replace(/style=/g, '');
 
-      images = windowElement.current.getElementsByClassName('images')[0].innerHTML
+      images = windowElement.current.getElementsByClassName('imageBox')[0].innerHTML
+      console.log(images);
+      
       // 处理样式，避免 Anki 内显示异常
       images = images.replace(/style=/gi, '');
       images = images.replace(/width/gi, '');
 
       // 获取 unsplashApi 的 download_location
-      unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadLocation')
-      console.log(windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadLocation'));
+      unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadlocation')
 
     }
-
-
 
 
     // 请求 background 将数据保存到 Anki
@@ -773,7 +777,7 @@ export function PopupCard(props: any) {
         <div className='flex-grow flex flex-col overflow-scroll'>
           <div className='flex-grow overflow-scroll'
             ref={messagesList}
-            style={{ paddingTop: '44px' }}
+            style={{ paddingTop: '48px' }}
           >
 
             <Selection text={keyWord} />
@@ -783,13 +787,14 @@ export function PopupCard(props: any) {
             <div
               className='messages'
               style={{
-                lineHeight: '1.7em',
-                wordWrap: 'break-word'
+                lineHeight: '2em',
+                wordWrap: 'break-word',
+                margin:'0.4em 0'
               }}
             >
               {messages.map((item) => {
 
-                return <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
+                return <div key={item.chatId} className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
                   <Skeleton loading={item.loading} active={true} title={false}>
 
                     <ReactMarkdown remarkPlugins={[breaks]} children={item.content} />
@@ -799,17 +804,16 @@ export function PopupCard(props: any) {
                 </div>
 
 
-                {/* return item.loading ? <div className='p-4'><Skeleton active={true} rows={1} title={false} /></div> : <div className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}><ReactMarkdown remarkPlugins={[breaks]} children={item.content} />{isApiErro ? <img src={settingGuide} /> : ''}</div> */ }
               }
 
 
 
               )}
-              <div className='p-4'>
-                {isApiErro ? <img src={settingGuide} style={{
-                  borderRadius: '4px'
-                }} /> : ''}
-              </div>
+
+              {isApiErro ? <div className='p-4'> <img src={settingGuide} style={{
+                borderRadius: '4px'
+              }} /></div> : ''}
+
 
             </div>
           </div>

@@ -11,11 +11,9 @@ let isContinue = true
 console.log('I am background');
 
 browser.runtime.onInstalled.addListener(function () {
+
   console.log("插件已被安装");
-  
-  
-  console.log(process.env.API_KEY);
-  
+
 });
 
 // 卸载插件后引导填写卸载原因，帮助产品优化
@@ -83,12 +81,11 @@ browser.runtime.onConnect.addListener(port => {
     console.log('接收消息：', msg)
 
     // 获取 API Key 等存储的数据
-    let openApiKey: any, unsplashApiKey: any, currentLanguage, targetLanguage = ''
-    browser.storage.sync.get({ 'openApiKey': '', 'unsplashApiKey': '', 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+    let openApiKey: any, currentLanguage, targetLanguage = ''
+    browser.storage.sync.get({ 'openApiKey': '', 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
       console.log(result);
 
       openApiKey = result.openApiKey
-      unsplashApiKey = result.unsplashApiKey
       currentLanguage = result.currentLanguage
       targetLanguage = result.targetLanguage
 
@@ -182,10 +179,13 @@ browser.runtime.onConnect.addListener(port => {
               try {
 
                 let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
+
                 if (new_msg !== undefined) {
 
+                  console.log(JSON.parse(event.data).id);
+
                   // 将数据发送给 UI 以渲染内容
-                  port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'] })
+                  port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
 
                 }
 
@@ -251,7 +251,7 @@ browser.runtime.onConnect.addListener(port => {
 
           // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
 
-          unsplashSearchPhotos(unsplashApiKey, msg.keyWord).then((imgs: any) => {
+          unsplashSearchPhotos(process.env.UNSPLASH_API_KEY as string, msg.keyWord).then((imgs: any) => {
             console.log(imgs);
             port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
           }).catch((error: any) => {
@@ -283,45 +283,37 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
     console.log('addToAnki');
 
 
-    browser.storage.sync.get({ 'unsplashApiKey': '' }).then((result) => {
-      // Unsplash
-      const unsplash = createApi({
-        accessKey: result.unsplashApiKey
-      });
-      
-      console.log('unsplash.photos.trackDownload');
-      
-      unsplash.photos.trackDownload({ downloadLocation: request.messages.unsplash_download_location, }).then((result) => console.log(result))
-
-
-  })
-
-
-  // unsplash.photos.trackDownload({ downloadLocation: photo.links.download_location, });
-
-
-  // Define sendResponse as an async function
-  const asyncSendResponse = async (response: any) => {
-    try {
-      await sendResponse(response);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  ankiAction('addNote', 6, request.messages.anki_arguments).then((result: any) => {
-    console.log(`got list of decks: ${result}`);
-    // 反馈处理结果
-    asyncSendResponse({ type: 'addToAnki', result: 'success', error: result.error });
-  })
-    .catch((error) => {
-      console.error(error);
-      asyncSendResponse({ type: 'addToAnki', result: 'failure', error: error.error });
+    // Unsplash
+    const unsplash = createApi({
+      accessKey: process.env.UNSPLASH_API_KEY as string
     });
 
-  // Return true to inform sendResponse that you will be calling it asynchronously
-  return true;
+    console.log('unsplash.photos.trackDownload');
 
-}
+    unsplash.photos.trackDownload({ downloadLocation: request.messages.unsplash_download_location, }).then((result) => console.log(result))
+
+    // Define sendResponse as an async function
+    const asyncSendResponse = async (response: any) => {
+      try {
+        await sendResponse(response);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    ankiAction('addNote', 6, request.messages.anki_arguments).then((result: any) => {
+      console.log(`got list of decks: ${result}`);
+      // 反馈处理结果
+      asyncSendResponse({ type: 'addToAnki', result: 'success', error: result.error });
+    })
+      .catch((error) => {
+        console.error(error);
+        asyncSendResponse({ type: 'addToAnki', result: 'failure', error: error.error });
+      });
+
+    // Return true to inform sendResponse that you will be calling it asynchronously
+    return true;
+
+  }
 
 }

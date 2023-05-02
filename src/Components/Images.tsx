@@ -79,19 +79,13 @@ export function Images(props: ImagesProps) {
     // const [currentURL, setCurrentURL] = useState<string>();
 
     useEffect(() => {
-        console.log('Images useEffect:');
-        console.log(props);
+
         setImages(props.images)
 
     }, [props.images]);
 
     const handleChangeImagesClick = (offset: number) => {
 
-        console.log('handleChangeImagesClick');
-
-
-
-        console.log(props.images);
         setImageIndex(index => {
             index = index + offset
             if (index >= images.length) {
@@ -101,12 +95,13 @@ export function Images(props: ImagesProps) {
                 index = images.length - 1
             }
 
-            console.log(index);
-
 
             return index
 
         })
+
+        // 预加载下一张图
+
     };
 
     const handleImagesBoxHover = (e: any) => {
@@ -130,14 +125,28 @@ export function Images(props: ImagesProps) {
             <div>
                 {images.length === 0 ? '' : <>
                     <div onMouseEnter={handleImagesBoxHover} onMouseLeave={handleImagesBoxHover}>
-                        <Image
-                            data-downloadLocation={images[imageIndex].links.download_location}
-                            src={images[imageIndex].urls.small}
-                            alt={images[imageIndex]['description']}
-                            height={250}
-                            width={'100%'}
-                            preview={false}
-                            placeholder />
+                        <div className="imageBox">
+                            <Image
+                                data-downloadlocation={images[imageIndex].links.download_location}
+                                src={images[imageIndex].urls.small}
+                                alt={images[imageIndex]['description']}
+                                height={240}
+                                width={'100%'}
+                                preview={false}
+                                placeholder />
+                        </div>
+
+
+                        {/* 后台加载所有图片，提升渲染速度 */}
+                        <div
+                            style={{
+                                display: 'none'
+                            }}>
+                            {images.map(img => <img key={img.id}
+                                src={img.urls.small}></img>)}
+
+                        </div>
+
 
                         {showControl ?
                             <div
@@ -146,11 +155,15 @@ export function Images(props: ImagesProps) {
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     width: '100%',
+                                    height:'100%',
                                     left: 0,
                                     display: 'flex',
+                                    justifyContent:'space-around',
+                                    flexDirection: 'column',
                                     padding: '10px'
                                 }}
                             >
+                                <div></div>
                                 <div
                                     style={{
                                         display: 'flex',
@@ -173,7 +186,13 @@ export function Images(props: ImagesProps) {
                                         type="primary" size="small" shape="circle" icon={<RightOutlined />} onClick={() => handleChangeImagesClick(1)} />
 
                                 </div>
-                                {/* <p>{imageIndex + 1 + '/' + images.length}</p> */}
+                                <div
+                                    style={{
+                                        textAlign:'center',
+                                        color:'#fff',
+                                        fontWeight:'500'
+                                    }}
+                                >{imageIndex + 1 + '/' + images.length}</div>
                             </div> : ''}
 
                     </div>
@@ -183,7 +202,9 @@ export function Images(props: ImagesProps) {
                             color: 'rgba(0, 0, 0, 0.4)'
                         }}
                     >
-                        By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash
+                        Photo by <a style={{ textDecoration: 'underline' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
+
+                        {/* By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash */}
                     </div>
                 </>
                 }
