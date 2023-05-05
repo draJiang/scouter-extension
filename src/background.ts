@@ -157,18 +157,22 @@ browser.runtime.onConnect.addListener(port => {
 
           port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
 
-          if (response.status === 401) {
+          if (response.status !== 200) {
             // API KEY Error
-            console.log('401');
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
-            return
+            response.json().then((data) => {
+              console.log(data)
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message,'code':data.error.code })
+              return
+            })
+
+
           }
 
-          if (response.status !== 401 && response.status !== 200) {
-            //  Error
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
-            return
-          }
+          // if (response.status !== 401 && response.status !== 200) {
+          //   //  Error
+          //   port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
+          //   return
+          // }
 
           // 处理 server-sent events
           const parser = createParser((event) => {

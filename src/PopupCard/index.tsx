@@ -304,7 +304,7 @@ export function PopupCard(props: any) {
 
 
       // 将查询记录保存起来
-      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href}
+      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href }
 
 
       if (keyWord !== '' && sentence !== '' && messages[0]['content'] !== '') {
@@ -335,9 +335,9 @@ export function PopupCard(props: any) {
             newHistoryList = item.history
             newHistoryList.unshift(newHistory)
             newHistoryList.splice(8)
-            
+
             // console.log(newHistoryList);
-            
+
           }
 
           if (!bingo) {
@@ -416,6 +416,12 @@ export function PopupCard(props: any) {
           setIsLoading(false)
           setAddToAnkiStatus('normal')
 
+          if (msg.code === 'invalid_api_key') {
+            setIsApiErro(true)
+            msg.content+='\
+            After that, you need to set the correct Open API Key in the Scouter:'
+          }
+
           setMessages(prevMessages => {
 
             const lastMessage = prevMessages[prevMessages.length - 1];
@@ -431,9 +437,7 @@ export function PopupCard(props: any) {
 
           })
 
-          if (msg.content.indexOf('API Key error') > -1) {
-            setIsApiErro(true)
-          }
+
 
           scrollToBottom()
 
@@ -666,7 +670,7 @@ export function PopupCard(props: any) {
 
       images = windowElement.current.getElementsByClassName('imageBox')[0].innerHTML
       console.log(images);
-      
+
       // 处理样式，避免 Anki 内显示异常
       images = images.replace(/style=/gi, '');
       images = images.replace(/width/gi, '');
@@ -789,7 +793,7 @@ export function PopupCard(props: any) {
               style={{
                 lineHeight: '2em',
                 wordWrap: 'break-word',
-                margin:'0.4em 0'
+                margin: '0.4em 0'
               }}
             >
               {messages.map((item) => {
