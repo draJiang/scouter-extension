@@ -418,7 +418,7 @@ export function PopupCard(props: any) {
 
           if (msg.code === 'invalid_api_key') {
             setIsApiErro(true)
-            msg.content+='\
+            msg.content += '\
             After that, you need to set the correct Open API Key in the Scouter:'
           }
 
@@ -668,15 +668,19 @@ export function PopupCard(props: any) {
       // 处理样式，避免 Anki 内显示异常
       container = container.replace(/style=/g, '');
 
-      images = windowElement.current.getElementsByClassName('imageBox')[0].innerHTML
+      if (windowElement.current.getElementsByClassName('imageBox')[0] !== undefined) {
+        images = windowElement.current.getElementsByClassName('imageBox')[0].innerHTML
+        // 获取 unsplashApi 的 download_location
+        unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadlocation')
+      }
+
       console.log(images);
 
       // 处理样式，避免 Anki 内显示异常
       images = images.replace(/style=/gi, '');
       images = images.replace(/width/gi, '');
 
-      // 获取 unsplashApi 的 download_location
-      unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadlocation')
+
 
     }
 

@@ -161,7 +161,7 @@ browser.runtime.onConnect.addListener(port => {
             // API KEY Error
             response.json().then((data) => {
               console.log(data)
-              port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message,'code':data.error.code })
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message, 'code': data.error.code })
               return
             })
 
@@ -294,7 +294,10 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
     console.log('unsplash.photos.trackDownload');
 
-    unsplash.photos.trackDownload({ downloadLocation: request.messages.unsplash_download_location, }).then((result) => console.log(result))
+    if (request.messages.unsplash_download_location !== undefined) {
+      unsplash.photos.trackDownload({ downloadLocation: request.messages.unsplash_download_location, }).then((result) => console.log(result))
+    }
+
 
     // Define sendResponse as an async function
     const asyncSendResponse = async (response: any) => {
