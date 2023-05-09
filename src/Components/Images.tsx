@@ -81,6 +81,7 @@ export function Images(props: ImagesProps) {
     useEffect(() => {
 
         setImages(props.images)
+        setImageIndex(0)
 
     }, [props.images]);
 
@@ -155,10 +156,10 @@ export function Images(props: ImagesProps) {
                                     top: '50%',
                                     transform: 'translateY(-50%)',
                                     width: '100%',
-                                    height:'100%',
+                                    height: '100%',
                                     left: 0,
                                     display: 'flex',
-                                    justifyContent:'space-around',
+                                    justifyContent: 'space-around',
                                     flexDirection: 'column',
                                     padding: '10px'
                                 }}
@@ -188,9 +189,9 @@ export function Images(props: ImagesProps) {
                                 </div>
                                 <div
                                     style={{
-                                        textAlign:'center',
-                                        color:'#fff',
-                                        fontWeight:'500'
+                                        textAlign: 'center',
+                                        color: '#fff',
+                                        fontWeight: '500'
                                     }}
                                 >{imageIndex + 1 + '/' + images.length}</div>
                             </div> : ''}

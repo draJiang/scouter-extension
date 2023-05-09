@@ -171,11 +171,15 @@ style.textContent = `
 
   #LearningEnglish2023 .rightBtnBox button {
 
-    margin-left: 6px;
+    margin-left: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
 
+  }
+
+  #LearningEnglish2023 .rightBtnBox button span:last-of-type{
+    
   }
 
   `

@@ -6,7 +6,7 @@ import { Button, ConfigProvider } from 'antd';
 import Icon from "../assets/icon128.png"
 
 import { pinPopupCard } from '../content_script'
-import { PushpinOutlined, PushpinFilled, PlusSquareOutlined } from '@ant-design/icons';
+import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone } from '@ant-design/icons';
 
 
 interface NavProps {
@@ -68,15 +68,20 @@ export function Nav(props: NavProps) {
                             justifyContent: 'end',
                             alignItems: 'center'
                         }}>
-                        {props.addToAnkiStatus == 'success' ? '✅ Added to Anki' :
+                        {props.addToAnkiStatus == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to Anki</span> :
                             <Button size="small"
-                                type='text'
+                                // type='text'
                                 icon={<PlusSquareOutlined />}
                                 // loading={props.addToAnkiStatus === 'loading' ? true : false}
                                 disabled={props.addToAnkiStatus === 'standby' || props.addToAnkiStatus === 'loading' ? true : false}
                                 onClick={handleSaveToAnkiBtnClick}>{props.addToAnkiStatus === 'loading' ? 'Adding...' : 'Add to Anki'}</Button>}
 
-                        <Button size='small' type='text' icon={isPin ? <PushpinFilled className='isPin' /> : <PushpinOutlined />} onClick={handlePinBtnClick} />
+                        <Button size='small'
+                            // type='text'
+                            style={{
+                                borderColor: isPin ? '#F08A24' : ''
+                            }}
+                            icon={isPin ? <PushpinFilled className='isPin' /> : <PushpinOutlined />} onClick={handlePinBtnClick} />
                     </div>
 
                 </div>
