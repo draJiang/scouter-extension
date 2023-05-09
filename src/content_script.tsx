@@ -16,6 +16,8 @@ import { CurrentLanguageContext } from './lib/locale'
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
 
+let isPin = false
+
 // 初始化主容器，主容器用来挂在全局样式，包括第三方组件的样式
 let MyBox: HTMLElement | null = document.getElementById('__jiang-souter');
 // container 承载 UI 组件
@@ -27,7 +29,7 @@ if (MyBox !== null && MyBox !== undefined) {
   // 如果已存在容器
   // console.log('已存在 Box 容器');
   // 移除旧容器，避免出现 2 个主容器会导致 UI 渲染错误
-  MyBox.parentNode?.removeChild(MyBox);
+  // MyBox.parentNode?.removeChild(MyBox);
 
 }
 
@@ -163,6 +165,19 @@ style.textContent = `
     
   }
 
+  #LearningEnglish2023 .isPin path{
+    fill: #F08A24;
+  }
+
+  #LearningEnglish2023 .rightBtnBox button {
+
+    margin-left: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+  }
+
   `
 shadowRoot?.appendChild(style);
 
@@ -174,36 +189,53 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   // console.log(msg);
   if (msg.type === 'open-souter') {
 
+    let port = browser.runtime.connect({
+      name: 'popup-name'
+    })
+
+
+
     // 处理窗口
 
     if (MyBox !== null && MyBox !== undefined) {
       // 如果已存在容器
 
-      // console.log('已存在 Box 容器');
+      if (MyBox.shadowRoot?.querySelector('.container') === null) {
+        // 如果不存在 PopupCard
+        container = document.createElement('div')
+        container.className = 'container'
+        shadowRoot?.appendChild(container)
+      }
+      // 停止旧的对话
+      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+
       MyBox.style.display = 'block'
+
       // 移除旧内容，避免 2 次渲染混杂在一起
-      container.parentNode?.removeChild(container);
+      // container.parentNode?.removeChild(container);
 
     } else {
       // console.log('不存在 Box 容器');
+      container = document.createElement('div')
+      container.className = 'container'
+      shadowRoot?.appendChild(container)
     }
 
-
-    container = document.createElement('div')
-    container.className = 'container'
-    shadowRoot?.appendChild(container)
-
     // 显示窗口
-    showPopupCard(window.getSelection(), container, shadowRoot)
+    showPopupCard(window.getSelection(), container, shadowRoot, isPin)
 
     // 监听页面点击事件
     document.onmousedown = function (event) {
 
-      if (MyBox !== undefined && MyBox !== null) {
+      if (MyBox !== undefined && MyBox !== null && !isPin) {
         // 如果点击的不是插件窗口及其子元素，则关闭窗口
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
           // 隐藏窗口
           container.parentNode?.removeChild(container);
+
+          // 使用 postMs 发送信息
+          port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+
         }
       }
     }
@@ -213,7 +245,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 });
 
 // 显示应用窗口
-async function showPopupCard(msg: any, MyBox: any, shadowRoot: any) {
+async function showPopupCard(msg: any, MyBox: any, shadowRoot: any, isPin: boolean) {
   console.log('showPopupCard:');
   // let a = await fetchcurrentLanguage()
   // console.log(a);
@@ -222,9 +254,9 @@ async function showPopupCard(msg: any, MyBox: any, shadowRoot: any) {
   ReactDOM.render(
     <React.StrictMode>
       <CurrentLanguageContext.Provider value={lang}>
-      <StyleProvider container={shadowRoot}>
-        <PopupCard selection={msg} />
-      </StyleProvider>
+        <StyleProvider container={shadowRoot}>
+          <PopupCard selection={msg} isPin={isPin} />
+        </StyleProvider>
       </CurrentLanguageContext.Provider>
     </React.StrictMode>,
     MyBox
@@ -235,6 +267,10 @@ async function showPopupCard(msg: any, MyBox: any, shadowRoot: any) {
 // async function getCurrentLanguage() {
 //   const lang = await fetchcurrentLanguage()
 //   console.log(lang);
-  
+
 //   return lang 
 // }
+
+export const pinPopupCard = (value: boolean) => {
+  isPin = value
+}

@@ -77,9 +77,12 @@ export function PopupCard(props: any) {
 
     // 选中文字所在的段落
     let sentence = props.selection.anchorNode.data
+    if (sentence === undefined) {
+      sentence = ''
+    }
 
     // 设置窗口的默认位置
-    if (windowElement.current) {
+    if (windowElement.current && !props.isPin) {
 
       // Check the boundaries
       const windowWidth = window.innerWidth;
@@ -104,6 +107,7 @@ export function PopupCard(props: any) {
       windowElement.current.style.top = `${clampedY}px`;
     }
 
+    setMessages([])
     setKeyWord(keyWord)
     setSentence(sentence)
 
@@ -401,8 +405,20 @@ export function PopupCard(props: any) {
     // 在消息历史中插入新记录
     setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '' }])
 
-    // 使用 postMs 发送信息
-    port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': keyWord })
+    // 停止旧的对话
+    // port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+
+    // const messageBox = document.getElementsByClassName('messages')[0]
+    // if (messageBox) {
+    //   messageBox.parentNode?.removeChild(messageBox);
+    // }
+
+
+    setTimeout(() => {
+      // 使用 postMs 发送信息
+      port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': keyWord })
+    }, 20);
+
 
     // 接收信息
     port.onMessage.addListener(msg => {
@@ -467,20 +483,28 @@ export function PopupCard(props: any) {
         // 请求 GPT 数据成功且数据流传输中
         if (msg.status === 'process') {
 
-          setMessages(prevMessages => {
+          try {
 
-            const lastMessage = prevMessages[prevMessages.length - 1];
-            const newMsgList = lastMessage
-            const updatedLastMessage = {
-              ...lastMessage,
-              chatId: msg.chatId,
-              content: newMsgList.content + msg.content,
-              loading: false
-            };
-            // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
-            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+            setMessages(prevMessages => {
 
-          })
+              const lastMessage = prevMessages[prevMessages.length - 1];
+              const newMsgList = lastMessage
+              const updatedLastMessage = {
+                ...lastMessage,
+                chatId: msg.chatId,
+                content: newMsgList.content + msg.content,
+                loading: false
+              };
+              // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
+              return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+            })
+
+          } catch (error) {
+
+          }
+
+
 
 
           scrollToBottom()

@@ -21,6 +21,7 @@
     "dotenv-webpack": "^8.0.1",
     "eventsource-parser": "^0.1.0",
     "franc": "^6.1.0",
+    "lamejs": "^1.2.1",
     "langs": "^2.0.0",
     "language-detect": "^1.1.0",
     "languagedetect": "^2.0.0",

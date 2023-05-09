@@ -5,6 +5,8 @@ import { Button, ConfigProvider } from 'antd';
 
 import Icon from "../assets/icon128.png"
 
+import { pinPopupCard } from '../content_script'
+import { PushpinOutlined, PushpinFilled, PlusSquareOutlined } from '@ant-design/icons';
 
 
 interface NavProps {
@@ -15,7 +17,7 @@ interface NavProps {
 }
 
 export function Nav(props: NavProps) {
-    const [count, setCount] = useState(0);
+    const [isPin, setIsPin] = useState(false);
     const [currentURL, setCurrentURL] = useState < string > ();
 
     useEffect(() => {
@@ -26,6 +28,17 @@ export function Nav(props: NavProps) {
         console.log('Nav handleSaveToAnkiBtnClick');
         props.handleSaveToAnkiBtnClick()
     };
+
+    const handlePinBtnClick = () => {
+        if (isPin) {
+            pinPopupCard(false)
+            setIsPin(false)
+        } else {
+            pinPopupCard(true)
+            setIsPin(true)
+        }
+
+    }
 
 
     return (
@@ -47,13 +60,23 @@ export function Nav(props: NavProps) {
                     }}
                     onMouseDown={props.onMouseDown}>
                     <img src={Icon} />
-                    <div className="rightBtnBox" style={{ flex: 1, textAlign: 'right' }}>
+                    <div className="rightBtnBox"
+                        style={{
+                            flex: 1,
+                            textAlign: 'right',
+                            display: 'flex',
+                            justifyContent: 'end',
+                            alignItems: 'center'
+                        }}>
                         {props.addToAnkiStatus == 'success' ? '✅ Added to Anki' :
                             <Button size="small"
-                                // type='link'
+                                type='text'
+                                icon={<PlusSquareOutlined />}
                                 // loading={props.addToAnkiStatus === 'loading' ? true : false}
                                 disabled={props.addToAnkiStatus === 'standby' || props.addToAnkiStatus === 'loading' ? true : false}
                                 onClick={handleSaveToAnkiBtnClick}>{props.addToAnkiStatus === 'loading' ? 'Adding...' : 'Add to Anki'}</Button>}
+
+                        <Button size='small' type='text' icon={isPin ? <PushpinFilled className='isPin' /> : <PushpinOutlined />} onClick={handlePinBtnClick} />
                     </div>
 
                 </div>

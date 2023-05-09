@@ -8,6 +8,9 @@ import { createApi } from 'unsplash-js';
 // [暂时废弃]content script 关闭窗口时，将此值设为 false 以中断数据渲染
 let isContinue = true
 
+let controller = new AbortController();
+
+
 console.log('I am background');
 
 browser.runtime.onInstalled.addListener(function () {
@@ -98,7 +101,7 @@ browser.runtime.onConnect.addListener(port => {
 
         // isContinue = true 时才会渲染数据
         isContinue = true
-
+        controller = new AbortController();
 
         let messages = msg.messages
 
@@ -120,6 +123,10 @@ browser.runtime.onConnect.addListener(port => {
 
         //     for (let i = 0; i < 80; i++) {
         //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+        //       if (!isContinue) {
+        //         console.log('停止渲染数据')
+        //         break
+        //       }
         //     }
 
         //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
@@ -138,7 +145,7 @@ browser.runtime.onConnect.addListener(port => {
         }
 
         fetch('https://api.openai.com/v1/chat/completions', {
-
+          signal: controller.signal,
           method: "POST",
           body: JSON.stringify({
             "model": "gpt-3.5-turbo",
@@ -240,7 +247,7 @@ browser.runtime.onConnect.addListener(port => {
           console.log('error');
           console.log(error);
 
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
+          // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
         })
 
@@ -267,8 +274,10 @@ browser.runtime.onConnect.addListener(port => {
       }
 
       // 停止渲染数据
-      if (msg.type === 'windowClosed') {
+      if (msg.type === 'StopTheConversation') {
         isContinue = false
+        controller.abort();
+
       }
 
     })
