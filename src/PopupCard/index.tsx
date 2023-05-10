@@ -108,6 +108,7 @@ export function PopupCard(props: any) {
     }
 
     setMessages([])
+    setImages([])
     setKeyWord(keyWord)
     setSentence(sentence)
 
@@ -195,6 +196,7 @@ export function PopupCard(props: any) {
           
           ---
           
+          接下来，请使用指定语言回复：
           A 语言：${Lang['target']['name']}
           B 语言：${Lang['current']['name']}`
         }
@@ -809,7 +811,7 @@ export function PopupCard(props: any) {
         <div className='flex-grow flex flex-col overflow-scroll'>
           <div className='flex-grow overflow-scroll'
             ref={messagesList}
-            style={{ paddingTop: '48px' }}
+            style={{ paddingTop: '54px' }}
           >
 
             <Selection text={keyWord} />

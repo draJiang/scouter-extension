@@ -200,7 +200,8 @@ export function Images(props: ImagesProps) {
                     <div
                         style={{
                             fontSize: '0.92em',
-                            color: 'rgba(0, 0, 0, 0.4)'
+                            color: 'rgba(0, 0, 0, 0.4)',
+                            marginTop: '4px'
                         }}
                     >
                         Photo by <a style={{ textDecoration: 'underline' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>

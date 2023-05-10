@@ -154,7 +154,7 @@ browser.runtime.onConnect.addListener(port => {
             "max_tokens": 420,
             "top_p": 1,
             "frequency_penalty": 0,
-            "presence_penalty": 1,
+            "presence_penalty": 2,
 
             "stream": true
           }),

@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill'
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
 
 // import LanguageDetect from "languagedetect";
@@ -35,12 +35,14 @@ export function Selection(props: SelectionProps) {
 
     browser.storage.onChanged.addListener(onStorageChange)
 
+    setPlayStatus(false)
+
     return () => {
       browser.storage.onChanged.removeListener(onStorageChange)
     };
 
 
-  }, [props]);
+  }, [props.text]);
 
   // 语音播报
   const speaker = () => {
@@ -64,9 +66,11 @@ export function Selection(props: SelectionProps) {
     if (playStatus) {
       // 基数次播放时采用慢速播放，让用户可以听的更清楚
       utterance.rate = 0.6
+
     } else {
       utterance.rate = 0.85
     }
+
     setPlayStatus(!playStatus)
 
     // 开播吧
