@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@types/chrome": "0.0.158",
+    "@types/google.analytics": "^0.0.42",
     "@types/jest": "^27.0.2",
     "@types/langs": "^2.0.1",
     "@types/react": "^17.0.0",

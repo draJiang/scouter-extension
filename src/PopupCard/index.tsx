@@ -23,6 +23,10 @@ import { useCurrentLanguage } from '../lib/locale'
 
 import "./index.css"
 
+
+
+
+
 let currentLanguage: string
 let targetLanguage: string
 
@@ -792,7 +796,7 @@ export function PopupCard(props: any) {
       style={{
         left: 10,
         top: 10,
-        color: 'rgba(0, 0, 0, 0.88)',
+        color: 'rgba(0, 0, 0, 0.80)',
       }}
     >
 

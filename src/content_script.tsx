@@ -16,6 +16,8 @@ import { CurrentLanguageContext } from './lib/locale'
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
 
+
+
 let isPin = false
 
 // 初始化主容器，主容器用来挂在全局样式，包括第三方组件的样式
@@ -118,6 +120,12 @@ style.textContent = `
   }
 
   #LearningEnglish2023,#LearningEnglish2023 textarea {
+
+  }
+
+  #LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3 {
+
+    color: rgba(0, 0, 0);
 
   }
 
@@ -236,9 +244,6 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
           // 隐藏窗口
           container.parentNode?.removeChild(container);
-
-          // 使用 postMs 发送信息
-          // port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
         }
       }
