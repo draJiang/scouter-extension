@@ -238,7 +238,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
           container.parentNode?.removeChild(container);
 
           // 使用 postMs 发送信息
-          port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+          // port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
         }
       }
@@ -274,6 +274,7 @@ async function showPopupCard(msg: any, MyBox: any, shadowRoot: any, isPin: boole
 
 //   return lang 
 // }
+
 
 export const pinPopupCard = (value: boolean) => {
   isPin = value

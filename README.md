@@ -15,16 +15,15 @@ Scouter is a browser extension designed for language learners, with the goal of 
 
 [🚀 Install in the Chrome Store](https://chrome.google.com/webstore/detail/scouter/mncfcjnabpfoagocanfjglfcpmmnkicb?hl=zh-CN&authuser=0)
 
-![Scouter](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/CleanShot2023-04-1623.18.48@2x20230416231933.png)
+![Scouter](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame8720230510130846.png)
 
-![Multilingual support](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/YGWe3e20230416233244.jpg)
+![Multilingual support](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame6220230510130857.png)
 
-![Add to Anki](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/f4Av4c20230416233309.jpg)
+![Add to Anki](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame5620230510130905.png)
 
 ## What it isn't
 
 - Scouter is not a translation tool. Its goal is to help you learn to use foreign languages independently.
-- Scouter is not a conversation tool. It only supports one-time quiz answering based on the questions provided by AI.
 
 ## Usage
 
