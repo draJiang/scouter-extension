@@ -18,6 +18,8 @@ Scouter 是一款针对语言学习者的浏览器插件，目标是帮助你在
 
 [🚀 在 Chrome 商店中安装](https://chrome.google.com/webstore/detail/scouter/mncfcjnabpfoagocanfjglfcpmmnkicb?hl=zh-CN&authuser=0)
 
+[💬 加入我们的 Discord 社区](https://discord.com/invite/7Pm3vmz87n)
+
 ![Scouter](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame8720230510130846.png)
 
 ![Multilingual support](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame6220230510130857.png)

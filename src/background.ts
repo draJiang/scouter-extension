@@ -1,3 +1,5 @@
+
+
 import browser from 'webextension-polyfill'
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
@@ -37,40 +39,23 @@ browser.contextMenus.create({
 browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
   console.log('右键菜单点击事件');
+  console.log(info);
 
+  sendMessageToContent()
 
-
-  browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-    console.log(tabs);
-    const activeTab = tabs[0]
-    let tID = activeTab.id ?? -1
-
-    if (activeTab && activeTab.id !== undefined) {
-
-      let b = browser.tabs.sendMessage(tID, { type: 'open-souter', info, })
-
-      // 已知情况：刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
-      b.catch(e => {
-        console.log(e);
-        console.log('catch');
-
-        browser.scripting.executeScript({
-          target: { tabId: tID },
-          files: ["js/vendor.js", "js/content_script.js"],
-        }).then(() => {
-          console.log('chrome.scripting.executeScript');
-        }).then(() => {
-          browser.tabs.sendMessage(tID, { type: 'open-souter', info, })
-        })
-
-      })
-
-    }
-
-
-  })
 
 })
+
+// 监听快捷键
+browser.commands.onCommand.addListener(function (command) {
+
+  console.log('hello');
+
+  if (command === 'scout') {
+    // 执行相关代码
+    sendMessageToContent()
+  }
+});
 
 // 长连接，处理 GPT 数据
 browser.runtime.onConnect.addListener(port => {
@@ -112,30 +97,30 @@ browser.runtime.onConnect.addListener(port => {
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
 
-        // setTimeout(() => {
-        //   const now = new Date();
+        setTimeout(() => {
+          const now = new Date();
 
-        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
 
 
-        //   setTimeout(() => {
+          setTimeout(() => {
 
-        //     for (let i = 0; i < 80; i++) {
-        //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-        //       if (!isContinue) {
-        //         console.log('停止渲染数据')
-        //         break
-        //       }
-        //     }
+            for (let i = 0; i < 80; i++) {
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+              if (!isContinue) {
+                console.log('停止渲染数据')
+                break
+              }
+            }
 
-        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
-        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-        //   }, 1000);
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+          }, 1000);
 
-        // }, 2000);
+        }, 2000);
 
-        // return
+        return
 
         // ====================
 
@@ -331,5 +316,41 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
     return true;
 
   }
+
+}
+
+
+const sendMessageToContent = () => {
+
+  browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+    console.log(tabs);
+    const activeTab = tabs[0]
+    let tID = activeTab.id ?? -1
+
+    if (activeTab && activeTab.id !== undefined) {
+
+      let b = browser.tabs.sendMessage(tID, { type: 'open-souter' })
+
+      // 已知情况：刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
+      b.catch(e => {
+        console.log(e);
+        console.log('catch');
+
+        browser.scripting.executeScript({
+          target: { tabId: tID },
+          files: ["js/vendor.js", "js/content_script.js"],
+        }).then(() => {
+          console.log('chrome.scripting.executeScript');
+        }).then(() => {
+          browser.tabs.sendMessage(tID, { type: 'open-souter' })
+        })
+
+      })
+
+    }
+
+
+  })
+
 
 }

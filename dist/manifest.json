@@ -7,6 +7,15 @@
         "default_icon": "icon48.png",
         "default_popup": "popup.html"
     },
+    "commands": {
+        "scout": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+S",
+                "mac": "Command+Shift+S"
+            },
+            "description": "Scout"
+        }
+    },
     "content_scripts": [{
         "matches": [
             "<all_urls>"
@@ -27,7 +36,8 @@
     "permissions": [
         "storage",
         "contextMenus",
-        "scripting"
+        "scripting",
+        "commands"
     ],
     "host_permissions": [
         "<all_urls>"
