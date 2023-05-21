@@ -276,9 +276,17 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
   console.log("Message from the content script: " +
     request.type);
 
+  // Define sendResponse as an async function
+  const asyncSendResponse = async (response: any) => {
+    try {
+      await sendResponse(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-  if (request.type === 'addToAnki') {
-    console.log('addToAnki');
+  if (request.type === 'addNote') {
+    console.log('addNote');
 
 
     // Unsplash
@@ -292,27 +300,96 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
       unsplash.photos.trackDownload({ downloadLocation: request.messages.unsplash_download_location, }).then((result) => console.log(result))
     }
 
+    ankiAction(request.messages.anki_action_type, 6, request.messages.anki_arguments).then((result: any) => {
 
-    // Define sendResponse as an async function
-    const asyncSendResponse = async (response: any) => {
-      try {
-        await sendResponse(response);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    ankiAction('addNote', 6, request.messages.anki_arguments).then((result: any) => {
       console.log(`got list of decks: ${result}`);
       // 反馈处理结果
       asyncSendResponse({ type: 'addToAnki', result: 'success', error: result.error });
+
     })
       .catch((error) => {
+
         console.error(error);
         asyncSendResponse({ type: 'addToAnki', result: 'failure', error: error.error });
+
       });
 
     // Return true to inform sendResponse that you will be calling it asynchronously
+    return true;
+
+  }
+
+  if (request.type === 'setModel') {
+
+    // 从本地设置中获取 DeckName
+
+    // 获取所有 Model
+    ankiAction('modelNames', 6).then((result: any) => {
+
+      console.log(result.result);
+
+      if (!result.error) {
+
+        const defaultModelName = 'Scouter'
+
+        if (result.result.includes(defaultModelName)) {
+          // 如果有 Scouter Model 则获取 Model 的字段
+          ankiAction('modelFieldNames', 6, { 'modelName': defaultModelName }).then((result: any) => {
+            if (result.result.length < 2) {
+              // 字段少于 2 个时无法添加笔记，引导用户修改
+            } else {
+
+              // 反馈处理结果
+              asyncSendResponse({ type: 'setModel', result: 'success', data: { 'modelName': defaultModelName, 'field1': result.result[0], 'field2': result.result[1] }, error: result.error });
+
+            }
+          })
+
+        } else {
+          // 如果没有 Scouter 默认的 Model，则创建
+          ankiAction('createModel', 6, {
+            "modelName": defaultModelName,
+            "inOrderFields": ["Front", "Back"],
+            'cardTemplates': [
+              {
+                'name': 'Card1',
+                'Front': '{{Front}}',
+                'Back': `{{Front}}
+                <hr id=answer>
+                {{Back}}`
+
+              }
+            ]
+          }).then((result: any) => {
+            if (!result.error) {
+              // 反馈处理结果
+              asyncSendResponse({
+                type: 'setModel', result: 'success', data: {
+                  'modelName': defaultModelName,
+                  'field1': result.result.flds[0].name,
+                  'field2': result.result.flds[1].name
+
+                }, error: result.error
+              });
+            }
+          })
+
+        }
+
+
+      }
+
+
+
+
+    })
+      .catch((error) => {
+
+        console.error(error);
+        asyncSendResponse({ type: 'addToAnki', result: 'failure', error: error.error });
+
+      });
+
     return true;
 
   }

@@ -3,6 +3,9 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
+
+import { ankiAction } from '../util'
+
 import { Button, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 
 import "./index.css"
@@ -13,8 +16,9 @@ import { lang } from "../lib/lang"
 
 export const Options = () => {
 
-  const [openApiKey, setOpenApiKey] = useState < string | null > (null);
-  const [status, setStatus] = useState < string > ("");
+  const [openApiKey, setOpenApiKey] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("");
+  const [ankiDeckNames, setAnkiDeckNames] = useState<Array<string>>(['Default']);
 
   const [form] = Form.useForm();
   const { Option } = Select;
@@ -38,18 +42,83 @@ export const Options = () => {
 
     console.log('options useEffect:');
 
+    // chrome.storage.sync.remove('ankiDeckName', function () {
+    //   console.log('历史记录已删除');
+    // });
+
+
+    let defaultDeckName = ''
+
     // 获取配置信息
     getSettings().then(items => {
       // setOpenApiKey(items.openApiKey ?? null);
+      console.log(items);
+      console.log(items.ankiDeckName);
+
+      if (items.ankiDeckName) {
+        console.log('items.ankiDeckName');
+
+        // 如果存有历史记录
+        defaultDeckName = items.ankiDeckName
+
+      } else {
+        // 如果没有历史记录
+
+        // 获取 Anki 的牌组列表
+        ankiAction('deckNames', 6).then((result: any) => {
+
+
+          console.log(result);
+          // 将第一个牌组作为默认牌组
+          defaultDeckName = result.result[0]
+          setAnkiDeckNames(result.result)
+
+          console.log(defaultDeckName);
+
+          form.setFieldsValue({
+
+            ankiDeckName: defaultDeckName
+
+          });
+
+        })
+
+      }
+
+      console.log(defaultDeckName);
 
       // 更新 input 文本框的默认值
-      form.setFieldsValue({ openApiKey: items.openApiKey, unsplashApiKey: items.unsplashApiKey, currentLanguage: items.currentLanguage, targetLanguage: items.targetLanguage });
+      form.setFieldsValue({
+        openApiKey: items.openApiKey,
+        unsplashApiKey: items.unsplashApiKey,
+        currentLanguage: items.currentLanguage,
+        targetLanguage: items.targetLanguage,
+        ankiDeckName: defaultDeckName
+
+      });
     })
 
-  }, []);
+
+
+
+
+
+  }, [ankiDeckNames.join('')]);
+
+  // useEffect(() => {
+
+  //   // 获取 Anki 的牌组列表
+  //   ankiAction('deckNames', 6).then((result: any) => {
+  //     console.log(result);
+
+  //     setAnkiDeckNames(result.result)
+
+  //   })
+
+  // }, [ankiDeckNames])
 
   async function getSettings() {
-    let items = await browser.storage.sync.get(["openApiKey", "unsplashApiKey", "currentLanguage", "targetLanguage"])
+    let items = await browser.storage.sync.get(["openApiKey", "unsplashApiKey", "currentLanguage", "targetLanguage", "ankiDeckName"])
     return items
   }
 
@@ -62,14 +131,17 @@ export const Options = () => {
         openApiKey: values['openApiKey'],
         unsplashApiKey: values['unsplashApiKey'],
         currentLanguage: values['currentLanguage'],
-        targetLanguage: values['targetLanguage']
+        targetLanguage: values['targetLanguage'],
+        ankiDeckName: values['ankiDeckName']
       }
     ).then(item => {
 
       // Update status to let user know options were saved.
+      console.log(item);
 
       console.log('browser');
       setStatus(' ✅ Saved')
+
       setTimeout(() => {
         setStatus('')
       }, 2000);
@@ -138,21 +210,56 @@ export const Options = () => {
             </Form.Item>
 
             <Form.Item
+              name="ankiDeckName"
+              label="ankiDeckName"
+            >
+              <Select
+                placeholder="ankiDeckName"
+              >
+
+                {ankiDeckNames.map((item) => <Option key={item} value={item}>{item}</Option>)}
+
+
+                {/* {() => {
+
+                  const optionList = ankiAction('deckNames', 6).then((result: any) => {
+
+                    const optionList = result.result.map((item: any) => <Option key={item} value={item}>{item}</Option>)
+
+                    return optionList
+
+                  })
+
+                  return optionList
+
+                }
+                } */}
+
+              </Select>
+            </Form.Item>
+
+            <Form.Item
               style={{ margin: '0' }}
             >
               <Button type="primary" htmlType="submit">Save</Button>
               <span>{status}</span>
             </Form.Item>
 
+
+
           </Form>
 
           <Divider />
 
           <div className="instructions">
+
             <h2>Usage</h2>
-            <h3>Set up your API Key</h3>
-            <ul>
+
+            <ul style={{
+              marginBottom: '14px'
+            }}>
               <li>
+                <p>Set up your API Key</p>
                 <p><a target={"_blank"} href="https://platform.openai.com/account/api-keys">Get Open API Key</a></p>
               </li>
               <li>
@@ -160,13 +267,15 @@ export const Options = () => {
                 <img src={Usage}></img>
               </li>
             </ul>
-            <h3>Use the "Add to Anki" feature</h3>
-            <p>This is an optional step if you need to add knowledge to Anki, you need to complete the following steps:</p>
-            <ul>
-              <li>Install the <a href='https://apps.ankiweb.net/'>Anki client</a></li>
-              <li>Install the <a href='https://ankiweb.net/shared/info/2055492159'>AnkiConnect plugin</a></li>
-            </ul>
-            <p>The "Add to Anki" feature can only be used when the Anki client is open.</p>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'left',
+              width: '100%'
+            }}>
+              <Button style={{ width: '300px', marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
+              <Button style={{ width: '300px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
+            </div>
           </div>
 
         </ConfigProvider>

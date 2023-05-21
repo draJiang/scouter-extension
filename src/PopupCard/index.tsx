@@ -58,8 +58,6 @@ export function PopupCard(props: any) {
 
   // 窗口拖拽逻辑
   const [dragging, setDragging] = useState(false);
-  // const [position, setPosition] = useState({ x: 10, y: 10 });
-  // const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const windowElement = useRef<HTMLDivElement>(null);
   const messagesList = useRef<HTMLDivElement>(null);
@@ -679,10 +677,7 @@ export function PopupCard(props: any) {
     }
   }
 
-  // 点击保存到 Anki
-  const handleSaveToAnkiBtnClick = () => {
-
-    setAddToAnkiStatus('loading')
+  const addToAnki = (deckName: string, modelName: string, front: string, back: string) => {
 
     let container = ''
     let images = ''
@@ -708,19 +703,17 @@ export function PopupCard(props: any) {
       images = images.replace(/style=/gi, '');
       images = images.replace(/width/gi, '');
 
-
-
     }
 
 
     // 请求 background 将数据保存到 Anki
     const p = {
       "note": {
-        "deckName": "Default",
-        "modelName": "Basic",
+        "deckName": deckName,
+        "modelName": modelName,
         "fields": {
-          "Front": keyWord,
-          "Back": '<p>' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>'
+          [front]: keyWord,
+          [back]: '<p>' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>'
         },
         "tags": [
           "Scouter"
@@ -729,29 +722,52 @@ export function PopupCard(props: any) {
     }
 
     // 发送消息给 background
-    let sending = browser.runtime.sendMessage({ 'type': 'addToAnki', 'messages': { 'anki_arguments': p, 'unsplash_download_location': unsplash_download_location }, })
+    let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
     sending.then(handleResponse, handleError);
-    // 接收 background 的回复
-    function handleResponse(message: any) {
 
-      // console.log(message);
+  }
 
-      if (message.error === null) {
+  // 点击保存到 Anki
+  const handleSaveToAnkiBtnClick = () => {
 
-        setAddToAnkiStatus('success')
+    setAddToAnkiStatus('loading')
 
-      } else {
-        alert(message.error)
-        setAddToAnkiStatus('normal')
-      }
 
-    }
 
-    function handleError(erro: any) {
+    // 先预处理 Anki 的 model
+    let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, })
+    sending.then((message: any) => {
+
+      // 添加到 Anki 中
+      console.log(message);
+      addToAnki('Default', message.data.modelName, message.data.field1, message.data.field2)
+
+    }, handleError);
+
+
+
+  }
+
+  // 接收 background 的回复
+  function handleResponse(message: any) {
+
+    // console.log(message);
+
+    if (message.error === null) {
+
+      setAddToAnkiStatus('success')
+
+
+    } else {
+      alert(message.error)
       setAddToAnkiStatus('normal')
-      // console.log(erro);
     }
 
+  }
+
+  function handleError(erro: any) {
+    setAddToAnkiStatus('normal')
+    // console.log(erro);
   }
 
 
