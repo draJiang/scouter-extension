@@ -322,73 +322,88 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
   if (request.type === 'setModel') {
 
     // 从本地设置中获取 DeckName
+    browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
 
-    // 获取所有 Model
-    ankiAction('modelNames', 6).then((result: any) => {
+      let defaultDeckName = result.ankiDeckName
 
-      console.log(result.result);
+      if (defaultDeckName === '' || defaultDeckName === undefined) {
+        defaultDeckName = 'Default'
+      }
 
-      if (!result.error) {
+      // 获取所有 Model
+      ankiAction('modelNames', 6).then((result: any) => {
 
-        const defaultModelName = 'Scouter'
+        console.log(result.result);
 
-        if (result.result.includes(defaultModelName)) {
-          // 如果有 Scouter Model 则获取 Model 的字段
-          ankiAction('modelFieldNames', 6, { 'modelName': defaultModelName }).then((result: any) => {
-            if (result.result.length < 2) {
-              // 字段少于 2 个时无法添加笔记，引导用户修改
-            } else {
+        if (!result.error) {
 
-              // 反馈处理结果
-              asyncSendResponse({ type: 'setModel', result: 'success', data: { 'modelName': defaultModelName, 'field1': result.result[0], 'field2': result.result[1] }, error: result.error });
+          const defaultModelName = 'Scouter'
 
-            }
-          })
+          if (result.result.includes(defaultModelName)) {
+            // 如果有 Scouter Model 则获取 Model 的字段
+            ankiAction('modelFieldNames', 6, { 'modelName': defaultModelName }).then((result: any) => {
+              if (result.result.length < 2) {
+                // 字段少于 2 个时无法添加笔记，引导用户修改
 
-        } else {
-          // 如果没有 Scouter 默认的 Model，则创建
-          ankiAction('createModel', 6, {
-            "modelName": defaultModelName,
-            "inOrderFields": ["Front", "Back"],
-            'cardTemplates': [
-              {
-                'name': 'Card1',
-                'Front': '{{Front}}',
-                'Back': `{{Front}}
+                asyncSendResponse({ type: 'setModel', result: 'failure', data: {}, error: 'The Scouter model in Anki needs to include at least 2 fields. Please modify and try again.' });
+
+              } else {
+
+                // 反馈处理结果
+                asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelName': defaultModelName, 'field1': result.result[0], 'field2': result.result[1] }, error: result.error });
+
+              }
+            })
+
+          } else {
+            // 如果没有 Scouter 默认的 Model，则创建
+            ankiAction('createModel', 6, {
+              "modelName": defaultModelName,
+              "inOrderFields": ["Front", "Back"],
+              'cardTemplates': [
+                {
+                  'name': 'Card1',
+                  'Front': '{{Front}}',
+                  'Back': `{{Front}}
                 <hr id=answer>
                 {{Back}}`
 
-              }
-            ]
-          }).then((result: any) => {
-            if (!result.error) {
-              // 反馈处理结果
-              asyncSendResponse({
-                type: 'setModel', result: 'success', data: {
-                  'modelName': defaultModelName,
-                  'field1': result.result.flds[0].name,
-                  'field2': result.result.flds[1].name
+                }
+              ]
+            }).then((result: any) => {
+              if (!result.error) {
+                // 反馈处理结果
+                asyncSendResponse({
+                  type: 'setModel', result: 'success', data: {
+                    'defaultDeckName': defaultDeckName,
+                    'modelName': defaultModelName,
+                    'field1': result.result.flds[0].name,
+                    'field2': result.result.flds[1].name
 
-                }, error: result.error
-              });
-            }
-          })
+                  }, error: result.error
+                });
+              }
+            })
+
+          }
+
 
         }
 
 
-      }
 
 
+      })
+        .catch((error) => {
 
+          console.error(error);
+          asyncSendResponse({ type: 'setModel', result: 'failure', error: error.error });
+
+        });
 
     })
-      .catch((error) => {
 
-        console.error(error);
-        asyncSendResponse({ type: 'addToAnki', result: 'failure', error: error.error });
 
-      });
 
     return true;
 

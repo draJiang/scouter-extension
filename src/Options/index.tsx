@@ -20,6 +20,8 @@ export const Options = () => {
   const [status, setStatus] = useState<string>("");
   const [ankiDeckNames, setAnkiDeckNames] = useState<Array<string>>(['Default']);
 
+  const [ankiClientIsopen, setAnkiClientIsopen] = useState<boolean>(true)
+
   const [form] = Form.useForm();
   const { Option } = Select;
 
@@ -71,7 +73,6 @@ export const Options = () => {
           console.log(result);
           // 将第一个牌组作为默认牌组
           defaultDeckName = result.result[0]
-          setAnkiDeckNames(result.result)
 
           console.log(defaultDeckName);
 
@@ -80,6 +81,10 @@ export const Options = () => {
             ankiDeckName: defaultDeckName
 
           });
+
+        }).catch((error) => {
+
+          console.log(error);
 
         })
 
@@ -94,7 +99,6 @@ export const Options = () => {
         currentLanguage: items.currentLanguage,
         targetLanguage: items.targetLanguage,
         ankiDeckName: defaultDeckName
-
       });
     })
 
@@ -105,17 +109,19 @@ export const Options = () => {
 
   }, [ankiDeckNames.join('')]);
 
-  // useEffect(() => {
+  useEffect(() => {
 
-  //   // 获取 Anki 的牌组列表
-  //   ankiAction('deckNames', 6).then((result: any) => {
-  //     console.log(result);
+    // 获取 Anki 的牌组列表
+    ankiAction('deckNames', 6).then((result: any) => {
+      console.log(result);
 
-  //     setAnkiDeckNames(result.result)
+      setAnkiDeckNames(result.result)
 
-  //   })
+    }).catch(error => {
+      setAnkiClientIsopen(false)
+    })
 
-  // }, [ankiDeckNames])
+  }, [ankiDeckNames.join(''), ankiClientIsopen])
 
   async function getSettings() {
     let items = await browser.storage.sync.get(["openApiKey", "unsplashApiKey", "currentLanguage", "targetLanguage", "ankiDeckName"])
@@ -211,32 +217,22 @@ export const Options = () => {
 
             <Form.Item
               name="ankiDeckName"
-              label="ankiDeckName"
+              label="Anki Deck Name"
+              extra={!ankiClientIsopen && <p style={{
+                color: '#666'
+              }}>Anki client and related settings not found. Please <a target='__blank' href='https://jiangzilong.notion.site/Use-the-Add-to-Anki-feature-7ab95ff8aa5e419c978e8a2a0a451324'>configure</a> and try again</p>}
             >
               <Select
-                placeholder="ankiDeckName"
+                placeholder="Anki Deck Name"
+                disabled={!ankiClientIsopen}
               >
 
                 {ankiDeckNames.map((item) => <Option key={item} value={item}>{item}</Option>)}
 
 
-                {/* {() => {
-
-                  const optionList = ankiAction('deckNames', 6).then((result: any) => {
-
-                    const optionList = result.result.map((item: any) => <Option key={item} value={item}>{item}</Option>)
-
-                    return optionList
-
-                  })
-
-                  return optionList
-
-                }
-                } */}
-
               </Select>
             </Form.Item>
+
 
             <Form.Item
               style={{ margin: '0' }}

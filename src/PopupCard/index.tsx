@@ -738,11 +738,21 @@ export function PopupCard(props: any) {
     let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, })
     sending.then((message: any) => {
 
-      // 添加到 Anki 中
-      console.log(message);
-      addToAnki('Default', message.data.modelName, message.data.field1, message.data.field2)
 
-    }, handleError);
+      console.log(message);
+      if (message.result == 'success') {
+        // 添加到 Anki 中
+        addToAnki(message.data.defaultDeckName, message.data.modelName, message.data.field1, message.data.field2)
+      } else {
+        // 反馈错误信息
+        alert(message.error)
+        setAddToAnkiStatus('normal')
+      }
+
+
+    }, () => {
+      //error
+    });
 
 
 
