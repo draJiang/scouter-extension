@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 
-import { ankiAction } from '../util'
+import { ankiAction, getDefaultDeckName } from '../util'
 
 import { Button, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 
@@ -57,54 +57,58 @@ export const Options = () => {
       console.log(items);
       console.log(items.ankiDeckName);
 
-      if (items.ankiDeckName) {
-        console.log('items.ankiDeckName');
+      // if (items.ankiDeckName) {
+      //   console.log('items.ankiDeckName');
 
-        // 如果存有历史记录
-        defaultDeckName = items.ankiDeckName
+      //   // 如果存有历史记录
+      //   defaultDeckName = items.ankiDeckName
 
-      } else {
-        // 如果没有历史记录
+      // } else {
+      //   // 如果没有历史记录
 
-        // 获取 Anki 的牌组列表
-        ankiAction('deckNames', 6).then((result: any) => {
+      //   // 获取 Anki 的牌组列表
+      //   ankiAction('deckNames', 6).then((result: any) => {
 
 
-          console.log(result);
-          // 将第一个牌组作为默认牌组
-          defaultDeckName = result.result[0]
+      //     console.log(result);
+      //     // 将第一个牌组作为默认牌组
+      //     defaultDeckName = result.result[0]
 
-          console.log(defaultDeckName);
+      //     console.log(defaultDeckName);
 
-          form.setFieldsValue({
+      //     form.setFieldsValue({
 
-            ankiDeckName: defaultDeckName
+      //       ankiDeckName: defaultDeckName
 
-          });
+      //     });
 
-        }).catch((error) => {
+      //   }).catch((error) => {
 
-          console.log(error);
+      //     console.log(error);
 
-        })
+      //   })
 
-      }
+      // }
 
-      console.log(defaultDeckName);
 
-      // 更新 input 文本框的默认值
-      form.setFieldsValue({
-        openApiKey: items.openApiKey,
-        unsplashApiKey: items.unsplashApiKey,
-        currentLanguage: items.currentLanguage,
-        targetLanguage: items.targetLanguage,
-        ankiDeckName: defaultDeckName
-      });
+      getDefaultDeckName().then((data: any) => {
+        
+        defaultDeckName = data.defaultDeckName
+
+        // 更新 input 文本框的默认值
+        form.setFieldsValue({
+          openApiKey: items.openApiKey,
+          unsplashApiKey: items.unsplashApiKey,
+          currentLanguage: items.currentLanguage,
+          targetLanguage: items.targetLanguage,
+          ankiDeckName: defaultDeckName
+        });
+
+      })
+
+
+
     })
-
-
-
-
 
 
   }, [ankiDeckNames.join('')]);

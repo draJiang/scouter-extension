@@ -3,7 +3,7 @@
 import browser from 'webextension-polyfill'
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
-import { ankiAction, unsplashSearchPhotos } from "./util";
+import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "./util";
 import { createApi } from 'unsplash-js';
 
 
@@ -97,30 +97,30 @@ browser.runtime.onConnect.addListener(port => {
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
 
-        setTimeout(() => {
-          const now = new Date();
+        // setTimeout(() => {
+        //   const now = new Date();
 
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
 
 
-          setTimeout(() => {
+        //   setTimeout(() => {
 
-            for (let i = 0; i < 80; i++) {
-              port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-              if (!isContinue) {
-                console.log('停止渲染数据')
-                break
-              }
-            }
+        //     for (let i = 0; i < 80; i++) {
+        //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+        //       if (!isContinue) {
+        //         console.log('停止渲染数据')
+        //         break
+        //       }
+        //     }
 
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-          }, 1000);
+        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
+        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+        //   }, 1000);
 
-        }, 2000);
+        // }, 2000);
 
-        return
+        // return
 
         // ====================
 
@@ -304,7 +304,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
       console.log(`got list of decks: ${result}`);
       // 反馈处理结果
-      asyncSendResponse({ type: 'addToAnki', result: 'success', error: result.error });
+      asyncSendResponse({ type: 'addToAnki', result: 'success', data: request.messages.anki_arguments, error: result.error });
 
     })
       .catch((error) => {
@@ -321,10 +321,11 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   if (request.type === 'setModel') {
 
-    // 从本地设置中获取 DeckName
-    browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
 
-      let defaultDeckName = result.ankiDeckName
+    // 获取 DeckName
+    getDefaultDeckName().then((result: any) => {
+
+      let defaultDeckName = result.defaultDeckName
 
       if (defaultDeckName === '' || defaultDeckName === undefined) {
         defaultDeckName = 'Default'
@@ -341,6 +342,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
           if (result.result.includes(defaultModelName)) {
             // 如果有 Scouter Model 则获取 Model 的字段
+
             ankiAction('modelFieldNames', 6, { 'modelName': defaultModelName }).then((result: any) => {
               if (result.result.length < 2) {
                 // 字段少于 2 个时无法添加笔记，引导用户修改
@@ -357,6 +359,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
           } else {
             // 如果没有 Scouter 默认的 Model，则创建
+
             ankiAction('createModel', 6, {
               "modelName": defaultModelName,
               "inOrderFields": ["Front", "Back"],
@@ -400,6 +403,12 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
           asyncSendResponse({ type: 'setModel', result: 'failure', error: error.error });
 
         });
+
+    })
+
+    browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
+
+
 
     })
 

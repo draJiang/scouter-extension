@@ -1,3 +1,4 @@
+import browser from 'webextension-polyfill'
 import { createApi } from 'unsplash-js';
 
 // 将信息添加到 Anki
@@ -20,6 +21,7 @@ export function ankiAction(action: any, version: any, params = {}) {
   });
 }
 
+// 在 unsplash 中搜索照片
 export function unsplashSearchPhotos(API_KEY: string, query: string) {
   return new Promise((resolve, reject) => {
     const unsplash = createApi({
@@ -34,9 +36,9 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
       if (data.response?.results.length === 0) {
         resolve([]);
       } else {
-        const imageUrl = data.response?.results[0].urls.regular
-        // chrome.tabs.create({ url: imageUrl });
+        
         resolve(data.response?.results);
+        
       }
     }).catch((error) => {
       reject(error);
@@ -44,39 +46,46 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
   });
 }
 
-export function getMp3() {
-  // 创建 AudioContext 对象
-  const audioContext = new AudioContext();
+// 获取 Anki 的 Deck 名称，添加到卡片会存放到这里
+export function getDefaultDeckName() {
+  return new Promise((resolve, reject) => {
 
-  // 创建一个空的缓冲区，用于存储音频数据
-  const buffer = audioContext.createBuffer(1, 44100, 44100);
+    let defaultDeckName = ''
 
-  // 获取缓冲区的数据
-  const data = buffer.getChannelData(0);
+    // 获取用户设置的 Deck Name
+    browser.storage.sync.get(["ankiDeckName"]).then(async (result) => {
+      console.log('result:');
+      console.log(result);
 
-  // 将字符串转换为音频数据
-  const string = 'Hello, world!';
-  for (let i = 0; i < string.length; i++) {
-    data[i] = string.charCodeAt(i) / 65535 * 2 - 1;
-  }
+      if (result.ankiDeckName) {
+        // 用户有设置
 
-  // 创建一个 AudioBufferSourceNode 对象，将缓冲区作为参数传入
-  const source = audioContext.createBufferSource();
-  source.buffer = buffer;
 
-  // 将 AudioBufferSourceNode 对象连接到 AudioContext 的 destination 属性
-  source.connect(audioContext.destination);
+        defaultDeckName = result.ankiDeckName
+      } else {
+        // 用户未设置
+        // 获取 Anki 的牌组列表
+        defaultDeckName = await ankiAction('deckNames', 6).then((result: any) => {
 
-  // 播放音频
-  source.start();
+          // 将第一个牌组作为默认牌组
+          return result.result[0]
 
-  // 将音频导出为 MP3 文件
-  // const encoder = new Mp3Encoder(1, 44100, 128);
-  // const mp3Data = encoder.encodeBuffer(buffer.getChannelData(0));
-  // const blob = new Blob([mp3Data], { type: 'audio/mp3' });
-  // const url = URL.createObjectURL(blob);
-  // const link = document.createElement('a');
-  // link.href = url;
-  // link.download = 'audio.mp3';
+
+        }).catch((error) => {
+
+          console.log(error);
+          return ''
+
+        })
+
+      }
+
+      resolve({ 'defaultDeckName': defaultDeckName })
+
+    })
+
+  })
+
+
 
 }
