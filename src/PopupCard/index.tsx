@@ -410,12 +410,6 @@ export function PopupCard(props: any) {
     // 在消息历史中插入新记录
     setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '' }])
 
-    // const messageBox = document.getElementsByClassName('messages')[0]
-    // if (messageBox) {
-    //   messageBox.parentNode?.removeChild(messageBox);
-    // }
-
-
     setTimeout(() => {
       // 使用 postMs 发送信息
       port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': keyWord })
@@ -922,6 +916,7 @@ export function PopupCard(props: any) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  color: !isLoading && isAnswerInputed ? '#F08A24' : ''
                 }}
                 icon={<SendOutlined />}
               />

@@ -52,7 +52,7 @@ export const Options = () => {
     let defaultDeckName = ''
 
     // 获取配置信息
-    getSettings().then(items => {
+    getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
       console.log(items);
       console.log(items.ankiDeckName);
@@ -91,20 +91,20 @@ export const Options = () => {
       // }
 
 
-      getDefaultDeckName().then((data: any) => {
-        
+      await getDefaultDeckName().then((data: any) => {
+
         defaultDeckName = data.defaultDeckName
 
-        // 更新 input 文本框的默认值
-        form.setFieldsValue({
-          openApiKey: items.openApiKey,
-          unsplashApiKey: items.unsplashApiKey,
-          currentLanguage: items.currentLanguage,
-          targetLanguage: items.targetLanguage,
-          ankiDeckName: defaultDeckName
-        });
-
       })
+
+      // 更新 input 文本框的默认值
+      form.setFieldsValue({
+        openApiKey: items.openApiKey,
+        unsplashApiKey: items.unsplashApiKey,
+        currentLanguage: items.currentLanguage,
+        targetLanguage: items.targetLanguage,
+        ankiDeckName: defaultDeckName
+      });
 
 
 
