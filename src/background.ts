@@ -97,30 +97,30 @@ browser.runtime.onConnect.addListener(port => {
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
 
-        // setTimeout(() => {
-        //   const now = new Date();
+        setTimeout(() => {
+          const now = new Date();
 
-        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
 
 
-        //   setTimeout(() => {
+          setTimeout(() => {
 
-        //     for (let i = 0; i < 80; i++) {
-        //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-        //       if (!isContinue) {
-        //         console.log('停止渲染数据')
-        //         break
-        //       }
-        //     }
+            for (let i = 0; i < 80; i++) {
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+              if (!isContinue) {
+                console.log('停止渲染数据')
+                break
+              }
+            }
 
-        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
-        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-        //   }, 1000);
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+          }, 1000);
 
-        // }, 2000);
+        }, 2000);
 
-        // return
+        return
 
         // ====================
 
@@ -304,7 +304,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
       console.log(`got list of decks: ${result}`);
       // 反馈处理结果
-      asyncSendResponse({ type: 'addToAnki', result: 'success', data: request.messages.anki_arguments, error: result.error });
+      asyncSendResponse({ type: 'addToAnki', result: 'success', data: result.result, error: result.error });
 
     })
       .catch((error) => {
@@ -414,6 +414,27 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
 
 
+    return true;
+
+  }
+
+  if (request.type === 'guiEditNote') {
+
+    ankiAction(request.messages.anki_action_type, 6, request.messages.anki_arguments).then((result: any) => {
+
+      console.log(`got list of decks: ${result}`);
+      // 反馈处理结果
+      asyncSendResponse({ type: 'guiEditNote', result: 'success', data: result.result, error: result.error });
+
+    })
+      .catch((error) => {
+
+        console.error(error);
+        asyncSendResponse({ type: 'guiEditNote', result: 'failure', error: error.error });
+
+      });
+
+    // Return true to inform sendResponse that you will be calling it asynchronously
     return true;
 
   }

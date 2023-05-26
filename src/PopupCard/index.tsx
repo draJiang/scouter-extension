@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill'
 
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 // import ReactDOM from "react-dom";
 
 import ReactMarkdown from 'react-markdown'
@@ -10,12 +10,14 @@ import rehypeRaw from 'rehype-raw'
 
 import { Nav } from "../Components/Nav"
 import { Images } from "../Components/Images"
+import Notice from '../Components/Notice';
 
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
-import { Skeleton, Input, ConfigProvider, theme, message, Result, Select, Form, Button } from 'antd';
+import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Form, Button } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
+
 
 import settingGuide from '../assets/settingGuide.png'
 
@@ -32,7 +34,11 @@ let targetLanguage: string
 
 const { TextArea } = Input;
 
+const AnkiContext = createContext(null);
+
+
 export function PopupCard(props: any) {
+
 
   const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string }>>([])
   const [images, setImages] = useState([])
@@ -43,7 +49,7 @@ export function PopupCard(props: any) {
   const [isLoading, setIsLoading] = useState(true);
 
   // standby,normal,loading,success
-  const [addToAnkiStatus, setAddToAnkiStatus] = useState<string>('standby');
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState<{ status: string, noteId: number }>({ 'status': 'standby', 'noteId': 0 });
 
 
   const [isAnswerDone, setAnswerDone] = useState(false);
@@ -64,6 +70,9 @@ export function PopupCard(props: any) {
   const inputRef = useRef<HTMLDivElement>(null);
 
   const [form] = Form.useForm();
+
+
+
 
   // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
 
@@ -153,7 +162,8 @@ export function PopupCard(props: any) {
 
           setIsLoading(false)
           setAnswerDone(true)
-          setAddToAnkiStatus('normal')
+
+          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
           break
         }
       }
@@ -399,7 +409,7 @@ export function PopupCard(props: any) {
 
     setIsLoading(true)
     setAnswerDone(false)
-    setAddToAnkiStatus('standby')
+    setAddToAnkiStatus({ 'status': 'standby', 'noteId': 0 })
 
     // 请求 background 获取数据
     // 使用长连接
@@ -426,7 +436,7 @@ export function PopupCard(props: any) {
 
           // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
           setIsLoading(false)
-          setAddToAnkiStatus('normal')
+          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
           if (msg.code === 'invalid_api_key') {
             setIsApiErro(true)
@@ -462,7 +472,7 @@ export function PopupCard(props: any) {
           // 记录消息回答完毕（触发保存历史记录）
           setAnswerDone(true)
 
-          setAddToAnkiStatus('normal')
+          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
           setIsLoading(false)
 
         }
@@ -724,9 +734,7 @@ export function PopupCard(props: any) {
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
 
-    setAddToAnkiStatus('loading')
-
-
+    setAddToAnkiStatus({ 'status': 'loading', 'noteId': 0 })
 
     // 先预处理 Anki 的 model
     let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, })
@@ -740,7 +748,7 @@ export function PopupCard(props: any) {
       } else {
         // 反馈错误信息
         alert(message.error)
-        setAddToAnkiStatus('normal')
+        setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
       }
 
 
@@ -759,18 +767,17 @@ export function PopupCard(props: any) {
 
     if (message.error === null) {
 
-      setAddToAnkiStatus('success')
-
+      setAddToAnkiStatus({ 'status': 'success', 'noteId': message.data })
 
     } else {
       alert(message.error)
-      setAddToAnkiStatus('normal')
+      setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
     }
 
   }
 
   function handleError(erro: any) {
-    setAddToAnkiStatus('normal')
+    setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
     // console.log(erro);
   }
 
@@ -810,130 +817,137 @@ export function PopupCard(props: any) {
   }
 
   return (
-    <div id="LearningEnglish2023"
-      ref={windowElement}
+    <>
 
-      style={{
-        left: 10,
-        top: 10,
-        color: 'rgba(0, 0, 0, 0.80)',
-      }}
-    >
+      <div id="LearningEnglish2023"
+        ref={windowElement}
 
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#F08A24',
-          },
+        style={{
+          left: 10,
+          top: 10,
+          color: 'rgba(0, 0, 0, 0.80)',
         }}
       >
 
-        <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} title='Scouter' />
+        {/* <Notice type='info' message='hello' actionName='action' action={() => {
+          console.log('hello')
+        }} /> */}
 
-        <div className='flex-grow flex flex-col overflow-scroll'>
-          <div className='flex-grow overflow-scroll'
-            ref={messagesList}
-            style={{ paddingTop: '54px' }}
-          >
+        <ConfigProvider
+          theme={{
+            token: {
+              colorPrimary: '#F08A24',
+            },
+          }}
+        >
 
-            <Selection text={keyWord} />
+          <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} title='Scouter' />
 
-            <Images images={images} />
-
-            <div
-              className='messages'
-              style={{
-                lineHeight: '2em',
-                wordWrap: 'break-word',
-                margin: '0.4em 0'
-              }}
+          <div className='flex-grow flex flex-col overflow-scroll'>
+            <div className='flex-grow overflow-scroll'
+              ref={messagesList}
+              style={{ paddingTop: '54px' }}
             >
-              {messages.map((item) => {
 
-                return <div key={item.chatId} className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
-                  <Skeleton loading={item.loading} active={true} title={false}>
+              <Selection text={keyWord} />
 
-                    <ReactMarkdown remarkPlugins={[breaks]} skipHtml={false} children={item.content.replace(new RegExp(keyWord, 'gi'), `**${keyWord}**`)} />
+              <Images images={images} />
 
-                  </Skeleton>
+              <div
+                className='messages'
+                style={{
+                  lineHeight: '2em',
+                  wordWrap: 'break-word',
+                  margin: '0.4em 0'
+                }}
+              >
+                {messages.map((item) => {
 
-                </div>
+                  return <div key={item.chatId} className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
+                    <Skeleton loading={item.loading} active={true} title={false}>
+
+                      <ReactMarkdown remarkPlugins={[breaks]} skipHtml={false} children={item.content.replace(new RegExp(keyWord, 'gi'), `**${keyWord}**`)} />
+
+                    </Skeleton>
+
+                  </div>
 
 
-              }
+                }
 
 
 
-              )}
+                )}
 
-              {isApiErro ? <div className='p-4'> <img src={settingGuide} style={{
-                borderRadius: '4px'
-              }} /></div> : ''}
+                {isApiErro ? <div className='p-4'> <img src={settingGuide} style={{
+                  borderRadius: '4px'
+                }} /></div> : ''}
 
 
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className='w-full'
-          ref={inputRef}
-          style={{ borderTop: '1px solid rgba(5, 5, 5, .06)' }}
-        >
-          <Form
-            form={form}
-            onFinish={handleSendMessage}
-            onKeyDown={handleFormKeyDown}
-            layout='inline'
-            style={{ alignItems: 'center' }}
-            className='p-2'
+          <div className='w-full'
+            ref={inputRef}
+            style={{ borderTop: '1px solid rgba(5, 5, 5, .06)' }}
           >
-            <Form.Item
-              name="msg"
-              style={{ margin: '0', flexGrow: '1' }}
+            <Form
+              form={form}
+              onFinish={handleSendMessage}
+              onKeyDown={handleFormKeyDown}
+              layout='inline'
+              style={{ alignItems: 'center' }}
+              className='p-2'
             >
-              <TextArea
-                placeholder="Send a message"
-                bordered={false}
-                autoSize={{ minRows: 1, maxRows: 2 }}
-                // onChange={handleInputChange}
-                style={{
-                  caretColor: '#F08A24',
-                }}
-                onKeyDown={handleKeyDown} onInput={onTextAreaInput}
+              <Form.Item
+                name="msg"
+                style={{ margin: '0', flexGrow: '1' }}
+              >
+                <TextArea
+                  placeholder="Send a message"
+                  bordered={false}
+                  autoSize={{ minRows: 1, maxRows: 2 }}
+                  // onChange={handleInputChange}
+                  style={{
+                    caretColor: '#F08A24',
+                  }}
+                  onKeyDown={handleKeyDown} onInput={onTextAreaInput}
 
-              />
+                />
 
-            </Form.Item>
+              </Form.Item>
 
-            <Form.Item
-              style={{ marginRight: '0' }}
-            >
-              <Button
-                type="text"
-                htmlType="submit"
-                disabled={isLoading || !isAnswerInputed}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: !isLoading && isAnswerInputed ? '#F08A24' : ''
-                }}
-                icon={<SendOutlined />}
-              />
+              <Form.Item
+                style={{ marginRight: '0' }}
+              >
+                <Button
+                  type="text"
+                  htmlType="submit"
+                  disabled={isLoading || !isAnswerInputed}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: !isLoading && isAnswerInputed ? '#F08A24' : ''
+                  }}
+                  icon={<SendOutlined />}
+                />
 
-            </Form.Item>
+              </Form.Item>
 
-            <Form.Item
-              style={{ margin: '0' }}
-            >
+              <Form.Item
+                style={{ margin: '0' }}
+              >
 
-            </Form.Item>
-          </Form>
-        </div>
+              </Form.Item>
+            </Form>
+          </div>
 
-      </ConfigProvider >
+        </ConfigProvider >
 
-    </div >
+      </div >
+    </>
 
   );
 };

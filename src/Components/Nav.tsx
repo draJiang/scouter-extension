@@ -12,7 +12,7 @@ import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone 
 interface NavProps {
     title: string;
     handleSaveToAnkiBtnClick: () => void;
-    addToAnkiStatus: string;
+    addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
@@ -39,6 +39,24 @@ export function Nav(props: NavProps) {
         }
 
     }
+
+    const editNoteInAnki = (noteId: number) => {
+
+        console.log('editNoteInAnki');
+        console.log(noteId);
+
+
+        let sending = browser.runtime.sendMessage({ 'type': 'guiEditNote', 'messages': { 'anki_action_type': 'guiEditNote', 'anki_arguments': { 'note': noteId }, } })
+        sending.then((message: any) => {
+
+
+
+        }, () => {
+            //error
+        });
+
+    }
+
 
 
     return (
@@ -68,13 +86,13 @@ export function Nav(props: NavProps) {
                             justifyContent: 'end',
                             alignItems: 'center'
                         }}>
-                        {props.addToAnkiStatus == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to Anki</span> :
+                        {props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <a href="#" onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</a></span> :
                             <Button size="small"
                                 // type='text'
                                 icon={<PlusSquareOutlined />}
                                 // loading={props.addToAnkiStatus === 'loading' ? true : false}
-                                disabled={props.addToAnkiStatus === 'standby' || props.addToAnkiStatus === 'loading' ? true : false}
-                                onClick={handleSaveToAnkiBtnClick}>{props.addToAnkiStatus === 'loading' ? 'Adding...' : 'Add to Anki'}</Button>}
+                                disabled={props.addToAnkiStatus.status === 'standby' || props.addToAnkiStatus.status === 'loading' ? true : false}
+                                onClick={handleSaveToAnkiBtnClick}>{props.addToAnkiStatus.status === 'loading' ? 'Adding...' : 'Add to Anki'}</Button>}
 
                         <Button size='small'
                             // type='text'
