@@ -86,7 +86,9 @@ export function Nav(props: NavProps) {
                             justifyContent: 'end',
                             alignItems: 'center'
                         }}>
-                        {props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <a href="#" onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</a></span> :
+                        {props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <a style={{
+                            textDecoration:'underline'
+                        }} href="#" onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</a></span> :
                             <Button size="small"
                                 // type='text'
                                 icon={<PlusSquareOutlined />}
