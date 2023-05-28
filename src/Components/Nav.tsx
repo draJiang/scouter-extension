@@ -87,8 +87,8 @@ export function Nav(props: NavProps) {
                             alignItems: 'center'
                         }}>
                         {props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <a style={{
-                            textDecoration:'underline'
-                        }} href="#" onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</a></span> :
+                            textDecoration: 'underline'
+                        }} href="javascript:void(0);" onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</a></span> :
                             <Button size="small"
                                 // type='text'
                                 icon={<PlusSquareOutlined />}

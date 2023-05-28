@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "antd": "^5.3.2",
+    "clipboardy": "^3.0.0",
     "dotenv-webpack": "^8.0.1",
     "eventsource-parser": "^0.1.0",
     "franc": "^6.1.0",

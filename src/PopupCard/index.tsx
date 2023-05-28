@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill'
 
+
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 // import ReactDOM from "react-dom";
 
@@ -22,6 +23,8 @@ import { SendOutlined } from '@ant-design/icons';
 import settingGuide from '../assets/settingGuide.png'
 
 import { useCurrentLanguage } from '../lib/locale'
+
+import { getClipboard } from './util'
 
 import "./index.css"
 
@@ -83,6 +86,7 @@ export function PopupCard(props: any) {
 
 
   useEffect(() => {
+
 
     // 当前选中的文字
     let keyWord = props.selection.toString()
