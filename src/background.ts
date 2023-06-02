@@ -97,30 +97,30 @@ browser.runtime.onConnect.addListener(port => {
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
         
 
-        setTimeout(() => {
-          const now = new Date();
+        // setTimeout(() => {
+        //   const now = new Date();
 
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
 
 
-          setTimeout(() => {
+        //   setTimeout(() => {
 
-            for (let i = 0; i < 80; i++) {
-              port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-              if (!isContinue) {
-                console.log('停止渲染数据')
-                break
-              }
-            }
+        //     for (let i = 0; i < 80; i++) {
+        //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+        //       if (!isContinue) {
+        //         console.log('停止渲染数据')
+        //         break
+        //       }
+        //     }
 
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-          }, 1000);
+        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
+        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+        //   }, 1000);
 
-        }, 2000);
+        // }, 2000);
 
-        return
+        // return
 
         // ====================
 

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Button, Image } from 'antd';
-import { RightOutlined, LeftOutlined } from "@ant-design/icons";
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Image, Input, Empty } from 'antd';
+import { LoadingOutlined, RightOutlined, LeftOutlined, CloseOutlined, CheckOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
+
+import { InputRef } from 'antd/lib/input';
 
 
 interface Image {
@@ -69,6 +71,7 @@ interface Image {
 
 interface ImagesProps {
     images: Image[];
+    getUnsplashImages: (keyword: string) => void;
 }
 
 export function Images(props: ImagesProps) {
@@ -76,7 +79,12 @@ export function Images(props: ImagesProps) {
     const [images, setImages] = useState<Array<Image>>([]);
     const [imageIndex, setImageIndex] = useState(0);
     const [showControl, setShowControl] = useState(false)
+    const [changeImage, setChangeImageStatus] = useState(false)
+    // const [searchImageIsLoading, setSearchImageIsLoading] = useState(false)
+
     // const [currentURL, setCurrentURL] = useState<string>();
+
+    const inputElement = useRef<InputRef>(null);
 
     useEffect(() => {
 
@@ -84,6 +92,20 @@ export function Images(props: ImagesProps) {
         setImageIndex(0)
 
     }, [props.images]);
+
+    const handSearchBtnClick = () => {
+
+        // event.stopPropagation()
+
+        let inputValue = inputElement.current?.input?.value
+
+        if (inputValue && inputValue !== '') {
+            props.getUnsplashImages(inputValue)
+            setChangeImageStatus(false)
+        }
+
+
+    }
 
     const handleChangeImagesClick = (offset: number) => {
 
@@ -107,10 +129,18 @@ export function Images(props: ImagesProps) {
 
     const handleImagesBoxHover = (e: any) => {
 
+
         if (e.type === 'mouseenter') {
+
             setShowControl(true)
-        } else {
+
+        }
+
+
+        if (e.type === 'mouseleave') {
+
             setShowControl(false)
+
         }
 
     }
@@ -124,79 +154,187 @@ export function Images(props: ImagesProps) {
         >
 
             <div>
-                {images.length === 0 ? '' : <>
-                    <div onMouseEnter={handleImagesBoxHover} onMouseLeave={handleImagesBoxHover}>
-                        <div className="imageBox">
-                            <Image
-                                data-downloadlocation={images[imageIndex].links.download_location}
-                                src={images[imageIndex].urls.small}
-                                alt={images[imageIndex]['description']}
-                                height={240}
-                                width={'100%'}
-                                preview={false}
-                                placeholder />
-                        </div>
+
+                <div onMouseEnter={handleImagesBoxHover} onMouseLeave={handleImagesBoxHover}>
+
+                    {/* 图片 */}
+                    {images.length > 0 ?
+                        <>
+                            <div className="imageBox">
+                                <Image
+                                    data-downloadlocation={images[imageIndex].links.download_location}
+                                    src={images[imageIndex].urls.small}
+                                    alt={images[imageIndex]['description']}
+                                    height={240}
+                                    width={'100%'}
+                                    preview={false}
+                                    placeholder />
+                            </div>
 
 
-                        {/* 后台加载所有图片，提升渲染速度 */}
-                        <div
-                            style={{
-                                display: 'none'
-                            }}>
-                            {images.map(img => <img key={img.id}
-                                src={img.urls.small}></img>)}
-
-                        </div>
-
-
-                        {showControl ?
                             <div
                                 style={{
-                                    position: 'absolute',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    width: '100%',
-                                    height: '100%',
-                                    left: 0,
-                                    display: 'flex',
-                                    justifyContent: 'space-around',
-                                    flexDirection: 'column',
-                                    padding: '10px'
+                                    display: 'none'
+                                }}>
+                                {images.map(img => <img key={img.id}
+                                    src={img.urls.small}></img>)}
+
+                            </div>
+                        </>
+
+                        :
+
+                        <div
+                            style={{
+                                height: '240px',
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexDirection: 'row',
+                                border: '1px solid rgba(5, 5, 5, .06)',
+                                borderRadius: '2px'
+                            }}
+                        >
+                            <Empty style={{ margin: '0 auto' }} description='No related pictures found' image={Empty.PRESENTED_IMAGE_SIMPLE} />
+
+                        </div>
+
+                    }
+
+                    {/* 图片控制控件 */}
+                    {showControl &&
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                width: '100%',
+                                height: '100%',
+                                left: 0,
+                                display: 'flex',
+                                // justifyContent: 'space-around',
+                                flexDirection: 'column',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    padding: '6px 12px',
+                                    margin: '4px 14px',
+                                    background: 'linear-gradient(360deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 27.6%, rgba(0, 0, 0, 0.2) 54.69%, rgba(0, 0, 0, 0.35) 100%)'
                                 }}
                             >
-                                <div></div>
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        width: '100%'
-                                    }}
-                                >
-                                    <Button
+
+
+                                {changeImage ?
+                                    // 显示图片搜索控件
+                                    <div
                                         style={{
-                                            background: 'rgba(0, 0, 0, 0.5)',
-                                            lineHeight: '100%'
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            padding: '2px 0'
                                         }}
-                                        type="primary" size="small" shape="circle" icon={<LeftOutlined />} onClick={() => handleChangeImagesClick(-1)} />
+                                    >
+                                        <div style={{ flex: '1', marginRight: '20px' }}>
+                                            <Input prefix={<SearchOutlined />} placeholder="Search images" size="small" style={{ width: '100%' }} ref={inputElement} onPressEnter={() => handSearchBtnClick()} />
+                                        </div>
 
-                                    <Button
+                                        <div style={{
+                                            display: 'flex',
+                                        }}>
+
+                                            <Button type="text" size="small" style={{ color: '#fff', marginBottom: '4px', marginRight: '10px' }} onClick={() => handSearchBtnClick()} icon={<CheckOutlined />} />
+                                            <Button type="text" size="small" style={{ color: '#fff', marginBottom: '4px' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
+
+                                        </div>
+
+
+                                    </div>
+
+                                    :
+
+                                    // 显示图片导航控件
+                                    <div
                                         style={{
-                                            background: 'rgba(0, 0, 0, 0.5)',
-                                            lineHeight: '100%'
+                                            display: 'flex',
+                                            flexGrow: 'inherit',
                                         }}
-                                        type="primary" size="small" shape="circle" icon={<RightOutlined />} onClick={() => handleChangeImagesClick(1)} />
+                                    >
 
-                                </div>
-                                <div
-                                    style={{
-                                        textAlign: 'center',
-                                        color: '#fff',
-                                        fontWeight: '500'
-                                    }}
-                                >{imageIndex + 1 + '/' + images.length}</div>
-                            </div> : ''}
+                                        {/* Left Box */}
 
-                    </div>
+                                        {images.length > 0 &&
+
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center'
+                                                }}
+                                            >
+
+                                                <Button
+                                                    style={{
+                                                        color: '#fff',
+                                                        lineHeight: '100%'
+                                                    }}
+                                                    type="text" size="small" icon={<LeftOutlined />} onClick={() => handleChangeImagesClick(-1)} />
+
+                                                <div
+                                                    style={{
+                                                        width: '40px',
+                                                        textAlign: 'center',
+                                                        color: '#fff',
+                                                        fontWeight: '500',
+                                                        padding: '0 4px',
+                                                        marginTop: '4px'
+                                                    }}
+                                                >{imageIndex + 1 + '/' + images.length}
+                                                </div>
+
+                                                <Button
+                                                    style={{
+                                                        color: '#fff',
+                                                        lineHeight: '100%'
+                                                    }}
+                                                    type="text" size="small" icon={<RightOutlined />} onClick={() => handleChangeImagesClick(1)} />
+
+                                            </div>
+
+                                        }
+
+                                        {/* Right Box */}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'row-reverse',
+                                                flex: '1',
+                                                alignItems: 'end'
+                                            }}
+
+                                        >
+
+                                            <Button type="text" size="small" style={{ color: '#fff' }} onClick={() => {
+                                                setChangeImageStatus(true)
+                                                console.log(inputElement.current);
+                                                console.log(inputElement.current?.input);
+                                                inputElement.current?.focus()
+                                            }} icon={<FormOutlined />} />
+
+
+
+                                        </div>
+
+                                    </div>
+                                }
+                            </div>
+
+
+                        </div>
+                    }
+
+                </div>
+
+                {images.length > 0 &&
+
                     <div
                         style={{
                             fontSize: '0.92em',
@@ -208,8 +346,9 @@ export function Images(props: ImagesProps) {
 
                         {/* By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash */}
                     </div>
-                </>
                 }
+
+
             </div>
 
 

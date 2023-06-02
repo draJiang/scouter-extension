@@ -397,6 +397,7 @@ export function PopupCard(props: any) {
         if ('imgs' in msg) {
           // console.log('unsplashSearchPhotos');
           console.log('imgs:');
+          // setImages([])
           setImages(msg.imgs)
         }
       }
@@ -855,7 +856,7 @@ export function PopupCard(props: any) {
 
               <Selection text={keyWord} />
 
-              <Images images={images} />
+              <Images images={images} getUnsplashImages={getUnsplashImages} />
 
               <div
                 className='messages'
