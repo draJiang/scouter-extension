@@ -89,7 +89,7 @@ export function PopupCard(props: any) {
 
 
     // 当前选中的文字
-    let keyWord = props.selection.toString()
+    let keyWord = props.selection.toString().trim()
 
     // 选中文字所在的段落
     let sentence = props.selection.anchorNode.data
@@ -288,7 +288,10 @@ export function PopupCard(props: any) {
 
       }
 
-      getUnsplashImages(keyWord)
+      if (keyWord.length <= 20) {
+        getUnsplashImages(keyWord)
+      }
+
 
     })
 
@@ -582,7 +585,7 @@ export function PopupCard(props: any) {
   // 文本框下敲击按键时
   const handleKeyDown = (event: any) => {
     // 阻止事件冒泡
-    // console.log('handleKeyDown');
+    console.log('handleKeyDown');
 
     event.stopPropagation()
 
@@ -600,10 +603,10 @@ export function PopupCard(props: any) {
     }
   }
 
-  const handleFormKeyDown = (event: any) => {
-    // console.log('handleFormKeyDown');
+  // const handleFormKeyDown = (event: any) => {
+  //   // console.log('handleFormKeyDown');
 
-  }
+  // }
 
   const handleMouseDown = (event: any) => {
     // console.log('PopupCard:handleMouseDown');
@@ -678,6 +681,8 @@ export function PopupCard(props: any) {
 
   // 文本框值变化时
   const onTextAreaInput = (event: any) => {
+    console.log('onTextAreaInput');
+    
 
     if (event.target.value.length > 0) {
       setIsAnswerInputed(true)
@@ -856,7 +861,7 @@ export function PopupCard(props: any) {
 
               <Selection text={keyWord} />
 
-              <Images images={images} getUnsplashImages={getUnsplashImages} />
+              <Images images={images} keyWord={keyWord} getUnsplashImages={getUnsplashImages} />
 
               <div
                 className='messages'
@@ -900,7 +905,7 @@ export function PopupCard(props: any) {
             <Form
               form={form}
               onFinish={handleSendMessage}
-              onKeyDown={handleFormKeyDown}
+              // onKeyDown={handleFormKeyDown}
               layout='inline'
               style={{ alignItems: 'center' }}
               className='p-2'

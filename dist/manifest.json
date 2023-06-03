@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Scouter",
     "description": "Bridging the gap between theory and practice.",
-    "version": "0.8.70",
+    "version": "0.8.80",
     "action": {
         "default_icon": "icon48.png",
         "default_popup": "popup.html"
