@@ -74,6 +74,8 @@ export function PopupCard(props: any) {
 
   const [form] = Form.useForm();
 
+  const { Option } = Select;
+
 
 
 
@@ -87,6 +89,15 @@ export function PopupCard(props: any) {
 
   useEffect(() => {
 
+    // navigator.clipboard.readText()
+    //   .then(text => {
+    //     console.log('剪切板中的文本内容：', text);
+    //     alert(text)
+    //   })
+    //   .catch(err => {
+    //     console.error('无法读取剪切板中的文本内容：', err);
+    //     alert(err)
+    //   });
 
     // 当前选中的文字
     let keyWord = props.selection.toString().trim()
@@ -295,13 +306,14 @@ export function PopupCard(props: any) {
 
     })
 
-    // console.log(messagesList);
-
+    // 添加滚动事件，让消息列表自动滚动到底部
     messagesList.current?.addEventListener("scroll", handleScroll);
     return () => {
       // console.log('useEffect return');
       messagesList.current?.removeEventListener("scroll", handleScroll);
     };
+
+    // 获取 Anki 的 deck、model 名称
 
 
 
@@ -682,7 +694,7 @@ export function PopupCard(props: any) {
   // 文本框值变化时
   const onTextAreaInput = (event: any) => {
     console.log('onTextAreaInput');
-    
+
 
     if (event.target.value.length > 0) {
       setIsAnswerInputed(true)
