@@ -24,6 +24,7 @@ import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone,
 interface NavProps {
     title: string;
     handleSaveToAnkiBtnClick: () => void;
+    handleMenuItemClick: (prompt: { prompt: Array<{ role: string, content: string }>, getUnsplashImages: boolean }) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
@@ -106,15 +107,11 @@ export function Nav(props: NavProps) {
 
     }
 
-    const contentStyle = {
-        // backgroundColor: token.colorBgElevated,
-        // borderRadius: token.borderRadiusLG,
-        // boxShadow: token.boxShadowSecondary,
-    };
 
-    const menuStyle = {
-        boxShadow: 'none',
-    };
+    const handleMenuItemClick = (key: string) => {
+        console.log(key);
+        props.handleMenuItemClick({ 'prompt': [{ 'role': 'user', 'content': key }], 'getUnsplashImages': true })
+    }
 
 
 
@@ -159,7 +156,7 @@ export function Nav(props: NavProps) {
                                     display: 'flex',
                                     alignItems: 'center'
                                 }}>
-                                    hellohellohellohello <HamburgerMenuIcon />
+                                    {items[0]['key']} <HamburgerMenuIcon />
                                 </button>
                             </DropdownMenu.Trigger>
 
@@ -176,7 +173,7 @@ export function Nav(props: NavProps) {
                                     willChange: 'transform, opacity'
                                 }}>
 
-                                    {items.map(item => <DropdownMenu.Item className="DropdownMenuItem" onSelect={() => console.log(item.key)}>
+                                    {items.map(item => <DropdownMenu.Item className="DropdownMenuItem" onSelect={() => handleMenuItemClick(item.key)}>
                                         {item.key}
                                     </DropdownMenu.Item>
                                     )}

@@ -90,6 +90,7 @@ browser.runtime.onConnect.addListener(port => {
 
         let messages = msg.messages
 
+        console.log(messages);
 
         //==================== 下面的代码用于调试使用，正式环境需要注释掉
 
@@ -114,7 +115,7 @@ browser.runtime.onConnect.addListener(port => {
               }
             }
 
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "END" })
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': messages[0].content })
             port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
           }, 1000);
 
