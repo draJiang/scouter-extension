@@ -10,13 +10,15 @@ import rehypeRaw from 'rehype-raw'
 
 
 import { Nav } from "../Components/Nav"
+import { CustomPromptForm } from "../Components/CustomPromptForm"
+
 import { Images } from "../Components/Images"
 import Notice from '../Components/Notice';
 
 import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
-import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Form, Button } from 'antd';
+import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Drawer, Space, Form, Button } from 'antd';
 import { SendOutlined } from '@ant-design/icons';
 
 
@@ -50,6 +52,10 @@ export function PopupCard(props: any) {
   const [openApiAnser2, setopenApiAnser2] = useState('');
 
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const [customPromptFormData, setCustomPromptFormData] = useState('');
+
 
   // standby,normal,loading,success
   const [addToAnkiStatus, setAddToAnkiStatus] = useState<{ status: string, noteId: number }>({ 'status': 'standby', 'noteId': 0 });
@@ -849,6 +855,11 @@ export function PopupCard(props: any) {
     // 未位于底部，不执行自动滚动
   }
 
+  const openCustomPromptForm = (data: { isOpen: boolean, data: { text: string } }) => {
+    setPopoverOpen(data.isOpen)
+    setCustomPromptFormData(data.data.text)
+  }
+
   return (
     <>
 
@@ -874,7 +885,12 @@ export function PopupCard(props: any) {
           }}
         >
 
-          <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick} addToAnkiStatus={addToAnkiStatus} onMouseDown={handleMouseDown} handleMenuItemClick={executivePrompt} title='Scouter' />
+          <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick}
+            addToAnkiStatus={addToAnkiStatus}
+            onMouseDown={handleMouseDown}
+            handleMenuItemClick={executivePrompt}
+            openCustomPromptForm={openCustomPromptForm}
+            title='Scouter' />
 
           <div className='flex-grow flex flex-col overflow-scroll'>
             <div className='flex-grow overflow-scroll'
@@ -976,6 +992,33 @@ export function PopupCard(props: any) {
               </Form.Item>
             </Form>
           </div>
+
+          <div>
+
+            <Drawer
+              title="Basic Drawer"
+              placement="bottom"
+              closable={false}
+              // onClose={onClose}
+              open={isPopoverOpen}
+              getContainer={false}
+              extra={
+                <Space>
+                  <Button onClick={() => openCustomPromptForm({ isOpen: false, data: { 'text': '123' } })}>Cancel</Button>
+
+                  {/* <Button type="primary">
+                    OK
+                  </Button> */}
+
+                </Space>
+              }
+            >
+              <CustomPromptForm data={customPromptFormData} />
+
+            </Drawer>
+
+          </div>
+
 
         </ConfigProvider >
 

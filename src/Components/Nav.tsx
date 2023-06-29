@@ -1,9 +1,11 @@
 import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
-import { Button, ConfigProvider, Dropdown, Divider, Space, Select } from 'antd';
+import { Button, ConfigProvider, Dropdown, Divider, Space } from 'antd';
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+
+
 import {
     HamburgerMenuIcon,
     DotFilledIcon,
@@ -24,6 +26,7 @@ import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone,
 interface NavProps {
     title: string;
     handleSaveToAnkiBtnClick: () => void;
+    openCustomPromptForm: (data: { isOpen: boolean, data: { text: string } }) => void;
     handleMenuItemClick: (prompt: { prompt: Array<{ role: string, content: string }>, getUnsplashImages: boolean }) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
@@ -33,7 +36,7 @@ export function Nav(props: NavProps) {
     const [isPin, setIsPin] = useState(false);
     const [currentURL, setCurrentURL] = useState < string > ();
 
-    const { Option } = Select;
+    // const { Option } = Select;
 
     const navElement = useRef < HTMLDivElement > (null);
 
@@ -107,11 +110,17 @@ export function Nav(props: NavProps) {
 
     }
 
+    const openCustomPromptForm = (data: { isOpen: boolean, data: { text: string } }) => {
+        props.openCustomPromptForm(data)
+    }
+
 
     const handleMenuItemClick = (key: string) => {
         console.log(key);
         props.handleMenuItemClick({ 'prompt': [{ 'role': 'user', 'content': key }], 'getUnsplashImages': true })
     }
+
+
 
 
 
@@ -138,16 +147,6 @@ export function Nav(props: NavProps) {
                     {/* <img src={Icon} /> */}
 
                     <div style={{ zIndex: 9999 }}>
-                        {/* <Dropdown menu={{ items }} placement="topLeft" getPopupContainer={() => document.getElementById('__jiang-souter') ?? document.createElement('div')}>
-
-                            <Button>topLeft</Button>
-                        </Dropdown> */}
-
-                        {/* <Select defaultValue="lucy" style={{ width: 120 }} >
-                            <Option value="jack">Jack</Option>
-                            <Option value="lucy">Lucy</Option>
-                            <Option value="yiminghe">yiminghe</Option>
-                        </Select> */}
 
                         <DropdownMenu.Root>
 
@@ -180,6 +179,8 @@ export function Nav(props: NavProps) {
 
 
                                     <DropdownMenu.Separator className="DropdownMenuSeparator" />
+
+                                    <Button onClick={() => openCustomPromptForm({ isOpen: true, data: { 'text': 'hello world' } })}>Click me</Button>
 
                                     {/* <DropdownMenu.Arrow className="DropdownMenuArrow" /> */}
                                 </DropdownMenu.Content>
