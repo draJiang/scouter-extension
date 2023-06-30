@@ -240,7 +240,7 @@ export const fetchcurrentLanguage = async () => {
     let r = null
     await browser.storage.sync.get({ 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
 
-        console.log('browser.storage.sync.get');
+        // console.log('browser.storage.sync.get');
 
         // r =  { 'current': 'c', 'target': 't' }
 

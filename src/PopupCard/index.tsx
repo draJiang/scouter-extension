@@ -996,9 +996,10 @@ export function PopupCard(props: any) {
           <div>
 
             <Drawer
-              title="Basic Drawer"
+              title="Create Prompt"
               placement="bottom"
               closable={false}
+              height={440}
               // onClose={onClose}
               open={isPopoverOpen}
               getContainer={false}

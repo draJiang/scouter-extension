@@ -15,6 +15,8 @@ Scouter is a browser extension designed for language learners, with the goal of 
 
 [🚀 Install in the Chrome Store](https://chrome.google.com/webstore/detail/scouter/mncfcjnabpfoagocanfjglfcpmmnkicb?hl=zh-CN&authuser=0)
 
+[💬 Join our Discord community](https://discord.com/invite/7Pm3vmz87n)
+
 ![Scouter](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame8720230510130846.png)
 
 ![Multilingual support](https://jiangzilong-image.oss-cn-beijing.aliyuncs.com/uPic/Frame6220230510130857.png)
