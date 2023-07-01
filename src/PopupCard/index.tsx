@@ -45,16 +45,16 @@ const AnkiContext = createContext(null);
 export function PopupCard(props: any) {
 
 
-  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string }>>([])
+  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '' }])
   const [images, setImages] = useState([])
+  const [prompts, setPrompts] = useState<Array<{ title: string, getUnsplashImages: boolean, userPrompt: string, id: string }>>([])
 
-  const [openApiAnser, setopenApiAnser] = useState('');
-  const [openApiAnser2, setopenApiAnser2] = useState('');
+
 
   const [isLoading, setIsLoading] = useState(true);
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const [customPromptFormData, setCustomPromptFormData] = useState('');
+  const [customPromptFormData, setCustomPromptFormData] = useState<{ title: string, getUnsplashImages: boolean, userPrompt: string, id: string }>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' });
 
 
   // standby,normal,loading,success
@@ -67,8 +67,9 @@ export function PopupCard(props: any) {
 
   const [isAnswerInputed, setIsAnswerInputed] = useState(false);
 
-  const [keyWord, setKeyWord] = useState('');
-  const [sentence, setSentence] = useState('');
+  // const [keyWord, setKeyWord] = useState('');
+  // const [sentence, setSentence] = useState('');
+
   let promptRef = useRef<{ prompt: Array<{ role: string, content: string }>, getUnsplashImages: boolean }>();
 
 
@@ -94,6 +95,24 @@ export function PopupCard(props: any) {
 
 
   useEffect(() => {
+    console.log('useEffect');
+
+    // // 当前选中的文字
+    // let keyWord = props.selection.toString().trim()
+
+    // // 选中文字所在的段落
+    // let sentence = props.selection.anchorNode.data
+
+    // if (sentence === undefined) {
+    //   sentence = ''
+    // } else {
+    //   sentence = sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence
+    // }
+
+    // setKeyWord(keyWord)
+    // setSentence(sentence)
+
+    initializePromptList()
 
     // 设置窗口的默认位置
     if (windowElement.current && !props.isPin) {
@@ -173,7 +192,7 @@ export function PopupCard(props: any) {
     }
 
     // 关键字长度较长时，按照句子进行处理
-    if (keyWord.length > 20) {
+    if (props.data.keyWord.length > 20) {
 
       systemPrompt = {
         "role": "system", "content": `作为语言老师，给你一个句子，你需要：
@@ -264,13 +283,15 @@ export function PopupCard(props: any) {
       console.log('Save');
       console.log(messages);
 
+      const keyWord = props.data.keyWord
+      const Sentence = props.data.Sentence
 
 
       // 将查询记录保存起来
-      const newHistory = { 'keyWord': keyWord, 'sentence': sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href, 'prompt': messages[0]['prompt'] }
+      const newHistory = { 'keyWord': keyWord, 'sentence': Sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href, 'prompt': messages[0]['prompt'] }
 
 
-      if (keyWord !== '' && sentence !== '' && messages[0]['content'] !== '') {
+      if (keyWord !== '' && Sentence !== '' && messages[0]['content'] !== '') {
         browser.storage.local.get({ "history": [] }).then((item) => {
 
           // console.log(item.history);
@@ -324,24 +345,14 @@ export function PopupCard(props: any) {
 
     promptRef.current = prompt
 
-    // 获取 keyword、sentence
-    // 当前选中的文字
-    let keyWord = props.selection.toString().trim()
+    const keyWord = props.data.keyWord
+    const Sentence = props.data.Sentence
 
-    // 选中文字所在的段落
-    let sentence = props.selection.anchorNode.data
-
-    if (sentence === undefined) {
-      sentence = ''
-    } else {
-      sentence = sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence
-    }
 
     // 初始化
     setMessages([])
     setImages([])
-    setKeyWord(keyWord)
-    setSentence(sentence)
+
 
     // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
     browser.storage.local.get({ "history": [] }).then((item) => {
@@ -351,7 +362,7 @@ export function PopupCard(props: any) {
       let bingo = false
       for (let i = 0; i < item.history.length; i++) {
         let obj = item.history[i]
-        if (obj.keyWord === keyWord && obj.sentence === sentence && obj.prompt === prompt.prompt[0]['content']) {
+        if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === prompt.prompt[0]['content']) {
 
           if ('role' in obj) {
 
@@ -393,14 +404,27 @@ export function PopupCard(props: any) {
 
       }
 
+      if (keyWord.length <= 20 && getUnsplashImages) {
+        getUnsplashImages(keyWord)
+      }
+
 
 
 
     })
 
-    if (keyWord.length <= 20 && getUnsplashImages) {
-      getUnsplashImages(keyWord)
-    }
+
+
+
+  }
+
+  const initializePromptList = async () => {
+    // 获取已保存的 Prompt List
+    const promptList = await browser.storage.sync.get({ "promptList": [] }).then((item) => {
+      return item.promptList
+    })
+
+    setPrompts(promptList)
 
 
   }
@@ -528,7 +552,18 @@ export function PopupCard(props: any) {
 
             setMessages(prevMessages => {
 
+              console.log(msg);
+
+
               const lastMessage = prevMessages[prevMessages.length - 1];
+
+              console.log(prevMessages)
+              console.log(lastMessage)
+
+              if (prevMessages.length === 0) {
+                return []
+              }
+
               const newMsgList = lastMessage
               const updatedLastMessage = {
                 ...lastMessage,
@@ -722,10 +757,13 @@ export function PopupCard(props: any) {
 
   const addToAnki = (deckName: string, modelName: string, front: string, back: string) => {
 
+    const keyWord = props.data.keyWord
+    const Sentence = props.data.Sentence
+
     let container = ''
     let images = ''
     let unsplash_download_location
-    const stc = keyWord.length <= 20 ? sentence : ''
+    const stc = keyWord.length <= 20 ? Sentence : ''
 
     if (windowElement.current) {
       // console.log(windowElement.current);
@@ -855,9 +893,9 @@ export function PopupCard(props: any) {
     // 未位于底部，不执行自动滚动
   }
 
-  const openCustomPromptForm = (data: { isOpen: boolean, data: { text: string } }) => {
+  const openCustomPromptForm = (data: { isOpen: boolean, data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string } }) => {
     setPopoverOpen(data.isOpen)
-    setCustomPromptFormData(data.data.text)
+    setCustomPromptFormData(data.data)
   }
 
   return (
@@ -890,7 +928,9 @@ export function PopupCard(props: any) {
             onMouseDown={handleMouseDown}
             handleMenuItemClick={executivePrompt}
             openCustomPromptForm={openCustomPromptForm}
-            title='Scouter' />
+            title='Scouter'
+            prompts={prompts}
+          />
 
           <div className='flex-grow flex flex-col overflow-scroll'>
             <div className='flex-grow overflow-scroll'
@@ -898,9 +938,9 @@ export function PopupCard(props: any) {
               style={{ paddingTop: '54px' }}
             >
 
-              <Selection text={keyWord} />
+              <Selection text={props.data.keyWord} />
 
-              <Images images={images} keyWord={keyWord} getUnsplashImages={getUnsplashImages} />
+              <Images images={images} keyWord={props.data.keyWord} getUnsplashImages={getUnsplashImages} />
 
               <div
                 className='messages'
@@ -915,7 +955,7 @@ export function PopupCard(props: any) {
                   return <div key={item.chatId} className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
                     <Skeleton loading={item.loading} active={true} title={false}>
 
-                      <ReactMarkdown remarkPlugins={[breaks]} skipHtml={false} children={item.content.replace(new RegExp(keyWord, 'gi'), `**${keyWord}**`)} />
+                      <ReactMarkdown remarkPlugins={[breaks]} skipHtml={false} children={item.content.replace(new RegExp(props.data.keyWord, 'gi'), `**${props.data.keyWord}**`)} />
 
                     </Skeleton>
 
@@ -1005,7 +1045,7 @@ export function PopupCard(props: any) {
               getContainer={false}
               extra={
                 <Space>
-                  <Button onClick={() => openCustomPromptForm({ isOpen: false, data: { 'text': '123' } })}>Cancel</Button>
+                  <Button onClick={() => openCustomPromptForm({ isOpen: false, data: { 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' } })}>Cancel</Button>
 
                   {/* <Button type="primary">
                     OK
@@ -1014,7 +1054,7 @@ export function PopupCard(props: any) {
                 </Space>
               }
             >
-              <CustomPromptForm data={customPromptFormData} />
+              <CustomPromptForm openCustomPromptForm={openCustomPromptForm} initializePromptList={initializePromptList} data={customPromptFormData} />
 
             </Drawer>
 

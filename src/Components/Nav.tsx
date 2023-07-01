@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import { Button, ConfigProvider, Dropdown, Divider, Space } from 'antd';
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { DropdownMenuItem } from './DropdownMenuItem'
 
 
 import {
@@ -25,8 +26,9 @@ import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone,
 
 interface NavProps {
     title: string;
+    prompts: Array<{ title: string, getUnsplashImages: boolean, userPrompt: string, id: string }>;
     handleSaveToAnkiBtnClick: () => void;
-    openCustomPromptForm: (data: { isOpen: boolean, data: { text: string } }) => void;
+    openCustomPromptForm: (data: { isOpen: boolean, data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string } }) => void;
     handleMenuItemClick: (prompt: { prompt: Array<{ role: string, content: string }>, getUnsplashImages: boolean }) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
@@ -34,11 +36,12 @@ interface NavProps {
 
 export function Nav(props: NavProps) {
     const [isPin, setIsPin] = useState(false);
-    const [currentURL, setCurrentURL] = useState < string > ();
+    const [currentURL, setCurrentURL] = useState<string>();
+    const [isOpenPromptMenu, setIsOpenPromptMenu] = useState(false);
 
     // const { Option } = Select;
 
-    const navElement = useRef < HTMLDivElement > (null);
+    const navElement = useRef<HTMLDivElement>(null);
 
     const items = [
         {
@@ -71,6 +74,7 @@ export function Nav(props: NavProps) {
 
 
     useEffect(() => {
+        console.log(props);
 
     }, []);
 
@@ -110,17 +114,26 @@ export function Nav(props: NavProps) {
 
     }
 
-    const openCustomPromptForm = (data: { isOpen: boolean, data: { text: string } }) => {
+    // 打开 Prompt 编辑窗口
+    const openCustomPromptForm = (data: { isOpen: boolean, data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string } }) => {
+
         props.openCustomPromptForm(data)
+        setIsOpenPromptMenu(false)
+
     }
 
 
-    const handleMenuItemClick = (key: string) => {
-        console.log(key);
-        props.handleMenuItemClick({ 'prompt': [{ 'role': 'user', 'content': key }], 'getUnsplashImages': true })
+    const handleMenuItemClick = (data: { title: string, getUnsplashImages: boolean, userPrompt: string }) => {
+        console.log(data);
+        props.handleMenuItemClick({ 'prompt': [{ 'role': 'user', 'content': data.userPrompt }], 'getUnsplashImages': data.getUnsplashImages })
     }
 
+    const onMenuOpenChange = (open: boolean) => {
+        console.log('onMenuOpenChange');
+        console.log(open);
+        setIsOpenPromptMenu(open)
 
+    }
 
 
 
@@ -148,13 +161,18 @@ export function Nav(props: NavProps) {
 
                     <div style={{ zIndex: 9999 }}>
 
-                        <DropdownMenu.Root>
+                        <DropdownMenu.Root open={isOpenPromptMenu}
+                            onOpenChange={onMenuOpenChange}
+                        >
 
                             <DropdownMenu.Trigger asChild>
                                 <button className="IconButton" aria-label="Customise options" style={{
                                     display: 'flex',
                                     alignItems: 'center'
-                                }}>
+                                }}
+
+                                >
+
                                     {items[0]['key']} <HamburgerMenuIcon />
                                 </button>
                             </DropdownMenu.Trigger>
@@ -172,15 +190,18 @@ export function Nav(props: NavProps) {
                                     willChange: 'transform, opacity'
                                 }}>
 
-                                    {items.map(item => <DropdownMenu.Item className="DropdownMenuItem" onSelect={() => handleMenuItemClick(item.key)}>
-                                        {item.key}
-                                    </DropdownMenu.Item>
-                                    )}
+                                    {props.prompts.map(item => <DropdownMenuItem
+                                        key={item.id}
+                                        data={item}
+                                        onSelect={() => handleMenuItemClick(item)}
+                                        handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: item })}
+                                    >
 
+                                        {item.title}</DropdownMenuItem>)}
 
                                     <DropdownMenu.Separator className="DropdownMenuSeparator" />
 
-                                    <Button onClick={() => openCustomPromptForm({ isOpen: true, data: { 'text': 'hello world' } })}>Click me</Button>
+                                    <Button onClick={() => openCustomPromptForm({ isOpen: true, data: { 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' } })}>Click me</Button>
 
                                     {/* <DropdownMenu.Arrow className="DropdownMenuArrow" /> */}
                                 </DropdownMenu.Content>

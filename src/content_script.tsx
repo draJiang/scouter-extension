@@ -123,6 +123,10 @@ style.textContent = `
 
   }
 
+  #LearningEnglish2023 .DropdownMenuItem:hover {
+    color:red;
+  }
+
   #LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3 {
 
     color: rgba(0, 0, 0);
@@ -233,8 +237,28 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       shadowRoot?.appendChild(container)
     }
 
-    // 显示窗口
-    showPopupCard(window.getSelection(), container, shadowRoot, isPin)
+    const selection = window.getSelection();
+
+    if (selection !== null) {
+      // 当前选中的文字
+      let keyWord = selection.toString().trim()
+
+      // 选中文字所在的段落
+      let sentence = selection.anchorNode?.textContent ?? ''
+
+      if (sentence === undefined) {
+        sentence = ''
+      } else {
+        sentence = sentence.length <= keyWord.length ? (selection.anchorNode?.parentNode?.parentNode as HTMLElement)?.innerText ?? '' : sentence
+      }
+
+      // 显示窗口
+      showPopupCard({ 'keyWord': keyWord, 'Sentence': sentence }, window.getSelection(), container, shadowRoot, isPin)
+
+    }
+
+
+
 
     // 监听页面点击事件
     document.onmousedown = function (event) {
@@ -254,7 +278,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 });
 
 // 显示应用窗口
-async function showPopupCard(msg: any, MyBox: any, shadowRoot: any, isPin: boolean) {
+async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean) {
   console.log('showPopupCard:');
   // let a = await fetchcurrentLanguage()
   // console.log(a);
@@ -264,7 +288,7 @@ async function showPopupCard(msg: any, MyBox: any, shadowRoot: any, isPin: boole
     <React.StrictMode>
       <CurrentLanguageContext.Provider value={lang}>
         <StyleProvider container={shadowRoot}>
-          <PopupCard selection={msg} isPin={isPin} />
+          <PopupCard data={data} selection={msg} isPin={isPin} />
         </StyleProvider>
       </CurrentLanguageContext.Provider>
     </React.StrictMode>,

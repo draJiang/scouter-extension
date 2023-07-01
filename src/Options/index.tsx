@@ -57,40 +57,6 @@ export const Options = () => {
       console.log(items);
       console.log(items.ankiDeckName);
 
-      // if (items.ankiDeckName) {
-      //   console.log('items.ankiDeckName');
-
-      //   // 如果存有历史记录
-      //   defaultDeckName = items.ankiDeckName
-
-      // } else {
-      //   // 如果没有历史记录
-
-      //   // 获取 Anki 的牌组列表
-      //   ankiAction('deckNames', 6).then((result: any) => {
-
-
-      //     console.log(result);
-      //     // 将第一个牌组作为默认牌组
-      //     defaultDeckName = result.result[0]
-
-      //     console.log(defaultDeckName);
-
-      //     form.setFieldsValue({
-
-      //       ankiDeckName: defaultDeckName
-
-      //     });
-
-      //   }).catch((error) => {
-
-      //     console.log(error);
-
-      //   })
-
-      // }
-
-
       await getDefaultDeckName().then((data: any) => {
 
         defaultDeckName = data.defaultDeckName
