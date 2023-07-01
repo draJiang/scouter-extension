@@ -552,13 +552,7 @@ export function PopupCard(props: any) {
 
             setMessages(prevMessages => {
 
-              console.log(msg);
-
-
               const lastMessage = prevMessages[prevMessages.length - 1];
-
-              console.log(prevMessages)
-              console.log(lastMessage)
 
               if (prevMessages.length === 0) {
                 return []
