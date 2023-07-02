@@ -26,7 +26,7 @@ import settingGuide from '../assets/settingGuide.png'
 
 import { useCurrentLanguage } from '../lib/locale'
 
-import { getClipboard } from './util'
+import { windowInitialization, getUnsplashImages } from './util'
 
 import "./index.css"
 
@@ -41,21 +41,26 @@ const { TextArea } = Input;
 
 const AnkiContext = createContext(null);
 
+type PromptType = {
+  title: string;
+  getUnsplashImages: boolean;
+  userPrompt: string;
+  id: string;
+};
+
 
 export function PopupCard(props: any) {
 
 
   const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '' }])
   const [images, setImages] = useState([])
-  const [prompts, setPrompts] = useState<Array<{ title: string, getUnsplashImages: boolean, userPrompt: string, id: string }>>([])
-
-
+  const [prompts, setPrompts] = useState<Array<PromptType>>([]);
+  const [lastExecutedPrompt, setLastExecutedPrompt] = useState<PromptType>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
 
   const [isLoading, setIsLoading] = useState(true);
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const [customPromptFormData, setCustomPromptFormData] = useState<{ title: string, getUnsplashImages: boolean, userPrompt: string, id: string }>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' });
-
+  const [customPromptFormData, setCustomPromptFormData] = useState<PromptType>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' });
 
   // standby,normal,loading,success
   const [addToAnkiStatus, setAddToAnkiStatus] = useState<{ status: string, noteId: number }>({ 'status': 'standby', 'noteId': 0 });
@@ -67,12 +72,6 @@ export function PopupCard(props: any) {
 
   const [isAnswerInputed, setIsAnswerInputed] = useState(false);
 
-  // const [keyWord, setKeyWord] = useState('');
-  // const [sentence, setSentence] = useState('');
-
-  let promptRef = useRef<{ prompt: Array<{ role: string, content: string }>, getUnsplashImages: boolean }>();
-
-
   // 窗口拖拽逻辑
   const [dragging, setDragging] = useState(false);
 
@@ -83,13 +82,7 @@ export function PopupCard(props: any) {
   const [form] = Form.useForm();
 
 
-
-
-
-  // const [conversationList, setConversationList] = useState<{ type: string, isLoading: boolean, content: string }[]>([{ 'type': 'ai', 'isLoading': true, 'content': '' }]);
-
   let Lang = useCurrentLanguage()!
-
   currentLanguage = Lang['current']['name']
   targetLanguage = Lang['target']['name']
 
@@ -97,166 +90,140 @@ export function PopupCard(props: any) {
   useEffect(() => {
     console.log('useEffect');
 
-    // // 当前选中的文字
-    // let keyWord = props.selection.toString().trim()
-
-    // // 选中文字所在的段落
-    // let sentence = props.selection.anchorNode.data
-
-    // if (sentence === undefined) {
-    //   sentence = ''
-    // } else {
-    //   sentence = sentence.length <= keyWord.length ? props.selection.anchorNode.parentNode.parentNode.innerText : sentence
-    // }
-
-    // setKeyWord(keyWord)
-    // setSentence(sentence)
-
+    // 渲染 Prompt 列表
     initializePromptList()
 
-    // 设置窗口的默认位置
-    if (windowElement.current && !props.isPin) {
+    if (true) {
 
-      // Check the boundaries
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
 
-      const elementWidth = windowElement.current.clientWidth;
-      const elementHeight = windowElement.current.clientHeight;
+      // 获取最近一次执行的 Prompt
+      browser.storage.local.get({ "lastExecutedPrompt": [] }).then((item) => {
+        console.log('lastExecutedPrompt:');
 
-      const minX = 0;
-      const minY = 0;
-      const maxX = windowWidth - elementWidth;
-      const maxY = windowHeight - elementHeight;
+        console.log(item);
+        // 执行 Prompt、获取 Unsplash 图片
+        executivePrompt(item.lastExecutedPrompt)
 
-      const newX = maxX - 20
-      const newY = props.selection.anchorNode.parentElement.offsetTop + props.selection.anchorNode.parentElement.clientHeight + 20
 
-      const clampedX = Math.max(minX, Math.min(newX, maxX));
-      const clampedY = Math.max(minY, Math.min(newY, maxY));
-      // console.log(props.selection.getRangeAt(0));
+      })
 
-      windowElement.current.style.left = `${clampedX}px`;
-      windowElement.current.style.top = `${clampedY}px`;
-    }
+    } else {
 
-    // 执行上一次的 prompt 或默认不执行由用户手动选择 prompt
+      // 执行上一次的 prompt 或默认不执行由用户手动选择 prompt
 
-    let systemPrompt = {
-      "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
-      - 说明单词的词性
-      - 解释单词在句子中的含义
+      let systemPrompt = {
+        "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
+    - 说明单词的词性
+    - 解释单词在句子中的含义
+    - 提供例句
+    - 提供简单的翻译题
+    
+    让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
+    - 说明部分需要使用 B 语言。
+    - 提供 A 语言的例句并显示其 B 语言的翻译。
+    - 翻译题显示 B 语言的句子，要求翻译为 A 语言，句子尽量简单，翻译后的句子需要包含上述单词。
+    - ## 表示标题，你需要使用 B 语言表示。
+    
+    ---
+    例子：
+    
+    用户输入：
+    单词：called
+    句子：This syntax is called “destructuring”
+
+    示例回复：
+    
+    含义：“被称作”或“被叫做”
+    词性：动词的过去分词形式，也可以作为形容词或名词使用
+    
+    ## 在句子中的含义
+    这里的 called 是一个被动语态的形式，表示“被称作”或“被叫做”的意思。句子的意思是“这种语法结构被称作‘解构’”。
+    
+    ## 例句
+    
+    - The movie is called “The Godfather”. - 这部电影叫做“教父”
+    - I was called to the principal’s office this morning. - 我今天早上被叫去校长办公室了。
+    
+    ## 翻译题
+    - 我刚刚打电话给我的姐姐。
+    - 她的朋友们都叫她 "小兔子"。
+    
+    ---
+    
+    接下来，请使用指定语言回复：
+    A 语言：${Lang['target']['name']}
+    B 语言：${Lang['current']['name']}`
+      }
+
+      let userPrompt = {
+        "role": "user", "content": `Word:"{{keyWord}}", sentence: "{{sentence}}"`
+      }
+
+      // 关键字长度较长时，按照句子进行处理
+      if (props.data.keyWord.length > 20) {
+
+        systemPrompt = {
+          "role": "system", "content": `作为语言老师，给你一个句子，你需要：
+      - 解释句子的语法知识
       - 提供例句
-      - 提供简单的翻译题
+      - 提供测试题测试学生的理解程度。
       
       让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
-      - 说明部分需要使用 B 语言。
+      - 翻译部分需要翻译为 B 语言。
+      - 分析**用户提供的句子**
       - 提供 A 语言的例句并显示其 B 语言的翻译。
-      - 翻译题显示 B 语言的句子，要求翻译为 A 语言，句子尽量简单，翻译后的句子需要包含上述单词。
-      - ## 表示标题，你需要使用 B 语言表示。
       
-      ---
-      例子：
       
-      用户输入：
-      单词：called
-      句子：This syntax is called “destructuring”
-
-      示例回复：
+      下面是一个案例：
+      用户提供的句子：My parents are busier than my grandparents.
       
-      含义：“被称作”或“被叫做”
-      词性：动词的过去分词形式，也可以作为形容词或名词使用
+      ## 翻译
+      我的父母比我的祖父母更忙。
       
-      ## 在句子中的含义
-      这里的 called 是一个被动语态的形式，表示“被称作”或“被叫做”的意思。句子的意思是“这种语法结构被称作‘解构’”。
+      ## 分析
+      - 主语：[My parents]
+      - 谓语：[are busier]
+      - 比较结构：[than my grandparents]
       
       ## 例句
+      1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
+      2. This car is faster than that one. - 这辆车比那辆车跑得快。
       
-      - The movie is called “The Godfather”. - 这部电影叫做“教父”
-      - I was called to the principal’s office this morning. - 我今天早上被叫去校长办公室了。
-      
-      ## 翻译题
-      - 我刚刚打电话给我的姐姐。
-      - 她的朋友们都叫她 "小兔子"。
+      ## 练习题
+      1. 翻译句子。
+      The new restaurant is much busier than the old one.
+      2. 把下面的句子改写为否定句和疑问句。
+      My sister is taller than my brother.
       
       ---
       
-      接下来，请使用指定语言回复：
-      A 语言：${Lang['target']['name']}
-      B 语言：${Lang['current']['name']}`
-    }
+      现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
+        }
 
-    let userPrompt = {
-      "role": "user", "content": `Word:"{{keyWord}}", sentence: "{{sentence}}"
-      `
-    }
+        // userPrompt = {
+        //   "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
+        //     3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
+        //     4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
+        //     Please reply "Yes" if you understand.`
+        // }
 
-    // 关键字长度较长时，按照句子进行处理
-    if (props.data.keyWord.length > 20) {
+        userPrompt = {
+          "role": "user", "content": `Sentence: "{{keyWord}}"`
+        }
 
-      systemPrompt = {
-        "role": "system", "content": `作为语言老师，给你一个句子，你需要：
-        - 解释句子的语法知识
-        - 提供例句
-        - 提供测试题测试学生的理解程度。
-        
-        让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
-        - 翻译部分需要翻译为 B 语言。
-        - 分析**用户提供的句子**
-        - 提供 A 语言的例句并显示其 B 语言的翻译。
-        
-        
-        下面是一个案例：
-        用户提供的句子：My parents are busier than my grandparents.
-        
-        ## 翻译
-        我的父母比我的祖父母更忙。
-        
-        ## 分析
-        - 主语：[My parents]
-        - 谓语：[are busier]
-        - 比较结构：[than my grandparents]
-        
-        ## 例句
-        1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
-        2. This car is faster than that one. - 这辆车比那辆车跑得快。
-        
-        ## 练习题
-        1. 翻译句子。
-        The new restaurant is much busier than the old one.
-        2. 把下面的句子改写为否定句和疑问句。
-        My sister is taller than my brother.
-        
-        ---
-        
-        现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
+
       }
 
-      // userPrompt = {
-      //   "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
-      //     3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
-      //     4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
-      //     Please reply "Yes" if you understand.`
-      // }
+      let prompt = [systemPrompt, userPrompt]
 
-      userPrompt = {
-        "role": "user", "content": `Sentence: "{{keyWord}}"`
-      }
-
+      // 执行 Prompt、获取 Unsplash 图片
+      executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' })
 
     }
 
-    let prompt = [systemPrompt, userPrompt]
 
-    executivePrompt({ 'prompt': prompt, 'getUnsplashImages': true })
-
-
-    // 添加滚动事件，让消息列表自动滚动到底部
-    messagesList.current?.addEventListener("scroll", handleScroll);
-    return () => {
-      // console.log('useEffect return');
-      messagesList.current?.removeEventListener("scroll", handleScroll);
-    };
+    // 设置窗口的默认位置、添加滚动事件，让消息列表自动滚动到底部
+    windowInitialization({ 'isPin': props.isPin, 'windowElement': windowElement, 'selection': props.selection, 'messagesList': messagesList })
 
 
   }, [props]);
@@ -288,7 +255,14 @@ export function PopupCard(props: any) {
 
 
       // 将查询记录保存起来
-      const newHistory = { 'keyWord': keyWord, 'sentence': Sentence, 'role': messages[0]['role'], 'answer': messages[0]['content'], 'source': window.location.href, 'prompt': messages[0]['prompt'] }
+      const newHistory = {
+        'keyWord': keyWord,
+        'sentence': Sentence,
+        'role': messages[0]['role'],
+        'answer': messages[0]['content'],
+        'source': window.location.href,
+        'prompt': messages[0]['prompt']
+      }
 
 
       if (keyWord !== '' && Sentence !== '' && messages[0]['content'] !== '') {
@@ -307,7 +281,7 @@ export function PopupCard(props: any) {
               let obj = item.history[i]
 
 
-              if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence'] && obj.prompt === promptRef.current?.prompt[0]['content']) {
+              if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence'] && obj.prompt === lastExecutedPrompt.userPrompt) {
 
                 bingo = true
                 break
@@ -339,15 +313,17 @@ export function PopupCard(props: any) {
 
   }, [isAnswerDone]);
 
-  const executivePrompt = (prompt: { prompt: Array<{ role: string, content: string }>, getUnsplashImages: boolean }) => {
+  const executivePrompt = (prompt: PromptType) => {
     console.log('executivePrompt:');
     console.log(prompt);
 
-    promptRef.current = prompt
+    // promptRef.current = prompt
 
     const keyWord = props.data.keyWord
     const Sentence = props.data.Sentence
 
+    // 设置最近执行的 Prompt
+    setLastExecutedPrompt(prompt)
 
     // 初始化
     setMessages([])
@@ -362,7 +338,7 @@ export function PopupCard(props: any) {
       let bingo = false
       for (let i = 0; i < item.history.length; i++) {
         let obj = item.history[i]
-        if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === prompt.prompt[0]['content']) {
+        if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === prompt.userPrompt) {
 
           if ('role' in obj) {
 
@@ -400,21 +376,27 @@ export function PopupCard(props: any) {
 
       if (!bingo) {
 
-        getGPTMsg(prompt.prompt, keyWord)
+        getGPTMsg([{ 'role': 'user', 'content': prompt.userPrompt }], keyWord)
 
       }
 
       if (keyWord.length <= 20 && getUnsplashImages) {
-        getUnsplashImages(keyWord)
+
+        getUnsplashImages(keyWord).then((imgs: any) => {
+          setImages(imgs)
+        })
+
       }
-
-
-
 
     })
 
 
-
+    // 记录最近 1 次使用的 Prompt
+    browser.storage.local.set(
+      {
+        lastExecutedPrompt: prompt
+      }
+    )
 
   }
 
@@ -425,35 +407,6 @@ export function PopupCard(props: any) {
     })
 
     setPrompts(promptList)
-
-
-  }
-
-  const getUnsplashImages = (keyWord: string) => {
-    // 请求 background 获取数据
-    // 使用长连接
-    let port = browser.runtime.connect({
-      name: 'popup-name'
-    })
-
-    // 使用 postMs 发送信息
-    port.postMessage({ 'type': 'getUnsplashImages', 'messages': '', 'keyWord': keyWord })
-
-    // 接收信息
-    port.onMessage.addListener(msg => {
-
-      if (msg.type === 'sendImgData') {
-        console.log('sendImgData');
-
-        if ('imgs' in msg) {
-          // console.log('unsplashSearchPhotos');
-          console.log('imgs:');
-          // setImages([])
-          setImages(msg.imgs)
-        }
-      }
-
-    })
 
   }
 
@@ -661,11 +614,6 @@ export function PopupCard(props: any) {
     }
   }
 
-  // const handleFormKeyDown = (event: any) => {
-  //   // console.log('handleFormKeyDown');
-
-  // }
-
   const handleMouseDown = (event: any) => {
     // console.log('PopupCard:handleMouseDown');
     setDragging(true);
@@ -872,22 +820,9 @@ export function PopupCard(props: any) {
 
   }
 
-  function handleScroll() {
 
-    if (messagesList.current !== null) {
-      const isAtBottom = messagesList.current?.scrollTop + messagesList.current.clientHeight >= messagesList.current.scrollHeight - 0.5;
-      if (isAtBottom) {
-        // 已经位于底部，不需要自动滚动
-        console.log('isAtBottom');
-        return;
-      } else {
-        // scrollToBottom()
-      }
-    }
-    // 未位于底部，不执行自动滚动
-  }
 
-  const openCustomPromptForm = (data: { isOpen: boolean, data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string } }) => {
+  const openCustomPromptForm = (data: { isOpen: boolean, data: PromptType }) => {
     setPopoverOpen(data.isOpen)
     setCustomPromptFormData(data.data)
   }
@@ -924,6 +859,7 @@ export function PopupCard(props: any) {
             openCustomPromptForm={openCustomPromptForm}
             title='Scouter'
             prompts={prompts}
+            lastExecutedPrompt={lastExecutedPrompt}
           />
 
           <div className='flex-grow flex flex-col overflow-scroll'>

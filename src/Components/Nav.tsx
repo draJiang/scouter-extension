@@ -23,13 +23,20 @@ import Icon from "../assets/icon128.png"
 import { pinPopupCard } from '../content_script'
 import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
 
+type PromptType = {
+    title: string;
+    getUnsplashImages: boolean;
+    userPrompt: string;
+    id: string;
+};
 
 interface NavProps {
     title: string;
-    prompts: Array<{ title: string, getUnsplashImages: boolean, userPrompt: string, id: string }>;
+    prompts: Array<PromptType>;
+    lastExecutedPrompt: PromptType;
     handleSaveToAnkiBtnClick: () => void;
-    openCustomPromptForm: (data: { isOpen: boolean, data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string } }) => void;
-    handleMenuItemClick: (prompt: { prompt: Array<{ role: string, content: string }>, getUnsplashImages: boolean }) => void;
+    openCustomPromptForm: (data: { isOpen: boolean, data: PromptType }) => void;
+    handleMenuItemClick: (data: PromptType) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
@@ -42,36 +49,6 @@ export function Nav(props: NavProps) {
     // const { Option } = Select;
 
     const navElement = useRef<HTMLDivElement>(null);
-
-    const items = [
-        {
-            key: 'noopener noreferrer',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                    1st menu item
-                </a>
-            ),
-        },
-        {
-            key: '2',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-                    2nd menu item (disabled)
-                </a>
-            ),
-            disabled: true,
-        },
-        {
-            key: '3',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-                    3rd menu item (disabled)
-                </a>
-            ),
-            disabled: true,
-        },
-    ];
-
 
     useEffect(() => {
         console.log(props);
@@ -115,7 +92,7 @@ export function Nav(props: NavProps) {
     }
 
     // 打开 Prompt 编辑窗口
-    const openCustomPromptForm = (data: { isOpen: boolean, data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string } }) => {
+    const openCustomPromptForm = (data: { isOpen: boolean, data: PromptType }) => {
 
         props.openCustomPromptForm(data)
         setIsOpenPromptMenu(false)
@@ -123,9 +100,9 @@ export function Nav(props: NavProps) {
     }
 
 
-    const handleMenuItemClick = (data: { title: string, getUnsplashImages: boolean, userPrompt: string }) => {
+    const handleMenuItemClick = (data: PromptType) => {
         console.log(data);
-        props.handleMenuItemClick({ 'prompt': [{ 'role': 'user', 'content': data.userPrompt }], 'getUnsplashImages': data.getUnsplashImages })
+        props.handleMenuItemClick(data)
     }
 
     const onMenuOpenChange = (open: boolean) => {
@@ -173,7 +150,7 @@ export function Nav(props: NavProps) {
 
                                 >
 
-                                    {items[0]['key']} <HamburgerMenuIcon />
+                                    {props.lastExecutedPrompt.title} <HamburgerMenuIcon />
                                 </button>
                             </DropdownMenu.Trigger>
 
