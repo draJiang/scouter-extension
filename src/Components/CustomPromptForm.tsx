@@ -128,10 +128,10 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
             <Form
                 onFinish={savePrompt}
                 // layout='horizontal'
-                // labelCol={{
-                //     xs: { span: 6 },
-                //     sm: { span: 4 },
-                // }}
+                labelCol={{
+                    xs: { span: 6 },
+                    sm: { span: 4 },
+                }}
                 form={form}
             >
 

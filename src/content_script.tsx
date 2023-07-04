@@ -253,7 +253,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       }
 
       // 显示窗口
-      showPopupCard({ 'keyWord': keyWord, 'Sentence': sentence }, window.getSelection(), container, shadowRoot, isPin)
+      showPopupCard({ 'keyWord': keyWord, 'Sentence': sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
 
     }
 
@@ -278,7 +278,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 });
 
 // 显示应用窗口
-async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean) {
+async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
   console.log('showPopupCard:');
   // let a = await fetchcurrentLanguage()
   // console.log(a);
@@ -288,7 +288,7 @@ async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: a
     <React.StrictMode>
       <CurrentLanguageContext.Provider value={lang}>
         <StyleProvider container={shadowRoot}>
-          <PopupCard data={data} selection={msg} isPin={isPin} />
+          <PopupCard data={data} selection={msg} runPrompt={runPrompt} isPin={isPin} />
         </StyleProvider>
       </CurrentLanguageContext.Provider>
     </React.StrictMode>,

@@ -54,8 +54,9 @@ export function PopupCard(props: any) {
 
   const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '' }])
   const [images, setImages] = useState([])
+  const [showImagesBox, setShowImagesBox] = useState(false)
   const [prompts, setPrompts] = useState<Array<PromptType>>([]);
-  const [lastExecutedPrompt, setLastExecutedPrompt] = useState<PromptType>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
+  const [lastExecutedPrompt, setLastExecutedPrompt] = useState<PromptType>({ 'title': '👉🏼 Please choose a prompt', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -89,11 +90,12 @@ export function PopupCard(props: any) {
 
   useEffect(() => {
     console.log('useEffect');
+    console.log(props);
 
     // 渲染 Prompt 列表
     initializePromptList()
 
-    if (true) {
+    if (props.runPrompt) {
 
 
       // 获取最近一次执行的 Prompt
@@ -109,7 +111,9 @@ export function PopupCard(props: any) {
 
     } else {
 
-      // 执行上一次的 prompt 或默认不执行由用户手动选择 prompt
+      // 不执行任何 Prompt，由用户自行选择
+      console.log('不执行任何 Prompt，由用户自行选择');
+
 
       let systemPrompt = {
         "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
@@ -217,7 +221,7 @@ export function PopupCard(props: any) {
       let prompt = [systemPrompt, userPrompt]
 
       // 执行 Prompt、获取 Unsplash 图片
-      executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' })
+      executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' }, false)
 
     }
 
@@ -313,7 +317,10 @@ export function PopupCard(props: any) {
 
   }, [isAnswerDone]);
 
-  const executivePrompt = (prompt: PromptType) => {
+  const executivePrompt = (prompt: PromptType, runPrompt?: boolean) => {
+
+    runPrompt = runPrompt === undefined ? true : false
+
     console.log('executivePrompt:');
     console.log(prompt);
 
@@ -322,81 +329,92 @@ export function PopupCard(props: any) {
     const keyWord = props.data.keyWord
     const Sentence = props.data.Sentence
 
-    // 设置最近执行的 Prompt
-    setLastExecutedPrompt(prompt)
-
     // 初始化
     setMessages([])
     setImages([])
+    if (prompt.getUnsplashImages && runPrompt) {
+      // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
+      setShowImagesBox(true)
+    } else {
+      setShowImagesBox(false)
+    }
 
 
-    // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
-    browser.storage.local.get({ "history": [] }).then((item) => {
-      console.log(item);
 
-      // 如果记录已存在，则不重复保存
-      let bingo = false
-      for (let i = 0; i < item.history.length; i++) {
-        let obj = item.history[i]
-        if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === prompt.userPrompt) {
+    if (runPrompt) {
+      // 设置最近执行的 Prompt
+      setLastExecutedPrompt(prompt)
 
-          if ('role' in obj) {
+      // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
+      browser.storage.local.get({ "history": [] }).then((item) => {
+        console.log(item);
 
-          } else {
-            // 旧版本中因为没有存储 role ，直接显示历史数据时会导致后续流程异常
-            bingo = false
+        // 如果记录已存在，则不重复保存
+        let bingo = false
+        for (let i = 0; i < item.history.length; i++) {
+          let obj = item.history[i]
+          if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === prompt.userPrompt) {
+
+            if ('role' in obj) {
+
+            } else {
+              // 旧版本中因为没有存储 role ，直接显示历史数据时会导致后续流程异常
+              bingo = false
+              break
+            }
+
+            bingo = true
+
+            // 直接显示历史记录中的回答
+            setMessages(prevMessages => {
+
+              const lastMessage = prevMessages[prevMessages.length - 1];
+              const updatedLastMessage = {
+                ...lastMessage,
+                chatId: Date.now().toString(),
+                role: obj.role,
+                content: obj.answer,
+                loading: false
+              };
+
+              return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+            })
+
+            setIsLoading(false)
+            setAnswerDone(true)
+
+            setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
             break
           }
+        }
 
-          bingo = true
+        if (!bingo) {
 
-          // 直接显示历史记录中的回答
-          setMessages(prevMessages => {
+          getGPTMsg([{ 'role': 'user', 'content': prompt.userPrompt }], keyWord)
 
-            const lastMessage = prevMessages[prevMessages.length - 1];
-            const updatedLastMessage = {
-              ...lastMessage,
-              chatId: Date.now().toString(),
-              role: obj.role,
-              content: obj.answer,
-              loading: false
-            };
+        }
 
-            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+        if (keyWord.length <= 20 && prompt.getUnsplashImages) {
 
+          getUnsplashImages(keyWord).then((imgs: any) => {
+            setImages(imgs)
           })
 
-          setIsLoading(false)
-          setAnswerDone(true)
-
-          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
-          break
         }
-      }
 
-      if (!bingo) {
-
-        getGPTMsg([{ 'role': 'user', 'content': prompt.userPrompt }], keyWord)
-
-      }
-
-      if (keyWord.length <= 20 && getUnsplashImages) {
-
-        getUnsplashImages(keyWord).then((imgs: any) => {
-          setImages(imgs)
-        })
-
-      }
-
-    })
+      })
 
 
-    // 记录最近 1 次使用的 Prompt
-    browser.storage.local.set(
-      {
-        lastExecutedPrompt: prompt
-      }
-    )
+      // 记录最近 1 次使用的 Prompt
+      browser.storage.local.set(
+        {
+          lastExecutedPrompt: prompt
+        }
+      )
+    } else {
+      setLastExecutedPrompt({ 'title': '👉🏼 Please choose a prompt', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
+    }
 
   }
 
@@ -870,7 +888,11 @@ export function PopupCard(props: any) {
 
               <Selection text={props.data.keyWord} />
 
-              <Images images={images} keyWord={props.data.keyWord} getUnsplashImages={getUnsplashImages} />
+              {showImagesBox && <Images images={images} keyWord={props.data.keyWord} getUnsplashImages={(keyWord) => {
+                getUnsplashImages(keyWord).then((imgs: any) => {
+                  setImages(imgs)
+                })
+              }} />}
 
               <div
                 className='messages'

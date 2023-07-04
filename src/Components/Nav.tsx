@@ -50,6 +50,9 @@ export function Nav(props: NavProps) {
 
     const navElement = useRef<HTMLDivElement>(null);
 
+    const defaultPrompt = { 'title': 'Default', 'getUnsplashImages': false, 'userPrompt': 'Default', 'id': 'Default' }
+
+
     useEffect(() => {
         console.log(props);
 
@@ -99,7 +102,7 @@ export function Nav(props: NavProps) {
 
     }
 
-
+    // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
         console.log(data);
         props.handleMenuItemClick(data)
@@ -166,6 +169,21 @@ export function Nav(props: NavProps) {
                                     MozAnimationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                                     willChange: 'transform, opacity'
                                 }}>
+
+
+                                    <DropdownMenu.Item className="DropdownMenuItem"
+                                        onSelect={() => handleMenuItemClick(defaultPrompt)}>
+                                        Default
+                                    </DropdownMenu.Item>
+
+                                    {/* <DropdownMenuItem
+                                        key='Default'
+                                        data={defaultPrompt}
+                                        onSelect={() => handleMenuItemClick(defaultPrompt)}
+                                        handleEditPrompt={() => console.log('hello')}
+                                    >
+
+                                        Default</DropdownMenuItem> */}
 
                                     {props.prompts.map(item => <DropdownMenuItem
                                         key={item.id}

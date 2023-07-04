@@ -34,6 +34,15 @@ browser.contextMenus.create({
     browser.runtime.lastError
   });
 
+browser.contextMenus.create({
+  id: "2",
+  title: "Scouter - Don't run any prompt",
+  contexts: ["selection"],
+},
+  () => {
+    browser.runtime.lastError
+  });
+
 
 // 右键菜单点击事件
 browser.contextMenus.onClicked.addListener(async function (info, _tab) {
@@ -41,7 +50,9 @@ browser.contextMenus.onClicked.addListener(async function (info, _tab) {
   console.log('右键菜单点击事件');
   console.log(info);
 
-  sendMessageToContent()
+  const runPrompt = info.menuItemId === '1' ? true : false
+
+  sendMessageToContent(runPrompt)
 
 
 })
@@ -443,7 +454,9 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 }
 
 
-const sendMessageToContent = () => {
+const sendMessageToContent = (runPrompt?: boolean) => {
+  console.log('sendMessageToContent:');
+  runPrompt = runPrompt === undefined ? true : runPrompt
 
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
     console.log(tabs);
@@ -452,7 +465,7 @@ const sendMessageToContent = () => {
 
     if (activeTab && activeTab.id !== undefined) {
 
-      let b = browser.tabs.sendMessage(tID, { type: 'open-souter' })
+      let b = browser.tabs.sendMessage(tID, { type: 'open-souter', runPrompt: runPrompt })
 
       // 已知情况：刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
       b.catch(e => {
