@@ -361,7 +361,7 @@ export function PopupCard(props: any) {
       } else {
 
         let p = prompt.userPrompt.replace(/\{selection\}/g, keyWord)
-        p = p.replace(/\{sentence\}/g, keyWord)
+        p = p.replace(/\{sentence\}/g, Sentence)
 
         newPrompt = [{ 'role': 'user', 'content': p }]
       }
@@ -636,7 +636,7 @@ export function PopupCard(props: any) {
   // 文本框下敲击按键时
   const handleKeyDown = (event: any) => {
     // 阻止事件冒泡
-    console.log('handleKeyDown');
+    // console.log('handleKeyDown');
 
     event.stopPropagation()
 
@@ -727,8 +727,6 @@ export function PopupCard(props: any) {
 
   // 文本框值变化时
   const onTextAreaInput = (event: any) => {
-    console.log('onTextAreaInput');
-
 
     if (event.target.value.length > 0) {
       setIsAnswerInputed(true)
@@ -1010,10 +1008,10 @@ export function PopupCard(props: any) {
           <div>
 
             <Drawer
-              title="Create Prompt"
+              title={customPromptFormData.id === '' ? "Create Prompt" : "Edit Prompt"}
               placement="bottom"
               closable={false}
-              height={440}
+              height={'100%'}
               // onClose={onClose}
               open={isPopoverOpen}
               getContainer={false}

@@ -27,7 +27,7 @@ browser.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSdobGQ
 // 创建右键菜单
 browser.contextMenus.create({
   id: "1",
-  title: "Scouter",
+  title: "Open",
   contexts: ["selection"],
 },
   () => {
@@ -36,7 +36,7 @@ browser.contextMenus.create({
 
 browser.contextMenus.create({
   id: "2",
-  title: "Scouter - Don't run any prompt",
+  title: "Run last prompt",
   contexts: ["selection"],
 },
   () => {
@@ -50,7 +50,7 @@ browser.contextMenus.onClicked.addListener(async function (info, _tab) {
   console.log('右键菜单点击事件');
   console.log(info);
 
-  const runPrompt = info.menuItemId === '1' ? true : false
+  const runPrompt = info.menuItemId === '2' ? true : false
 
   sendMessageToContent(runPrompt)
 
@@ -62,7 +62,7 @@ browser.commands.onCommand.addListener(function (command) {
 
   console.log('hello');
 
-  if (command === 'scout') {
+  if (command === 'RunLastPrompt') {
     // 执行相关代码
     sendMessageToContent()
   }
@@ -456,7 +456,9 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
 const sendMessageToContent = (runPrompt?: boolean) => {
   console.log('sendMessageToContent:');
-  runPrompt = runPrompt === undefined ? true : runPrompt
+  if (runPrompt === undefined) {
+    runPrompt = true
+  }
 
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
     console.log(tabs);

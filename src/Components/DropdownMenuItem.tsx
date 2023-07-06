@@ -40,7 +40,7 @@ export function DropdownMenuItem(props: DropdownMenuItemProps) {
         <DropdownMenu.Item
             style={{
                 display: 'flex',
-                padding: '4px',
+                padding: '6px',
                 marginBottom: '4px',
                 borderRadius:'2px'
             }}

@@ -134,7 +134,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                 // layout='horizontal'
                 labelCol={{
                     xs: { span: 6 },
-                    sm: { span: 4 },
+                    sm: { span: 5 },
                 }}
                 form={form}
             >
@@ -148,7 +148,9 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                     <Input maxLength={40} onKeyDown={handleKeyDown} placeholder="How to name the Prompt" type="text" />
                 </Form.Item>
 
-                <Form.Item name="getUnsplashImages" label="Images" valuePropName="checked">
+                <Form.Item
+                    extra="Display Images Related to the Selected Text"
+                    name="getUnsplashImages" label="Images" valuePropName="checked">
                     <Switch />
                 </Form.Item>
 

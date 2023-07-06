@@ -36,7 +36,7 @@ interface NavProps {
     lastExecutedPrompt: PromptType;
     handleSaveToAnkiBtnClick: () => void;
     openCustomPromptForm: (data: { isOpen: boolean, data: PromptType }) => void;
-    handleMenuItemClick: (data: PromptType, runPrompt: boolean, imageToRerender: boolean) => void;
+    handleMenuItemClick: (data: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
@@ -105,13 +105,18 @@ export function Nav(props: NavProps) {
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
         console.log(data);
-        // false 表示不重新渲染图片（因为 keyword 根本没有改变）
-        props.handleMenuItemClick(data, true, false)
+        // 第 3 个参数 false 表示不重新渲染图片
+        // 如果上一个 Prompt 是不显示图片，且当前 Prompt 需要显示图片，则本次任务需要渲染图片，否则不重新渲染图片
+        if (props.lastExecutedPrompt.getUnsplashImages !== true && data.getUnsplashImages) {
+            props.handleMenuItemClick(data)
+        } else {
+            props.handleMenuItemClick(data, true, false)
+        }
+
     }
 
     const onMenuOpenChange = (open: boolean) => {
-        console.log('onMenuOpenChange');
-        console.log(open);
+
         setIsOpenPromptMenu(open)
 
     }
@@ -134,13 +139,13 @@ export function Nav(props: NavProps) {
                         position: 'absolute',
                         width: '100%', top: 0,
                         background: 'white',
-                        zIndex: 9999
+                        zIndex: 9
                     }}
                     onMouseDown={props.onMouseDown}>
 
                     {/* <img src={Icon} /> */}
 
-                    <div style={{ zIndex: 9999 }}>
+                    <div style={{ zIndex: 9 }}>
 
                         <DropdownMenu.Root open={isOpenPromptMenu}
                             onOpenChange={onMenuOpenChange}
@@ -154,13 +159,19 @@ export function Nav(props: NavProps) {
 
                                 >
 
-                                    <span style={{ marginRight: '4px' }}>{props.lastExecutedPrompt.title}</span><HamburgerMenuIcon />
+                                    <span style={{
+                                        marginRight: '2px',
+                                        maxWidth: '170px',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis'
+                                    }}>{props.lastExecutedPrompt.title}</span><HamburgerMenuIcon />
                                 </button>
                             </DropdownMenu.Trigger>
 
                             <DropdownMenu.Portal container={navElement.current} >
 
-                                <DropdownMenu.Content className="DropdownMenuContent" sideOffset={5} style={{
+                                <DropdownMenu.Content className="DropdownMenuContent" align='start' sideOffset={5} style={{
                                     backgroundColor: '#fff',
                                     cursor: 'default',
                                     display: 'flex',
@@ -175,8 +186,9 @@ export function Nav(props: NavProps) {
                                 }}>
 
                                     <DropdownMenu.Item className="DropdownMenuItem" style={{
-                                        padding: '4px',
-                                        marginBottom: '4px'
+                                        padding: '6px',
+                                        marginBottom: '4px',
+                                        borderRadius: '2px'
                                     }}
                                         onSelect={() => handleMenuItemClick(defaultPrompt)}>
                                         Default
