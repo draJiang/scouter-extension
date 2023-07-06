@@ -118,7 +118,7 @@ browser.runtime.onConnect.addListener(port => {
 
           setTimeout(() => {
 
-            for (let i = 0; i < 80; i++) {
+            for (let i = 0; i < 20; i++) {
               port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
               if (!isContinue) {
                 console.log('停止渲染数据')

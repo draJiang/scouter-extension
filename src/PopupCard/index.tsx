@@ -114,112 +114,6 @@ export function PopupCard(props: any) {
       // 不执行任何 Prompt，由用户自行选择
       console.log('不执行任何 Prompt，由用户自行选择');
 
-
-      let systemPrompt = {
-        "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
-    - 说明单词的词性
-    - 解释单词在句子中的含义
-    - 提供例句
-    - 提供简单的翻译题
-    
-    让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
-    - 说明部分需要使用 B 语言。
-    - 提供 A 语言的例句并显示其 B 语言的翻译。
-    - 翻译题显示 B 语言的句子，要求翻译为 A 语言，句子尽量简单，翻译后的句子需要包含上述单词。
-    - ## 表示标题，你需要使用 B 语言表示。
-    
-    ---
-    例子：
-    
-    用户输入：
-    单词：called
-    句子：This syntax is called “destructuring”
-
-    示例回复：
-    
-    含义：“被称作”或“被叫做”
-    词性：动词的过去分词形式，也可以作为形容词或名词使用
-    
-    ## 在句子中的含义
-    这里的 called 是一个被动语态的形式，表示“被称作”或“被叫做”的意思。句子的意思是“这种语法结构被称作‘解构’”。
-    
-    ## 例句
-    
-    - The movie is called “The Godfather”. - 这部电影叫做“教父”
-    - I was called to the principal’s office this morning. - 我今天早上被叫去校长办公室了。
-    
-    ## 翻译题
-    - 我刚刚打电话给我的姐姐。
-    - 她的朋友们都叫她 "小兔子"。
-    
-    ---
-    
-    接下来，请使用指定语言回复：
-    A 语言：${Lang['target']['name']}
-    B 语言：${Lang['current']['name']}`
-      }
-
-      let userPrompt = {
-        "role": "user", "content": `Word:"{{keyWord}}", sentence: "{{sentence}}"`
-      }
-
-      // 关键字长度较长时，按照句子进行处理
-      if (props.data.keyWord.length > 20) {
-
-        systemPrompt = {
-          "role": "system", "content": `作为语言老师，给你一个句子，你需要：
-      - 解释句子的语法知识
-      - 提供例句
-      - 提供测试题测试学生的理解程度。
-      
-      让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
-      - 翻译部分需要翻译为 B 语言。
-      - 分析**用户提供的句子**
-      - 提供 A 语言的例句并显示其 B 语言的翻译。
-      
-      
-      下面是一个案例：
-      用户提供的句子：My parents are busier than my grandparents.
-      
-      ## 翻译
-      我的父母比我的祖父母更忙。
-      
-      ## 分析
-      - 主语：[My parents]
-      - 谓语：[are busier]
-      - 比较结构：[than my grandparents]
-      
-      ## 例句
-      1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
-      2. This car is faster than that one. - 这辆车比那辆车跑得快。
-      
-      ## 练习题
-      1. 翻译句子。
-      The new restaurant is much busier than the old one.
-      2. 把下面的句子改写为否定句和疑问句。
-      My sister is taller than my brother.
-      
-      ---
-      
-      现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
-        }
-
-        // userPrompt = {
-        //   "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
-        //     3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
-        //     4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
-        //     Please reply "Yes" if you understand.`
-        // }
-
-        userPrompt = {
-          "role": "user", "content": `Sentence: "{{keyWord}}"`
-        }
-
-
-      }
-
-      let prompt = [systemPrompt, userPrompt]
-
       // 执行 Prompt、获取 Unsplash 图片
       executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' }, false)
 
@@ -317,9 +211,14 @@ export function PopupCard(props: any) {
 
   }, [isAnswerDone]);
 
-  const executivePrompt = (prompt: PromptType, runPrompt?: boolean) => {
+  const executivePrompt = (prompt: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => {
 
-    runPrompt = runPrompt === undefined ? true : false
+    if (runPrompt === undefined) {
+      runPrompt = true
+    }
+    if (imageToRerender === undefined) {
+      imageToRerender = true
+    }
 
     console.log('executivePrompt:');
     console.log(prompt);
@@ -330,8 +229,12 @@ export function PopupCard(props: any) {
     const Sentence = props.data.Sentence
 
     // 初始化
-    setMessages([])
-    setImages([])
+    setMessages([])   // 对话列表
+    if (imageToRerender) {
+      setImages([])     // 图片列表
+    }
+
+
     if (prompt.getUnsplashImages && runPrompt) {
       // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
       setShowImagesBox(true)
@@ -344,6 +247,125 @@ export function PopupCard(props: any) {
     if (runPrompt) {
       // 设置最近执行的 Prompt
       setLastExecutedPrompt(prompt)
+
+      // 处理 Prompt 中的变量
+      let newPrompt: Array<{ role: string, content: string }>;
+
+      if (prompt.id == 'Default') {
+
+        let systemPrompt = {
+          "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
+      - 说明单词的词性
+      - 解释单词在句子中的含义
+      - 提供例句
+      - 提供简单的翻译题
+      
+      让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
+      - 说明部分需要使用 B 语言。
+      - 提供 A 语言的例句并显示其 B 语言的翻译。
+      - 翻译题显示 B 语言的句子，要求翻译为 A 语言，句子尽量简单，翻译后的句子需要包含上述单词。
+      - ## 表示标题，你需要使用 B 语言表示。
+      
+      ---
+      例子：
+      
+      用户输入：
+      单词：called
+      句子：This syntax is called “destructuring”
+  
+      示例回复：
+      
+      含义：“被称作”或“被叫做”
+      词性：动词的过去分词形式，也可以作为形容词或名词使用
+      
+      ## 在句子中的含义
+      这里的 called 是一个被动语态的形式，表示“被称作”或“被叫做”的意思。句子的意思是“这种语法结构被称作‘解构’”。
+      
+      ## 例句
+      
+      - The movie is called “The Godfather”. - 这部电影叫做“教父”
+      - I was called to the principal’s office this morning. - 我今天早上被叫去校长办公室了。
+      
+      ## 翻译题
+      - 我刚刚打电话给我的姐姐。
+      - 她的朋友们都叫她 "小兔子"。
+      
+      ---
+      
+      接下来，请使用指定语言回复：
+      A 语言：${Lang['target']['name']}
+      B 语言：${Lang['current']['name']}`
+        }
+
+        let userPrompt = {
+          "role": "user", "content": `Word:${keyWord}, sentence: ${Sentence}`
+        }
+
+        // 关键字长度较长时，按照句子进行处理
+        if (props.data.keyWord.length > 20) {
+
+          systemPrompt = {
+            "role": "system", "content": `作为语言老师，给你一个句子，你需要：
+        - 解释句子的语法知识
+        - 提供例句
+        - 提供测试题测试学生的理解程度。
+        
+        让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
+        - 翻译部分需要翻译为 B 语言。
+        - 分析**用户提供的句子**
+        - 提供 A 语言的例句并显示其 B 语言的翻译。
+        
+        
+        下面是一个案例：
+        用户提供的句子：My parents are busier than my grandparents.
+        
+        ## 翻译
+        我的父母比我的祖父母更忙。
+        
+        ## 分析
+        - 主语：[My parents]
+        - 谓语：[are busier]
+        - 比较结构：[than my grandparents]
+        
+        ## 例句
+        1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
+        2. This car is faster than that one. - 这辆车比那辆车跑得快。
+        
+        ## 练习题
+        1. 翻译句子。
+        The new restaurant is much busier than the old one.
+        2. 把下面的句子改写为否定句和疑问句。
+        My sister is taller than my brother.
+        
+        ---
+        
+        现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
+          }
+
+          // userPrompt = {
+          //   "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
+          //     3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
+          //     4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
+          //     Please reply "Yes" if you understand.`
+          // }
+
+          userPrompt = {
+            "role": "user", "content": `Sentence: ${keyWord}`
+          }
+
+
+        }
+
+        newPrompt = [systemPrompt, userPrompt]
+
+      } else {
+
+        let p = prompt.userPrompt.replace(/\{keyword\}/g, keyWord)
+        p = p.replace(/\{sentence\}/g, keyWord)
+
+        newPrompt = [{ 'role': 'user', 'content': p }]
+      }
+
 
       // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
       browser.storage.local.get({ "history": [] }).then((item) => {
@@ -391,11 +413,11 @@ export function PopupCard(props: any) {
 
         if (!bingo) {
 
-          getGPTMsg([{ 'role': 'user', 'content': prompt.userPrompt }], keyWord)
+          getGPTMsg(newPrompt, keyWord)
 
         }
 
-        if (keyWord.length <= 20 && prompt.getUnsplashImages) {
+        if (keyWord.length <= 20 && prompt.getUnsplashImages && imageToRerender) {
 
           getUnsplashImages(keyWord).then((imgs: any) => {
             setImages(imgs)

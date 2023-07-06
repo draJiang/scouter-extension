@@ -36,7 +36,7 @@ interface NavProps {
     lastExecutedPrompt: PromptType;
     handleSaveToAnkiBtnClick: () => void;
     openCustomPromptForm: (data: { isOpen: boolean, data: PromptType }) => void;
-    handleMenuItemClick: (data: PromptType) => void;
+    handleMenuItemClick: (data: PromptType, runPrompt: boolean, imageToRerender: boolean) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
@@ -50,7 +50,7 @@ export function Nav(props: NavProps) {
 
     const navElement = useRef<HTMLDivElement>(null);
 
-    const defaultPrompt = { 'title': 'Default', 'getUnsplashImages': false, 'userPrompt': 'Default', 'id': 'Default' }
+    const defaultPrompt = { 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': 'Default', 'id': 'Default' }
 
 
     useEffect(() => {
@@ -105,7 +105,8 @@ export function Nav(props: NavProps) {
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
         console.log(data);
-        props.handleMenuItemClick(data)
+        // false 表示不重新渲染图片（因为 keyword 根本没有改变）
+        props.handleMenuItemClick(data, true, false)
     }
 
     const onMenuOpenChange = (open: boolean) => {
@@ -169,7 +170,6 @@ export function Nav(props: NavProps) {
                                     MozAnimationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                                     willChange: 'transform, opacity'
                                 }}>
-
 
                                     <DropdownMenu.Item className="DropdownMenuItem"
                                         onSelect={() => handleMenuItemClick(defaultPrompt)}>

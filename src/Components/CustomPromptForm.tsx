@@ -123,6 +123,10 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
 
     }
 
+    const handleKeyDown = (event: any) => {
+        event.stopPropagation()
+    }
+
     return (
         <div>
             <Form
@@ -139,7 +143,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                     name="title"
                     label="Title"
                 >
-                    <Input placeholder="We will not use your Key for any other purposes." type="text" />
+                    <Input onKeyDown={handleKeyDown} placeholder="We will not use your Key for any other purposes." type="text" />
                 </Form.Item>
 
                 <Form.Item name="getUnsplashImages" label="Images" valuePropName="checked">
@@ -149,7 +153,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                 <Form.Item name="userPrompt" label="Prompt"
                     extra="hello"
                 >
-                    <Input.TextArea rows={4} />
+                    <Input.TextArea onKeyDown={handleKeyDown} rows={4} />
                 </Form.Item>
 
                 <Form.Item
