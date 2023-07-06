@@ -154,7 +154,7 @@ export function Nav(props: NavProps) {
 
                                 >
 
-                                    {props.lastExecutedPrompt.title} <HamburgerMenuIcon />
+                                    <span style={{ marginRight: '4px' }}>{props.lastExecutedPrompt.title}</span><HamburgerMenuIcon />
                                 </button>
                             </DropdownMenu.Trigger>
 
@@ -163,6 +163,9 @@ export function Nav(props: NavProps) {
                                 <DropdownMenu.Content className="DropdownMenuContent" sideOffset={5} style={{
                                     backgroundColor: '#fff',
                                     cursor: 'default',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    width: '180px',
                                     padding: '10px',
                                     boxShadow: '0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)',
                                     borderRadius: '6px',
@@ -171,7 +174,10 @@ export function Nav(props: NavProps) {
                                     willChange: 'transform, opacity'
                                 }}>
 
-                                    <DropdownMenu.Item className="DropdownMenuItem"
+                                    <DropdownMenu.Item className="DropdownMenuItem" style={{
+                                        padding: '4px',
+                                        marginBottom: '4px'
+                                    }}
                                         onSelect={() => handleMenuItemClick(defaultPrompt)}>
                                         Default
                                     </DropdownMenu.Item>
@@ -196,7 +202,9 @@ export function Nav(props: NavProps) {
 
                                     <DropdownMenu.Separator className="DropdownMenuSeparator" />
 
-                                    <Button onClick={() => openCustomPromptForm({ isOpen: true, data: { 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' } })}>Click me</Button>
+                                    {props.prompts.length < 6 ? <Button style={{ marginTop: '4px' }} size='small' onClick={() => openCustomPromptForm({ isOpen: true, data: { 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' } })}>Create prompt</Button> :
+                                        <Button style={{ marginTop: '4px' }} size='small' disabled>At most 7 Prompts</Button>}
+
 
                                     {/* <DropdownMenu.Arrow className="DropdownMenuArrow" /> */}
                                 </DropdownMenu.Content>

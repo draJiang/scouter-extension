@@ -360,7 +360,7 @@ export function PopupCard(props: any) {
 
       } else {
 
-        let p = prompt.userPrompt.replace(/\{keyword\}/g, keyWord)
+        let p = prompt.userPrompt.replace(/\{selection\}/g, keyWord)
         p = p.replace(/\{sentence\}/g, keyWord)
 
         newPrompt = [{ 'role': 'user', 'content': p }]

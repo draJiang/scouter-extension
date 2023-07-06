@@ -142,8 +142,10 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                 <Form.Item
                     name="title"
                     label="Title"
+
+                    rules={[{ required: true, message: 'Please input your title' }]}
                 >
-                    <Input onKeyDown={handleKeyDown} placeholder="We will not use your Key for any other purposes." type="text" />
+                    <Input maxLength={40} onKeyDown={handleKeyDown} placeholder="How to name the Prompt" type="text" />
                 </Form.Item>
 
                 <Form.Item name="getUnsplashImages" label="Images" valuePropName="checked">
@@ -151,18 +153,27 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                 </Form.Item>
 
                 <Form.Item name="userPrompt" label="Prompt"
-                    extra="hello"
+                    extra={
+                        <>
+                            {`${'{selection}'}: Selected text`}<br />
+                            {`${'{sentence}'}: Sentence containing the selected text`}
+                        </>}
+                    rules={[{ required: true, message: 'Please input your prompt' }]}
                 >
-                    <Input.TextArea onKeyDown={handleKeyDown} rows={4} />
+                    <Input.TextArea
+                        placeholder="Translate {selection} to Chinese"
+                        onKeyDown={handleKeyDown} rows={4} />
                 </Form.Item>
 
                 <Form.Item
                     style={{ margin: '0' }}
                 >
 
-                    {props.data.id !== '' && <Button onClick={handleDeleteButtonClick} type="primary">Delete</Button>}
+                    {props.data.id !== '' && <Button style={{
+                        marginRight: '12px'
+                    }} onClick={handleDeleteButtonClick} danger>Delete</Button>}
 
-                    <Button type="primary" htmlType="submit">Save</Button>
+                    <Button style={{ minWidth: '100px' }} type="primary" htmlType="submit">Save</Button>
 
                 </Form.Item>
 

@@ -124,7 +124,12 @@ style.textContent = `
   }
 
   #LearningEnglish2023 .DropdownMenuItem:hover {
-    color:red;
+    
+    background-color:#F6F6F6;
+  }
+
+  #LearningEnglish2023 .DropdownMenuItem:focus-visible {
+    outline: none;
   }
 
   #LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3 {

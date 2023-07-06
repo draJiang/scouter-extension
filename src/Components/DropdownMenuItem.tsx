@@ -4,6 +4,10 @@ import browser from 'webextension-polyfill'
 import { Button } from 'antd';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
+import {
+    Pencil2Icon,
+} from '@radix-ui/react-icons';
+
 interface DropdownMenuItemProps {
     children: ReactNode;
     onSelect: () => void;
@@ -33,11 +37,23 @@ export function DropdownMenuItem(props: DropdownMenuItemProps) {
 
 
     return (
-        <DropdownMenu.Item className="DropdownMenuItem"
+        <DropdownMenu.Item
+            style={{
+                display: 'flex',
+                padding: '4px',
+                marginBottom: '4px',
+                borderRadius:'2px'
+            }}
+            className="DropdownMenuItem"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onSelect={onSelect}>
-            {props.children}{isHovered && <button onClick={handleEditPrompt}>Edit</button>}
-        </DropdownMenu.Item>
+            <span style={{
+                flex: '1',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+            }}>{props.children}</span>{isHovered && <button onClick={handleEditPrompt}><Pencil2Icon /></button>}
+        </DropdownMenu.Item >
     )
 }
