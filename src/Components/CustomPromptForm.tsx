@@ -164,7 +164,8 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                 >
                     <Input.TextArea
                         placeholder="Translate {selection} to Chinese"
-                        onKeyDown={handleKeyDown} rows={4} />
+                        onKeyDown={handleKeyDown} rows={4}
+                        maxLength={3000} />
                 </Form.Item>
 
                 <Form.Item
@@ -175,7 +176,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                         marginRight: '12px'
                     }} onClick={handleDeleteButtonClick} danger>Delete</Button>}
 
-                    <Button style={{ minWidth: '100px' }} type="primary" htmlType="submit">Save</Button>
+                    <Button style={{ minWidth: '120px' }} type="primary" htmlType="submit">Save</Button>
 
                 </Form.Item>
 

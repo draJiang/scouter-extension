@@ -1007,6 +1007,7 @@ export function PopupCard(props: any) {
 
           <div>
 
+
             <Drawer
               title={customPromptFormData.id === '' ? "Create Prompt" : "Edit Prompt"}
               placement="bottom"
@@ -1017,7 +1018,8 @@ export function PopupCard(props: any) {
               getContainer={false}
               extra={
                 <Space>
-                  <Button onClick={() => openCustomPromptForm({ isOpen: false, data: { 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' } })}>Cancel</Button>
+
+                  <Button style={{ zIndex: '9' }} onClick={() => openCustomPromptForm({ isOpen: false, data: { 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' } })}>Cancel</Button>
 
                   {/* <Button type="primary">
                     OK
@@ -1026,6 +1028,18 @@ export function PopupCard(props: any) {
                 </Space>
               }
             >
+              <div style={{
+                // backgroundColor: 'red',
+                position: 'absolute',
+                left: '0',
+                top: '0',
+                width: '100%',
+                height: '64px',
+                cursor: 'all-scroll'
+              }}
+                onMouseDown={handleMouseDown}
+              ></div>
+
               <CustomPromptForm openCustomPromptForm={openCustomPromptForm} initializePromptList={initializePromptList} data={customPromptFormData} />
 
             </Drawer>
