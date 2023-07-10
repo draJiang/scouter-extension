@@ -179,7 +179,7 @@ export function PopupCard(props: any) {
               let obj = item.history[i]
 
 
-              if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence'] && obj.prompt === lastExecutedPrompt.userPrompt) {
+              if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence'] && obj.prompt === newHistory['prompt']) {
 
                 bingo = true
                 break
@@ -253,94 +253,110 @@ export function PopupCard(props: any) {
 
       if (prompt.id == 'Default') {
 
-        let systemPrompt = {
-          "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
-      - 说明单词的词性
-      - 解释单词在句子中的含义
-      - 提供例句
-      - 提供简单的翻译题
-      
-      让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
-      - 说明部分需要使用 B 语言。
-      - 提供 A 语言的例句并显示其 B 语言的翻译。
-      - 翻译题显示 B 语言的句子，要求翻译为 A 语言，句子尽量简单，翻译后的句子需要包含上述单词。
-      - ## 表示标题，你需要使用 B 语言表示。
-      
-      ---
-      例子：
-      
-      用户输入：
-      单词：called
-      句子：This syntax is called “destructuring”
-  
-      示例回复：
-      
-      含义：“被称作”或“被叫做”
-      词性：动词的过去分词形式，也可以作为形容词或名词使用
-      
-      ## 在句子中的含义
-      这里的 called 是一个被动语态的形式，表示“被称作”或“被叫做”的意思。句子的意思是“这种语法结构被称作‘解构’”。
-      
-      ## 例句
-      
-      - The movie is called “The Godfather”. - 这部电影叫做“教父”
-      - I was called to the principal’s office this morning. - 我今天早上被叫去校长办公室了。
-      
-      ## 翻译题
-      - 我刚刚打电话给我的姐姐。
-      - 她的朋友们都叫她 "小兔子"。
-      
-      ---
-      
-      接下来，请使用指定语言回复：
-      A 语言：${Lang['target']['name']}
-      B 语言：${Lang['current']['name']}`
-        }
+        //   let systemPrompt = {
+        //     "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
+        // - 说明单词的词性
+        // - 解释单词在句子中的含义
+        // - 提供例句
+        // - 提供简单的翻译题
+
+        // ---
+
+        // 让我们一步一步来，如果你是${Lang['target']['name']}的老师使用${Lang['target']['name']}教学。
+
+        // 例子：
+        // """
+        // - 含义：<使用 ${Lang['current']['name']} 解释含义>
+        // - 词性：<使用 ${Lang['current']['name']} 说明词性>
+
+        // ## 在句子中的含义
+        // - <使用 ${Lang['current']['name']} 说明单词在句子中的含义>
+
+        // ## 例句
+
+        // - <${Lang['target']['name']}例句> - <${Lang['current']['name']}的翻译>
+        // - <${Lang['target']['name']}例句> - <${Lang['current']['name']}的翻译>
+
+        // ## 翻译题
+        // - <${Lang['current']['name']}句子>
+        // - <${Lang['current']['name']}句子>
+        // """
+
+        // `
+
+        //   }
 
         let userPrompt = {
-          "role": "user", "content": `Word:${keyWord}, sentence: ${Sentence}`
+          "role": "user", "content": `
+
+          Please help me learn as a foreign language teacher.
+
+          Example：
+          """
+          -  Meaning: <Explain the meaning using ${Lang['current']['name']}>
+          -  Part of Speech: <Indicate the part of speech using ${Lang['current']['name']}>
+          
+          ## Meaning in the sentence
+          -  <Explain the meaning of the word in the sentence using ${Lang['current']['name']}>
+          
+          ## Example Sentences
+          -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
+          -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
+          
+          ## Translation Exercise
+          -  <${Lang['current']['name']} sentence>
+          -  <${Lang['current']['name']} sentence>
+          
+          """ 
+          
+          Word:${keyWord}, sentence: ${Sentence},You must reply in the specified language
+
+          Please start teaching:
+
+          `
+
         }
 
         // 关键字长度较长时，按照句子进行处理
         if (props.data.keyWord.length > 20) {
 
-          systemPrompt = {
-            "role": "system", "content": `作为语言老师，给你一个句子，你需要：
-        - 解释句子的语法知识
-        - 提供例句
-        - 提供测试题测试学生的理解程度。
-        
-        让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
-        - 翻译部分需要翻译为 B 语言。
-        - 分析**用户提供的句子**
-        - 提供 A 语言的例句并显示其 B 语言的翻译。
-        
-        
-        下面是一个案例：
-        用户提供的句子：My parents are busier than my grandparents.
-        
-        ## 翻译
-        我的父母比我的祖父母更忙。
-        
-        ## 分析
-        - 主语：[My parents]
-        - 谓语：[are busier]
-        - 比较结构：[than my grandparents]
-        
-        ## 例句
-        1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
-        2. This car is faster than that one. - 这辆车比那辆车跑得快。
-        
-        ## 练习题
-        1. 翻译句子。
-        The new restaurant is much busier than the old one.
-        2. 把下面的句子改写为否定句和疑问句。
-        My sister is taller than my brother.
-        
-        ---
-        
-        现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
-          }
+          //   systemPrompt = {
+          //     "role": "system", "content": `作为语言老师，给你一个句子，你需要：
+          // - 解释句子的语法知识
+          // - 提供例句
+          // - 提供测试题测试学生的理解程度。
+
+          // 让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
+          // - 翻译部分需要翻译为 B 语言。
+          // - 分析**用户提供的句子**
+          // - 提供 A 语言的例句并显示其 B 语言的翻译。
+
+
+          // 下面是一个案例：
+          // 用户提供的句子：My parents are busier than my grandparents.
+
+          // ## 翻译
+          // 我的父母比我的祖父母更忙。
+
+          // ## 分析
+          // - 主语：[My parents]
+          // - 谓语：[are busier]
+          // - 比较结构：[than my grandparents]
+
+          // ## 例句
+          // 1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
+          // 2. This car is faster than that one. - 这辆车比那辆车跑得快。
+
+          // ## 练习题
+          // 1. 翻译句子。
+          // The new restaurant is much busier than the old one.
+          // 2. 把下面的句子改写为否定句和疑问句。
+          // My sister is taller than my brother.
+
+          // ---
+
+          // 现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
+          //   }
 
           // userPrompt = {
           //   "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
@@ -350,13 +366,33 @@ export function PopupCard(props: any) {
           // }
 
           userPrompt = {
-            "role": "user", "content": `Sentence: ${keyWord}`
+            "role": "user", "content": `
+
+            As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
+
+            Example:
+            """
+
+            ## Translation
+            <Translate to ${Lang['current']['name']}>
+            
+            ## Grammar
+            <- Point: Explain in [${Lang['current']['name']}]>
+
+            ## Examples of related grammar
+            -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
+            -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
+
+            """
+            
+            Sentence: ${keyWord}`
           }
 
 
         }
 
-        newPrompt = [systemPrompt, userPrompt]
+        // newPrompt = [systemPrompt, userPrompt]
+        newPrompt = [userPrompt]
 
       } else {
 
@@ -375,7 +411,7 @@ export function PopupCard(props: any) {
         let bingo = false
         for (let i = 0; i < item.history.length; i++) {
           let obj = item.history[i]
-          if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === prompt.userPrompt) {
+          if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === newPrompt[0]['content']) {
 
             if ('role' in obj) {
 
@@ -396,6 +432,7 @@ export function PopupCard(props: any) {
                 chatId: Date.now().toString(),
                 role: obj.role,
                 content: obj.answer,
+                prompt: newPrompt[0]['content'],
                 loading: false
               };
 
@@ -516,6 +553,8 @@ export function PopupCard(props: any) {
           scrollToBottom()
 
           // setIsLoading(false)
+        } else if (isApiErro) {
+          setIsApiErro(false)
         }
 
         // 请求 GPT 数据成功且数据流结束传输

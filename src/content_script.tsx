@@ -173,15 +173,16 @@ style.textContent = `
   margin-right: 6px;
   }
 
-  .messages ul,.messages ol{
+  .messages ul{
+    list-style:disc;
+    padding-left: 20px;
+  }
+
+  .messages ol{
     list-style:auto;
     padding-left: 20px;
   }
   
-  #LearningEnglish2023 .messages * {
-    
-  }
-
   #LearningEnglish2023 .isPin path{
     fill: #F08A24;
   }

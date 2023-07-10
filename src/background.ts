@@ -24,6 +24,15 @@ browser.runtime.onInstalled.addListener(function () {
 // 卸载插件后引导填写卸载原因，帮助产品优化
 browser.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSdobGQN3O0Ck4fVrgfvRZMme3de-2OaEp1pFtibZkU0koc37w/viewform?usp=sf_link");
 
+browser.contextMenus.create({
+  id: "2",
+  title: "Run last prompt",
+  contexts: ["selection"],
+},
+  () => {
+    browser.runtime.lastError
+  });
+
 // 创建右键菜单
 browser.contextMenus.create({
   id: "1",
@@ -34,14 +43,7 @@ browser.contextMenus.create({
     browser.runtime.lastError
   });
 
-browser.contextMenus.create({
-  id: "2",
-  title: "Run last prompt",
-  contexts: ["selection"],
-},
-  () => {
-    browser.runtime.lastError
-  });
+
 
 
 // 右键菜单点击事件
@@ -109,35 +111,35 @@ browser.runtime.onConnect.addListener(port => {
         // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
 
 
-        setTimeout(() => {
-          const now = new Date();
+        // setTimeout(() => {
+        //   const now = new Date();
 
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
+        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
+        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
 
 
-          setTimeout(() => {
+        //   setTimeout(() => {
 
-            for (let i = 0; i < 20; i++) {
-              port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-              if (!isContinue) {
-                console.log('停止渲染数据')
-                break
-              }
-            }
+        //     for (let i = 0; i < 20; i++) {
+        //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
+        //       if (!isContinue) {
+        //         console.log('停止渲染数据')
+        //         break
+        //       }
+        //     }
 
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': messages[0].content })
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-          }, 1000);
+        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': messages[messages.length - 1].content })
+        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
+        //   }, 1000);
 
-        }, 2000);
+        // }, 1400);
 
-        return
+        // return
 
         // ====================
 
         if (openApiKey.length < 5) {
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
           return
         }
 
