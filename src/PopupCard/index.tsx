@@ -99,22 +99,33 @@ export function PopupCard(props: any) {
 
 
       // 获取最近一次执行的 Prompt
-      browser.storage.local.get({ "lastExecutedPrompt": [] }).then((item) => {
+      browser.storage.local.get({ "lastExecutedPrompt": undefined }).then((item) => {
         console.log('lastExecutedPrompt:');
 
         console.log(item);
-        // 执行 Prompt、获取 Unsplash 图片
-        executivePrompt(item.lastExecutedPrompt)
+
+        if (item.lastExecutedPrompt === undefined) {
+
+          // 执行默认 Prompt、获取 Unsplash 图片
+          executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' })
+
+        } else {
+          // 执行 Prompt、获取 Unsplash 图片
+          executivePrompt(item.lastExecutedPrompt)
+        }
+
+
 
 
       })
+
 
     } else {
 
       // 不执行任何 Prompt，由用户自行选择
       console.log('不执行任何 Prompt，由用户自行选择');
 
-      // 执行 Prompt、获取 Unsplash 图片
+      // 执行默认 Prompt、获取 Unsplash 图片
       executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' }, false)
 
     }
@@ -377,7 +388,7 @@ export function PopupCard(props: any) {
             <Translate to ${Lang['current']['name']}>
             
             ## Grammar
-            <- Point: Explain in [${Lang['current']['name']}]>
+            <- Point: Explain in ${Lang['current']['name']}>
 
             ## Examples of related grammar
             -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>

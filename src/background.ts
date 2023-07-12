@@ -84,7 +84,6 @@ browser.runtime.onConnect.addListener(port => {
     // 获取 API Key 等存储的数据
     let openApiKey: any, currentLanguage, targetLanguage = ''
     browser.storage.sync.get({ 'openApiKey': '', 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
-      console.log(result);
 
       openApiKey = result.openApiKey
       currentLanguage = result.currentLanguage
