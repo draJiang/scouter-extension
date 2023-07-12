@@ -14,6 +14,23 @@ import Usage from "../assets/usage.png"
 
 import { lang } from "../lib/lang"
 
+type LanguageObject = Record<string, {
+  name: string;
+  Prompt1: {
+    explanation: string;
+  };
+  Prompt2: {
+    translate: string;
+    explanation: string;
+  };
+  Prompt3: {
+    validation: string;
+  };
+}>;
+
+const languageData: LanguageObject = lang;
+
+
 export const Options = () => {
 
   const [openApiKey, setOpenApiKey] = useState<string | null>(null);
@@ -166,7 +183,7 @@ export const Options = () => {
                 placeholder="What language do you use?"
               >
 
-                {Object.keys(lang).map((item) => <Option key={item} value={item}>{item}</Option>)}
+                {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
 
               </Select>
             </Form.Item>
@@ -180,7 +197,7 @@ export const Options = () => {
               // onChange={onGenderChange}
               // allowClear
               >
-                {Object.keys(lang).map((item) => <Option key={item} value={item}>{item}</Option>)}
+                {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
 
               </Select>
             </Form.Item>
@@ -239,9 +256,11 @@ export const Options = () => {
               alignItems: 'left',
               width: '100%'
             }}>
-              <Button style={{ width: '300px', marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
-              <Button style={{ width: '300px', marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
-              <Button style={{ width: '300px' }} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button>
+              <div>
+                <Button style={{ width: '300px', marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
+                <Button style={{ width: '300px', marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
+                <Button style={{ width: '300px' }} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button>
+              </div>
             </div>
           </div>
 

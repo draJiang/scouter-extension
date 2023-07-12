@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill'
 import { createApi } from 'unsplash-js';
+import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 // 将信息添加到 Anki
 export function ankiAction(action: any, version: any, params = {}) {
@@ -36,9 +37,9 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
       if (data.response?.results.length === 0) {
         resolve([]);
       } else {
-        
+
         resolve(data.response?.results);
-        
+
       }
     }).catch((error) => {
       reject(error);
@@ -89,3 +90,34 @@ export function getDefaultDeckName() {
 
 
 }
+
+
+export const playTextToSpeech = (text: string) => {
+
+  const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
+  const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_TTS_API_KEY as string, process.env.AZURE_TTS_SPEECH_REGION as string);
+  speechConfig.speechSynthesisVoiceName = 'en-US-JennyNeural';
+
+  const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+  synthesizer.speakTextAsync(
+    text,
+    function (result) {
+      if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+        console.log('synthesis finished.');
+      } else {
+        console.error(
+          'Speech synthesis canceled, ' + result.errorDetails + '\nDid you set the speech resource key and region values?'
+        );
+      }
+      synthesizer.close();
+    },
+    function (err) {
+      console.trace('err - ' + err);
+      synthesizer.close();
+    }
+  );
+
+  console.log('Now synthesizing...');
+
+};

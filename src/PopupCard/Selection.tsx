@@ -2,6 +2,7 @@ import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
+import { playTextToSpeech } from '../util'
 
 // import LanguageDetect from "languagedetect";
 
@@ -52,6 +53,8 @@ export function Selection(props: SelectionProps) {
     // lngDetector.setLanguageType('iso2')
     // console.log(lngDetector.detect(props.text, 2));
 
+    playTextToSpeech(props.text)
+
     // 暂停上一次播报任务
     speechSynthesis.cancel();
 
@@ -74,7 +77,10 @@ export function Selection(props: SelectionProps) {
     setPlayStatus(!playStatus)
 
     // 开播吧
-    speechSynthesis.speak(utterance);
+    setTimeout(() => {
+      speechSynthesis.speak(utterance);
+    }, 2000);
+
 
   }
 

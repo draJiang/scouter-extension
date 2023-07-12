@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill'
 // 多语言信息
 export const lang = {
     'Arabic': {
-        'name': 'Arabic',
+        'name': 'العربية',
         'Prompt1': {
             'explanation': 'استخدام اللغة العربية لتفسير معنى الكلمات ودورها النحوي في الجملة'
         },
@@ -16,7 +16,7 @@ export const lang = {
         }
     },
     'Chinese Simplified': {
-        'name': 'Chinese Simplified',
+        'name': '简体中文',
         'Prompt1': {
             'explanation': '使用中文解释单词在句子中的含义和语法作用'
         },
@@ -29,7 +29,7 @@ export const lang = {
         }
     },
     'Chinese Traditional': {
-        'name': 'Chinese Traditional',
+        'name': '繁體中文',
         'Prompt1': {
             'explanation': '使用繁體中文解釋單詞在句子中的含義和語法作用'
         },
@@ -41,9 +41,8 @@ export const lang = {
             'validation': '作為一個語言專家，請檢查我提供的句子。如果句子不正確，那麼用繁體中文指出錯誤，並提供修改後的句子。句子：'
         }
     },
-
     'Dutch': {
-        'name': 'Dutch',
+        'name': 'Nederlands',
         'Prompt1': {
             'explanation': 'Gebruik het Nederlands om de betekenis van woorden en hun grammaticale rol in de zin uit te leggen'
         },
@@ -69,7 +68,7 @@ export const lang = {
         }
     },
     'French': {
-        'name': 'French',
+        'name': 'Français',
         'Prompt1': {
             'explanation': 'Utilisez le français pour expliquer la signification des mots et leur rôle grammatical dans la phrase'
         },
@@ -82,7 +81,7 @@ export const lang = {
         }
     },
     'German': {
-        'name': 'German',
+        'name': 'Deutsch',
         'Prompt1': {
             'explanation': 'Verwenden Sie Deutsch, um die Bedeutung von Wörtern und ihre grammatikalische Rolle im Satz zu erklären'
         },
@@ -95,7 +94,7 @@ export const lang = {
         }
     },
     'Hindi': {
-        'name': 'Hindi',
+        'name': 'हिन्दी',
         'Prompt1': {
             'explanation': 'शब्दों के अर्थ और वाक्य में उनकी व्याकरणिक भूमिका का विवरण देने के लिए हिंदी का उपयोग करें'
         },
@@ -107,10 +106,8 @@ export const lang = {
             'validation': 'भाषा विशेषज्ञ के रूप में, कृपया मैंने पेश किए गए वाक्यों की जांच करें। यदि वाक्य गलत है, तो कृपया हिंदी में त्रुटि बताएं और सही किए गए वाक्य प्रदान करें। वाक्य:'
         }
     },
-
-
     'Indonesian': {
-        'name': 'Indonesian',
+        'name': 'Bahasa Indonesia',
         'Prompt1': {
             'explanation': 'Menggunakan bahasa Indonesia untuk menjelaskan makna kata dan peran gramatikalnya dalam kalimat'
         },
@@ -123,7 +120,7 @@ export const lang = {
         }
     },
     'Italian': {
-        'name': 'Italian',
+        'name': 'Italiano',
         'Prompt1': {
             'explanation': 'Usa l\'italiano per spiegare il significato delle parole e il loro ruolo grammaticale nella frase'
         },
@@ -136,7 +133,7 @@ export const lang = {
         }
     },
     'Japanese': {
-        'name': 'Japanese',
+        'name': '日本語',
         'Prompt1': {
             'explanation': '単語の意味と文法上の役割を説明するために日本語を使用する'
         },
@@ -149,7 +146,7 @@ export const lang = {
         }
     },
     'Korean': {
-        'name': 'Korean',
+        'name': '한국어',
         'Prompt1': {
             'explanation': '단어의 의미와 문장에서의 문법적 역할을 설명하기 위해 한국어를 사용합니다.'
         },
@@ -162,7 +159,7 @@ export const lang = {
         }
     },
     'Portuguese': {
-        'name': 'Portuguese',
+        'name': 'Português',
         'Prompt1': {
             'explanation': 'Usar o português para explicar o significado das palavras e o papel gramatical delas na frase'
         },
@@ -175,7 +172,7 @@ export const lang = {
         }
     },
     'Russian': {
-        'name': 'Russian',
+        'name': 'Русский',
         'Prompt1': {
             'explanation': 'Используйте русский язык, чтобы объяснить значение слов и их грамматическую роль в предложении'
         },
@@ -188,7 +185,7 @@ export const lang = {
         }
     },
     'Spanish': {
-        'name': 'Spanish',
+        'name': 'Español',
         'Prompt1': {
             'explanation': 'Utilice el español para explicar el significado de las palabras y su función gramatical en la oración'
         },
@@ -201,7 +198,7 @@ export const lang = {
         }
     },
     'Turkish': {
-        'name': 'Turkish',
+        'name': 'Türkçe',
         'Prompt1': {
             'explanation': 'Kelimelerin anlamını ve cümledeki dilbilgisel rolünü açıklamak için Türkçeyi kullanın'
         },
@@ -213,8 +210,8 @@ export const lang = {
             'validation': 'Dil uzmanı olarak, lütfen sunduğum cümleyi kontrol edin. Eğer cümle yanlışsa, lütfen hatayı Türkçe olarak belirtin ve düzeltilmiş cümleyi sağlayın. Cümle:'
         }
     }
-
 }
+
 
 export const languageCodes = {
     "Arabic": "ar",
