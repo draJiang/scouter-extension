@@ -99,21 +99,20 @@ export function PopupCard(props: any) {
 
 
       // 获取最近一次执行的 Prompt
-      browser.storage.local.get({ "lastExecutedPrompt": undefined }).then((item) => {
+      browser.storage.local.get({ "lastExecutedPrompt": '' }).then((item) => {
         console.log('lastExecutedPrompt:');
 
         console.log(item);
 
-        if (item.lastExecutedPrompt === undefined) {
+        if (item.lastExecutedPrompt === '') {
 
           // 执行默认 Prompt、获取 Unsplash 图片
-          executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' })
+          executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id':'Default' })
 
         } else {
           // 执行 Prompt、获取 Unsplash 图片
           executivePrompt(item.lastExecutedPrompt)
         }
-
 
 
 
@@ -126,7 +125,7 @@ export function PopupCard(props: any) {
       console.log('不执行任何 Prompt，由用户自行选择');
 
       // 执行默认 Prompt、获取 Unsplash 图片
-      executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': '0' }, false)
+      executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id':'Default' }, false)
 
     }
 
@@ -264,39 +263,6 @@ export function PopupCard(props: any) {
 
       if (prompt.id == 'Default') {
 
-        //   let systemPrompt = {
-        //     "role": "system", "content": `作为语言老师，给你一个单词和句子，你需要：
-        // - 说明单词的词性
-        // - 解释单词在句子中的含义
-        // - 提供例句
-        // - 提供简单的翻译题
-
-        // ---
-
-        // 让我们一步一步来，如果你是${Lang['target']['name']}的老师使用${Lang['target']['name']}教学。
-
-        // 例子：
-        // """
-        // - 含义：<使用 ${Lang['current']['name']} 解释含义>
-        // - 词性：<使用 ${Lang['current']['name']} 说明词性>
-
-        // ## 在句子中的含义
-        // - <使用 ${Lang['current']['name']} 说明单词在句子中的含义>
-
-        // ## 例句
-
-        // - <${Lang['target']['name']}例句> - <${Lang['current']['name']}的翻译>
-        // - <${Lang['target']['name']}例句> - <${Lang['current']['name']}的翻译>
-
-        // ## 翻译题
-        // - <${Lang['current']['name']}句子>
-        // - <${Lang['current']['name']}句子>
-        // """
-
-        // `
-
-        //   }
-
         let userPrompt = {
           "role": "user", "content": `
 
@@ -330,51 +296,6 @@ export function PopupCard(props: any) {
 
         // 关键字长度较长时，按照句子进行处理
         if (props.data.keyWord.length > 20) {
-
-          //   systemPrompt = {
-          //     "role": "system", "content": `作为语言老师，给你一个句子，你需要：
-          // - 解释句子的语法知识
-          // - 提供例句
-          // - 提供测试题测试学生的理解程度。
-
-          // 让我们一步一步来，如果你是 A 语言的老师使用 B 语言教学。
-          // - 翻译部分需要翻译为 B 语言。
-          // - 分析**用户提供的句子**
-          // - 提供 A 语言的例句并显示其 B 语言的翻译。
-
-
-          // 下面是一个案例：
-          // 用户提供的句子：My parents are busier than my grandparents.
-
-          // ## 翻译
-          // 我的父母比我的祖父母更忙。
-
-          // ## 分析
-          // - 主语：[My parents]
-          // - 谓语：[are busier]
-          // - 比较结构：[than my grandparents]
-
-          // ## 例句
-          // 1. My sister is smarter than my brother. - 我妹妹比我哥哥更聪明。
-          // 2. This car is faster than that one. - 这辆车比那辆车跑得快。
-
-          // ## 练习题
-          // 1. 翻译句子。
-          // The new restaurant is much busier than the old one.
-          // 2. 把下面的句子改写为否定句和疑问句。
-          // My sister is taller than my brother.
-
-          // ---
-
-          // 现在你是一名${Lang['target']['name']}老师，使用${Lang['current']['name']}教学。`
-          //   }
-
-          // userPrompt = {
-          //   "role": "user", "content": `1. ${Lang['current']['Prompt2']['translate']} 2. Explanation: ${Lang['current']['Prompt2']['explanation']} 
-          //     3. Example sentences: Provide 2 ${Lang['target']['name']} example sentences and show their translations. 
-          //     4. Translation question: Based on the grammar knowledge points mentioned, Provide 2 simple test questions to translate the ${Lang['current']['name']} sentences into ${Lang['target']['name']}
-          //     Please reply "Yes" if you understand.`
-          // }
 
           userPrompt = {
             "role": "user", "content": `

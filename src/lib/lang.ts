@@ -252,7 +252,7 @@ export const languageCodes = {
 // 获取语言
 export const fetchcurrentLanguage = async () => {
     let r = null
-    await browser.storage.sync.get({ 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+    await browser.storage.sync.get({ 'currentLanguage': 'Chinese Simplified', 'targetLanguage': 'English' }).then((result) => {
 
         // console.log('browser.storage.sync.get');
 
