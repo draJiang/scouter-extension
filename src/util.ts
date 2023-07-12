@@ -92,11 +92,11 @@ export function getDefaultDeckName() {
 }
 
 
-export const playTextToSpeech = (text: string) => {
+export const playTextToSpeech = (text: string, voice: string) => {
 
   const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
   const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_TTS_API_KEY as string, process.env.AZURE_TTS_SPEECH_REGION as string);
-  speechConfig.speechSynthesisVoiceName = 'en-US-JennyNeural';
+  speechConfig.speechSynthesisVoiceName = voice;
 
   const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
 

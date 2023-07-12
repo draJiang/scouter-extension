@@ -1,7 +1,6 @@
 import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef } from "react";
-import ReactDOM from "react-dom";
 import { playTextToSpeech } from '../util'
 
 // import LanguageDetect from "languagedetect";
@@ -32,7 +31,7 @@ export function Selection(props: SelectionProps) {
 
 
   useEffect(() => {
-    setTargetLanguage(Lang['target']['name'])
+    setTargetLanguage(Lang['target']['id'])
 
     browser.storage.onChanged.addListener(onStorageChange)
 
@@ -53,33 +52,41 @@ export function Selection(props: SelectionProps) {
     // lngDetector.setLanguageType('iso2')
     // console.log(lngDetector.detect(props.text, 2));
 
-    playTextToSpeech(props.text)
+    try {
 
-    // 暂停上一次播报任务
-    speechSynthesis.cancel();
+      playTextToSpeech(props.text, languageCodes[targetLanguage as keyof typeof languageCodes])
 
-    const utterance = new SpeechSynthesisUtterance(props.text);
+    } catch (error) {
 
-    // 语种
-    utterance.lang = languageCodes[targetLanguage as keyof typeof languageCodes];
-    // console.log(languageCodes[targetLanguage as keyof typeof languageCodes]);
-    // console.log(targetLanguage);
+      // 暂停上一次播报任务
+      speechSynthesis.cancel();
 
-    // 语速
-    if (playStatus) {
-      // 基数次播放时采用慢速播放，让用户可以听的更清楚
-      utterance.rate = 0.6
+      const utterance = new SpeechSynthesisUtterance(props.text);
 
-    } else {
-      utterance.rate = 0.85
+      // 语种
+      utterance.lang = languageCodes[targetLanguage as keyof typeof languageCodes];
+      // console.log(languageCodes[targetLanguage as keyof typeof languageCodes]);
+      // console.log(targetLanguage);
+
+      // 语速
+      if (playStatus) {
+        // 基数次播放时采用慢速播放，让用户可以听的更清楚
+        utterance.rate = 0.6
+
+      } else {
+        utterance.rate = 0.85
+      }
+
+      setPlayStatus(!playStatus)
+
+      // 开播吧
+      speechSynthesis.speak(utterance);
+
     }
 
-    setPlayStatus(!playStatus)
 
-    // 开播吧
-    setTimeout(() => {
-      speechSynthesis.speak(utterance);
-    }, 2000);
+
+
 
 
   }

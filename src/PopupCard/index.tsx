@@ -636,7 +636,7 @@ export function PopupCard(props: any) {
   const handleSendMessage = (values: any) => {
 
     // console.log(values);
-    let prompt = `${Lang['current']['Prompt3']['validation']}"${values.msg}"`
+    let prompt = values.msg
 
     // 清空文本框
     form.resetFields();

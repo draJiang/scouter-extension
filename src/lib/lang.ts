@@ -4,6 +4,7 @@ import browser from 'webextension-polyfill'
 export const lang = {
     'Arabic': {
         'name': 'العربية',
+        'id':'Arabic',
         'Prompt1': {
             'explanation': 'استخدام اللغة العربية لتفسير معنى الكلمات ودورها النحوي في الجملة'
         },
@@ -17,6 +18,7 @@ export const lang = {
     },
     'Chinese Simplified': {
         'name': '简体中文',
+        'id':'Chinese Simplified',
         'Prompt1': {
             'explanation': '使用中文解释单词在句子中的含义和语法作用'
         },
@@ -30,6 +32,7 @@ export const lang = {
     },
     'Chinese Traditional': {
         'name': '繁體中文',
+        'id':'Chinese Traditional',
         'Prompt1': {
             'explanation': '使用繁體中文解釋單詞在句子中的含義和語法作用'
         },
@@ -43,6 +46,7 @@ export const lang = {
     },
     'Dutch': {
         'name': 'Nederlands',
+        'id':'Dutch',
         'Prompt1': {
             'explanation': 'Gebruik het Nederlands om de betekenis van woorden en hun grammaticale rol in de zin uit te leggen'
         },
@@ -56,6 +60,7 @@ export const lang = {
     },
     'English': {
         'name': 'English',
+        'id':'English',
         'Prompt1': {
             'explanation': 'Use English to explain the meaning and grammatical role of words in sentences'
         },
@@ -69,6 +74,7 @@ export const lang = {
     },
     'French': {
         'name': 'Français',
+        'id':'French',
         'Prompt1': {
             'explanation': 'Utilisez le français pour expliquer la signification des mots et leur rôle grammatical dans la phrase'
         },
@@ -82,6 +88,7 @@ export const lang = {
     },
     'German': {
         'name': 'Deutsch',
+        'id':'German',
         'Prompt1': {
             'explanation': 'Verwenden Sie Deutsch, um die Bedeutung von Wörtern und ihre grammatikalische Rolle im Satz zu erklären'
         },
@@ -95,6 +102,7 @@ export const lang = {
     },
     'Hindi': {
         'name': 'हिन्दी',
+        'id':'Hindi',
         'Prompt1': {
             'explanation': 'शब्दों के अर्थ और वाक्य में उनकी व्याकरणिक भूमिका का विवरण देने के लिए हिंदी का उपयोग करें'
         },
@@ -108,6 +116,7 @@ export const lang = {
     },
     'Indonesian': {
         'name': 'Bahasa Indonesia',
+        'id':'Indonesian',
         'Prompt1': {
             'explanation': 'Menggunakan bahasa Indonesia untuk menjelaskan makna kata dan peran gramatikalnya dalam kalimat'
         },
@@ -121,6 +130,7 @@ export const lang = {
     },
     'Italian': {
         'name': 'Italiano',
+        'id':'Italian',
         'Prompt1': {
             'explanation': 'Usa l\'italiano per spiegare il significato delle parole e il loro ruolo grammaticale nella frase'
         },
@@ -134,6 +144,7 @@ export const lang = {
     },
     'Japanese': {
         'name': '日本語',
+        'id':'Japanese',
         'Prompt1': {
             'explanation': '単語の意味と文法上の役割を説明するために日本語を使用する'
         },
@@ -147,6 +158,7 @@ export const lang = {
     },
     'Korean': {
         'name': '한국어',
+        'id':'Korean',
         'Prompt1': {
             'explanation': '단어의 의미와 문장에서의 문법적 역할을 설명하기 위해 한국어를 사용합니다.'
         },
@@ -160,6 +172,7 @@ export const lang = {
     },
     'Portuguese': {
         'name': 'Português',
+        'id':'Portuguese',
         'Prompt1': {
             'explanation': 'Usar o português para explicar o significado das palavras e o papel gramatical delas na frase'
         },
@@ -173,6 +186,7 @@ export const lang = {
     },
     'Russian': {
         'name': 'Русский',
+        'id':'Russian',
         'Prompt1': {
             'explanation': 'Используйте русский язык, чтобы объяснить значение слов и их грамматическую роль в предложении'
         },
@@ -186,6 +200,7 @@ export const lang = {
     },
     'Spanish': {
         'name': 'Español',
+        'id':'Spanish',
         'Prompt1': {
             'explanation': 'Utilice el español para explicar el significado de las palabras y su función gramatical en la oración'
         },
@@ -199,6 +214,7 @@ export const lang = {
     },
     'Turkish': {
         'name': 'Türkçe',
+        'id':'Turkish',
         'Prompt1': {
             'explanation': 'Kelimelerin anlamını ve cümledeki dilbilgisel rolünü açıklamak için Türkçeyi kullanın'
         },
@@ -214,23 +230,24 @@ export const lang = {
 
 
 export const languageCodes = {
-    "Arabic": "ar",
-    "Chinese Simplified": "zh-CN",
-    "Chinese Traditional": "zh-TW",
-    "Dutch": "nl",
-    "English": "en",
-    "French": "fr",
-    "German": "de",
-    "Hindi": "hi",
-    "Indonesian": "id",
-    "Italian": "it",
-    "Japanese": "ja",
-    "Korean": "ko",
-    "Portuguese": "pt",
-    "Russian": "ru",
-    "Spanish": "es",
-    "Turkish": "tr"
-};
+    "Arabic": "ar-AE-FatimaNeural",
+    "Chinese Simplified": "zh-CN-XiaoxiaoNeural",
+    "Chinese Traditional": "zh-TW-HsiaoChenNeural",
+    "Dutch": "nl-NL-ColetteNeural",
+    "English": "en-US-AriaNeural",
+    "French": "fr-FR-DeniseNeural",
+    "German": "de-DE-KatjaNeural",
+    "Hindi": "hi-IN-MadhurNeural",
+    "Indonesian": "id-ID-ArdiNeural",
+    "Italian": "it-IT-ElsaNeural",
+    "Japanese": "ja-JP-NanamiNeural",
+    "Korean": "ko-KR-SunHiNeural",
+    "Portuguese": "pt-BR-FranciscaNeural",
+    "Russian": "ru-RU-SvetlanaNeural",
+    "Spanish": "es-ES-ElviraNeural",
+    "Turkish": "tr-TR-AhmetNeural"
+}
+
 
 // 获取语言
 export const fetchcurrentLanguage = async () => {
