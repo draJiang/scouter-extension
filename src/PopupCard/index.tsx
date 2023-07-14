@@ -107,7 +107,7 @@ export function PopupCard(props: any) {
         if (item.lastExecutedPrompt === '') {
 
           // 执行默认 Prompt、获取 Unsplash 图片
-          executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id':'Default' })
+          executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': 'Default' })
 
         } else {
           // 执行 Prompt、获取 Unsplash 图片
@@ -125,7 +125,7 @@ export function PopupCard(props: any) {
       console.log('不执行任何 Prompt，由用户自行选择');
 
       // 执行默认 Prompt、获取 Unsplash 图片
-      executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id':'Default' }, false)
+      executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': 'Default' }, false)
 
     }
 
@@ -243,7 +243,6 @@ export function PopupCard(props: any) {
     if (imageToRerender) {
       setImages([])     // 图片列表
     }
-
 
     if (prompt.getUnsplashImages && runPrompt) {
       // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
@@ -382,17 +381,34 @@ export function PopupCard(props: any) {
 
         if (!bingo) {
 
+          // 请求 AI 数据
           getGPTMsg(newPrompt, keyWord)
 
         }
 
-        if (keyWord.length <= 20 && prompt.getUnsplashImages && imageToRerender) {
+        if (prompt.id == 'Default') {
 
-          getUnsplashImages(keyWord).then((imgs: any) => {
-            setImages(imgs)
-          })
+          if (keyWord.length <= 20 && prompt.getUnsplashImages && imageToRerender) {
+            // 获取图片数据
+            getUnsplashImages(keyWord).then((imgs: any) => {
+              setImages(imgs)
+            })
+
+          }
+
+        } else {
+
+          if (prompt.getUnsplashImages && imageToRerender) {
+            // 获取图片数据
+            getUnsplashImages(keyWord).then((imgs: any) => {
+              setImages(imgs)
+            })
+
+          }
 
         }
+
+
 
       })
 

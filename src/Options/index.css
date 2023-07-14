@@ -22,3 +22,14 @@ body {
     width: 68%;
     border-radius: 4px;
 }
+
+section {
+    border: 1px solid rgba(5, 5, 5, 0.06);
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+section :last-child {
+    margin-bottom: 0;
+}

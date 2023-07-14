@@ -12,6 +12,8 @@ let isContinue = true
 
 let controller = new AbortController();
 
+const defaultOpenApiEndpoint = 'https://api.openai.com'
+
 
 console.log('I am background');
 
@@ -82,10 +84,11 @@ browser.runtime.onConnect.addListener(port => {
     console.log('接收消息：', msg)
 
     // 获取 API Key 等存储的数据
-    let openApiKey: any, currentLanguage, targetLanguage = ''
-    browser.storage.sync.get({ 'openApiKey': '', 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+    let openApiKey: any, currentLanguage, openApiEndpoint, targetLanguage = ''
+    browser.storage.sync.get({ 'openApiKey': '', 'openApiEndpoint': defaultOpenApiEndpoint, 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
 
       openApiKey = result.openApiKey
+      openApiEndpoint = result.openApiEndpoint
       currentLanguage = result.currentLanguage
       targetLanguage = result.targetLanguage
 
@@ -142,7 +145,11 @@ browser.runtime.onConnect.addListener(port => {
           return
         }
 
-        fetch('https://api.openai.com/v1/chat/completions', {
+        if (openApiEndpoint.length < 5) {
+          openApiEndpoint = defaultOpenApiEndpoint
+        }
+
+        fetch(openApiEndpoint + '/v1/chat/completions', {
           signal: controller.signal,
           method: "POST",
           body: JSON.stringify({
@@ -153,7 +160,6 @@ browser.runtime.onConnect.addListener(port => {
             "top_p": 1,
             "frequency_penalty": 0,
             "presence_penalty": 2,
-
             "stream": true
           }),
           headers: { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
@@ -256,7 +262,7 @@ browser.runtime.onConnect.addListener(port => {
       if (msg.type === 'getUnsplashImages') {
 
         // 获取图片
-        if (msg.keyWord && msg.keyWord.length <= 20) {
+        if (msg.keyWord) {
 
           // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
 

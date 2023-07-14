@@ -83,6 +83,7 @@ export const Options = () => {
       // 更新 input 文本框的默认值
       form.setFieldsValue({
         openApiKey: items.openApiKey,
+        openApiEndpoint: items.openApiEndpoint,
         unsplashApiKey: items.unsplashApiKey,
         currentLanguage: items.currentLanguage,
         targetLanguage: items.targetLanguage,
@@ -111,10 +112,11 @@ export const Options = () => {
   }, [ankiDeckNames.join(''), ankiClientIsopen])
 
   async function getSettings() {
-    let items = await browser.storage.sync.get(["openApiKey", "unsplashApiKey", "currentLanguage", "targetLanguage", "ankiDeckName"])
+    let items = await browser.storage.sync.get(["openApiKey", "openApiEndpoint", "unsplashApiKey", "currentLanguage", "targetLanguage", "ankiDeckName"])
     return items
   }
 
+  // 保存设置
   async function saveOptions(values: any) {
     console.log('Options save');
     console.log(values);
@@ -122,6 +124,7 @@ export const Options = () => {
     let setStorage = await browser.storage.sync.set(
       {
         openApiKey: values['openApiKey'],
+        openApiEndpoint: values['openApiEndpoint'],
         unsplashApiKey: values['unsplashApiKey'],
         currentLanguage: values['currentLanguage'],
         targetLanguage: values['targetLanguage'],
@@ -161,12 +164,29 @@ export const Options = () => {
 
           >
 
-            <Form.Item
-              name="openApiKey"
-              label="Your Open API Key"
-            >
-              <Input placeholder="We will not use your Key for any other purposes." type="password" />
-            </Form.Item>
+            <section>
+
+              <Form.Item
+                name="openApiKey"
+                label="🔑Your Open API Key"
+              >
+                <Input placeholder="We will not use your Key for any other purposes." type="password" />
+              </Form.Item>
+
+
+              <Form.Item
+                name="openApiEndpoint"
+                label="🔗API Endpoint"
+                extra={
+                  <p style={{
+                    color: '#666'
+                  }}>If you use a third-party API endpoint, fill in the endpoint address</p>
+                }
+              >
+                <Input placeholder="https://..." type="url" />
+              </Form.Item>
+
+            </section>
 
             {/* <Form.Item
               name="unsplashApiKey"
@@ -175,50 +195,58 @@ export const Options = () => {
               <Input placeholder="We will not use your Key for any other purposes." type="password" />
             </Form.Item> */}
 
-            <Form.Item
-              name="currentLanguage"
-              label="Current Language"
-            >
-              <Select
-                placeholder="What language do you use?"
+            <section>
+
+              <Form.Item
+                name="currentLanguage"
+                label="💬Current Language"
               >
+                <Select
+                  placeholder="What language do you use?"
+                >
 
-                {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
+                  {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
 
-              </Select>
-            </Form.Item>
+                </Select>
+              </Form.Item>
 
-            <Form.Item
-              name="targetLanguage"
-              label="What language do you want to learn"
-            >
-              <Select
-                placeholder="What do you want to learn"
-              // onChange={onGenderChange}
-              // allowClear
+              <Form.Item
+                name="targetLanguage"
+                label="💬What language do you want to learn"
               >
-                {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
+                <Select
+                  placeholder="What do you want to learn"
+                // onChange={onGenderChange}
+                // allowClear
+                >
+                  {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
 
-              </Select>
-            </Form.Item>
+                </Select>
+              </Form.Item>
 
-            <Form.Item
-              name="ankiDeckName"
-              label="Anki Deck Name"
-              extra={!ankiClientIsopen && <p style={{
-                color: '#666'
-              }}>Anki client and related settings not found. Please <a target='__blank' href='https://jiangzilong.notion.site/Use-the-Add-to-Anki-feature-7ab95ff8aa5e419c978e8a2a0a451324'>configure</a> and try again</p>}
-            >
-              <Select
-                placeholder="Anki Deck Name"
-                disabled={!ankiClientIsopen}
+            </section>
+
+            <section>
+
+              <Form.Item
+                name="ankiDeckName"
+                label="📘Anki Deck Name"
+                extra={!ankiClientIsopen && <p style={{
+                  color: '#666'
+                }}>Anki client and related settings not found. Please <a target='__blank' href='https://jiangzilong.notion.site/Use-the-Add-to-Anki-feature-7ab95ff8aa5e419c978e8a2a0a451324'>configure</a> and try again</p>}
               >
+                <Select
+                  placeholder="Anki Deck Name"
+                  disabled={!ankiClientIsopen}
+                >
 
-                {ankiDeckNames.map((item) => <Option key={item} value={item}>{item}</Option>)}
+                  {ankiDeckNames.map((item) => <Option key={item} value={item}>{item}</Option>)}
 
 
-              </Select>
-            </Form.Item>
+                </Select>
+              </Form.Item>
+
+            </section>
 
 
             <Form.Item
@@ -236,7 +264,7 @@ export const Options = () => {
 
           <div className="instructions">
 
-            <h2>Usage</h2>
+            {/* <h2>Usage</h2>
 
             <ul style={{
               marginBottom: '14px'
@@ -249,7 +277,8 @@ export const Options = () => {
                 <p>Select text, then right-click and choose Scouter.</p>
                 <img src={Usage}></img>
               </li>
-            </ul>
+            </ul> */}
+            
             <div style={{
               display: 'flex',
               flexDirection: 'column',
