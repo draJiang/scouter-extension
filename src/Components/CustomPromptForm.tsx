@@ -77,6 +77,11 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
             // 将 Prompt 传回给父组件，以让 Prompt 列表 UI 重新渲染
             props.initializePromptList()
 
+        }).catch((error) => {
+
+            console.log('error');
+            alert('🥲Save failed, possibly due to a too long Prompt. You can delete other Prompts or shorten the Prompt characters and try again. \n' + error)
+
         })
 
     }

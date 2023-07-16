@@ -344,10 +344,10 @@ const handleMouseup = (event: any) => {
       const selection = getSelection()
 
       // 显示窗口
-      if (selection) {
+      if (selection && selection?.keyWord.length > 0) {
         showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, true)
       }
-      
+
     }
 
 

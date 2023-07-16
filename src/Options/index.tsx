@@ -226,7 +226,7 @@ export const Options = () => {
                 // onChange={onGenderChange}
                 // allowClear
                 >
-                  {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
+                  {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name + '(' + item + ')'}</Option>)}
 
                 </Select>
               </Form.Item>
@@ -255,17 +255,34 @@ export const Options = () => {
 
             </section>
 
+            <section>
+              <div style={{ padding: '0 0 8px' }}>
+                <label>⌨️Keyboard shortcut</label>
+              </div>
+              <a target='__blank' href='https://jiangzilong.notion.site/keyboard-shortcut-94a604055ef148a3b7c835e6436543f0?pvs=4'>Viewing and Setting Keyboard Shortcuts ↗️</a>
+            </section>
+
 
             <Form.Item
-              style={{ margin: '0' }}
+              style={{
+                margin: '0',
+                position: 'sticky',
+                bottom: 0,
+                padding: '10px 0',
+                display: 'flex',
+                justifyContent: 'end',
+                backdropFilter: 'blur(5px)'
+              }}
             >
+              <span style={{marginRight:'10px'}}>{status}</span>
               <Button type="primary" htmlType="submit">Save</Button>
-              <span>{status}</span>
             </Form.Item>
 
 
 
           </Form>
+
+
 
           <Divider />
 

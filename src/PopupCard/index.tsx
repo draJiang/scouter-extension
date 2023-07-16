@@ -679,7 +679,7 @@ export function PopupCard(props: any) {
       const elementHeight = windowElement.current.clientHeight;
 
       const minX = - elementWidth / 2;
-      const minY = - elementHeight / 1.5;
+      const minY = 0;
       const maxX = windowWidth - elementWidth + elementWidth / 2;
       const maxY = windowHeight - elementHeight + elementHeight / 1.5;
 
