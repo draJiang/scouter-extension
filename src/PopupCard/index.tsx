@@ -678,10 +678,10 @@ export function PopupCard(props: any) {
       const elementWidth = windowElement.current.clientWidth;
       const elementHeight = windowElement.current.clientHeight;
 
-      const minX = 0;
-      const minY = 0;
-      const maxX = windowWidth - elementWidth;
-      const maxY = windowHeight - elementHeight;
+      const minX = - elementWidth / 2;
+      const minY = - elementHeight / 1.5;
+      const maxX = windowWidth - elementWidth + elementWidth / 2;
+      const maxY = windowHeight - elementHeight + elementHeight / 1.5;
 
       const clampedX = Math.max(minX, Math.min(newX, maxX));
       const clampedY = Math.max(minY, Math.min(newY, maxY));

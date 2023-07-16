@@ -6,7 +6,7 @@ import ReactDOM from "react-dom";
 
 import { ankiAction, getDefaultDeckName } from '../util'
 
-import { Button, Input, Form, Divider, ConfigProvider, Select } from 'antd';
+import { Button, Radio, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 
 import "./index.css"
 // import "../assets/tailwind.css"
@@ -83,6 +83,7 @@ export const Options = () => {
       // 更新 input 文本框的默认值
       form.setFieldsValue({
         openApiKey: items.openApiKey,
+        // servers: 'azureOpenAI',
         openApiEndpoint: items.openApiEndpoint,
         unsplashApiKey: items.unsplashApiKey,
         currentLanguage: items.currentLanguage,
@@ -166,6 +167,19 @@ export const Options = () => {
 
             <section>
 
+              {/* <Form.Item name="servers" label="Radio.Group">
+                <Radio.Group defaultValue="openAI" buttonStyle="solid" onChange={(e) => console.log(e)} style={{
+                  display: 'flex'
+                }}>
+                  <Radio.Button style={{
+                    flex: '1'
+                  }} value="openAI">OpenAI</Radio.Button>
+                  <Radio.Button style={{
+                    flex: '1'
+                  }} value="azureOpenAI">Azure OpenAI</Radio.Button>
+                </Radio.Group>
+              </Form.Item> */}
+
               <Form.Item
                 name="openApiKey"
                 label="🔑Your Open API Key"
@@ -183,17 +197,10 @@ export const Options = () => {
                   }}>If you use a third-party API endpoint, fill in the endpoint address</p>
                 }
               >
-                <Input placeholder="https://..." type="url" />
+                <Input placeholder="https://api.openai.com" type="url" />
               </Form.Item>
 
             </section>
-
-            {/* <Form.Item
-              name="unsplashApiKey"
-              label="Your unsplash Access Key"
-            >
-              <Input placeholder="We will not use your Key for any other purposes." type="password" />
-            </Form.Item> */}
 
             <section>
 
@@ -205,7 +212,7 @@ export const Options = () => {
                   placeholder="What language do you use?"
                 >
 
-                  {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name}</Option>)}
+                  {Object.keys(languageData).map((item) => <Option key={item} value={item}>{languageData[item].name + '(' + item + ')'}</Option>)}
 
                 </Select>
               </Form.Item>
@@ -278,7 +285,7 @@ export const Options = () => {
                 <img src={Usage}></img>
               </li>
             </ul> */}
-            
+
             <div style={{
               display: 'flex',
               flexDirection: 'column',

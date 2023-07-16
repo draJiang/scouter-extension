@@ -9,6 +9,7 @@ import { StyleProvider } from '@ant-design/cssinjs';
 
 import { fetchcurrentLanguage } from './lib/lang';
 import { CurrentLanguageContext } from './lib/locale'
+import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 
 // import './assets/tailwind.css';
 
@@ -243,25 +244,32 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       shadowRoot?.appendChild(container)
     }
 
-    const selection = window.getSelection();
+    // const selection = window.getSelection();
 
-    if (selection !== null) {
-      // 当前选中的文字
-      let keyWord = selection.toString().trim()
+    const selection = getSelection()
 
-      // 选中文字所在的段落
-      let sentence = selection.anchorNode?.textContent ?? ''
-
-      if (sentence === undefined) {
-        sentence = ''
-      } else {
-        sentence = sentence.length <= keyWord.length ? (selection.anchorNode?.parentNode?.parentNode as HTMLElement)?.innerText ?? '' : sentence
-      }
-
-      // 显示窗口
-      showPopupCard({ 'keyWord': keyWord, 'Sentence': sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
-
+    // 显示窗口
+    if (selection) {
+      showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
     }
+
+    // if (selection !== null) {
+    //   // 当前选中的文字
+    //   let keyWord = selection.toString().trim()
+
+    //   // 选中文字所在的段落
+    //   let sentence = selection.anchorNode?.textContent ?? ''
+
+    //   if (sentence === undefined) {
+    //     sentence = ''
+    //   } else {
+    //     sentence = sentence.length <= keyWord.length ? (selection.anchorNode?.parentNode?.parentNode as HTMLElement)?.innerText ?? '' : sentence
+    //   }
+
+    //   // 显示窗口
+    //   showPopupCard({ 'keyWord': keyWord, 'Sentence': sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
+
+    // }
 
 
 
@@ -275,9 +283,17 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
           // 隐藏窗口
           container.parentNode?.removeChild(container);
 
+          document.removeEventListener('selectionchange', handleSelectionchange);
+          document.removeEventListener('mouseup', handleMouseup);
+
         }
       }
     }
+
+    let isTextSelected = false;
+
+    document.addEventListener('selectionchange', handleSelectionchange);
+    document.addEventListener('mouseup', handleMouseup);
 
   }
 
@@ -303,14 +319,64 @@ async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: a
 
 }
 
-// async function getCurrentLanguage() {
-//   const lang = await fetchcurrentLanguage()
-//   console.log(lang);
-
-//   return lang 
-// }
-
 
 export const pinPopupCard = (value: boolean) => {
   isPin = value
+}
+
+let isTextSelected = false;
+
+const handleSelectionchange = () => {
+  let selection = window.getSelection();
+  if (selection) {
+    isTextSelected = selection.toString().length > 0;
+  }
+}
+
+const handleMouseup = (event: any) => {
+  if (isTextSelected) {
+
+
+    if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
+
+      isTextSelected = false;
+
+      const selection = getSelection()
+
+      // 显示窗口
+      if (selection) {
+        showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, true)
+      }
+      
+    }
+
+
+
+
+  }
+}
+
+const getSelection = () => {
+
+  const selection = window.getSelection();
+
+  if (selection !== null) {
+    // 当前选中的文字
+    let keyWord = selection.toString().trim()
+
+    // 选中文字所在的段落
+    let sentence = selection.anchorNode?.textContent ?? ''
+
+    if (sentence === undefined) {
+      sentence = ''
+    } else {
+      sentence = sentence.length <= keyWord.length ? (selection.anchorNode?.parentNode?.parentNode as HTMLElement)?.innerText ?? '' : sentence
+    }
+
+    return { 'keyWord': keyWord, 'sentence': sentence }
+
+  } else {
+    return null
+  }
+
 }

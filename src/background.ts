@@ -179,12 +179,6 @@ browser.runtime.onConnect.addListener(port => {
 
           }
 
-          // if (response.status !== 401 && response.status !== 200) {
-          //   //  Error
-          //   port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
-          //   return
-          // }
-
           // 处理 server-sent events
           const parser = createParser((event) => {
 
