@@ -194,7 +194,7 @@ export const Options = () => {
                 extra={
                   <p style={{
                     color: '#666'
-                  }}>If you use a third-party API endpoint, fill in the endpoint address</p>
+                  }}>If you use a third-party API endpoint, fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More</a></p>
                 }
               >
                 <Input placeholder="https://api.openai.com" type="url" />
