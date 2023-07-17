@@ -84,7 +84,7 @@ browser.runtime.onConnect.addListener(port => {
     console.log('接收消息：', msg)
 
     // 获取 API Key 等存储的数据
-    let openApiKey: any, currentLanguage, openApiEndpoint, targetLanguage = ''
+    let openApiKey: any, currentLanguage, openApiEndpoint: string, targetLanguage = ''
     browser.storage.sync.get({ 'openApiKey': '', 'openApiEndpoint': defaultOpenApiEndpoint, 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
 
       openApiKey = result.openApiKey
@@ -245,6 +245,9 @@ browser.runtime.onConnect.addListener(port => {
           console.log('error');
           console.log(error);
 
+          const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
+
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
           // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
         })

@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Skeleton, Input, Space, Form, Button, Switch } from 'antd';
 
 interface CustomPromptFormProps {
-    initializePromptList: () => void;
+    handlePromptEdited: (isNew: boolean) => void;
     openCustomPromptForm: (data: { isOpen: boolean, data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string } }) => void;
     data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string };
 }
@@ -75,7 +75,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
             console.log(item);
 
             // 将 Prompt 传回给父组件，以让 Prompt 列表 UI 重新渲染
-            props.initializePromptList()
+            props.handlePromptEdited(props.data.id === '')
 
         }).catch((error) => {
 
@@ -116,7 +116,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                     console.log(item);
 
                     // 将 Prompt 传回给父组件，以让 Prompt 列表 UI 重新渲染
-                    props.initializePromptList()
+                    props.handlePromptEdited(props.data.id === '')
 
                 })
 

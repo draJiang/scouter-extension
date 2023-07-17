@@ -274,7 +274,7 @@ export const Options = () => {
                 backdropFilter: 'blur(5px)'
               }}
             >
-              <span style={{marginRight:'10px'}}>{status}</span>
+              <span style={{ marginRight: '10px' }}>{status}</span>
               <Button type="primary" htmlType="submit">Save</Button>
             </Form.Item>
 
@@ -288,20 +288,6 @@ export const Options = () => {
 
           <div className="instructions">
 
-            {/* <h2>Usage</h2>
-
-            <ul style={{
-              marginBottom: '14px'
-            }}>
-              <li>
-                <p>Set up your API Key</p>
-                <p><a target={"_blank"} href="https://platform.openai.com/account/api-keys">Get Open API Key</a></p>
-              </li>
-              <li>
-                <p>Select text, then right-click and choose Scouter.</p>
-                <img src={Usage}></img>
-              </li>
-            </ul> */}
 
             <div style={{
               display: 'flex',
@@ -309,11 +295,9 @@ export const Options = () => {
               alignItems: 'left',
               width: '100%'
             }}>
-              <div>
-                <Button style={{ width: '300px', marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
-                <Button style={{ width: '300px', marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
-                <Button style={{ width: '300px' }} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button>
-              </div>
+              <Button style={{marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
+              <Button style={{marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
+              <Button style={{}} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button>
             </div>
           </div>
 

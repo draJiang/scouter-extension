@@ -435,6 +435,36 @@ export function PopupCard(props: any) {
 
   }
 
+  const handlePromptEdited = async (isNew: boolean) => {
+    // 初始化 Prompt 列表
+    initializePromptList()
+
+    // 更新最近使用的 Prompt（针对编辑的场景）
+    if (!isNew) {
+      browser.storage.sync.get({ "promptList": [] }).then((item) => {
+
+        for (let i = 0; i < item.promptList.length; i++) {
+          if (item.promptList[i].id === lastExecutedPrompt.id) {
+            // 更新
+            setLastExecutedPrompt(item.promptList[i])
+
+            // 记录最近 1 次使用的 Prompt
+            browser.storage.local.set(
+              {
+                lastExecutedPrompt: item.promptList[i]
+              }
+            )
+            break
+          }
+        }
+
+      })
+    }
+
+
+
+  }
+
   // 请求 GPT 数据
   const getGPTMsg = async (prompt: Array<{ role: string, content: string }>, keyWord?: string) => {
 
@@ -1027,7 +1057,7 @@ export function PopupCard(props: any) {
                 onMouseDown={handleMouseDown}
               ></div>
 
-              <CustomPromptForm openCustomPromptForm={openCustomPromptForm} initializePromptList={initializePromptList} data={customPromptFormData} />
+              <CustomPromptForm openCustomPromptForm={openCustomPromptForm} handlePromptEdited={handlePromptEdited} data={customPromptFormData} />
 
             </Drawer>
 
