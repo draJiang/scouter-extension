@@ -106,7 +106,7 @@ style.textContent = `
 
   #LearningEnglish2023 {
   font-family: sans-serif;
-  width: 380px;
+  width: 390px;
   height: 560px;
   color: rgb(0 0 0 / 80%);
   position: fixed;
@@ -116,8 +116,9 @@ style.textContent = `
   background-color: #fff;
   z-index: 9999;
   overflow: hidden;
-  box-shadow: 2px 4px 16px rgba(0, 0, 0, 0.1), -1px 10px 10px rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
+  box-shadow: 0px 8px 28px rgba(0,0,0,.16);
+  border-radius: 6px;
+  border:1px solid rgba(5, 5, 5, .06)
   }
 
   #LearningEnglish2023 .container::-webkit-scrollbar  {
@@ -147,7 +148,7 @@ style.textContent = `
 
   }
 
-  #LearningEnglish2023 #ScouterNav,#LearningEnglish2023 .container  {
+  #LearningEnglish2023 #ScouterNav,#LearningEnglish2023 .images,#LearningEnglish2023 #ScouterSelection, #LearningEnglish2023 .messages>div  {
     padding-left:18px;
     padding-right:18px;
   }

@@ -136,6 +136,18 @@ export function PopupCard(props: any) {
 
   }, [props]);
 
+  // 聊天记录改变时
+  useEffect(() => {
+
+    console.log('聊天记录改变 useEffect');
+    console.log(messages)
+    if (messages.length > 1) {
+      scrollToBottom(true)
+    }
+
+
+  }, [messages])
+
   // 窗口拖拽时触发
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
@@ -528,9 +540,6 @@ export function PopupCard(props: any) {
 
 
 
-          scrollToBottom()
-
-          // setIsLoading(false)
         } else if (isApiErro) {
           setIsApiErro(false)
         }
@@ -586,10 +595,6 @@ export function PopupCard(props: any) {
           }
 
 
-
-
-          scrollToBottom()
-
         }
       }
 
@@ -643,9 +648,6 @@ export function PopupCard(props: any) {
 
     getGPTMsg([...msgHistory, { "role": "user", "content": values.msg }])
 
-    setTimeout(() => {
-      scrollToBottom(true)
-    }, 10);
 
 
   }
@@ -866,7 +868,14 @@ export function PopupCard(props: any) {
 
       if (isAtBottom || canSroll) {
         // 位于底部，需要自动滚动
-        messagesList.current.scrollTop = messagesList.current.scrollHeight;
+        // messagesList.current.scrollTop = messagesList.current.scrollHeight;
+
+        const childElements = messagesList.current.querySelectorAll('.messages > :last-child');
+        if (childElements.length > 0) {
+          const lastChildElement = childElements[childElements.length - 1];
+          lastChildElement.scrollIntoView();
+        }
+
 
       }
     }
@@ -939,7 +948,7 @@ export function PopupCard(props: any) {
               >
                 {messages.map((item) => {
 
-                  return <div key={item.chatId} className='' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
+                  return <div key={item.chatId} className='' style={item.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
                     <Skeleton loading={item.loading} active={true} title={false}>
 
                       <ReactMarkdown remarkPlugins={[breaks]} skipHtml={false} children={item.content.replace(new RegExp(props.data.keyWord, 'gi'), `**${props.data.keyWord}**`)} />

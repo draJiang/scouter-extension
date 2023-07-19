@@ -241,7 +241,7 @@ export function Images(props: ImagesProps) {
                             <div
                                 style={{
                                     padding: '6px 12px',
-                                    margin: '0',
+                                    margin: '0px 18px',
                                     background: 'linear-gradient(360deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 27.6%, rgba(0, 0, 0, 0.2) 54.69%, rgba(0, 0, 0, 0.35) 100%)'
                                 }}
                             >
