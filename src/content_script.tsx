@@ -106,23 +106,31 @@ style.textContent = `
 
   #LearningEnglish2023 {
   font-family: sans-serif;
-  width: 400px;
-  height: 570px;
-  color: #333;
+  width: 380px;
+  height: 560px;
+  color: rgb(0 0 0 / 80%);
   position: fixed;
   display: flex;
   flex-direction: column;
-  font-size: 13.4px;
+  font-size: 13px;
   background-color: #fff;
   z-index: 9999;
   overflow: hidden;
   box-shadow: 2px 4px 16px rgba(0, 0, 0, 0.1), -1px 10px 10px rgba(0, 0, 0, 0.06);
-  border-radius: 4px;
+  border-radius: 8px;
   }
 
-  #LearningEnglish2023,#LearningEnglish2023 textarea {
-
+  #LearningEnglish2023 .container::-webkit-scrollbar  {
+    width:0px;
   }
+
+  #LearningEnglish2023 .container::-webkit-scrollbar-track  {
+    background: #fff; /* 设置滚动条轨道背景色 */
+  }
+
+  // #LearningEnglish2023 .container::-webkit-scrollbar-thumb {
+  //   background: #888; /* 设置滚动条滑块背景色 */
+  // }
 
   #LearningEnglish2023 .DropdownMenuItem:hover {
     
@@ -139,8 +147,9 @@ style.textContent = `
 
   }
 
-  #LearningEnglish2023 .p-4 {
-    padding:0.4em 1.1em;
+  #LearningEnglish2023 #ScouterNav,#LearningEnglish2023 .container  {
+    padding-left:18px;
+    padding-right:18px;
   }
 
   #LearningEnglish2023 .openAIAnswer {
@@ -163,7 +172,8 @@ style.textContent = `
   display: flex;
   justify-content: start;
   align-items: center;
-  padding: 10px 19px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(5, 5, 5, .06);
   user-select: none;
   }

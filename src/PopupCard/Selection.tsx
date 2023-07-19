@@ -107,9 +107,9 @@ export function Selection(props: SelectionProps) {
 
   return (
     <>
-      <div id="ScouterSelection" className='p-4'
+      <div id="ScouterSelection" className=''
         style={{
-          paddingBottom: '0.4em'
+          paddingBottom: '10px'
         }}
       >
         <span>{props.text}</span>

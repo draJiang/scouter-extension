@@ -752,6 +752,7 @@ export function PopupCard(props: any) {
     }
   }
 
+  // 添加到 Anki
   const addToAnki = (deckName: string, modelName: string, front: string, back: string) => {
 
     const keyWord = props.data.keyWord
@@ -814,8 +815,6 @@ export function PopupCard(props: any) {
     let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, })
     sending.then((message: any) => {
 
-
-      console.log(message);
       if (message.result == 'success') {
         // 添加到 Anki 中
         addToAnki(message.data.defaultDeckName, message.data.modelName, message.data.field1, message.data.field2)
@@ -891,7 +890,6 @@ export function PopupCard(props: any) {
         style={{
           left: 10,
           top: 10,
-          color: 'rgba(0, 0, 0, 0.80)',
         }}
       >
 
@@ -917,8 +915,8 @@ export function PopupCard(props: any) {
             lastExecutedPrompt={lastExecutedPrompt}
           />
 
-          <div className='flex-grow flex flex-col overflow-scroll'>
-            <div className='flex-grow overflow-scroll'
+          <div className='container flex-grow flex flex-col overflow-auto'>
+            <div className='flex-grow'
               ref={messagesList}
               style={{ paddingTop: '54px' }}
             >
@@ -934,14 +932,14 @@ export function PopupCard(props: any) {
               <div
                 className='messages'
                 style={{
-                  lineHeight: '2em',
+                  lineHeight: '28px',
                   wordWrap: 'break-word',
                   margin: '0.4em 0'
                 }}
               >
                 {messages.map((item) => {
 
-                  return <div key={item.chatId} className='p-4' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
+                  return <div key={item.chatId} className='' style={item.role === 'user' ? { backgroundColor: '#F5F5F5' } : {}}>
                     <Skeleton loading={item.loading} active={true} title={false}>
 
                       <ReactMarkdown remarkPlugins={[breaks]} skipHtml={false} children={item.content.replace(new RegExp(props.data.keyWord, 'gi'), `**${props.data.keyWord}**`)} />

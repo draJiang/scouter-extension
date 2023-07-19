@@ -335,8 +335,8 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   }
 
+  // 获取用户设置的牌组和模板
   if (request.type === 'setModel') {
-
 
     // 获取 DeckName
     getDefaultDeckName().then((result: any) => {

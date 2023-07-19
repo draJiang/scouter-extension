@@ -50,6 +50,8 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
             // 在 Prompt 记录中找到这条 Prompt
             for (let i = 0; i < newPrompts.length; i++) {
                 if (newPrompts[i]['id'] === props.data.id) {
+
+                    // 修改
                     newPrompts[i]['title'] = values['title']
                     newPrompts[i]['getUnsplashImages'] = values['getUnsplashImages']
                     newPrompts[i]['userPrompt'] = values['userPrompt']

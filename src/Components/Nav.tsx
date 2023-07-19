@@ -66,6 +66,7 @@ export function Nav(props: NavProps) {
 
     // 点击 Pin 按钮
     const handlePinBtnClick = () => {
+
         if (isPin) {
             pinPopupCard(false)
             setIsPin(false)
@@ -134,6 +135,7 @@ export function Nav(props: NavProps) {
             >
                 <div id="ScouterNav"
                     ref={navElement}
+                    className='p-4'
                     style={{
                         cursor: 'move',
                         position: 'absolute',

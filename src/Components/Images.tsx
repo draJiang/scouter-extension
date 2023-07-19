@@ -168,10 +168,10 @@ export function Images(props: ImagesProps) {
     }
 
     return (
-        <div className="images p-4"
+        <div className="images"
             style={{
                 position: 'relative',
-                paddingBottom: 0
+                paddingBottom: '8px'
             }}
         >
             <div>
@@ -233,6 +233,7 @@ export function Images(props: ImagesProps) {
                                 height: '100%',
                                 left: 0,
                                 display: 'flex',
+                                borderRadius: '0 2px',
                                 // justifyContent: 'space-around',
                                 flexDirection: 'column',
                             }}
@@ -240,7 +241,7 @@ export function Images(props: ImagesProps) {
                             <div
                                 style={{
                                     padding: '6px 12px',
-                                    margin: '4px 14px',
+                                    margin: '0',
                                     background: 'linear-gradient(360deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 27.6%, rgba(0, 0, 0, 0.2) 54.69%, rgba(0, 0, 0, 0.35) 100%)'
                                 }}
                             >
