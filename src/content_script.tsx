@@ -112,7 +112,7 @@ style.textContent = `
   position: fixed;
   display: flex;
   flex-direction: column;
-  font-size: 13px;
+  font-size: 13.2px;
   background-color: #fff;
   z-index: 9999;
   overflow: hidden;
@@ -215,6 +215,9 @@ style.textContent = `
   `
 shadowRoot?.appendChild(style);
 
+let port = browser.runtime.connect({
+  name: 'popup-name'
+})
 
 // 接收 background 消息（目前是通过浏览器的右键菜单触发）
 browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
@@ -222,11 +225,6 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   // console.log('content script onMessage:');
   // console.log(msg);
   if (msg.type === 'open-souter') {
-
-    let port = browser.runtime.connect({
-      name: 'popup-name'
-    })
-
 
 
     // 处理窗口
@@ -283,7 +281,8 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     // }
 
 
-
+    document.addEventListener('selectionchange', handleSelectionchange);
+    document.addEventListener('mouseup', handleMouseup);
 
     // 监听页面点击事件
     document.onmousedown = function (event) {
@@ -301,10 +300,6 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       }
     }
 
-    let isTextSelected = false;
-
-    document.addEventListener('selectionchange', handleSelectionchange);
-    document.addEventListener('mouseup', handleMouseup);
 
   }
 
@@ -353,6 +348,9 @@ const handleMouseup = (event: any) => {
       isTextSelected = false;
 
       const selection = getSelection()
+
+      // 停止旧的对话
+      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
       // 显示窗口
       if (selection && selection?.keyWord.length > 0) {

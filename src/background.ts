@@ -101,6 +101,8 @@ browser.runtime.onConnect.addListener(port => {
 
         // isContinue = true 时才会渲染数据
         isContinue = true
+
+        // controller.abort();
         controller = new AbortController();
 
         let messages = msg.messages
@@ -244,10 +246,14 @@ browser.runtime.onConnect.addListener(port => {
         }).catch((error) => {
           console.log('error');
           console.log(error);
+          if (error.message.indexOf('aborted') >= 0) {
 
-          const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
+          } else {
+            const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
 
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
+          }
+
           // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
         })

@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef } from "react";
 import { playTextToSpeech } from '../util'
 
-// import LanguageDetect from "languagedetect";
+import { createUseStyles } from 'react-jss'
 
 
 import { Button } from 'antd';
@@ -19,23 +19,50 @@ interface SelectionProps {
   text: string;
 }
 
+// const useStyles = createUseStyles({
+//   moreButton: {
+//     color: '#F08A24',
+//     "&:hover": {
+//       color: 'red'
+//     }
+//   },
+
+// })
+
+const style = `
+  #ScouterSelection>span {
+    font-site:12px;
+    color:#666;
+  }
+  .moreButton {
+    color: #F08A24;
+    cursor:pointer;
+    margin:0px 2px;
+  }
+  .moreButton:hover {
+    opacity:0.8;
+  }
+
+`
+
 
 
 export function Selection(props: SelectionProps) {
 
   const [targetLanguage, setTargetLanguage] = useState('English');
+  const [showFullText, setShowFullText] = useState(true);
   const [playStatus, setPlayStatus] = useState(false);
 
   // 获取用户设置的语言信息
   let Lang = useCurrentLanguage()!
 
-
   useEffect(() => {
+
     setTargetLanguage(Lang['target']['id'])
+    setShowFullText(props.text.length <= 140)
+    setPlayStatus(false)
 
     browser.storage.onChanged.addListener(onStorageChange)
-
-    setPlayStatus(false)
 
     return () => {
       browser.storage.onChanged.removeListener(onStorageChange)
@@ -104,15 +131,23 @@ export function Selection(props: SelectionProps) {
 
   }
 
+  const handleToggleShowFunText = () => {
+    setShowFullText(!showFullText)
+  }
 
+  // const classes = useStyles()
   return (
     <>
+      <style>{style}</style>
       <div id="ScouterSelection" className=''
         style={{
           paddingBottom: '10px'
         }}
       >
-        <span>{props.text}</span>
+
+        {showFullText ? <><span>{props.text}</span>{props.text.length > 140 && <a className='moreButton' onClick={handleToggleShowFunText}>Less</a>}</>
+          : <><span>{props.text.substring(0, 140) + '...'}</span><a className='moreButton' onClick={handleToggleShowFunText}>More</a></>}
+
         <Button style={{
           display: 'inline-block',
           position: 'relative',

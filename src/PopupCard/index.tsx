@@ -139,8 +139,6 @@ export function PopupCard(props: any) {
   // 聊天记录改变时
   useEffect(() => {
 
-    console.log('聊天记录改变 useEffect');
-    console.log(messages)
     if (messages.length > 1) {
       scrollToBottom(true)
     }
