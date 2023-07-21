@@ -35,8 +35,10 @@ export const windowInitialization = (data: { isPin: boolean, windowElement: any,
         const maxX = windowWidth - elementWidth;
         const maxY = windowHeight - elementHeight;
 
-        const newX = maxX - 20
-        const newY = data.selection.anchorNode.parentElement.offsetTop + data.selection.anchorNode.parentElement.clientHeight + 20
+        const selectionObject = data.selection.getRangeAt(0).getBoundingClientRect()
+
+        const newX = selectionObject.x + selectionObject.width
+        const newY = selectionObject.y + selectionObject.height
 
         const clampedX = Math.max(minX, Math.min(newX, maxX));
         const clampedY = Math.max(minY, Math.min(newY, maxY));
@@ -95,7 +97,7 @@ export const getUnsplashImages = (keyWord: string) => {
                     // console.log('unsplashSearchPhotos');
                     console.log('imgs:');
                     // setImages([])
-                    resolve (msg.imgs)
+                    resolve(msg.imgs)
                 }
             }
 
