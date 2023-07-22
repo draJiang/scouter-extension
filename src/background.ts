@@ -8,7 +8,7 @@ import { createApi } from 'unsplash-js';
 
 
 // [暂时废弃]content script 关闭窗口时，将此值设为 false 以中断数据渲染
-let isContinue = true
+// let isContinue = true
 
 let controller = new AbortController();
 
@@ -26,6 +26,9 @@ browser.runtime.onInstalled.addListener(function () {
 // 卸载插件后引导填写卸载原因，帮助产品优化
 browser.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSdobGQN3O0Ck4fVrgfvRZMme3de-2OaEp1pFtibZkU0koc37w/viewform?usp=sf_link");
 
+
+// 创建右键菜单
+
 browser.contextMenus.create({
   id: "2",
   title: "Run last prompt",
@@ -35,7 +38,7 @@ browser.contextMenus.create({
     browser.runtime.lastError
   });
 
-// 创建右键菜单
+
 browser.contextMenus.create({
   id: "1",
   title: "Open",
@@ -44,8 +47,6 @@ browser.contextMenus.create({
   () => {
     browser.runtime.lastError
   });
-
-
 
 
 // 右键菜单点击事件
@@ -100,7 +101,7 @@ browser.runtime.onConnect.addListener(port => {
 
 
         // isContinue = true 时才会渲染数据
-        isContinue = true
+        // isContinue = true
 
         // controller.abort();
         controller = new AbortController();
@@ -126,10 +127,10 @@ browser.runtime.onConnect.addListener(port => {
 
         //     for (let i = 0; i < 20; i++) {
         //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-        //       if (!isContinue) {
-        //         console.log('停止渲染数据')
-        //         break
-        //       }
+        //       // if (!isContinue) {
+        //       //   console.log('停止渲染数据')
+        //       //   break
+        //       // }
         //     }
 
         //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': messages[messages.length - 1].content })
@@ -223,10 +224,10 @@ browser.runtime.onConnect.addListener(port => {
 
                 }
 
-                if (!isContinue) {
-                  console.log('停止渲染数据')
-                  break
-                }
+                // if (!isContinue) {
+                //   console.log('停止渲染数据')
+                //   break
+                // }
 
                 const str = new TextDecoder().decode(value)
                 parser.feed(str)
@@ -247,6 +248,7 @@ browser.runtime.onConnect.addListener(port => {
           console.log('error');
           console.log(error);
           if (error.message.indexOf('aborted') >= 0) {
+            // 开启新的请求，中断旧请求
 
           } else {
             const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
@@ -282,7 +284,7 @@ browser.runtime.onConnect.addListener(port => {
 
       // 停止渲染数据
       if (msg.type === 'StopTheConversation') {
-        isContinue = false
+        // isContinue = false
         controller.abort();
 
       }
@@ -457,6 +459,19 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
       });
 
     // Return true to inform sendResponse that you will be calling it asynchronously
+    return true;
+
+  }
+
+  if (request.type === 'ankiAction') {
+
+    ankiAction(request.messages.anki_action_type, 6, request.messages.anki_arguments).then((result: any) => {
+
+      // 反馈处理结果
+      asyncSendResponse(result);
+
+    })
+
     return true;
 
   }

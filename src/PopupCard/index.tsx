@@ -26,7 +26,7 @@ import settingGuide from '../assets/settingGuide.png'
 
 import { useCurrentLanguage } from '../lib/locale'
 
-import { windowInitialization, getUnsplashImages } from './util'
+import { windowInitialization, getUnsplashImages, handlePromptVariables } from './util'
 
 import "./index.css"
 
@@ -89,8 +89,8 @@ export function PopupCard(props: any) {
 
 
   useEffect(() => {
-    console.log('useEffect');
-    console.log(props);
+    // console.log('useEffect');
+    // console.log(props);
 
     // 渲染 Prompt 列表
     initializePromptList()
@@ -100,9 +100,9 @@ export function PopupCard(props: any) {
 
       // 获取最近一次执行的 Prompt
       browser.storage.local.get({ "lastExecutedPrompt": '' }).then((item) => {
-        console.log('lastExecutedPrompt:');
+        // console.log('lastExecutedPrompt:');
 
-        console.log(item);
+        // console.log(item);
 
         if (item.lastExecutedPrompt === '') {
 
@@ -122,7 +122,7 @@ export function PopupCard(props: any) {
     } else {
 
       // 不执行任何 Prompt，由用户自行选择
-      console.log('不执行任何 Prompt，由用户自行选择');
+      // console.log('不执行任何 Prompt，由用户自行选择');
 
       // 执行默认 Prompt、获取 Unsplash 图片
       executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': 'Default' }, false)
@@ -139,9 +139,12 @@ export function PopupCard(props: any) {
   // 聊天记录改变时
   useEffect(() => {
 
+    // 自动滚动到消息底部，方便看到最新的文字
     if (messages.length > 1) {
       scrollToBottom(true)
     }
+
+    // 如果当前 Prompt 包含 Anki 牌组中的单词，则高亮显示，支持点击在 Anki 中打开
 
 
   }, [messages])
@@ -165,8 +168,8 @@ export function PopupCard(props: any) {
     // 只保留消息记录的第 1 条
     if (messages.length > 0 && isAnswerDone) {
 
-      console.log('Save');
-      console.log(messages);
+      // console.log('Save');
+      // console.log(messages);
 
       const keyWord = props.data.keyWord
       const Sentence = props.data.Sentence
@@ -212,7 +215,7 @@ export function PopupCard(props: any) {
             newHistoryList.unshift(newHistory)
             newHistoryList.splice(8)
 
-            console.log(newHistoryList);
+            // console.log(newHistoryList);
 
           }
 
@@ -231,7 +234,7 @@ export function PopupCard(props: any) {
 
   }, [isAnswerDone]);
 
-  const executivePrompt = (prompt: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => {
+  const executivePrompt = async (prompt: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => {
 
     if (runPrompt === undefined) {
       runPrompt = true
@@ -241,7 +244,7 @@ export function PopupCard(props: any) {
     }
 
     console.log('executivePrompt:');
-    console.log(prompt);
+    // console.log(prompt);
 
     // promptRef.current = prompt
 
@@ -337,8 +340,8 @@ export function PopupCard(props: any) {
 
       } else {
 
-        let p = prompt.userPrompt.replace(/\{selection\}/g, keyWord)
-        p = p.replace(/\{sentence\}/g, Sentence)
+        // 处理 Prompt 中的变量
+        let p = await handlePromptVariables(prompt.userPrompt, keyWord, Sentence)
 
         newPrompt = [{ 'role': 'user', 'content': p }]
       }
@@ -346,7 +349,7 @@ export function PopupCard(props: any) {
 
       // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
       browser.storage.local.get({ "history": [] }).then((item) => {
-        console.log(item);
+        // console.log(item);
 
         // 如果记录已存在，则不重复保存
         let bingo = false
@@ -558,7 +561,7 @@ export function PopupCard(props: any) {
 
           // type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
 
-          console.log('begin');
+          // console.log('begin');
 
         }
 
@@ -595,19 +598,6 @@ export function PopupCard(props: any) {
 
         }
       }
-
-
-      // if (msg.type === 'sendImgData') {
-      //   console.log('sendImgData');
-
-      //   if ('imgs' in msg) {
-      //     // console.log('unsplashSearchPhotos');
-      //     console.log('imgs:');
-      //     console.log(msg);
-      //     setImages(msg.imgs)
-      //   }
-      // }
-
 
     })
 
@@ -776,7 +766,7 @@ export function PopupCard(props: any) {
         unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadlocation')
       }
 
-      console.log(images);
+      // console.log(images);
 
       // 处理样式，避免 Anki 内显示异常
       images = images.replace(/style=/gi, '');

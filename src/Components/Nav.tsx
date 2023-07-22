@@ -117,7 +117,10 @@ export function Nav(props: NavProps) {
     }
 
     const onMenuOpenChange = (open: boolean) => {
+        console.log(open);
+        console.log(event);
 
+        // event.stopPropagation()
         setIsOpenPromptMenu(open)
 
     }
@@ -150,6 +153,7 @@ export function Nav(props: NavProps) {
                     <div style={{ zIndex: 9 }}>
 
                         <DropdownMenu.Root open={isOpenPromptMenu}
+                            modal={false}
                             onOpenChange={onMenuOpenChange}
                         >
 

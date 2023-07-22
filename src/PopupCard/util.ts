@@ -1,4 +1,5 @@
 import browser from 'webextension-polyfill'
+import { ankiAction } from '../util'
 
 export const getClipboard = () => {
 
@@ -104,5 +105,86 @@ export const getUnsplashImages = (keyWord: string) => {
         })
 
     });
+
+}
+
+/**
+ * 处理 Prompt 中的变量
+ *
+ * @param {string} promptStr - 需要处理的 Prompt 字符串
+ * @param {string} keyWord - 用户所选中的关键字
+ * @param {string} Sentence - 从网页中提取的关键字所在的句子
+ * @returns {string} 处理后的 Prompt 字符串
+ * @throws {异常类型} 异常描述
+ */
+export const handlePromptVariables = async (promptStr: string, keyWord: string, Sentence: string) => {
+
+    let newPromptStr = promptStr
+
+    // 处理关键字和句子
+    newPromptStr = promptStr.replace(/\{selection\}/g, keyWord)
+    newPromptStr = newPromptStr.replace(/\{sentence\}/g, Sentence)
+
+    // 处理 Anki 单词
+    await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'findCards', 'anki_arguments': { 'query': 'is:due prop:due>-1 prop:due<2' } }, }).then(async (message: any) => {
+
+        if (message.error === null) {
+
+            console.log(message);
+            // 根据卡片 ID 查询卡片信息
+            await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'cardsInfo', 'anki_arguments': { 'cards': message.result } }, }).then((message: any) => {
+                console.log(message);
+
+                if (message.result.length > 5) {
+                    // 随机取 X 个卡片
+
+                    // 深拷贝数组以避免修改源数组
+                    const shuffledArray = message.result.slice();
+
+                    // 使用 Fisher-Yates 洗牌算法对数组进行打乱
+                    for (let i = shuffledArray.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+                    }
+
+                    // 取前 10 个元素作为结果
+                    const randomValues = shuffledArray.slice(0, 5);
+                    let ankiCardsStr = ''
+
+                    randomValues.forEach((card: any) => {
+                        const keys = Object.keys(card.fields);
+                        const firstKey = keys[0];
+                        ankiCardsStr += card.fields[firstKey].value + ','
+
+                    });
+
+                    newPromptStr = newPromptStr.replace(/\{ankiCard\}/g, ankiCardsStr)
+
+                    console.log(randomValues)
+                    console.log(ankiCardsStr)
+
+                } else {
+
+                }
+
+                // 将单词替换到 prompt 中
+
+            }, () => {
+                //error
+
+            })
+
+        } else {
+            // 反馈错误信息
+
+        }
+
+
+    }, () => {
+        //error
+    });
+
+
+    return newPromptStr
 
 }
