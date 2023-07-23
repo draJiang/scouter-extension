@@ -481,8 +481,9 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
 const sendMessageToContent = (runPrompt?: boolean) => {
   console.log('sendMessageToContent:');
-  if (runPrompt === undefined) {
-    runPrompt = true
+  let needToRunPrompt = runPrompt
+  if (needToRunPrompt === undefined) {
+    needToRunPrompt = true
   }
 
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
@@ -492,7 +493,7 @@ const sendMessageToContent = (runPrompt?: boolean) => {
 
     if (activeTab && activeTab.id !== undefined) {
 
-      let b = browser.tabs.sendMessage(tID, { type: 'open-souter', runPrompt: runPrompt })
+      let b = browser.tabs.sendMessage(tID, { type: 'open-souter', runPrompt: needToRunPrompt })
 
       // 已知情况：刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
       b.catch(e => {

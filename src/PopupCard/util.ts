@@ -38,8 +38,8 @@ export const windowInitialization = (data: { isPin: boolean, windowElement: any,
 
         const selectionObject = data.selection.getRangeAt(0).getBoundingClientRect()
 
-        const newX = selectionObject.x + selectionObject.width
-        const newY = selectionObject.y + selectionObject.height
+        const newX = selectionObject.x + selectionObject.width + 10
+        const newY = selectionObject.y + selectionObject.height + 10
 
         const clampedX = Math.max(minX, Math.min(newX, maxX));
         const clampedY = Math.max(minY, Math.min(newY, maxY));
@@ -126,31 +126,43 @@ export const handlePromptVariables = async (promptStr: string, keyWord: string, 
     newPromptStr = newPromptStr.replace(/\{sentence\}/g, Sentence)
 
     // 处理 Anki 单词
-    await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'findCards', 'anki_arguments': { 'query': 'is:due prop:due>-1 prop:due<2' } }, }).then(async (message: any) => {
+    if (newPromptStr.indexOf('{ankiCard\}') >= 0) {
 
-        if (message.error === null) {
+        // 获取目标卡片 ID
+        await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'findCards', 'anki_arguments': { 'query': 'is:due prop:due>-1 prop:due<2' } }, }).then(async (message: any) => {
 
-            console.log(message);
-            // 根据卡片 ID 查询卡片信息
-            await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'cardsInfo', 'anki_arguments': { 'cards': message.result } }, }).then((message: any) => {
+            if (message.error === null) {
+
                 console.log(message);
-
-                if (message.result.length > 5) {
-                    // 随机取 X 个卡片
-
-                    // 深拷贝数组以避免修改源数组
-                    const shuffledArray = message.result.slice();
-
-                    // 使用 Fisher-Yates 洗牌算法对数组进行打乱
-                    for (let i = shuffledArray.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
-                    }
-
-                    // 取前 10 个元素作为结果
-                    const randomValues = shuffledArray.slice(0, 5);
+                // 根据卡片 ID 查询卡片信息
+                await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'cardsInfo', 'anki_arguments': { 'cards': message.result } }, }).then((message: any) => {
+                    console.log(message);
+                    
+                    let randomValues
                     let ankiCardsStr = ''
 
+                    if (message.result.length > 5) {
+                        // 随机取 X 个卡片
+
+                        // 深拷贝数组以避免修改源数组
+                        const shuffledArray = message.result.slice();
+
+                        // 使用 Fisher-Yates 洗牌算法对数组进行打乱
+                        for (let i = shuffledArray.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+                        }
+
+                        // 取前 x 个元素作为结果
+                        randomValues = shuffledArray.slice(0, 5);
+                        
+                    } else {
+
+                        randomValues = message.result
+
+                    }
+
+                    // 将单词替换到 prompt 中
                     randomValues.forEach((card: any) => {
                         const keys = Object.keys(card.fields);
                         const firstKey = keys[0];
@@ -160,29 +172,21 @@ export const handlePromptVariables = async (promptStr: string, keyWord: string, 
 
                     newPromptStr = newPromptStr.replace(/\{ankiCard\}/g, ankiCardsStr)
 
-                    console.log(randomValues)
-                    console.log(ankiCardsStr)
+                }, () => {
+                    //error
 
-                } else {
+                })
 
-                }
+            } else {
+                // 反馈错误信息
 
-                // 将单词替换到 prompt 中
-
-            }, () => {
-                //error
-
-            })
-
-        } else {
-            // 反馈错误信息
-
-        }
+            }
 
 
-    }, () => {
-        //error
-    });
+        }, () => {
+            //error
+        });
+    }
 
 
     return newPromptStr

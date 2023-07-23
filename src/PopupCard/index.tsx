@@ -94,15 +94,17 @@ export function PopupCard(props: any) {
 
     // 渲染 Prompt 列表
     initializePromptList()
+    console.log('props.runPrompt:');
+    console.log(props.runPrompt);
 
-    if (props.runPrompt) {
+    if (props.runPrompt || props.runPrompt === undefined) {
 
 
       // 获取最近一次执行的 Prompt
       browser.storage.local.get({ "lastExecutedPrompt": '' }).then((item) => {
-        // console.log('lastExecutedPrompt:');
 
-        // console.log(item);
+        console.log('lastExecutedPrompt:');
+        console.log(item);
 
         if (item.lastExecutedPrompt === '') {
 
@@ -236,14 +238,22 @@ export function PopupCard(props: any) {
 
   const executivePrompt = async (prompt: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => {
 
-    if (runPrompt === undefined) {
-      runPrompt = true
+    // 设置加载状态
+    setIsLoading(true)
+
+
+    let needToRunPrompt = runPrompt
+    if (needToRunPrompt === undefined) {
+      needToRunPrompt = true
     }
-    if (imageToRerender === undefined) {
-      imageToRerender = true
+
+    let needToRerenderImage = imageToRerender
+    if (needToRerenderImage === undefined) {
+      needToRerenderImage = true
     }
 
     console.log('executivePrompt:');
+    console.log(needToRunPrompt);
     // console.log(prompt);
 
     // promptRef.current = prompt
@@ -253,11 +263,14 @@ export function PopupCard(props: any) {
 
     // 初始化
     setMessages([])   // 对话列表
-    if (imageToRerender) {
+    if (needToRerenderImage) {
       setImages([])     // 图片列表
     }
 
-    if (prompt.getUnsplashImages && runPrompt) {
+
+
+
+    if (prompt.getUnsplashImages && needToRunPrompt) {
       // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
       setShowImagesBox(true)
     } else {
@@ -266,9 +279,20 @@ export function PopupCard(props: any) {
 
 
 
-    if (runPrompt) {
+    if (needToRunPrompt) {
+
+      // 在消息历史中插入新记录
+      setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '' }])
+
       // 设置最近执行的 Prompt
       setLastExecutedPrompt(prompt)
+      // 记录最近 1 次使用的 Prompt
+      browser.storage.local.set(
+        {
+          lastExecutedPrompt: prompt
+        }
+      )
+
 
       // 处理 Prompt 中的变量
       let newPrompt: Array<{ role: string, content: string }>;
@@ -342,10 +366,9 @@ export function PopupCard(props: any) {
 
         // 处理 Prompt 中的变量
         let p = await handlePromptVariables(prompt.userPrompt, keyWord, Sentence)
-
         newPrompt = [{ 'role': 'user', 'content': p }]
-      }
 
+      }
 
       // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
       browser.storage.local.get({ "history": [] }).then((item) => {
@@ -401,7 +424,7 @@ export function PopupCard(props: any) {
 
         if (prompt.id == 'Default') {
 
-          if (keyWord.length <= 20 && prompt.getUnsplashImages && imageToRerender) {
+          if (keyWord.length <= 20 && prompt.getUnsplashImages && needToRerenderImage) {
             // 获取图片数据
             getUnsplashImages(keyWord).then((imgs: any) => {
               setImages(imgs)
@@ -411,7 +434,7 @@ export function PopupCard(props: any) {
 
         } else {
 
-          if (prompt.getUnsplashImages && imageToRerender) {
+          if (prompt.getUnsplashImages && needToRerenderImage) {
             // 获取图片数据
             getUnsplashImages(keyWord).then((imgs: any) => {
               setImages(imgs)
@@ -426,12 +449,10 @@ export function PopupCard(props: any) {
       })
 
 
-      // 记录最近 1 次使用的 Prompt
-      browser.storage.local.set(
-        {
-          lastExecutedPrompt: prompt
-        }
-      )
+
+
+
+
     } else {
       setLastExecutedPrompt({ 'title': '👉🏼 Please choose a prompt', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
     }
@@ -483,8 +504,6 @@ export function PopupCard(props: any) {
 
     keyWord = keyWord || '';
 
-    // 设置加载状态
-    setIsLoading(true)
     // 设置为回答中
     setAnswerDone(false)
     // 禁用保存到 Anki 按钮
@@ -497,7 +516,7 @@ export function PopupCard(props: any) {
     })
 
     // 在消息历史中插入新记录
-    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '' }])
+    // setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '' }])
 
     setTimeout(() => {
       // 使用 postMs 发送信息
@@ -629,6 +648,9 @@ export function PopupCard(props: any) {
       return [...prevMessages, updatedLastMessage];
 
     });
+
+    // 在消息历史中插入新记录
+    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '' }])
 
     // console.log(messages);
 
@@ -919,6 +941,7 @@ export function PopupCard(props: any) {
             >
 
               <Selection text={props.data.keyWord} />
+
 
               {showImagesBox && <Images images={images} keyWord={props.data.keyWord} getUnsplashImages={(keyWord) => {
                 getUnsplashImages(keyWord).then((imgs: any) => {

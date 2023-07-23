@@ -308,6 +308,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 // 显示应用窗口
 async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
   console.log('showPopupCard:');
+  console.log(runPrompt);
   // let a = await fetchcurrentLanguage()
   // console.log(a);
   const lang = await fetchcurrentLanguage()
