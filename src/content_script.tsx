@@ -17,52 +17,49 @@ import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
 
-
+console.log('Hello=========');
 
 let isPin = false
 
 // 初始化主容器，主容器用来挂在全局样式，包括第三方组件的样式
 let MyBox: HTMLElement | null = document.getElementById('__jiang-souter');
+console.log(MyBox);
+
 // container 承载 UI 组件
 let container = document.createElement('div')
+container.className = 'container'
 // 使用 shadow 来隔离样式
 let shadowRoot: any = undefined
 
-if (MyBox !== null && MyBox !== undefined) {
-  // 如果已存在容器
-  // console.log('已存在 Box 容器');
-  // 移除旧容器，避免出现 2 个主容器会导致 UI 渲染错误
-  // MyBox.parentNode?.removeChild(MyBox);
+if (MyBox === null || MyBox === undefined) {
+  // 如果不存在容器
+  // 创建主容器
+  MyBox = document.createElement('div')
+  MyBox.id = '__jiang-souter'
+  document.getElementsByTagName('html')[0].appendChild(MyBox);
+  MyBox.style.display = 'none' //默认隐藏
 
-}
+  shadowRoot = MyBox?.attachShadow({ mode: 'open' });
 
-// 创建主容器
-MyBox = document.createElement('div')
-MyBox.id = '__jiang-souter'
-document.getElementsByTagName('html')[0].appendChild(MyBox);
-MyBox.style.display = 'none' //默认隐藏
+  shadowRoot?.appendChild(container)
 
-shadowRoot = MyBox?.attachShadow({ mode: 'open' });
-container.className = 'container'
-shadowRoot?.appendChild(container)
-
-// Ant 组件样式
-// const antStylesheet = document.createElement('link');
-// antStylesheet.rel = 'stylesheet';
-// antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
-// shadowRoot.appendChild(antStylesheet);
+  // Ant 组件样式
+  // const antStylesheet = document.createElement('link');
+  // antStylesheet.rel = 'stylesheet';
+  // antStylesheet.href = 'https://cdn.bootcdn.net/ajax/libs/antd/4.17.1/antd.min.css';
+  // shadowRoot.appendChild(antStylesheet);
 
 
-// Tailwind
-const tailwindStylesheet = document.createElement('link');
-tailwindStylesheet.rel = 'stylesheet';
-tailwindStylesheet.href = 'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css';
-shadowRoot.appendChild(tailwindStylesheet);
+  // Tailwind
+  const tailwindStylesheet = document.createElement('link');
+  tailwindStylesheet.rel = 'stylesheet';
+  tailwindStylesheet.href = 'https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css';
+  shadowRoot.appendChild(tailwindStylesheet);
 
 
-// 在 Shadow DOM 中添加样式：
-const style = document.createElement('style');
-style.textContent = `
+  // 在 Shadow DOM 中添加样式：
+  const style = document.createElement('style');
+  style.textContent = `
   .slick-arrow::before{
     content:"" !important;
   }
@@ -213,7 +210,10 @@ style.textContent = `
   }
 
   `
-shadowRoot?.appendChild(style);
+  shadowRoot?.appendChild(style);
+
+}
+
 
 let port = browser.runtime.connect({
   name: 'popup-name'
