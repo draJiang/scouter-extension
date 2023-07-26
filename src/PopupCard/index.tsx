@@ -6,6 +6,7 @@ import React, { useEffect, useState, useRef, createContext, useContext } from "r
 
 import ReactMarkdown from 'react-markdown'
 import breaks from 'remark-breaks';
+import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 
 
@@ -26,7 +27,7 @@ import settingGuide from '../assets/settingGuide.png'
 
 import { useCurrentLanguage } from '../lib/locale'
 
-import { windowInitialization, getUnsplashImages, handlePromptVariables } from './util'
+import { windowInitialization, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
 import "./index.css"
 
@@ -36,6 +37,19 @@ import "./index.css"
 
 let currentLanguage: string
 let targetLanguage: string
+
+// // 使用长连接
+// let port = browser.runtime.connect({
+//   name: 'fromPopupCard'
+// })
+
+let ankiCards: Array<{}>
+getAnkiCards().then((cards: any) => {
+  ankiCards = cards
+}).catch((error) => {
+  console.log(error);
+
+})
 
 const { TextArea } = Input;
 
@@ -147,7 +161,40 @@ export function PopupCard(props: any) {
     }
 
     // 如果当前 Prompt 包含 Anki 牌组中的单词，则高亮显示，支持点击在 Anki 中打开
+    // console.log(windowElement.current?.getElementsByClassName('messages'));
 
+    // let messageDom = windowElement.current?.getElementsByClassName('messages')
+    // if (messageDom) {
+    //   if (messageDom.length > 0) {
+    //     const newMessageStr = (messageDom[0] as HTMLElement).innerHTML.replace(/o/g, '<span style="color: red; cursor: pointer;">o</span>');
+    //     messageDom[0].innerHTML = newMessageStr
+    //   }
+    // }
+
+    // const targetElement = windowElement.current?.querySelector(".messages");
+    // const selectedText = "a"; // 将 "指定字符" 替换为您想要设置为红色并支持点击的具体字符
+
+    // if (targetElement) {
+    //   targetElement.innerHTML = `<span style="color:red;">${Date.now()}</span>`
+    // }
+
+
+
+
+    // 获取目标 Anki 卡片
+    // browser.storage.local.get({ "ankiCards": [] }).then((item: any) => {
+
+    //   if (item.ankiCards.cards.length > 0) {
+    //     // 存在卡片
+    //     // 将消息中与目标卡片正面字符串匹配的字符突出显示
+
+
+    //   }
+    // })
+
+
+
+    // 不存在卡片
 
   }, [messages])
 
@@ -166,6 +213,7 @@ export function PopupCard(props: any) {
   // 保存历史记录
   useEffect(() => {
     // 在 openApiAnser 更新后将其保存到浏览器存储中
+
 
     // 只保留消息记录的第 1 条
     if (messages.length > 0 && isAnswerDone) {
@@ -238,9 +286,10 @@ export function PopupCard(props: any) {
 
   const executivePrompt = async (prompt: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => {
 
+    // port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+
     // 设置加载状态
     setIsLoading(true)
-
 
     let needToRunPrompt = runPrompt
     if (needToRunPrompt === undefined) {
@@ -501,6 +550,10 @@ export function PopupCard(props: any) {
 
   // 请求 GPT 数据
   const getGPTMsg = async (prompt: Array<{ role: string, content: string }>, keyWord?: string) => {
+    // 使用长连接
+    let port = browser.runtime.connect({
+      name: 'fromPopupCard'
+    })
 
     keyWord = keyWord || '';
 
@@ -509,11 +562,6 @@ export function PopupCard(props: any) {
     // 禁用保存到 Anki 按钮
     setAddToAnkiStatus({ 'status': 'standby', 'noteId': 0 })
 
-    // 请求 background 获取数据
-    // 使用长连接
-    let port = browser.runtime.connect({
-      name: 'popup-name'
-    })
 
     // 在消息历史中插入新记录
     // setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '' }])
@@ -598,10 +646,22 @@ export function PopupCard(props: any) {
               }
 
               const newMsgList = lastMessage
+              let newContent = newMsgList.content + msg.content
+
+              // if (prompt[0]['content'].indexOf('{ankiCards}') >= 0) {
+              //   newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
+              // }else{
+              //   newContent = newContent.replace(new RegExp(props.data.keyWord, 'gi'), `**${props.data.keyWord}**`)
+              // }
+
+              newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
+
+              // newContent = newContent.replace(/o/g, '<span style="color:red;">o</span>');
+
               const updatedLastMessage = {
                 ...lastMessage,
                 chatId: msg.chatId,
-                content: newMsgList.content + msg.content,
+                content: newContent,
                 loading: false,
                 prompt: prompt[0]['content']
               };
@@ -962,7 +1022,7 @@ export function PopupCard(props: any) {
                   return <div key={item.chatId} className='' style={item.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
                     <Skeleton loading={item.loading} active={true} title={false}>
 
-                      <ReactMarkdown remarkPlugins={[breaks]} skipHtml={false} children={item.content.replace(new RegExp(props.data.keyWord, 'gi'), `**${props.data.keyWord}**`)} />
+                      <ReactMarkdown remarkPlugins={[breaks]} rehypePlugins={[rehypeRaw]} skipHtml={false} children={item.content} />
 
                     </Skeleton>
 

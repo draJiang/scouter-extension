@@ -22,7 +22,7 @@ console.log('Hello=========');
 let isPin = false
 
 // 初始化主容器，主容器用来挂在全局样式，包括第三方组件的样式
-let MyBox: HTMLElement | null = document.getElementById('__jiang-souter');
+let MyBox: HTMLElement | null = document.getElementById('__jiang-scouter');
 console.log(MyBox);
 
 // container 承载 UI 组件
@@ -35,7 +35,7 @@ if (MyBox === null || MyBox === undefined) {
   // 如果不存在容器
   // 创建主容器
   MyBox = document.createElement('div')
-  MyBox.id = '__jiang-souter'
+  MyBox.id = '__jiang-scouter'
   document.getElementsByTagName('html')[0].appendChild(MyBox);
   MyBox.style.display = 'none' //默认隐藏
 
@@ -216,7 +216,7 @@ if (MyBox === null || MyBox === undefined) {
 
 
 let port = browser.runtime.connect({
-  name: 'popup-name'
+  name: 'fromContentScript'
 })
 
 // 接收 background 消息（目前是通过浏览器的右键菜单触发）
@@ -238,8 +238,19 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         container.className = 'container'
         shadowRoot?.appendChild(container)
       }
+      
       // 停止旧的对话
-      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+      try {
+        port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+      } catch (error) {
+        // 重新链接
+        port = browser.runtime.connect({
+          name: 'fromContentScript'
+        })
+        port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+      }
+
+
 
       MyBox.style.display = 'block'
 

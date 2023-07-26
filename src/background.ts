@@ -190,15 +190,18 @@ browser.runtime.onConnect.addListener(port => {
               // console.log('createParser:');
               try {
 
-                let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
+                if (event.data !== '[DONE]') {
 
-                if (new_msg !== undefined) {
+                  let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
 
-                  console.log(JSON.parse(event.data).id);
+                  if (new_msg !== undefined) {
 
-                  // 将数据发送给 UI 以渲染内容
-                  port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
+                    console.log(JSON.parse(event.data).id);
 
+                    // 将数据发送给 UI 以渲染内容
+                    port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
+
+                  }
                 }
 
               } catch {
@@ -470,7 +473,11 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
       // 反馈处理结果
       asyncSendResponse(result);
 
-    })
+    }).catch((error) => {
+
+      asyncSendResponse(error);
+
+    });
 
     return true;
 
