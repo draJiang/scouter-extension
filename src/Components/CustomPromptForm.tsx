@@ -166,6 +166,12 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                         <>
                             {`${'{selection}'}: Selected text`}<br />
                             {`${'{sentence}'}: Sentence containing the selected text`}
+                            <br />
+                            <a style={{
+                                opacity: 1,
+                                color: '#F08A24',
+                                textDecoration: 'underline'
+                            }} onClick={() => window.open('https://jiangzilong.notion.site/Dynamic-Placeholders-5f0705163ff640afbdd577115dc95779?pvs=4')}>Learn More</a>
                         </>}
                     rules={[{ required: true, message: 'Please input your prompt' }]}
                 >

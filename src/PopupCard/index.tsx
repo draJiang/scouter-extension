@@ -1035,7 +1035,7 @@ export function PopupCard(props: any) {
 
                 )}
 
-                {isApiErro ? <div className='p-4'> <img src={settingGuide} style={{
+                {isApiErro ? <div className=''> <img src={settingGuide} style={{
                   borderRadius: '4px'
                 }} /></div> : ''}
 

@@ -310,21 +310,21 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
         cards.forEach((card: any) => {
 
             // setTimeout(() => {
-                // console.log(card);
-                const keys = Object.keys(card.fields);
-                let firstKey = keys[0];
-                // 找到卡片正面
-                for (let i = 0; i < keys.length; i++) {
-                    if (card.fields[keys[i]].order === 0) {
-                        firstKey = keys[i]
-                        break
-                    }
+            // console.log(card);
+            const keys = Object.keys(card.fields);
+            let firstKey = keys[0];
+            // 找到卡片正面
+            for (let i = 0; i < keys.length; i++) {
+                if (card.fields[keys[i]].order === 0) {
+                    firstKey = keys[i]
+                    break
                 }
+            }
 
-                const cardFrontValue = card.fields[firstKey].value
-                if (cardFrontValue !== keyWord) {
-                    newStr = newStr.replace(new RegExp(cardFrontValue, 'gi'), `<mark>${cardFrontValue}</mark>`)
-                }
+            const cardFrontValue = card.fields[firstKey].value
+            if (cardFrontValue !== keyWord) {
+                newStr = newStr.replace(new RegExp(cardFrontValue, 'gi'), `<mark>${cardFrontValue}</mark>`)
+            }
             // }, 10);
 
 
