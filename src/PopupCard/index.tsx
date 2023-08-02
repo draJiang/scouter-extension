@@ -8,7 +8,10 @@ import ReactMarkdown from 'react-markdown'
 import breaks from 'remark-breaks';
 import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
+import remarkGfm from 'remark-gfm'
 
+
+import { setDonotClosePopupCard } from '../content_script'
 
 import { Nav } from "../Components/Nav"
 import { CustomPromptForm } from "../Components/CustomPromptForm"
@@ -856,6 +859,33 @@ export function PopupCard(props: any) {
 
     }
 
+    const cardStyle = `<style>
+
+    .sentence{
+      opacity:0.65;
+    }
+
+    table {
+      border: 1px solid #ccc;
+      border-collapse: collapse;
+      margin:0;
+      padding:0;
+      width: 100%;
+    }
+    table tr {
+      border: 1px solid #ddd;
+      padding: 5px;
+    }
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+    }
+    table th {
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    </style>
+    `
 
     // 请求 background 将数据保存到 Anki
     const p = {
@@ -864,7 +894,7 @@ export function PopupCard(props: any) {
         "modelName": modelName,
         "fields": {
           [front]: keyWord,
-          [back]: '<p>' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>'
+          [back]: cardStyle + '<p class="sentence">' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>'
         },
         "tags": [
           "Scouter"
@@ -956,8 +986,15 @@ export function PopupCard(props: any) {
 
 
   const openCustomPromptForm = (data: { isOpen: boolean, data: PromptType }) => {
+    // 开启或关闭自定义 Prompt 表单
     setPopoverOpen(data.isOpen)
-    setCustomPromptFormData(data.data)
+    // 设置表单的默认设置
+    if (data.isOpen) {
+      setCustomPromptFormData(data.data)
+    }
+    // 开启表单后禁止点击窗口外区域关闭窗口
+    setDonotClosePopupCard(data.isOpen)
+
   }
 
   return (
@@ -1022,7 +1059,23 @@ export function PopupCard(props: any) {
                   return <div key={item.chatId} className='' style={item.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
                     <Skeleton loading={item.loading} active={true} title={false}>
 
-                      <ReactMarkdown remarkPlugins={[breaks]} rehypePlugins={[rehypeRaw]} skipHtml={false} children={item.content} />
+                      <ReactMarkdown
+                        remarkPlugins={[breaks, remarkGfm]}
+                        rehypePlugins={[rehypeRaw]}
+                        components={{
+                          table: ({ node, ...props }) => <div style={{ overflowX: 'scroll' }}>
+                            <table style={{
+                              width: 'max-content',
+                              maxWidth: '620px',
+                              border: "1px solid #ccc",
+                              borderCollapse: 'collapse',
+                              margin: 0,
+                              padding: 0,
+                            }} {...props} />
+                          </div>
+                        }}
+                        skipHtml={false}
+                        children={item.content} />
 
                     </Skeleton>
 

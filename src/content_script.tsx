@@ -19,7 +19,10 @@ import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 
 console.log('Hello=========');
 
+// 记录当前窗口是否 Pin 住
 let isPin = false
+// 设置当前窗口是否允许关闭
+let donotClosePopupCard = false
 
 // 初始化主容器，主容器用来挂在全局样式，包括第三方组件的样式
 let MyBox: HTMLElement | null = document.getElementById('__jiang-scouter');
@@ -99,6 +102,13 @@ if (MyBox === null || MyBox === undefined) {
 
   #LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3{
     font-weight: bold;
+  }
+
+  #LearningEnglish2023 h1{
+    font-size:20px;
+  }
+  #LearningEnglish2023 h2{
+    font-size:17px;
   }
 
   #LearningEnglish2023 {
@@ -209,6 +219,88 @@ if (MyBox === null || MyBox === undefined) {
     
   }
 
+  table tr {
+    border: 1px solid #ddd;
+    padding: 5px;
+  }
+  table th, table td {
+    padding: 10px;
+    text-align: left;
+  }
+  table th {
+    // font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  // /* 滚动条以及滚动条轨道的宽度 */
+  // ::-webkit-scrollbar {
+  //     width: 10px;
+  // }
+  
+  // /* 滚动条轨道的样式*/
+  // ::-webkit-scrollbar-track {
+      
+  // }
+  
+  // /* 滚动条的样式 */
+  // ::-webkit-scrollbar-thumb {
+  //     background: #888; 
+  // }
+  
+  // /* 当你鼠标悬停在滚动条上时的样式 */
+  // ::-webkit-scrollbar-thumb:hover {
+  //     background: #555; 
+  // }
+
+  /* 滚动条 */
+::-webkit-scrollbar-thumb:horizontal { /*水平滚动条的样式*/
+    width: 4px;
+    background-color: #CCCCCC;
+    -webkit-border-radius: 6px;
+}
+::-webkit-scrollbar-track-piece {
+    background-color: #fff; /*滚动条的背景颜色*/
+    -webkit-border-radius: 0; /*滚动条的圆角宽度*/
+}
+::-webkit-scrollbar {
+    width: 10px; /*滚动条的宽度*/
+    height: 8px; /*滚动条的高度*/
+}
+::-webkit-scrollbar-thumb:vertical { /*垂直滚动条的样式*/
+    height: 50px;
+    background-color: #999;
+    -webkit-border-radius: 4px;
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+    border: 2px solid #fff;
+}
+::-webkit-scrollbar-thumb:hover { /*滚动条的hover样式*/
+    height: 50px;
+    background-color: #9f9f9f;
+    -webkit-border-radius: 4px;
+}
+
+pre {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  color: #333;
+  font-family: Courier, monospace;
+  line-height: 1.2;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+blockquote {
+  padding: 10px 20px;
+  margin: 0 0 20px;
+  border-left: 5px solid #f1f1f1;
+  color: #666;
+  background-color: #f9f9f9;
+}
+
   `
   shadowRoot?.appendChild(style);
 
@@ -238,7 +330,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         container.className = 'container'
         shadowRoot?.appendChild(container)
       }
-      
+
       // 停止旧的对话
       try {
         port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
@@ -298,7 +390,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     // 监听页面点击事件
     document.onmousedown = function (event) {
 
-      if (MyBox !== undefined && MyBox !== null && !isPin) {
+      if (MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
         // 如果点击的不是插件窗口及其子元素，则关闭窗口
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
           // 隐藏窗口
@@ -342,6 +434,10 @@ export const pinPopupCard = (value: boolean) => {
   isPin = value
 }
 
+export const setDonotClosePopupCard = (value: boolean) => {
+  donotClosePopupCard = value
+}
+
 let isTextSelected = false;
 
 const handleSelectionchange = () => {
@@ -352,7 +448,7 @@ const handleSelectionchange = () => {
 }
 
 const handleMouseup = (event: any) => {
-  if (isTextSelected) {
+  if (isTextSelected && !donotClosePopupCard) {
 
 
     if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
