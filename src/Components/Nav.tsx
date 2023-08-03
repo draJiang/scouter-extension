@@ -54,13 +54,11 @@ export function Nav(props: NavProps) {
 
 
     useEffect(() => {
-        console.log(props);
 
     }, []);
 
     // 点击保存到 Anki 按钮
     const handleSaveToAnkiBtnClick = () => {
-        console.log('Nav handleSaveToAnkiBtnClick');
         props.handleSaveToAnkiBtnClick()
     };
 
@@ -79,10 +77,6 @@ export function Nav(props: NavProps) {
 
     // 在 Anki 中打开笔记
     const editNoteInAnki = (noteId: number) => {
-
-        console.log('editNoteInAnki');
-        console.log(noteId);
-
 
         let sending = browser.runtime.sendMessage({ 'type': 'guiEditNote', 'messages': { 'anki_action_type': 'guiEditNote', 'anki_arguments': { 'note': noteId }, } })
         sending.then((message: any) => {
@@ -105,7 +99,6 @@ export function Nav(props: NavProps) {
 
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
-        console.log(data);
         // 第 3 个参数 false 表示不重新渲染图片
         // 如果上一个 Prompt 是不显示图片，且当前 Prompt 需要显示图片，则本次任务需要渲染图片，否则不重新渲染图片
         if (props.lastExecutedPrompt.getUnsplashImages !== true && data.getUnsplashImages) {
@@ -117,9 +110,6 @@ export function Nav(props: NavProps) {
     }
 
     const onMenuOpenChange = (open: boolean) => {
-        console.log(open);
-        console.log(event);
-
         // event.stopPropagation()
         setIsOpenPromptMenu(open)
 

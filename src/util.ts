@@ -10,12 +10,10 @@ export function ankiAction(action: any, version: any, params = {}) {
       body: JSON.stringify({ "action": action, "version": version, "params": params })
     }).then(response => response.json()).then((data) => {
 
-      console.log(data);
+      // console.log(data);
       resolve(data)
 
     }).catch((error) => {
-      console.log('error');
-      console.log(error);
       reject({ 'result': [], 'error': 'Please open the Anki client and install the Anki-Connect plugin before trying again.' })
     })
 
@@ -32,7 +30,7 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
     unsplash.search.getPhotos({
       query: query,
     }).then((data) => {
-      console.log(data);
+      // console.log(data);
 
       if (data.response?.results.length === 0) {
         resolve([]);
@@ -55,8 +53,8 @@ export function getDefaultDeckName() {
 
     // 获取用户设置的 Deck Name
     browser.storage.sync.get(["ankiDeckName"]).then(async (result) => {
-      console.log('result:');
-      console.log(result);
+      // console.log('result:');
+      // console.log(result);
 
       if (result.ankiDeckName) {
         // 用户有设置
@@ -74,7 +72,7 @@ export function getDefaultDeckName() {
 
         }).catch((error) => {
 
-          console.log(error);
+          // console.log(error);
           return ''
 
         })
@@ -104,7 +102,7 @@ export const playTextToSpeech = (text: string, voice: string) => {
     text,
     function (result) {
       if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-        console.log('synthesis finished.');
+        // console.log('synthesis finished.');
       } else {
         console.error(
           'Speech synthesis canceled, ' + result.errorDetails + '\nDid you set the speech resource key and region values?'
@@ -113,11 +111,11 @@ export const playTextToSpeech = (text: string, voice: string) => {
       synthesizer.close();
     },
     function (err) {
-      console.trace('err - ' + err);
+      // console.trace('err - ' + err);
       synthesizer.close();
     }
   );
 
-  console.log('Now synthesizing...');
+  // console.log('Now synthesizing...');
 
 };

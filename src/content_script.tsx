@@ -17,8 +17,6 @@ import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
 
-console.log('Hello=========');
-
 // 记录当前窗口是否 Pin 住
 let isPin = false
 // 设置当前窗口是否允许关闭
@@ -26,7 +24,7 @@ let donotClosePopupCard = false
 
 // 初始化主容器，主容器用来挂在全局样式，包括第三方组件的样式
 let MyBox: HTMLElement | null = document.getElementById('__jiang-scouter');
-console.log(MyBox);
+// console.log(MyBox);
 
 // container 承载 UI 组件
 let container = document.createElement('div')
@@ -393,6 +391,9 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       if (MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
         // 如果点击的不是插件窗口及其子元素，则关闭窗口
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
+          
+          port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+
           // 隐藏窗口
           container.parentNode?.removeChild(container);
 
@@ -410,8 +411,6 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
 // 显示应用窗口
 async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
-  console.log('showPopupCard:');
-  console.log(runPrompt);
   // let a = await fetchcurrentLanguage()
   // console.log(a);
   const lang = await fetchcurrentLanguage()

@@ -96,9 +96,9 @@ export function Images(props: ImagesProps) {
 
     useEffect(() => {
 
-        console.log(inputElement);
-        console.log(inputElement.current);
-        console.log(inputElement.current?.input);
+        // console.log(inputElement);
+        // console.log(inputElement.current);
+        // console.log(inputElement.current?.input);
         inputElement.current?.focus()
 
     }, [changeImage]);
@@ -111,7 +111,6 @@ export function Images(props: ImagesProps) {
     }
 
     const handleSearchInput = (event: any) => {
-        console.log('handleSearchInput');
         event.stopPropagation()
     }
 

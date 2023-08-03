@@ -47,19 +47,16 @@ export const Options = () => {
   // stored in chrome.storage.
 
 
-  console.log(Object.keys(lang));
 
   const onSelectChange = (value: string) => {
-    console.log(`selected ${value}`);
+    // console.log(`selected ${value}`);
   };
 
   const onSelectSearch = (value: string) => {
-    console.log('search:', value);
+    // console.log('search:', value);
   };
 
   useEffect(() => {
-
-    console.log('options useEffect:');
 
     // chrome.storage.sync.remove('ankiDeckName', function () {
     //   console.log('历史记录已删除');
@@ -71,8 +68,6 @@ export const Options = () => {
     // 获取配置信息
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
-      console.log(items);
-      console.log(items.ankiDeckName);
 
       await getDefaultDeckName().then((data: any) => {
 
@@ -102,7 +97,6 @@ export const Options = () => {
 
     // 获取 Anki 的牌组列表
     ankiAction('deckNames', 6).then((result: any) => {
-      console.log(result);
 
       setAnkiDeckNames(result.result)
 
@@ -119,8 +113,6 @@ export const Options = () => {
 
   // 保存设置
   async function saveOptions(values: any) {
-    console.log('Options save');
-    console.log(values);
     // Saves options to chrome.storage.sync.
     let setStorage = await browser.storage.sync.set(
       {
@@ -134,9 +126,6 @@ export const Options = () => {
     ).then(item => {
 
       // Update status to let user know options were saved.
-      console.log(item);
-
-      console.log('browser');
       setStatus(' ✅ Saved')
 
       setTimeout(() => {
@@ -194,7 +183,7 @@ export const Options = () => {
                 extra={
                   <p style={{
                     color: '#666'
-                  }}>If you use a third-party API endpoint, fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More</a></p>
+                  }}>If you are using Azure or a third-party endpoint, please fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More</a></p>
                 }
               >
                 <Input placeholder="https://api.openai.com" type="url" />

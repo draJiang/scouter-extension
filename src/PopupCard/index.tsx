@@ -10,6 +10,8 @@ import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 
+import { useSpring, animated } from 'react-spring';
+
 
 import { setDonotClosePopupCard } from '../content_script'
 
@@ -23,7 +25,7 @@ import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
 import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Drawer, Space, Form, Button } from 'antd';
-import { SendOutlined } from '@ant-design/icons';
+import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 
 import settingGuide from '../assets/settingGuide.png'
@@ -33,9 +35,6 @@ import { useCurrentLanguage } from '../lib/locale'
 import { windowInitialization, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
 import "./index.css"
-
-
-
 
 
 let currentLanguage: string
@@ -50,7 +49,7 @@ let ankiCards: Array<{}>
 getAnkiCards().then((cards: any) => {
   ankiCards = cards
 }).catch((error) => {
-  console.log(error);
+  // console.log(error);
 
 })
 
@@ -97,6 +96,8 @@ export function PopupCard(props: any) {
   const messagesList = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
 
+  const shouldStayAtBottomRef = useRef(false);
+
   const [form] = Form.useForm();
 
 
@@ -111,8 +112,6 @@ export function PopupCard(props: any) {
 
     // 渲染 Prompt 列表
     initializePromptList()
-    console.log('props.runPrompt:');
-    console.log(props.runPrompt);
 
     if (props.runPrompt || props.runPrompt === undefined) {
 
@@ -120,8 +119,6 @@ export function PopupCard(props: any) {
       // 获取最近一次执行的 Prompt
       browser.storage.local.get({ "lastExecutedPrompt": '' }).then((item) => {
 
-        console.log('lastExecutedPrompt:');
-        console.log(item);
 
         if (item.lastExecutedPrompt === '') {
 
@@ -158,46 +155,50 @@ export function PopupCard(props: any) {
   // 聊天记录改变时
   useEffect(() => {
 
-    // 自动滚动到消息底部，方便看到最新的文字
-    if (messages.length > 1) {
-      scrollToBottom(true)
+    // 记录当前列表的位置
+    if (windowElement.current) {
+      const container = windowElement.current.querySelectorAll('.container')[0]
+      shouldStayAtBottomRef.current = container.scrollHeight - container.scrollTop <= container.clientHeight + 20;
+
+      
+      // if (!shouldStayAtBottomRef.current) {
+      //   console.log('---');
+      //   console.log(container.scrollHeight - container.scrollTop - container.clientHeight);
+      // }
+
+
+
+      // const checkIfShouldStayAtBottom = () => {
+      //   if (container !== null) {
+      //     shouldStayAtBottomRef.current = Math.abs((container.scrollTop + container.clientHeight) - container.scrollHeight) < 2;
+      //   }
+      // };
+
+      // 自动滚动到消息底部，方便看到最新的文字
+      if (messages.length > 1) {
+
+        // checkIfShouldStayAtBottom();  // 初始检查
+        // container.addEventListener('scroll', checkIfShouldStayAtBottom);  // 每次滚动时检查
+
+        // console.log(shouldStayAtBottomRef.current);
+
+
+        if (messages[messages.length - 1].loading) {
+          scrollToBottom(true)
+        } else {
+          scrollToBottom(shouldStayAtBottomRef.current)
+        }
+
+      }
+
+      // return () => {
+      //   if (container !== null) {
+      //     container.removeEventListener('scroll', checkIfShouldStayAtBottom);
+      //   }
+      // }
+
     }
 
-    // 如果当前 Prompt 包含 Anki 牌组中的单词，则高亮显示，支持点击在 Anki 中打开
-    // console.log(windowElement.current?.getElementsByClassName('messages'));
-
-    // let messageDom = windowElement.current?.getElementsByClassName('messages')
-    // if (messageDom) {
-    //   if (messageDom.length > 0) {
-    //     const newMessageStr = (messageDom[0] as HTMLElement).innerHTML.replace(/o/g, '<span style="color: red; cursor: pointer;">o</span>');
-    //     messageDom[0].innerHTML = newMessageStr
-    //   }
-    // }
-
-    // const targetElement = windowElement.current?.querySelector(".messages");
-    // const selectedText = "a"; // 将 "指定字符" 替换为您想要设置为红色并支持点击的具体字符
-
-    // if (targetElement) {
-    //   targetElement.innerHTML = `<span style="color:red;">${Date.now()}</span>`
-    // }
-
-
-
-
-    // 获取目标 Anki 卡片
-    // browser.storage.local.get({ "ankiCards": [] }).then((item: any) => {
-
-    //   if (item.ankiCards.cards.length > 0) {
-    //     // 存在卡片
-    //     // 将消息中与目标卡片正面字符串匹配的字符突出显示
-
-
-    //   }
-    // })
-
-
-
-    // 不存在卡片
 
   }, [messages])
 
@@ -304,8 +305,8 @@ export function PopupCard(props: any) {
       needToRerenderImage = true
     }
 
-    console.log('executivePrompt:');
-    console.log(needToRunPrompt);
+    // console.log('executivePrompt:');
+    // console.log(needToRunPrompt);
     // console.log(prompt);
 
     // promptRef.current = prompt
@@ -638,8 +639,16 @@ export function PopupCard(props: any) {
         // 请求 GPT 数据成功且数据流传输中
         if (msg.status === 'process') {
 
+          // if (windowElement.current) {
+          //   const container = windowElement.current.querySelectorAll('.container')[0]
+          //   shouldStayAtBottomRef.current = container.scrollHeight - container.scrollTop <= container.clientHeight + 20;
+          // }
+
           try {
 
+
+
+            // 渲染数据
             setMessages(prevMessages => {
 
               const lastMessage = prevMessages[prevMessages.length - 1];
@@ -685,7 +694,7 @@ export function PopupCard(props: any) {
 
   };
 
-  // 发送消息
+  // 用户发送消息
   const handleSendMessage = (values: any) => {
 
     // console.log(values);
@@ -720,8 +729,6 @@ export function PopupCard(props: any) {
     const msgHistory = messages.slice(-5).map((item) => { return { 'role': item.role, 'content': item.content } })
 
     getGPTMsg([...msgHistory, { "role": "user", "content": values.msg }])
-
-
 
   }
 
@@ -956,25 +963,31 @@ export function PopupCard(props: any) {
     // console.log(erro);
   }
 
-
+  // GPT 生成消息时，自动定位到消息列表底部，方便用户阅读
   function scrollToBottom(canSroll: boolean = false) {
 
-    if (messagesList.current !== null) {
-      const isAtBottom = messagesList.current?.scrollTop + messagesList.current.clientHeight >= messagesList.current.scrollHeight - 1;
+    if (windowElement.current !== null) {
+      const container = windowElement.current.querySelectorAll('.container')[0]
+      // const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 14;
 
-      // console.log('isAtBottom:');
+      // console.log('isAtBottom ====== ');
+      // console.log(canSroll);
       // console.log(isAtBottom);
 
+      // console.log(container.scrollHeight);
+      // console.log(container.scrollTop);
+      // console.log(container.clientHeight);
 
-      if (isAtBottom || canSroll) {
+      if (canSroll) {
         // 位于底部，需要自动滚动
-        // messagesList.current.scrollTop = messagesList.current.scrollHeight;
 
-        const childElements = messagesList.current.querySelectorAll('.messages > :last-child');
-        if (childElements.length > 0) {
-          const lastChildElement = childElements[childElements.length - 1];
-          lastChildElement.scrollIntoView();
-        }
+        // const childElements = windowElement.current.querySelectorAll('.messages > :last-child');
+        // if (childElements.length > 0) {
+        //   const lastChildElement = childElements[childElements.length - 1];
+        //   lastChildElement.scrollIntoView();
+        // }
+
+        container.scrollTop = container.scrollHeight + 20;
 
 
       }
@@ -996,6 +1009,17 @@ export function PopupCard(props: any) {
     setDonotClosePopupCard(data.isOpen)
 
   }
+
+  const AnimatedButton = animated(Button);
+  const animationStyle = useSpring({
+    from: { transform: 'rotate(0deg)' },
+    to: { transform: 'rotate(360deg)' },
+    config: { duration: 1000 },
+    loop: true,
+    width: '32px',
+    height: '32px',
+    border: '1px solid red'
+  });
 
   return (
     <>
@@ -1081,10 +1105,7 @@ export function PopupCard(props: any) {
 
                   </div>
 
-
                 }
-
-
 
                 )}
 
@@ -1096,6 +1117,7 @@ export function PopupCard(props: any) {
               </div>
             </div>
           </div>
+
 
           <div className='w-full'
             ref={inputRef}
@@ -1130,18 +1152,24 @@ export function PopupCard(props: any) {
               <Form.Item
                 style={{ marginRight: '0' }}
               >
-                <Button
-                  type="text"
-                  htmlType="submit"
-                  disabled={isLoading || !isAnswerInputed}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: !isLoading && isAnswerInputed ? '#F08A24' : ''
-                  }}
-                  icon={<SendOutlined />}
-                />
+                {isAnswerDone ?
+                  <Button
+                    type="text"
+                    htmlType="submit"
+                    disabled={isLoading || !isAnswerInputed}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: !isLoading && isAnswerInputed ? '#F08A24' : ''
+                    }}
+                    icon={<SendOutlined />}
+                  /> : <div style={{ marginRight: '8px' }}>
+                    <animated.div style={animationStyle}><LoadingOutlined /></animated.div>
+                  </div>
+                }
+
+
 
               </Form.Item>
 

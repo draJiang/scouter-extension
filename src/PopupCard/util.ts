@@ -57,28 +57,27 @@ export const windowInitialization = (data: { isPin: boolean, windowElement: any,
         data.windowElement.current.style.top = `${clampedY}px`;
     }
 
-    // 添加滚动事件，让消息列表自动滚动到底部
-    data.messagesList.current?.addEventListener("scroll", handleScroll);
-    return () => {
-        // console.log('useEffect return');
-        data.messagesList.current?.removeEventListener("scroll", handleScroll);
+    // // 添加滚动事件，让消息列表自动滚动到底部
+    // data.messagesList.current?.addEventListener("scroll", handleScroll);
+    // return () => {
+    //     // console.log('useEffect return');
+    //     data.messagesList.current?.removeEventListener("scroll", handleScroll);
 
-    };
+    // };
 
-    function handleScroll() {
+    // function handleScroll() {
 
-        if (data.messagesList.current !== null) {
-            const isAtBottom = data.messagesList.current?.scrollTop + data.messagesList.current.clientHeight >= data.messagesList.current.scrollHeight - 0.5;
-            if (isAtBottom) {
-                // 已经位于底部，不需要自动滚动
-                console.log('isAtBottom');
-                return;
-            } else {
-                // scrollToBottom()
-            }
-        }
-        // 未位于底部，不执行自动滚动
-    }
+    //     if (data.messagesList.current !== null) {
+    //         const isAtBottom = data.messagesList.current?.scrollTop + data.messagesList.current.clientHeight >= data.messagesList.current.scrollHeight - 0.5;
+    //         if (isAtBottom) {
+    //             // 已经位于底部，不需要自动滚动
+    //             return;
+    //         } else {
+    //             // scrollToBottom()
+    //         }
+    //     }
+    //     // 未位于底部，不执行自动滚动
+    // }
 
 }
 
@@ -107,12 +106,9 @@ export const getUnsplashImages = (keyWord: string) => {
         port.onMessage.addListener(msg => {
 
             if (msg.type === 'sendImgData') {
-                console.log('sendImgData');
 
                 if ('imgs' in msg) {
                     // console.log('unsplashSearchPhotos');
-                    console.log('imgs:');
-                    // setImages([])
                     resolve(msg.imgs)
                 }
             }
@@ -153,9 +149,6 @@ export const handlePromptVariables = async (promptStr: string, keyWord: string, 
 
             if (randomValues !== null) {
 
-                console.log('randomValues:');
-                console.log(randomValues);
-
 
                 if (randomValues.length > 5) {
                     // 随机取 X 个卡片
@@ -192,12 +185,9 @@ export const handlePromptVariables = async (promptStr: string, keyWord: string, 
                 });
 
                 newPromptStr = newPromptStr.replace(/\{ankiCards\}/g, ankiCardsStr)
-                console.log(newPromptStr)
                 return newPromptStr
             }
         }).catch((error) => {
-            console.log('handlePromptVariables:');
-            console.log(error);
             newPromptStr = newPromptStr.replace(/\{ankiCards\}/g, '')
         })
 
@@ -221,8 +211,6 @@ export const getAnkiCards = () => {
     return new Promise((resolve, reject) => {
         // 判断本地是否存有未过期的数据
         browser.storage.local.get({ "ankiCards": { 'cards': [], 'time': 0 } }).then(async (item: any) => {
-            console.log('local cards:');
-            console.log(item.ankiCards);
 
             // 缓存 1 小时
             if (item.ankiCards.cards.length > 0 && Date.now() - item.ankiCards.time < 3600 * 1000) {
@@ -238,11 +226,10 @@ export const getAnkiCards = () => {
 
                     if (message.error === null) {
 
-                        console.log(message);
                         // 根据卡片 ID 查询卡片信息
                         await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'cardsInfo', 'anki_arguments': { 'cards': message.result } }, }).then((message: any) => {
 
-                            console.log(message);
+                            // console.log(message);
 
                             let cards = message.result
 
@@ -255,10 +242,6 @@ export const getAnkiCards = () => {
 
                         }, (message) => {
                             //error
-                            console.log('getAnkiCards error:');
-                            console.log(message);
-
-
                         })
 
                     } else {
@@ -269,8 +252,6 @@ export const getAnkiCards = () => {
 
                 }, (message) => {
                     //error
-                    console.log('getAnkiCards error:');
-                    console.log(message);
                 });
             }
 
@@ -366,7 +347,7 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
 
 function handleHightlightClick(event: any) {
     alert('hello')
-    console.log(event);
+    // console.log(event);
 
 }
 

@@ -6,6 +6,7 @@ import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser
 import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "./util";
 import { createApi } from 'unsplash-js';
 
+import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
 
 // [暂时废弃]content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
@@ -152,10 +153,39 @@ browser.runtime.onConnect.addListener(port => {
           openApiEndpoint = defaultOpenApiEndpoint
         }
 
-        fetch(openApiEndpoint + '/v1/chat/completions', {
-          signal: controller.signal,
-          method: "POST",
-          body: JSON.stringify({
+
+
+        let headers = {}
+        let body
+
+        if (openApiEndpoint.indexOf('azure.com') > -1) {
+
+          // Azure
+          headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
+          body = JSON.stringify({
+            "model": "gpt-35-turbo",
+            "messages": messages,
+            "temperature": 0.7,
+            "max_tokens": 420,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 2,
+            "stream": true
+          })
+
+        } else {
+
+          // OpenAI
+          headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+          
+          // 去除端点末尾的 \ 符号
+          if (openApiEndpoint.slice(-1) === "/") {
+            openApiEndpoint = openApiEndpoint.slice(0, -1);
+          }
+
+          openApiEndpoint += '/v1/chat/completions'
+          
+          body = JSON.stringify({
             "model": "gpt-3.5-turbo",
             "messages": messages,
             "temperature": 0.7,
@@ -164,8 +194,17 @@ browser.runtime.onConnect.addListener(port => {
             "frequency_penalty": 0,
             "presence_penalty": 2,
             "stream": true
-          }),
-          headers: { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+          })
+
+        }
+
+
+
+        fetch(openApiEndpoint, {
+          signal: controller.signal,
+          method: "POST",
+          body: body,
+          headers: headers
 
         }).then(async (response) => {
 
@@ -262,7 +301,6 @@ browser.runtime.onConnect.addListener(port => {
           // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
         })
-
 
       }
 

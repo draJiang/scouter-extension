@@ -16,8 +16,6 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
 
     useEffect(() => {
 
-        console.log(props.data);
-
         // 更新 input 文本框的默认值
         form.setFieldsValue({
             title: props.data.title,
@@ -39,8 +37,6 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
             return item.promptList
         })
 
-
-        console.log(props);
 
         let newPrompts = promptList
 
@@ -74,14 +70,11 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
             }
         ).then(item => {
 
-            console.log(item);
-
             // 将 Prompt 传回给父组件，以让 Prompt 列表 UI 重新渲染
             props.handlePromptEdited(props.data.id === '')
 
         }).catch((error) => {
 
-            console.log('error');
             alert('🥲Save failed, possibly due to a too long Prompt. You can delete other Prompts or shorten the Prompt characters and try again. \n' + error)
 
         })
@@ -115,7 +108,6 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
                     }
                 ).then(item => {
 
-                    console.log(item);
 
                     // 将 Prompt 传回给父组件，以让 Prompt 列表 UI 重新渲染
                     props.handlePromptEdited(props.data.id === '')
