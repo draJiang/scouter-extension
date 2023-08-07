@@ -146,7 +146,7 @@ export const Options = () => {
             },
           }}
         >
-          <header style={{
+          {/* <header style={{
             display: 'flex'
             , alignItems: 'center'
             , marginBottom: '20px'
@@ -156,11 +156,8 @@ export const Options = () => {
                 width: '24px',
               }} src={Icon} />
             </span>
-            {/* <span style={{
-              fontSize: '12px'
-              , opacity: '0.7'
-            }}>0.9.8</span> */}
-          </header>
+            
+          </header> */}
 
           <Form
             onFinish={saveOptions}

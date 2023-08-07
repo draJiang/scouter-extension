@@ -541,7 +541,7 @@ const sendMessageToContent = (runPrompt?: boolean) => {
 
     if (activeTab && activeTab.id !== undefined) {
 
-      let b = browser.tabs.sendMessage(tID, { type: 'open-souter', runPrompt: needToRunPrompt })
+      let b = browser.tabs.sendMessage(tID, { type: 'open-scouter', runPrompt: needToRunPrompt })
 
       // 已知情况：刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
       // b.catch(e => {
@@ -554,7 +554,7 @@ const sendMessageToContent = (runPrompt?: boolean) => {
       //   }).then(() => {
       //     console.log('chrome.scripting.executeScript');
       //   }).then(() => {
-      //     browser.tabs.sendMessage(tID, { type: 'open-souter' })
+      //     browser.tabs.sendMessage(tID, { type: 'open-scouter' })
       //   })
 
       // })

@@ -314,7 +314,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
   // console.log('content script onMessage:');
   // console.log(msg);
-  if (msg.type === 'open-souter') {
+  if (msg.type === 'open-scouter') {
 
 
     // 处理窗口
@@ -359,7 +359,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     const selection = getSelection()
 
     // 显示窗口
-    if (selection) {
+    if (selection && selection.keyWord !== '') {
       showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
     }
 
@@ -440,9 +440,6 @@ export const setDonotClosePopupCard = (value: boolean) => {
 let isTextSelected = false;
 
 const handleSelectionchange = () => {
-  console.log('===');
-
-  console.log('handleSelectionchange');
 
   // let selection = window.getSelection();
   // if (selection) {
@@ -455,9 +452,9 @@ const handleSelectionchange = () => {
 
 const handleMouseup = (event: any) => {
 
-  console.log('handleMouseup');
-  console.log(isTextSelected);
-  console.log(donotClosePopupCard);
+  // console.log('handleMouseup');
+  // console.log(isTextSelected);
+  // console.log(donotClosePopupCard);
 
   const selection = getSelection()
 
@@ -468,7 +465,7 @@ const handleMouseup = (event: any) => {
 
   if (isTextSelected && !donotClosePopupCard) {
 
-    console.log('isTextSelected && !donotClosePopupCard');
+    // console.log('isTextSelected && !donotClosePopupCard');
 
     if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
 
@@ -476,7 +473,6 @@ const handleMouseup = (event: any) => {
 
 
       console.log('(MyBox !== event.target && !MyBox?.contains(event.target as Node)');
-
 
       // 停止旧的对话
       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
@@ -499,6 +495,7 @@ const getSelection = () => {
   const selection = window.getSelection();
 
   if (selection !== null) {
+
     // 当前选中的文字
     let keyWord = selection.toString().trim()
 
