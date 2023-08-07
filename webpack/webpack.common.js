@@ -62,7 +62,7 @@ module.exports = {
             options: {},
         }),
         new DotenvWebpackPlugin({
-            path:'./.env'
+            path: './.env'
         }),
     ],
 };

@@ -391,7 +391,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       if (MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
         // 如果点击的不是插件窗口及其子元素，则关闭窗口
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
-          
+
           port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
           // 隐藏窗口
@@ -440,21 +440,43 @@ export const setDonotClosePopupCard = (value: boolean) => {
 let isTextSelected = false;
 
 const handleSelectionchange = () => {
-  let selection = window.getSelection();
-  if (selection) {
-    isTextSelected = selection.toString().length > 0;
-  }
+  console.log('===');
+
+  console.log('handleSelectionchange');
+
+  // let selection = window.getSelection();
+  // if (selection) {
+  //   console.log('selection.toString():');
+  //   console.log(selection.toString());
+
+  //   isTextSelected = selection.toString().length > 0;
+  // }
 }
 
 const handleMouseup = (event: any) => {
+
+  console.log('handleMouseup');
+  console.log(isTextSelected);
+  console.log(donotClosePopupCard);
+
+  const selection = getSelection()
+
+  if (selection) {
+    isTextSelected = selection.selection.toString().length > 0;
+  }
+
+
   if (isTextSelected && !donotClosePopupCard) {
 
+    console.log('isTextSelected && !donotClosePopupCard');
 
     if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
 
       isTextSelected = false;
 
-      const selection = getSelection()
+
+      console.log('(MyBox !== event.target && !MyBox?.contains(event.target as Node)');
+
 
       // 停止旧的对话
       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
@@ -489,7 +511,7 @@ const getSelection = () => {
       sentence = sentence.length <= keyWord.length ? (selection.anchorNode?.parentNode?.parentNode as HTMLElement)?.innerText ?? '' : sentence
     }
 
-    return { 'keyWord': keyWord, 'sentence': sentence }
+    return { 'selection': selection, 'keyWord': keyWord, 'sentence': sentence }
 
   } else {
     return null

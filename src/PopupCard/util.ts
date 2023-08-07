@@ -1,6 +1,8 @@
 import browser from 'webextension-polyfill'
 import { ankiAction } from '../util'
 
+import { PromptType } from '../types'
+
 export const getClipboard = () => {
 
     return new Promise((resolve, reject) => {
@@ -128,13 +130,17 @@ export const getUnsplashImages = (keyWord: string) => {
  * @returns {string} 处理后的 Prompt 字符串
  * @throws {异常类型} 异常描述
  */
-export const handlePromptVariables = async (promptStr: string, keyWord: string, Sentence: string) => {
+export const handlePromptVariables = async (promptStr: string, keyWord: string, Sentence: string, Lang: { target: { name: string }, current: { name: string } }) => {
 
     let newPromptStr = promptStr
 
     // 处理关键字和句子
     newPromptStr = promptStr.replace(/\{selection\}/g, keyWord)
     newPromptStr = newPromptStr.replace(/\{sentence\}/g, Sentence)
+
+    // 处理语言
+    newPromptStr = newPromptStr.replace(/\{currentLanguage\}/g, Lang['current']['name'])
+    newPromptStr = newPromptStr.replace(/\{targetLanguage\}/g, Lang['target']['name'])
 
     // 处理 Anki 单词
     if (newPromptStr.indexOf('{ankiCards}') >= 0) {
@@ -194,7 +200,6 @@ export const handlePromptVariables = async (promptStr: string, keyWord: string, 
 
 
     }
-
 
     return newPromptStr
 
@@ -345,9 +350,74 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
 
 }
 
-function handleHightlightClick(event: any) {
-    alert('hello')
-    // console.log(event);
+/**
+ * 获取系统的默认 Prompt
+ * @param {string} keyWord - 当前选中的字符
+ * @returns {string} Prompt 字符串
+ * @throws {异常类型} 异常描述
+ */
+export const getDefaultPrompt = (keyWord: string) => {
+
+    let userPrompt = `
+
+        Please help me learn as a foreign language teacher.
+
+        Example：
+        """
+        -  Meaning: <Explain the meaning using {currentLanguage}>
+        -  Part of Speech: <Indicate the part of speech using {currentLanguage}>
+        
+        ## Meaning in the sentence
+        -  <Explain the meaning of the word in the sentence using {currentLanguage}>
+        
+        ## Example Sentences
+        -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
+        -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
+        
+        ## Translation Exercise
+        -  <{currentLanguage} sentence>
+        -  <{currentLanguage} sentence>
+        
+        """ 
+        
+        Word:{selection}, sentence: {sentence},You must reply in the specified language
+
+        Please start teaching:
+
+        `
+
+    // 关键字长度较长时，按照句子进行处理
+    if (keyWord.length > 20) {
+
+        userPrompt = `
+      
+                  As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
+      
+                  Example:
+                  """
+      
+                  ## Translation
+                  <Translate to {currentLanguage}>
+                  
+                  ## Grammar
+                  <- Point: Explain in {currentLanguage}>
+      
+                  ## Examples of related grammar
+                  -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
+                  -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
+      
+                  """
+                  
+                  Sentence: {selection}`
+
+    }
+
+    const defaultPrompt: PromptType = {
+        'title': 'Default', 'getUnsplashImages': true, 'userPrompt': userPrompt,
+        'id': 'Default'
+    }
+
+    return defaultPrompt
 
 }
 

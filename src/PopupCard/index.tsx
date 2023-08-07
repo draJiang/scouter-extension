@@ -32,7 +32,7 @@ import settingGuide from '../assets/settingGuide.png'
 
 import { useCurrentLanguage } from '../lib/locale'
 
-import { windowInitialization, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
+import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
 import "./index.css"
 
@@ -106,6 +106,7 @@ export function PopupCard(props: any) {
   targetLanguage = Lang['target']['name']
 
 
+
   useEffect(() => {
     // console.log('useEffect');
     // console.log(props);
@@ -160,7 +161,7 @@ export function PopupCard(props: any) {
       const container = windowElement.current.querySelectorAll('.container')[0]
       shouldStayAtBottomRef.current = container.scrollHeight - container.scrollTop <= container.clientHeight + 20;
 
-      
+
       // if (!shouldStayAtBottomRef.current) {
       //   console.log('---');
       //   console.log(container.scrollHeight - container.scrollTop - container.clientHeight);
@@ -349,79 +350,18 @@ export function PopupCard(props: any) {
 
       // 处理 Prompt 中的变量
       let newPrompt: Array<{ role: string, content: string }>;
+      let p = prompt.userPrompt
 
       if (prompt.id == 'Default') {
 
-        let userPrompt = {
-          "role": "user", "content": `
-
-          Please help me learn as a foreign language teacher.
-
-          Example：
-          """
-          -  Meaning: <Explain the meaning using ${Lang['current']['name']}>
-          -  Part of Speech: <Indicate the part of speech using ${Lang['current']['name']}>
-          
-          ## Meaning in the sentence
-          -  <Explain the meaning of the word in the sentence using ${Lang['current']['name']}>
-          
-          ## Example Sentences
-          -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
-          -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
-          
-          ## Translation Exercise
-          -  <${Lang['current']['name']} sentence>
-          -  <${Lang['current']['name']} sentence>
-          
-          """ 
-          
-          Word:${keyWord}, sentence: ${Sentence},You must reply in the specified language
-
-          Please start teaching:
-
-          `
-
-        }
-
-        // 关键字长度较长时，按照句子进行处理
-        if (props.data.keyWord.length > 20) {
-
-          userPrompt = {
-            "role": "user", "content": `
-
-            As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
-
-            Example:
-            """
-
-            ## Translation
-            <Translate to ${Lang['current']['name']}>
-            
-            ## Grammar
-            <- Point: Explain in ${Lang['current']['name']}>
-
-            ## Examples of related grammar
-            -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
-            -  <${Lang['target']['name']} example sentence> - <Translation in ${Lang['current']['name']}>
-
-            """
-            
-            Sentence: ${keyWord}`
-          }
-
-
-        }
-
-        // newPrompt = [systemPrompt, userPrompt]
-        newPrompt = [userPrompt]
-
-      } else {
-
-        // 处理 Prompt 中的变量
-        let p = await handlePromptVariables(prompt.userPrompt, keyWord, Sentence)
-        newPrompt = [{ 'role': 'user', 'content': p }]
+        p = getDefaultPrompt(keyWord)['userPrompt']
 
       }
+
+      // 处理 Prompt 中的变量
+      p = await handlePromptVariables(p, keyWord, Sentence, Lang)
+
+      newPrompt = [{ 'role': 'user', 'content': p }]
 
       // 如果历史记录中存在记录，则不重复请求 API，直接显示历史记录的信息
       browser.storage.local.get({ "history": [] }).then((item) => {
@@ -554,6 +494,7 @@ export function PopupCard(props: any) {
 
   // 请求 GPT 数据
   const getGPTMsg = async (prompt: Array<{ role: string, content: string }>, keyWord?: string) => {
+
     // 使用长连接
     let port = browser.runtime.connect({
       name: 'fromPopupCard'
@@ -610,7 +551,7 @@ export function PopupCard(props: any) {
 
           })
 
-
+          setAnswerDone(true)
 
         } else if (isApiErro) {
           setIsApiErro(false)

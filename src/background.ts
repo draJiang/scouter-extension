@@ -8,7 +8,7 @@ import { createApi } from 'unsplash-js';
 
 import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
 
-// [暂时废弃]content script 关闭窗口时，将此值设为 false 以中断数据渲染
+// content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
 
 let controller = new AbortController();
@@ -177,14 +177,14 @@ browser.runtime.onConnect.addListener(port => {
 
           // OpenAI
           headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
-          
+
           // 去除端点末尾的 \ 符号
           if (openApiEndpoint.slice(-1) === "/") {
             openApiEndpoint = openApiEndpoint.slice(0, -1);
           }
 
           openApiEndpoint += '/v1/chat/completions'
-          
+
           body = JSON.stringify({
             "model": "gpt-3.5-turbo",
             "messages": messages,
@@ -250,13 +250,16 @@ browser.runtime.onConnect.addListener(port => {
             }
           })
 
+
           const reader = response.body?.getReader();
           if (reader !== undefined) {
             try {
 
+
               // eslint-disable-next-line no-constant-condition
               while (true) {
                 const { done, value } = await reader.read()
+                // const { done:boolean, value:uint8Array } = await Promise.race([reader.read(), cancelPromise]);
 
                 if (done) {
                   // 数据传输结束

@@ -6,6 +6,9 @@ import { Button, ConfigProvider, Dropdown, Divider, Space } from 'antd';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { DropdownMenuItem } from './DropdownMenuItem'
 
+import { getDefaultPrompt } from '../PopupCard/util'
+
+import { PromptType } from '../types'
 
 import {
     HamburgerMenuIcon,
@@ -23,12 +26,12 @@ import Icon from "../assets/icon128.png"
 import { pinPopupCard } from '../content_script'
 import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
 
-type PromptType = {
-    title: string;
-    getUnsplashImages: boolean;
-    userPrompt: string;
-    id: string;
-};
+// type PromptType = {
+//     title: string;
+//     getUnsplashImages: boolean;
+//     userPrompt: string;
+//     id: string;
+// };
 
 interface NavProps {
     title: string;
@@ -50,7 +53,7 @@ export function Nav(props: NavProps) {
 
     const navElement = useRef<HTMLDivElement>(null);
 
-    const defaultPrompt = { 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': 'Default', 'id': 'Default' }
+    const defaultPrompt = getDefaultPrompt('')
 
 
     useEffect(() => {
@@ -190,14 +193,6 @@ export function Nav(props: NavProps) {
                                         Default
                                     </DropdownMenu.Item>
 
-                                    {/* <DropdownMenuItem
-                                        key='Default'
-                                        data={defaultPrompt}
-                                        onSelect={() => handleMenuItemClick(defaultPrompt)}
-                                        handleEditPrompt={() => console.log('hello')}
-                                    >
-
-                                        Default</DropdownMenuItem> */}
 
                                     {props.prompts.map(item => <DropdownMenuItem
                                         key={item.id}
