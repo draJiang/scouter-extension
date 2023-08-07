@@ -4,15 +4,18 @@ import browser from 'webextension-polyfill'
 import { Button } from 'antd';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
+import { PromptType } from '../types'
+
 import {
     Pencil2Icon,
+    QuestionMarkCircledIcon
 } from '@radix-ui/react-icons';
 
 interface DropdownMenuItemProps {
     children: ReactNode;
     onSelect: () => void;
     handleEditPrompt: () => void;
-    data: { title: string, getUnsplashImages: boolean, userPrompt: string, id: string }
+    data: PromptType
 }
 
 export function DropdownMenuItem(props: DropdownMenuItemProps) {
@@ -42,7 +45,7 @@ export function DropdownMenuItem(props: DropdownMenuItemProps) {
                 display: 'flex',
                 padding: '6px',
                 marginBottom: '4px',
-                borderRadius:'2px'
+                borderRadius: '2px'
             }}
             className="DropdownMenuItem"
             onMouseEnter={() => setIsHovered(true)}
@@ -53,7 +56,7 @@ export function DropdownMenuItem(props: DropdownMenuItemProps) {
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
-            }}>{props.children}</span>{isHovered && <button onClick={handleEditPrompt}><Pencil2Icon /></button>}
+            }}>{props.children}</span>{isHovered && (props.data.id === 'Default' ? <button onClick={()=>{window.open('https://jiangzilong.notion.site/What-is-the-default-Prompt-Prompt-5b55e3fc303d425f8cca16d5bee19e7c')}}><QuestionMarkCircledIcon /></button> : <button onClick={handleEditPrompt}><Pencil2Icon /></button>)}
         </DropdownMenu.Item >
     )
 }

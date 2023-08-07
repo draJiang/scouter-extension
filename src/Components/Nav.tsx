@@ -184,14 +184,23 @@ export function Nav(props: NavProps) {
                                     willChange: 'transform, opacity'
                                 }}>
 
-                                    <DropdownMenu.Item className="DropdownMenuItem" style={{
+                                    {/* <DropdownMenu.Item className="DropdownMenuItem" style={{
                                         padding: '6px',
                                         marginBottom: '4px',
                                         borderRadius: '2px'
                                     }}
                                         onSelect={() => handleMenuItemClick(defaultPrompt)}>
                                         Default
-                                    </DropdownMenu.Item>
+                                    </DropdownMenu.Item> */}
+
+                                    <DropdownMenuItem
+                                        key={defaultPrompt.id}
+                                        data={defaultPrompt}
+                                        onSelect={() => handleMenuItemClick(defaultPrompt)}
+                                        handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: defaultPrompt })}
+                                    >
+
+                                        {defaultPrompt.title}</DropdownMenuItem>
 
 
                                     {props.prompts.map(item => <DropdownMenuItem

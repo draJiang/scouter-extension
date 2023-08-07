@@ -9,8 +9,8 @@ import { ankiAction, getDefaultDeckName } from '../util'
 import { Button, Radio, Input, Form, Divider, ConfigProvider, Select } from 'antd';
 
 import "./index.css"
-// import "../assets/tailwind.css"
-import Usage from "../assets/usage.png"
+
+import Icon from "../assets/icon128.png"
 
 import { lang } from "../lib/lang"
 
@@ -146,6 +146,21 @@ export const Options = () => {
             },
           }}
         >
+          <header style={{
+            display: 'flex'
+            , alignItems: 'center'
+            , marginBottom: '20px'
+          }}>
+            <span style={{ flexGrow: '1' }}>
+              <img style={{
+                width: '24px',
+              }} src={Icon} />
+            </span>
+            {/* <span style={{
+              fontSize: '12px'
+              , opacity: '0.7'
+            }}>0.9.8</span> */}
+          </header>
 
           <Form
             onFinish={saveOptions}
@@ -284,8 +299,8 @@ export const Options = () => {
               alignItems: 'left',
               width: '100%'
             }}>
-              <Button style={{marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
-              <Button style={{marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
+              <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
+              <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
               <Button style={{}} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button>
             </div>
           </div>
