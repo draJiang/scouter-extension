@@ -34,8 +34,6 @@ import { useCurrentLanguage } from '../lib/locale'
 
 import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
-import "./index.css"
-
 
 let currentLanguage: string
 let targetLanguage: string
@@ -161,28 +159,8 @@ export function PopupCard(props: any) {
       const container = windowElement.current.querySelectorAll('.container')[0]
       shouldStayAtBottomRef.current = container.scrollHeight - container.scrollTop <= container.clientHeight + 20;
 
-
-      // if (!shouldStayAtBottomRef.current) {
-      //   console.log('---');
-      //   console.log(container.scrollHeight - container.scrollTop - container.clientHeight);
-      // }
-
-
-
-      // const checkIfShouldStayAtBottom = () => {
-      //   if (container !== null) {
-      //     shouldStayAtBottomRef.current = Math.abs((container.scrollTop + container.clientHeight) - container.scrollHeight) < 2;
-      //   }
-      // };
-
       // 自动滚动到消息底部，方便看到最新的文字
       if (messages.length > 1) {
-
-        // checkIfShouldStayAtBottom();  // 初始检查
-        // container.addEventListener('scroll', checkIfShouldStayAtBottom);  // 每次滚动时检查
-
-        // console.log(shouldStayAtBottomRef.current);
-
 
         if (messages[messages.length - 1].loading) {
           scrollToBottom(true)
@@ -1123,7 +1101,6 @@ export function PopupCard(props: any) {
           </div>
 
           <div>
-
 
             <Drawer
               title={customPromptFormData.id === '' ? "Create Prompt" : "Edit Prompt"}

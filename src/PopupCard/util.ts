@@ -360,7 +360,7 @@ export const getDefaultPrompt = (keyWord: string) => {
 
     let userPrompt = `
 
-        Please help me learn as a foreign language teacher.
+        Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence.
 
         Example：
         """

@@ -21,8 +21,6 @@ import {
 // import type { MenuProps } from 'antd';
 
 
-import Icon from "../assets/icon128.png"
-
 import { pinPopupCard } from '../content_script'
 import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
 
@@ -141,7 +139,7 @@ export function Nav(props: NavProps) {
                     }}
                     onMouseDown={props.onMouseDown}>
 
-                    {/* <img src={Icon} /> */}
+
 
                     <div style={{ zIndex: 9 }}>
 
@@ -237,9 +235,10 @@ export function Nav(props: NavProps) {
                             justifyContent: 'end',
                             alignItems: 'center'
                         }}>
-                        {props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <a style={{
-                            textDecoration: 'underline'
-                        }} href="javascript:void(0);" onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</a></span> :
+                        {props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <span style={{
+                            textDecoration: 'underline',
+                            cursor: 'pointer'
+                        }} onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</span></span> :
                             <Button size="small"
                                 // type='text'
                                 icon={<PlusSquareOutlined />}
