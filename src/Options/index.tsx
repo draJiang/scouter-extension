@@ -10,7 +10,7 @@ import { Button, Radio, Input, Form, Divider, ConfigProvider, Select } from 'ant
 
 import "./index.css"
 
-import Icon from "../assets/icon128.png"
+import weChatGroup from "../assets/weChatGroup.png"
 
 import { lang } from "../lib/lang"
 
@@ -299,6 +299,12 @@ export const Options = () => {
               <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
               <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
               <Button style={{}} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <img src={weChatGroup} />
+              </div>
             </div>
           </div>
 
