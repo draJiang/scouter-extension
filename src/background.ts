@@ -79,16 +79,15 @@ browser.runtime.onConnect.addListener(port => {
   // 收到 content script 消息
   console.log('连接中------------')
 
-
-
   // 接收 content script 的消息
   port.onMessage.addListener(async (msg) => {
     console.log('接收消息：', msg)
 
     // 获取 API Key 等存储的数据
-    let openApiKey: any, currentLanguage, openApiEndpoint: string, targetLanguage = ''
-    browser.storage.sync.get({ 'openApiKey': '', 'openApiEndpoint': defaultOpenApiEndpoint, 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+    let openApiKey: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
+    browser.storage.sync.get({ 'licenseKey': '', 'openApiKey': '', 'openApiEndpoint': defaultOpenApiEndpoint, 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
 
+      licenseKey = result.licenseKey
       openApiKey = result.openApiKey
       openApiEndpoint = result.openApiEndpoint
       currentLanguage = result.currentLanguage
@@ -158,33 +157,12 @@ browser.runtime.onConnect.addListener(port => {
         let headers = {}
         let body
 
-        if (openApiEndpoint.indexOf('azure.com') > -1) {
+        if (licenseKey !== '') {
 
-          // Azure
-          headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
-          body = JSON.stringify({
-            "model": "gpt-35-turbo",
-            "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 420,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 2,
-            "stream": true
-          })
-
-        } else {
-
-          // OpenAI
+          // 使用许可证
+          openApiEndpoint = 'https://api.aiproxy.io/v1/chat/completions'
+          openApiKey = licenseKey
           headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
-
-          // 去除端点末尾的 \ 符号
-          if (openApiEndpoint.slice(-1) === "/") {
-            openApiEndpoint = openApiEndpoint.slice(0, -1);
-          }
-
-          openApiEndpoint += '/v1/chat/completions'
-
           body = JSON.stringify({
             "model": "gpt-3.5-turbo",
             "messages": messages,
@@ -196,7 +174,53 @@ browser.runtime.onConnect.addListener(port => {
             "stream": true
           })
 
+        } else {
+
+          // 使用用户自己的 Key
+
+          if (openApiEndpoint.indexOf('azure.com') > -1) {
+
+            // Azure
+            headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
+            body = JSON.stringify({
+              "model": "gpt-35-turbo",
+              "messages": messages,
+              "temperature": 0.7,
+              "max_tokens": 420,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 2,
+              "stream": true
+            })
+
+          } else {
+
+            // OpenAI
+            headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+
+            // 去除端点末尾的 \ 符号
+            if (openApiEndpoint.slice(-1) === "/") {
+              openApiEndpoint = openApiEndpoint.slice(0, -1);
+            }
+
+            openApiEndpoint += '/v1/chat/completions'
+
+            body = JSON.stringify({
+              "model": "gpt-3.5-turbo",
+              "messages": messages,
+              "temperature": 0.7,
+              "max_tokens": 420,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 2,
+              "stream": true
+            })
+
+          }
+
         }
+
+
 
 
 

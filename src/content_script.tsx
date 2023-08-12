@@ -136,13 +136,13 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
         // 如果点击的不是插件窗口及其子元素，则关闭窗口
         if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
 
-          port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
-
           // 隐藏窗口
           container.parentNode?.removeChild(container);
 
           document.removeEventListener('selectionchange', handleSelectionchange);
           document.removeEventListener('mouseup', handleMouseup);
+
+          port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
         }
       }
@@ -216,7 +216,7 @@ const handleMouseup = (event: any) => {
       isTextSelected = false;
 
 
-      console.log('(MyBox !== event.target && !MyBox?.contains(event.target as Node)');
+      // console.log('(MyBox !== event.target && !MyBox?.contains(event.target as Node)');
 
       // 停止旧的对话
       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })

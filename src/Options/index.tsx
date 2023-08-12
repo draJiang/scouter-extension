@@ -1,18 +1,22 @@
 import browser from 'webextension-polyfill'
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
 
 
 import { ankiAction, getDefaultDeckName } from '../util'
 
-import { Button, Radio, Input, Form, Divider, ConfigProvider, Select } from 'antd';
+import { BuyLicenseKeyDrawer } from './BuyLicenseKeyDrawer'
+
+import { Button, Radio, Input, Form, Space, Divider, ConfigProvider, Select, Drawer } from 'antd';
 
 import "./index.css"
 
 import weChatGroup from "../assets/weChatGroup.png"
 
 import { lang } from "../lib/lang"
+
+import type { RadioChangeEvent } from 'antd';
 
 type LanguageObject = Record<string, {
   name: string;
@@ -33,13 +37,19 @@ const languageData: LanguageObject = lang;
 
 export const Options = () => {
 
-  const [openApiKey, setOpenApiKey] = useState<string | null>(null);
+  const [radioValue, setRadioValue] = useState<string | null>('licenseKey');
+  const [defaultRadioValue, setDefaultRadioValue] = useState<string | null>(null);
+
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
   const [status, setStatus] = useState<string>("");
   const [ankiDeckNames, setAnkiDeckNames] = useState<Array<string>>(['Default']);
 
   const [ankiClientIsopen, setAnkiClientIsopen] = useState<boolean>(true)
 
   const [form] = Form.useForm();
+  const divElement = useRef<HTMLDivElement>(null);
+
   const { Option } = Select;
 
 
@@ -56,6 +66,16 @@ export const Options = () => {
     // console.log('search:', value);
   };
 
+  const onRadioChange = (e: RadioChangeEvent) => {
+    console.log(`radio checked:${e.target.value}`);
+    setRadioValue(e.target.value)
+  };
+
+  const openBuyLicenseKeyDrawer = (isOpen: boolean) => {
+    setPopoverOpen(isOpen)
+  }
+
+
   useEffect(() => {
 
     // chrome.storage.sync.remove('ankiDeckName', function () {
@@ -69,11 +89,20 @@ export const Options = () => {
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
 
+      // 设置默认选中的 Radio
+      if (items.licenseKey === '' && items.openApiKey !== '') {
+        setRadioValue('myOwnOpenAiKey')
+        // setDefaultRadioValue('myOwnOpenAiKey')
+      }
+
       await getDefaultDeckName().then((data: any) => {
 
         defaultDeckName = data.defaultDeckName
 
       })
+
+
+
 
       // 更新 input 文本框的默认值
       form.setFieldsValue({
@@ -83,8 +112,12 @@ export const Options = () => {
         unsplashApiKey: items.unsplashApiKey,
         currentLanguage: items.currentLanguage,
         targetLanguage: items.targetLanguage,
-        ankiDeckName: defaultDeckName
+        ankiDeckName: defaultDeckName,
+        licenseKey: items.licenseKey
       });
+
+      console.log(items);
+
 
 
 
@@ -107,7 +140,7 @@ export const Options = () => {
   }, [ankiDeckNames.join(''), ankiClientIsopen])
 
   async function getSettings() {
-    let items = await browser.storage.sync.get(["openApiKey", "openApiEndpoint", "unsplashApiKey", "currentLanguage", "targetLanguage", "ankiDeckName"])
+    let items = await browser.storage.sync.get(["openApiKey", "openApiEndpoint", "unsplashApiKey", "currentLanguage", "targetLanguage", "ankiDeckName", "licenseKey"])
     return items
   }
 
@@ -121,7 +154,8 @@ export const Options = () => {
         unsplashApiKey: values['unsplashApiKey'],
         currentLanguage: values['currentLanguage'],
         targetLanguage: values['targetLanguage'],
-        ankiDeckName: values['ankiDeckName']
+        ankiDeckName: values['ankiDeckName'],
+        licenseKey: values['licenseKey']
       }
     ).then(item => {
 
@@ -138,7 +172,9 @@ export const Options = () => {
 
   return (
     <>
-      <div id="MyOptions">
+      <div id="MyOptions"
+        ref={divElement}
+      >
         <ConfigProvider
           theme={{
             token: {
@@ -160,46 +196,67 @@ export const Options = () => {
           </header> */}
 
           <Form
+
             onFinish={saveOptions}
             layout='vertical'
             form={form}
 
           >
 
+
             <section>
 
-              {/* <Form.Item name="servers" label="Radio.Group">
-                <Radio.Group defaultValue="openAI" buttonStyle="solid" onChange={(e) => console.log(e)} style={{
-                  display: 'flex'
-                }}>
-                  <Radio.Button style={{
-                    flex: '1'
-                  }} value="openAI">OpenAI</Radio.Button>
-                  <Radio.Button style={{
-                    flex: '1'
-                  }} value="azureOpenAI">Azure OpenAI</Radio.Button>
-                </Radio.Group>
-              </Form.Item> */}
+              <Radio.Group onChange={onRadioChange} value={radioValue} style={{ marginBottom: 24, display: 'flex' }}>
+                <Radio.Button value="licenseKey" style={{flex:'1',textAlign:'center'}}>License Key</Radio.Button>
+                <Radio.Button value="myOwnOpenAiKey" style={{flex:'1',textAlign:'center'}}>OpenAI key</Radio.Button>
+              </Radio.Group>
 
-              <Form.Item
-                name="openApiKey"
-                label="🔑Your Open API Key"
-              >
-                <Input placeholder="We will not use your Key for any other purposes." type="password" />
-              </Form.Item>
+              {radioValue === 'myOwnOpenAiKey' ? <>
+                <Form.Item
+                  name="openApiKey"
+                  label="🔑Your Open API Key"
+                >
+                  <Input placeholder="We will not use your Key for any other purposes." type="password" />
+                </Form.Item>
 
 
-              <Form.Item
-                name="openApiEndpoint"
-                label="🔗API Endpoint"
-                extra={
-                  <p style={{
-                    color: '#666'
-                  }}>If you are using <strong>Azure</strong> or a third-party endpoint, please fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More</a></p>
-                }
-              >
-                <Input placeholder="https://api.openai.com" type="url" />
-              </Form.Item>
+                <Form.Item
+                  name="openApiEndpoint"
+                  label="🔗API Endpoint"
+                  extra={
+                    <p style={{
+                      color: '#666'
+                    }}>If you are using <strong>Azure</strong> or a third-party endpoint, please fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More</a></p>
+                  }
+                >
+                  <Input placeholder="https://api.openai.com" type="url" />
+                </Form.Item>
+              </> : <>
+                <Form.Item
+                  name="licenseKey"
+                  label="🔑License Key"
+                >
+                  <Input placeholder="We will not use your Key for any other purposes." type="password" />
+                </Form.Item>
+
+
+                <Form.Item
+                  name="buyButton"
+                // label="buyButton"
+                >
+                  <Form.Item
+                    style={{
+                    }}
+                  >
+                    <Button onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License</Button>
+
+                  </Form.Item>
+                </Form.Item>
+              </>
+              }
+
+
+
 
             </section>
 
@@ -283,6 +340,35 @@ export const Options = () => {
 
           </Form>
 
+          <Drawer
+            title={'Get License'}
+            placement="bottom"
+            maskClosable={true}
+            closable={false}
+            height={'80%'}
+            // onClose={onClose}
+            open={isPopoverOpen}
+
+            bodyStyle={{
+              overscrollBehavior: 'contain'
+            }}
+            extra={
+              <Space>
+
+                <Button style={{ zIndex: '9' }} onClick={() => openBuyLicenseKeyDrawer(false)}>Cancel</Button>
+
+                {/* <Button type="primary">
+                  OK
+                </Button> */}
+
+              </Space>
+            }
+          >
+
+            <BuyLicenseKeyDrawer />
+
+          </Drawer>
+
 
 
           <Divider />
@@ -303,13 +389,15 @@ export const Options = () => {
                 display: 'flex',
                 justifyContent: 'center'
               }}>
-                <img src={weChatGroup} />
+                <img src='https://raw.githubusercontent.com/draJiang/scouter-extension/master/src/assets/weChatGroup.png' />
               </div>
             </div>
           </div>
 
+
+
         </ConfigProvider>
-      </div>
+      </div >
     </>
   );
 };
