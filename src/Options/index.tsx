@@ -12,7 +12,7 @@ import { Button, Radio, Input, Form, Space, Divider, ConfigProvider, Select, Dra
 
 import "./index.css"
 
-import weChatGroup from "../assets/weChatGroup.png"
+import { getBalance } from '../util'
 
 import { lang } from "../lib/lang"
 
@@ -32,13 +32,19 @@ type LanguageObject = Record<string, {
   };
 }>;
 
+interface BalanceResponse {
+  data: {
+    limit_remaining: number;
+  };
+}
+
 const languageData: LanguageObject = lang;
 
 
 export const Options = () => {
 
   const [radioValue, setRadioValue] = useState<string | null>('licenseKey');
-  const [defaultRadioValue, setDefaultRadioValue] = useState<string | null>(null);
+  const [points, setPoints] = useState<string | null>('');
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
@@ -85,6 +91,8 @@ export const Options = () => {
 
     let defaultDeckName = ''
 
+
+
     // 获取配置信息
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
@@ -101,7 +109,8 @@ export const Options = () => {
 
       })
 
-
+      // 获取 Token
+      thisGetBalance(items.licenseKey)
 
 
       // 更新 input 文本框的默认值
@@ -168,7 +177,35 @@ export const Options = () => {
 
     })
 
+    thisGetBalance(values['licenseKey'])
+
   };
+
+  const thisGetBalance = (licenseKey: string) => {
+
+    if (licenseKey !== '') {
+
+      // 更新 tokens 信息
+      getBalance(licenseKey).then((balance: unknown) => {
+
+        console.log('data' in (balance as BalanceResponse));
+
+        if ('data' in (balance as BalanceResponse)) {
+
+          setPoints(Math.floor((balance as BalanceResponse).data.limit_remaining / 2 * 100 * 100) / 100 + '%')
+
+        } else {
+
+          setPoints(null)
+
+        }
+
+      })
+    } else {
+      setPoints('')
+    }
+
+  }
 
   return (
     <>
@@ -207,8 +244,8 @@ export const Options = () => {
             <section>
 
               <Radio.Group onChange={onRadioChange} value={radioValue} style={{ marginBottom: 24, display: 'flex' }}>
-                <Radio.Button value="licenseKey" style={{flex:'1',textAlign:'center'}}>License Key</Radio.Button>
-                <Radio.Button value="myOwnOpenAiKey" style={{flex:'1',textAlign:'center'}}>OpenAI key</Radio.Button>
+                <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>License Key</Radio.Button>
+                <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI key</Radio.Button>
               </Radio.Group>
 
               {radioValue === 'myOwnOpenAiKey' ? <>
@@ -235,23 +272,45 @@ export const Options = () => {
                 <Form.Item
                   name="licenseKey"
                   label="🔑License Key"
+                  tooltip={
+                    <div>
+                      <p>Prioritize using the License Key when filling out both the License Key and your own OpenAI Key simultaneously</p>
+                      <p>同时填写 License Key 和 自己的 OpenAI Key 时优先使用 License Key</p>
+                    </div>
+                  }
+                  extra={
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+
+                      {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : 'Invalid License'}</div>}
+
+                      <Button style={{
+                        paddingLeft: '0',
+                        paddingRight: '0',
+                      }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License</Button>
+                    </div>
+                  }
                 >
                   <Input placeholder="We will not use your Key for any other purposes." type="password" />
                 </Form.Item>
 
 
-                <Form.Item
+
+                {/* <Form.Item
                   name="buyButton"
                 // label="buyButton"
                 >
-                  <Form.Item
-                    style={{
-                    }}
-                  >
-                    <Button onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License</Button>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      {points && <div>Tokens balance:{points}</div>}
+                      <Button type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >{points ? 'Recharge' : 'Get License'}</Button>
+                    </div>
 
-                  </Form.Item>
-                </Form.Item>
+                </Form.Item> */}
               </>
               }
 

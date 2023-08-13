@@ -143,7 +143,7 @@ browser.runtime.onConnect.addListener(port => {
 
         // ====================
 
-        if (openApiKey.length < 5) {
+        if (openApiKey.length < 5 && licenseKey.length < 5) {
           port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
           return
         }
@@ -160,11 +160,16 @@ browser.runtime.onConnect.addListener(port => {
         if (licenseKey !== '') {
 
           // 使用许可证
-          openApiEndpoint = 'https://api.aiproxy.io/v1/chat/completions'
+          openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
           openApiKey = licenseKey
-          headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+          headers = {
+            'Authorization': 'Bearer ' + openApiKey,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://notes.dabing.one/', // To identify your app
+            'X-Title': 'Scouter'
+          }
           body = JSON.stringify({
-            "model": "gpt-3.5-turbo",
+            "model": "openai/gpt-3.5-turbo",
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 420,
@@ -219,10 +224,6 @@ browser.runtime.onConnect.addListener(port => {
           }
 
         }
-
-
-
-
 
         fetch(openApiEndpoint, {
           signal: controller.signal,

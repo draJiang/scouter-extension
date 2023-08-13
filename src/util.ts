@@ -119,3 +119,29 @@ export const playTextToSpeech = (text: string, voice: string) => {
   // console.log('Now synthesizing...');
 
 };
+
+export const getBalance = (apiKey: string) => {
+  return new Promise((resolve, reject) => {
+
+    const url = 'https://openrouter.ai/api/v1/auth/key'
+    const headers = { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json', }
+
+
+    fetch(url, {
+      headers: headers
+    }).then((response) => {
+      console.log(response);
+
+      response.json().then((data) => {
+        console.log(data);
+        resolve(data)
+      })
+
+
+    })
+
+  })
+
+
+
+}
