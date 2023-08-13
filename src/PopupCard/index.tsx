@@ -201,8 +201,8 @@ export function PopupCard(props: any) {
     // 只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
     if (messages.length > 0 && isAnswerDone && messages[0]['status'] !== 'erro') {
 
-      console.log('Save');
-      console.log(messages);
+      // console.log('Save');
+      // console.log(messages);
 
       const keyWord = props.data.keyWord
       const Sentence = props.data.Sentence
@@ -427,6 +427,8 @@ export function PopupCard(props: any) {
 
     } else {
       setLastExecutedPrompt({ 'title': '👉🏼 Please choose a prompt', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
+      setAnswerDone(true)
+      setIsLoading(false)
     }
 
   }

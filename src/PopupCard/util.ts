@@ -227,7 +227,7 @@ export const getAnkiCards = () => {
             } else {
 
                 // 若本地无可用的数据，则通过 Anki
-                await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'findCards', 'anki_arguments': { 'query': 'is:due prop:due>-1 prop:due<2' } }, }).then(async (message: any) => {
+                await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'findCards', 'anki_arguments': { 'query': 'is:due prop:due>-2 prop:due<3' } }, }).then(async (message: any) => {
 
                     if (message.error === null) {
 

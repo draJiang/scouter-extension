@@ -182,8 +182,11 @@ export const Options = () => {
   };
 
   const thisGetBalance = (licenseKey: string) => {
+    console.log('licenseKey:');
+    console.log(licenseKey);
 
-    if (licenseKey !== '') {
+
+    if (licenseKey !== '' && licenseKey !== undefined) {
 
       // 更新 tokens 信息
       getBalance(licenseKey).then((balance: unknown) => {
