@@ -66,7 +66,7 @@ type PromptType = {
 export function PopupCard(props: any) {
 
 
-  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '' }])
+  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string, status: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '', 'status': '' }])
   const [images, setImages] = useState([])
   const [showImagesBox, setShowImagesBox] = useState(false)
   const [prompts, setPrompts] = useState<Array<PromptType>>([]);
@@ -198,11 +198,11 @@ export function PopupCard(props: any) {
     // 在 openApiAnser 更新后将其保存到浏览器存储中
 
 
-    // 只保留消息记录的第 1 条
-    if (messages.length > 0 && isAnswerDone) {
+    // 只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
+    if (messages.length > 0 && isAnswerDone && messages[0]['status'] !== 'erro') {
 
-      // console.log('Save');
-      // console.log(messages);
+      console.log('Save');
+      console.log(messages);
 
       const keyWord = props.data.keyWord
       const Sentence = props.data.Sentence
@@ -314,7 +314,7 @@ export function PopupCard(props: any) {
     if (needToRunPrompt) {
 
       // 在消息历史中插入新记录
-      setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '' }])
+      setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '' }])
 
       // 设置最近执行的 Prompt
       setLastExecutedPrompt(prompt)
@@ -371,7 +371,8 @@ export function PopupCard(props: any) {
                 role: obj.role,
                 content: obj.answer,
                 prompt: newPrompt[0]['content'],
-                loading: false
+                loading: false,
+                status: 'success'
               };
 
               return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
@@ -522,6 +523,7 @@ export function PopupCard(props: any) {
               chatId: msg.chatId,
               content: msg.content,
               loading: false,
+              status: 'erro',
               prompt: prompt[0]['content']
             };
             // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
@@ -594,6 +596,7 @@ export function PopupCard(props: any) {
                 chatId: msg.chatId,
                 content: newContent,
                 loading: false,
+                status: 'success',
                 prompt: prompt[0]['content']
               };
               // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
@@ -632,8 +635,9 @@ export function PopupCard(props: any) {
         role: 'user',
         chatId: Date.now().toString(),
         content: values.msg,
-        'loading': false,
-        'prompt': prompt
+        loading: false,
+        status: 'success',
+        prompt: prompt
       };
       // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
       return [...prevMessages, updatedLastMessage];
@@ -641,7 +645,7 @@ export function PopupCard(props: any) {
     });
 
     // 在消息历史中插入新记录
-    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '' }])
+    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '' }])
 
     // console.log(messages);
 
