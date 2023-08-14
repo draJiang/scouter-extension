@@ -16,6 +16,8 @@ import { getBalance } from '../util'
 
 import { lang } from "../lib/lang"
 
+import { models } from "./models"
+
 import type { RadioChangeEvent } from 'antd';
 
 type LanguageObject = Record<string, {
@@ -73,7 +75,6 @@ export const Options = () => {
   };
 
   const onRadioChange = (e: RadioChangeEvent) => {
-    console.log(`radio checked:${e.target.value}`);
     setRadioValue(e.target.value)
   };
 
@@ -97,10 +98,16 @@ export const Options = () => {
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
 
+      console.log(items);
+
+
       // 设置默认选中的 Radio
-      if (items.licenseKey === '' && items.openApiKey !== '') {
-        setRadioValue('myOwnOpenAiKey')
-        // setDefaultRadioValue('myOwnOpenAiKey')
+      if (items.licenseKey === '' || items.licenseKey === undefined) {
+
+        if (items.openApiKey !== '' && items.openApiKey !== undefined) {
+          setRadioValue('myOwnOpenAiKey')
+        }
+
       }
 
       await getDefaultDeckName().then((data: any) => {
@@ -122,7 +129,8 @@ export const Options = () => {
         currentLanguage: items.currentLanguage,
         targetLanguage: items.targetLanguage,
         ankiDeckName: defaultDeckName,
-        licenseKey: items.licenseKey
+        licenseKey: items.licenseKey,
+        model: items.model
       });
 
       console.log(items);
@@ -149,7 +157,14 @@ export const Options = () => {
   }, [ankiDeckNames.join(''), ankiClientIsopen])
 
   async function getSettings() {
-    let items = await browser.storage.sync.get(["openApiKey", "openApiEndpoint", "unsplashApiKey", "currentLanguage", "targetLanguage", "ankiDeckName", "licenseKey"])
+    let items = await browser.storage.sync.get(["openApiKey",
+      "openApiEndpoint",
+      "unsplashApiKey",
+      "currentLanguage",
+      "targetLanguage",
+      "ankiDeckName",
+      "licenseKey",
+      "model"])
     return items
   }
 
@@ -164,7 +179,8 @@ export const Options = () => {
         currentLanguage: values['currentLanguage'],
         targetLanguage: values['targetLanguage'],
         ankiDeckName: values['ankiDeckName'],
-        licenseKey: values['licenseKey']
+        licenseKey: values['licenseKey'],
+        model: values['model']
       }
     ).then(item => {
 
@@ -275,6 +291,7 @@ export const Options = () => {
                 <Form.Item
                   name="licenseKey"
                   label="🔑License Key"
+                  style={{ marginBottom: '16px' }}
                   tooltip={
                     <div>
                       <p>Prioritize using the License Key when filling out both the License Key and your own OpenAI Key simultaneously</p>
@@ -284,7 +301,8 @@ export const Options = () => {
                   extra={
                     <div style={{
                       display: 'flex',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      justifyContent: 'end'
                     }}>
 
                       {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : 'Invalid License'}</div>}
@@ -299,21 +317,21 @@ export const Options = () => {
                   <Input placeholder="We will not use your Key for any other purposes." type="password" />
                 </Form.Item>
 
-
-
-                {/* <Form.Item
-                  name="buyButton"
-                // label="buyButton"
+                <Form.Item
+                  name="model"
+                  label="🤖Model"
                 >
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}>
-                      {points && <div>Tokens balance:{points}</div>}
-                      <Button type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >{points ? 'Recharge' : 'Get License'}</Button>
-                    </div>
+                  <Select
+                    placeholder=""
+                    defaultValue={models[0]['name']}
+                  >
 
-                </Form.Item> */}
+                    {models.map((item) => <Option key={item.id} value={item.id}>{item.name}</Option>)}
+
+                  </Select>
+
+                </Form.Item>
+
               </>
               }
 

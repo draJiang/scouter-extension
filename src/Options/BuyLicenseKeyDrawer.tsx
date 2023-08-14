@@ -23,7 +23,11 @@ export function BuyLicenseKeyDrawer() {
             }}>
 
                 <h2 style={{ margin: 0 }}>CN¥19.99</h2>
-                <p style={{ color: '#333' }}>可输出相当于 1200 篇高中作文的内容</p>
+                <div style={{ color: '#333', textAlign: 'center' }}>
+                    <p style={{ marginBottom: '0' }}>可输出相当于 1200 篇高中作文的内容</p>
+                    <p style={{ marginTop: '6px' }}>gpt-4、claude 等模型可选</p>
+                </div>
+
 
                 <div style={{
                     display: 'flex',

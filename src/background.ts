@@ -6,7 +6,7 @@ import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser
 import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "./util";
 import { createApi } from 'unsplash-js';
 
-import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
+import { models } from './Options/models'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
@@ -84,14 +84,15 @@ browser.runtime.onConnect.addListener(port => {
     console.log('接收消息：', msg)
 
     // 获取 API Key 等存储的数据
-    let openApiKey: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
-    browser.storage.sync.get({ 'licenseKey': '', 'openApiKey': '', 'openApiEndpoint': defaultOpenApiEndpoint, 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+    let openApiKey: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
+    browser.storage.sync.get({ 'licenseKey': '', 'openApiKey': '', 'model': models[0]['id'], 'openApiEndpoint': defaultOpenApiEndpoint, 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
 
       licenseKey = result.licenseKey
       openApiKey = result.openApiKey
       openApiEndpoint = result.openApiEndpoint
       currentLanguage = result.currentLanguage
       targetLanguage = result.targetLanguage
+      model = result.model
 
 
       // 请求  GPT 数据
@@ -169,7 +170,7 @@ browser.runtime.onConnect.addListener(port => {
             'X-Title': 'Scouter'
           }
           body = JSON.stringify({
-            "model": "openai/gpt-3.5-turbo",
+            "model": model,
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 420,

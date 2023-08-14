@@ -31,11 +31,6 @@ export const popupCardStyle = `
 }
 
 
-@font-face {
-font-family: 'OPPOSans-R';
-src: url('../public/font/OPPOSans-R.ttf') format('truetype');
-}
-
 #LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3{
   font-weight: bold;
 }

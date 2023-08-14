@@ -241,6 +241,9 @@ export function Nav(props: NavProps) {
                         }} onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</span></span> :
                             <Button size="small"
                                 // type='text'
+                                style={{
+                                    fontSize: '13.2px'
+                                }}
                                 icon={<PlusSquareOutlined />}
                                 // loading={props.addToAnkiStatus === 'loading' ? true : false}
                                 disabled={props.addToAnkiStatus.status === 'standby' || props.addToAnkiStatus.status === 'loading' ? true : false}
@@ -249,7 +252,8 @@ export function Nav(props: NavProps) {
                         <Button size='small'
                             // type='text'
                             style={{
-                                borderColor: isPin ? '#F08A24' : ''
+                                borderColor: isPin ? '#F08A24' : '',
+                                fontSize: '13.2px'
                             }}
                             icon={isPin ? <PushpinFilled className='isPin' /> : <PushpinOutlined />} onClick={handlePinBtnClick} />
                     </div>
