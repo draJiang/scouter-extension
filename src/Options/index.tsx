@@ -105,7 +105,7 @@ export const Options = () => {
       if (items.licenseKey === '' || items.licenseKey === undefined) {
 
         if (items.openApiKey !== '' && items.openApiKey !== undefined) {
-          setRadioValue('myOwnOpenAiKey')
+          // setRadioValue('myOwnOpenAiKey')
         }
 
       }
@@ -282,7 +282,7 @@ export const Options = () => {
                   extra={
                     <p style={{
                       color: '#666'
-                    }}>If you are using <strong>Azure</strong> or a third-party endpoint, please fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More</a></p>
+                    }}>If you are using <strong>Azure</strong> or a third-party endpoint, please fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More↗️</a></p>
                   }
                 >
                   <Input placeholder="https://api.openai.com" type="url" />
@@ -305,7 +305,7 @@ export const Options = () => {
                       justifyContent: 'end'
                     }}>
 
-                      {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : 'Invalid License'}</div>}
+                      {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : '🔴Invalid License'}</div>}
 
                       <Button style={{
                         paddingLeft: '0',

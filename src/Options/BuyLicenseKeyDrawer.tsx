@@ -24,8 +24,8 @@ export function BuyLicenseKeyDrawer() {
 
                 <h2 style={{ margin: 0 }}>CN¥19.99</h2>
                 <div style={{ color: '#333', textAlign: 'center' }}>
-                    <p style={{ marginBottom: '0' }}>可输出相当于 1200 篇高中作文的内容</p>
-                    <p style={{ marginTop: '6px' }}>gpt-4、claude 等模型可选</p>
+                    <p>可输出相当于 1200 篇高中作文的内容</p>
+                    {/* <p style={{ marginTop: '6px' }}>gpt-4、claude 等模型可选</p> */}
                 </div>
 
 
@@ -37,8 +37,8 @@ export function BuyLicenseKeyDrawer() {
                         <img style={{ width: '50%' }} src={WeChatPay} />
                     </div>
                 </div>
-                <p style={{ marginBottom: '8px' }}>请在付款时备注：<code>scouter - 你的邮箱</code></p>
-                <p style={{ margin: '0', color: '#666' }}> License Key 会发送到你的邮箱</p>
+                <p style={{ marginBottom: '8px' }}>请在付款时备注<strong>你的邮箱</strong><a style={{ marginLeft: '4px' }} target="__blank" href="https://jiang.lemonsqueezy.com/checkout/buy/848ef9ce-1d0d-42cd-88d6-5e7bc5016c1e">更多支付方式↗️</a></p>
+                {/* <p style={{ margin: '0', color: '#666' }}> License Key 会发送到你的邮箱</p> */}
             </div>
 
             <Divider style={{ marginTop: '20px' }}>常见问题</Divider>
