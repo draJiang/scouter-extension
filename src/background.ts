@@ -158,7 +158,8 @@ browser.runtime.onConnect.addListener(port => {
         let headers = {}
         let body
 
-        if (licenseKey !== '') {
+        // 优先使用自己的 Key
+        if (openApiKey === '' || openApiKey === undefined) {
 
           // 使用许可证
           openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'

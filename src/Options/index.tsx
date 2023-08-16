@@ -170,6 +170,9 @@ export const Options = () => {
 
   // 保存设置
   async function saveOptions(values: any) {
+    console.log(values);
+
+
     // Saves options to chrome.storage.sync.
     let setStorage = await browser.storage.sync.set(
       {
@@ -267,7 +270,9 @@ export const Options = () => {
                 <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI key</Radio.Button>
               </Radio.Group>
 
-              {radioValue === 'myOwnOpenAiKey' ? <>
+              <div style={{
+                display: radioValue === 'myOwnOpenAiKey' ? 'block' : 'none'
+              }}>
                 <Form.Item
                   name="openApiKey"
                   label="🔑Your Open API Key"
@@ -287,15 +292,18 @@ export const Options = () => {
                 >
                   <Input placeholder="https://api.openai.com" type="url" />
                 </Form.Item>
-              </> : <>
+              </div>
+              <div style={{
+                display: radioValue === 'myOwnOpenAiKey' ? 'none' : 'block'
+              }}>
                 <Form.Item
                   name="licenseKey"
                   label="🔑License Key"
                   style={{ marginBottom: '16px' }}
                   tooltip={
                     <div>
-                      <p>Prioritize using the License Key when filling out both the License Key and your own OpenAI Key simultaneously</p>
-                      <p>同时填写 License Key 和 自己的 OpenAI Key 时优先使用 License Key</p>
+                      <p>When filling in both the License Key and your own OpenAI Key, prioritize using your own Key.</p>
+                      <p>同时填写 License Key 和 自己的 OpenAI Key 时优先使用自己的 Key</p>
                     </div>
                   }
                   extra={
@@ -332,10 +340,7 @@ export const Options = () => {
 
                 </Form.Item>
 
-              </>
-              }
-
-
+              </div>
 
 
             </section>
@@ -465,12 +470,12 @@ export const Options = () => {
               <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
               <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
               <Button style={{}} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button>
-              <div style={{
+              {/* <div style={{
                 display: 'flex',
                 justifyContent: 'center'
               }}>
                 <img src='https://raw.githubusercontent.com/draJiang/scouter-extension/master/src/assets/weChatGroup.png' />
-              </div>
+              </div> */}
             </div>
           </div>
 

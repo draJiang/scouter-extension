@@ -48,10 +48,12 @@ export function BuyLicenseKeyDrawer() {
             }}>
                 <h4>付费后多久拿到许可证</h4>
                 <p>北京时间 12:00 ~ 02:00 会在 30 分钟内发送到你的邮箱</p>
+                <h4>许可证会过期吗</h4>
+                <p>不会过期，只有当用量使用完后才会失效</p>
                 <h4>联系方式</h4>
                 <a href="mailto:jzlong666@gmail.com">jzlong666@gmail.com</a>
                 <h4>同时填写 License Key 和 自己的 OpenAI Key 会怎么样</h4>
-                <p>优先使用 Licence Key</p>
+                <p>优先使用自己的 Key</p>
                 <h4>如何退款</h4>
                 <p>虚拟商品，购买后恕不退换。请谨慎购买。</p>
             </div>

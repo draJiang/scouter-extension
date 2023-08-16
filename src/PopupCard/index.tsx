@@ -837,7 +837,7 @@ export function PopupCard(props: any) {
       }
     }
 
-    if (container.indexOf('class="ankiSpace"') >= 0) {
+    if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
       p = {
         "note": {
           "deckName": deckName,
@@ -867,7 +867,7 @@ export function PopupCard(props: any) {
     const container = windowElement.current?.getElementsByClassName('messages')[0].innerHTML
     let isAnkiSpace = false
     if (container) {
-      if (container.indexOf('class="ankiSpace"') >= 0) {
+      if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
         isAnkiSpace = true
       }
     }
