@@ -285,7 +285,15 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
     let newStr = str
 
     // 处理 keyword 高亮
-    newStr = newStr.replace(new RegExp(keyWord, 'gi'), `**${keyWord}**`)
+    newStr = newStr.replace(new RegExp(`(^|[^*])(${keyWord})([^*]|$)`, 'gi'), function(match, p1, p2, p3) {
+        // 如果关键词前后没有*，则添加**，否则保留原样
+        if (p1 !== '*' && p3 !== '*') {
+            return p1 + '**' + p2 + '**' + p3;
+        } else {
+            return match;  // 不进行替换
+        }
+    });
+    console.log(newStr);
 
     // 处理 Anki 单词高亮
     const cards = ankiCards

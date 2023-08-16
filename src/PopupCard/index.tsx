@@ -796,6 +796,9 @@ export function PopupCard(props: any) {
     .sentence{
       opacity:0.65;
     }
+    .ankiSpace {
+      color:#F08A24;
+    }
 
     table {
       border: 1px solid #ccc;
@@ -820,7 +823,7 @@ export function PopupCard(props: any) {
     `
 
     // 请求 background 将数据保存到 Anki
-    const p = {
+    let p = {
       "note": {
         "deckName": deckName,
         "modelName": modelName,
@@ -834,6 +837,23 @@ export function PopupCard(props: any) {
       }
     }
 
+    if (container.indexOf('class="ankiSpace"') >= 0) {
+      p = {
+        "note": {
+          "deckName": deckName,
+          "modelName": modelName,
+          "fields": {
+            [front]: cardStyle + '<p class="sentence">' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>',
+            [back]: ''
+          },
+          "tags": [
+            "Scouter"
+          ]
+        }
+      }
+    }
+
+
     // 发送消息给 background
     let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
     sending.then(handleResponse, handleError);
@@ -843,10 +863,19 @@ export function PopupCard(props: any) {
   // 点击保存到 Anki
   const handleSaveToAnkiBtnClick = () => {
 
+    // 根据是否为完形填空申请不同的卡片模板
+    const container = windowElement.current?.getElementsByClassName('messages')[0].innerHTML
+    let isAnkiSpace = false
+    if (container) {
+      if (container.indexOf('class="ankiSpace"') >= 0) {
+        isAnkiSpace = true
+      }
+    }
+
     setAddToAnkiStatus({ 'status': 'loading', 'noteId': 0 })
 
     // 先预处理 Anki 的 model
-    let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, })
+    let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': { 'isAnkiSpace': isAnkiSpace }, })
     sending.then((message: any) => {
 
       if (message.result == 'success') {

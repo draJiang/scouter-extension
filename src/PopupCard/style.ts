@@ -3,6 +3,42 @@ export const popupCardStyle = `
   content:"" !important;
 }
 
+.ankiSpace {
+  color:#F08A24;
+  cursor: pointer;
+}
+
+.ankiSpace:hover {
+  background-color:#F08A24;
+  color:#ffffff;
+}
+
+.ankiSpaceButtonBox {
+  display: flex;
+  width: fit-content;
+  padding: 4px 8px;
+  background-color: #fff;
+  border: 1px solid rgba(5, 5, 5, .06);
+  border-radius: 4px;
+  box-shadow: 0px 8px 28px rgba(0,0,0,.16);
+}
+
+.setAnkiSpaceButton:first-of-type {
+  margin-right:8px;
+}
+
+.setAnkiSpaceButton {
+  cursor: pointer;
+  padding: 2px;
+}
+
+.setAnkiSpaceButton:hover {
+  
+  background-color: rgba(0,0,59,0.051);
+  border-radius: 2px;
+
+}
+
 .ant-carousel .slick-prev,
 .ant-carousel .slick-next,
 .ant-carousel .slick-prev:hover,
@@ -57,6 +93,14 @@ overflow: hidden;
 box-shadow: 0px 8px 28px rgba(0,0,0,.16);
 border-radius: 6px;
 border:1px solid rgba(5, 5, 5, .06)
+}
+
+::selection {
+  background-color: #FFD5B2;
+}
+
+::-moz-selection {
+  background-color: #FFD5B2;
 }
 
 #LearningEnglish2023 .container::-webkit-scrollbar  {

@@ -148,6 +148,21 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       }
     }
 
+    container.onmousedown = (event) => {
+      console.log('container.onmousedown');
+      // 隐藏 setAnkiSpaceButton
+      const ankiSpaceButtonBox = container.getElementsByClassName('ankiSpaceButtonBox')[0]
+
+      if (ankiSpaceButtonBox) {
+        // 点击的不是 setAnkiSpaceButton 时才隐藏
+        if (ankiSpaceButtonBox !== event.target && !ankiSpaceButtonBox.contains(event.target as Node)) {
+          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
+        }
+
+      }
+
+    }
+
 
   }
 
@@ -213,10 +228,9 @@ const handleMouseup = (event: any) => {
 
     if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
 
+      // 在 PopupCard 范围外触发
+
       isTextSelected = false;
-
-
-      // console.log('(MyBox !== event.target && !MyBox?.contains(event.target as Node)');
 
       // 停止旧的对话
       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
@@ -226,10 +240,82 @@ const handleMouseup = (event: any) => {
         showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, true)
       }
 
+    } else {
+
+      // 在 PopupCard 范围内触发
+      console.log('PopupCard');
+
+      // 显示完形填空操作按钮
+      console.log(shadowRoot.getElementById('__jiang-scouter'))
+      console.log(document.getElementById('__jiang-scouter'))
+      console.log(container);
+      const selectedText = shadowRoot.getSelection()
+      const selectedTextString = selectedText.toString()
+
+      console.log('selectedTextString:');
+
+      console.log(selectedTextString);
+
+
+      const PopupCardContainer = container.getElementsByClassName('container')[0]
+      if (PopupCardContainer && selectedTextString.length > 0) {
+
+        let ankiSpaceButtonBox = document.createElement('div');
+        ankiSpaceButtonBox.className = 'ankiSpaceButtonBox'
+
+        let setAnkiSpaceButton = document.createElement('div');
+        setAnkiSpaceButton.textContent = '[...]'
+        setAnkiSpaceButton.className = 'setAnkiSpaceButton'
+
+        let newAnkiSpaceButton = document.createElement('div');
+        newAnkiSpaceButton.textContent = '[...]+'
+        newAnkiSpaceButton.className = 'setAnkiSpaceButton'
+
+        //设置按钮的位置
+
+        const selectedTextX = selectedText.getRangeAt(0).getBoundingClientRect().x
+        const selectedTextY = selectedText.getRangeAt(0).getBoundingClientRect().y
+
+        const selectedTextWidth = selectedText.getRangeAt(0).getBoundingClientRect().width
+        const selectedTextHeight = selectedText.getRangeAt(0).getBoundingClientRect().height
+
+
+        ankiSpaceButtonBox.appendChild(setAnkiSpaceButton)
+        ankiSpaceButtonBox.appendChild(newAnkiSpaceButton)
+        PopupCardContainer.appendChild(ankiSpaceButtonBox)
+
+        const buttonX = ankiSpaceButtonBox.getBoundingClientRect().x
+        const buttonY = ankiSpaceButtonBox.getBoundingClientRect().y
+
+        console.log((selectedTextX - buttonX).toString());
+
+        ankiSpaceButtonBox.style.position = 'relative'
+        ankiSpaceButtonBox.style.left = (selectedTextX - buttonX + selectedTextWidth - 40).toString() + 'px'
+        ankiSpaceButtonBox.style.top = (selectedTextY - buttonY - selectedTextHeight - 20).toString() + 'px'
+
+
+        let range = selectedText.getRangeAt(0);
+
+        setAnkiSpaceButton.addEventListener('click', (event) => {
+
+          setAnkiSpace(range, selectedTextString, event, false)
+          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
+        });
+
+        newAnkiSpaceButton.addEventListener('click', (event) => {
+
+          setAnkiSpace(range, selectedTextString, event, true)
+          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
+        });
+
+      }
+
+
+
+      // 
+
+
     }
-
-
-
 
   }
 }
@@ -257,5 +343,57 @@ const getSelection = () => {
   } else {
     return null
   }
+
+}
+
+const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew: boolean) => {
+
+  console.log(selectedText);
+
+
+  let span = document.createElement('span');
+  const ankiSpace = container.getElementsByClassName('ankiSpace')
+  console.log(ankiSpace);
+
+  // 获取当前最大的 index
+  let maxIndex = 0
+  for (let i = 0; i < ankiSpace.length; i++) {
+    const thisIndex = Number(ankiSpace[i].getAttribute('data-index'))
+    if (thisIndex > maxIndex) {
+      maxIndex = thisIndex
+    }
+  }
+
+  let number = maxIndex === 0 ? 1 : maxIndex
+
+  if (isAddNew) {
+    number = maxIndex + 1
+  }
+
+  span.textContent = '{{c' + number + '::' + selectedText + '}}';
+  span.className = 'ankiSpace'
+  span.setAttribute('data-index', number.toString())
+
+  span.onclick = function () {
+
+
+    // 恢复为默认样式
+    // span.innerText
+    if (span.textContent) {
+
+      // let oldText = span.textContent
+      // oldText = oldText.replace('{{c1::', '')
+      // oldText = oldText.replace('}}', '')
+
+      var textNode = document.createTextNode(selectedText);
+      span.parentNode?.replaceChild(textNode, span);
+    }
+
+  };
+
+  console.log(range);
+
+  range?.deleteContents();
+  range?.insertNode(span);
 
 }

@@ -416,6 +416,9 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
   // 获取用户设置的牌组和模板
   if (request.type === 'setModel') {
 
+    const isAnkiSpace = request.messages.isAnkiSpace
+
+
     // 获取 DeckName
     getDefaultDeckName().then((result: any) => {
 
@@ -432,7 +435,32 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
         if (!result.error) {
 
-          const defaultModelName = 'Scouter'
+          let defaultModelName = 'Scouter'
+          let cardTemplates = [
+            {
+              'name': 'Card1',
+              'Front': '{{Front}}',
+              'Back': `{{Front}}
+              <hr id=answer>
+              {{Back}}`
+
+            }
+          ]
+          let inOrderFields = ["Front", "Back"]
+
+          if (isAnkiSpace) {
+            // Anki 完形填空
+            defaultModelName = 'Scouter Cloze Text'
+            cardTemplates = [
+              {
+                'name': 'Card2',
+                'Front': '{{cloze:Text}}',
+                'Back': `{{cloze:Text}}
+                        <br>{{More}}`
+              }
+            ]
+            inOrderFields = ["Text", "More"]
+          }
 
           if (result.result.includes(defaultModelName)) {
             // 如果有 Scouter Model 则获取 Model 的字段
@@ -455,18 +483,10 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
             // 如果没有 Scouter 默认的 Model，则创建
 
             ankiAction('createModel', 6, {
-              "modelName": defaultModelName,
-              "inOrderFields": ["Front", "Back"],
-              'cardTemplates': [
-                {
-                  'name': 'Card1',
-                  'Front': '{{Front}}',
-                  'Back': `{{Front}}
-                <hr id=answer>
-                {{Back}}`
-
-                }
-              ]
+              'modelName': defaultModelName,
+              'inOrderFields': inOrderFields,
+              'cardTemplates': cardTemplates,
+              'isCloze': isAnkiSpace
             }).then((result: any) => {
               if (!result.error) {
                 // 反馈处理结果
