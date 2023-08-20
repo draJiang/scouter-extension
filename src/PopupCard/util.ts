@@ -139,6 +139,7 @@ export const handlePromptVariables = async (promptStr: string, keyWord: string, 
     newPromptStr = newPromptStr.replace(/\{sentence\}/g, Sentence)
 
     // 处理语言
+    newPromptStr = newPromptStr.replace(/\{nativeLanguage\}/g, Lang['current']['name'])
     newPromptStr = newPromptStr.replace(/\{currentLanguage\}/g, Lang['current']['name'])
     newPromptStr = newPromptStr.replace(/\{targetLanguage\}/g, Lang['target']['name'])
 
@@ -293,7 +294,6 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
             return match;  // 不进行替换
         }
     });
-    console.log(newStr);
 
     // 处理 Anki 单词高亮
     const cards = ankiCards
@@ -372,19 +372,19 @@ export const getDefaultPrompt = (keyWord: string) => {
 
         Example：
         """
-        -  Meaning: <Explain the meaning using {currentLanguage}>
-        -  Part of Speech: <Indicate the part of speech using {currentLanguage}>
+        -  Meaning: <Explain the meaning using {nativeLanguage}>
+        -  Part of Speech: <Indicate the part of speech using {nativeLanguage}>
         
         ## Meaning in the sentence
-        -  <Explain the meaning of the word in the sentence using {currentLanguage}>
+        -  <Explain the meaning of the word in the sentence using {nativeLanguage}>
         
         ## Example Sentences
-        -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
-        -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
+        -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
+        -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
         
         ## Translation Exercise
-        -  <{currentLanguage} sentence>
-        -  <{currentLanguage} sentence>
+        -  <{nativeLanguage} sentence>
+        -  <{nativeLanguage} sentence>
         
         """ 
         
@@ -405,14 +405,14 @@ export const getDefaultPrompt = (keyWord: string) => {
                   """
       
                   ## Translation
-                  <Translate to {currentLanguage}>
+                  <Translate to {nativeLanguage}>
                   
                   ## Grammar
-                  <- Point: Explain in {currentLanguage}>
+                  <- Point: Explain in {nativeLanguage}>
       
                   ## Examples of related grammar
-                  -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
-                  -  <{targetLanguage} example sentence> - <Translation in {currentLanguage}>
+                  -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
+                  -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
       
                   """
                   

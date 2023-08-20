@@ -72,6 +72,9 @@ export function PopupCard(props: any) {
   const [prompts, setPrompts] = useState<Array<PromptType>>([]);
   const [lastExecutedPrompt, setLastExecutedPrompt] = useState<PromptType>({ 'title': '👉🏼 Please choose a prompt', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
 
+  const [isOpenMenu, setIsOpenMenu] = useState(false);
+
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -127,12 +130,14 @@ export function PopupCard(props: any) {
         } else {
           // 执行 Prompt、获取 Unsplash 图片
           executivePrompt(item.lastExecutedPrompt)
+
+
         }
 
 
 
       })
-
+      
 
     } else {
 
@@ -141,6 +146,8 @@ export function PopupCard(props: any) {
 
       // 执行默认 Prompt、获取 Unsplash 图片
       executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': 'Default' }, false)
+      setIsOpenMenu(true)
+
 
     }
 
@@ -426,7 +433,7 @@ export function PopupCard(props: any) {
 
 
     } else {
-      setLastExecutedPrompt({ 'title': '👉🏼 Please choose a prompt', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
+      setLastExecutedPrompt({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
       setAnswerDone(true)
       setIsLoading(false)
     }
@@ -1004,7 +1011,7 @@ export function PopupCard(props: any) {
             onMouseDown={handleMouseDown}
             handleMenuItemClick={executivePrompt}
             openCustomPromptForm={openCustomPromptForm}
-            title='Scouter'
+            isOpenMenu={isOpenMenu}
             prompts={prompts}
             lastExecutedPrompt={lastExecutedPrompt}
           />

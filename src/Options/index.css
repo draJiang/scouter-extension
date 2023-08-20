@@ -33,3 +33,8 @@ section {
 section :last-child {
     margin-bottom: 0;
 }
+
+.ant-tabs-nav-list>div>div,
+.ant-tabs-nav-list>div>div>div {
+    /* width: fit-content; */
+}

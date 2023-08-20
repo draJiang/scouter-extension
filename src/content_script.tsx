@@ -149,7 +149,6 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     }
 
     container.onmousedown = (event) => {
-      console.log('container.onmousedown');
       // 隐藏 setAnkiSpaceButton
       const ankiSpaceButtonBox = container.getElementsByClassName('ankiSpaceButtonBox')[0]
 
@@ -243,30 +242,34 @@ const handleMouseup = (event: any) => {
     } else {
 
       // 在 PopupCard 范围内触发
-      console.log('PopupCard');
 
       // 显示完形填空操作按钮
-      console.log(shadowRoot.getElementById('__jiang-scouter'))
-      console.log(document.getElementById('__jiang-scouter'))
-      console.log(container);
       const selectedText = shadowRoot.getSelection()
       const selectedTextString = selectedText.toString()
 
-      console.log('selectedTextString:');
-
-      console.log(selectedTextString);
-
-
       const PopupCardContainer = container.getElementsByClassName('container')[0]
-      if (PopupCardContainer && selectedTextString.length > 0) {
+      const messagesBox = container.getElementsByClassName('messages')[0]
+
+      // console.log(event);
+      // console.log(selectedText);
+      // console.log(messagesBox?.contains(selectedText.baseNode.parentNode as Node));
+
+      let isInMessages = false
+      if (messagesBox === selectedText.baseNode.parentNode || messagesBox?.contains(selectedText.baseNode.parentNode as Node)) {
+        //在 messages 容器内操作，则显示操作按钮
+        isInMessages = true
+      }
+
+      if (PopupCardContainer && selectedTextString.length > 0 && isInMessages) {
 
         let ankiSpaceButtonBox = document.createElement('div');
         ankiSpaceButtonBox.className = 'ankiSpaceButtonBox'
 
+        // 按钮：新增填空
         let setAnkiSpaceButton = document.createElement('div');
         setAnkiSpaceButton.textContent = '[...]'
         setAnkiSpaceButton.className = 'setAnkiSpaceButton'
-
+        // 按钮：新增填空，并新增 1 个单独的卡片
         let newAnkiSpaceButton = document.createElement('div');
         newAnkiSpaceButton.textContent = '[...]+'
         newAnkiSpaceButton.className = 'setAnkiSpaceButton'
@@ -287,7 +290,6 @@ const handleMouseup = (event: any) => {
         const buttonX = ankiSpaceButtonBox.getBoundingClientRect().x
         const buttonY = ankiSpaceButtonBox.getBoundingClientRect().y
 
-        console.log((selectedTextX - buttonX).toString());
 
         ankiSpaceButtonBox.style.position = 'relative'
         ankiSpaceButtonBox.style.left = (selectedTextX - buttonX + selectedTextWidth - 40).toString() + 'px'
@@ -296,12 +298,14 @@ const handleMouseup = (event: any) => {
 
         let range = selectedText.getRangeAt(0);
 
+        // 新增填空
         setAnkiSpaceButton.addEventListener('click', (event) => {
 
           setAnkiSpace(range, selectedTextString, event, false)
           ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
         });
 
+        // 新增填空，并新增 1 个单独的卡片
         newAnkiSpaceButton.addEventListener('click', (event) => {
 
           setAnkiSpace(range, selectedTextString, event, true)
@@ -348,12 +352,9 @@ const getSelection = () => {
 
 const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew: boolean) => {
 
-  console.log(selectedText);
-
 
   let span = document.createElement('span');
   const ankiSpace = container.getElementsByClassName('ankiSpace')
-  console.log(ankiSpace);
 
   // 获取当前最大的 index
   let maxIndex = 0
@@ -390,8 +391,6 @@ const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew
     }
 
   };
-
-  console.log(range);
 
   range?.deleteContents();
   range?.insertNode(span);

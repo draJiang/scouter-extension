@@ -6,6 +6,8 @@ import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser
 import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "./util";
 import { createApi } from 'unsplash-js';
 
+import { getSettings } from './Options/util'
+
 import { models } from './Options/models'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
@@ -14,7 +16,6 @@ import { models } from './Options/models'
 let controller = new AbortController();
 
 const defaultOpenApiEndpoint = 'https://api.openai.com'
-
 
 console.log('I am background');
 
@@ -84,9 +85,10 @@ browser.runtime.onConnect.addListener(port => {
     console.log('接收消息：', msg)
 
     // 获取 API Key 等存储的数据
-    let openApiKey: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
-    browser.storage.sync.get({ 'licenseKey': '', 'openApiKey': '', 'model': models[0]['id'], 'openApiEndpoint': defaultOpenApiEndpoint, 'currentLanguage': 'English', 'targetLanguage': 'Spanish' }).then((result) => {
+    let openApiKey: string, apiKeySelection: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
+    getSettings().then((result) => {
 
+      apiKeySelection = result.apiKeySelection
       licenseKey = result.licenseKey
       openApiKey = result.openApiKey
       openApiEndpoint = result.openApiEndpoint
@@ -159,7 +161,7 @@ browser.runtime.onConnect.addListener(port => {
         let body
 
         // 优先使用自己的 Key
-        if (openApiKey === '' || openApiKey === undefined) {
+        if (apiKeySelection === 'licenseKey') {
 
           // 使用许可证
           openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'

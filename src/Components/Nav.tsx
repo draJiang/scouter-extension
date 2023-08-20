@@ -32,7 +32,7 @@ import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone,
 // };
 
 interface NavProps {
-    title: string;
+    isOpenMenu: boolean;
     prompts: Array<PromptType>;
     lastExecutedPrompt: PromptType;
     handleSaveToAnkiBtnClick: () => void;
@@ -56,7 +56,12 @@ export function Nav(props: NavProps) {
 
     useEffect(() => {
 
-    }, []);
+        // 当不自动自行 Prompt，自动打开 Prompt 菜单供用户选择
+        if(props.isOpenMenu){
+            onMenuOpenChange(props.isOpenMenu)
+        }
+
+    }, [props.isOpenMenu]);
 
     // 点击保存到 Anki 按钮
     const handleSaveToAnkiBtnClick = () => {
