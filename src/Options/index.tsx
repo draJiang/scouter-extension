@@ -3,6 +3,7 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
 
+import * as amplitude from '@amplitude/analytics-browser';
 
 import { ankiAction, getDefaultDeckName } from '../util'
 
@@ -17,7 +18,7 @@ import { getSettings } from './util'
 
 import "./index.css"
 
-import { getBalance } from '../util'
+import { getBalance, getUserId } from '../util'
 
 import { lang } from "../lib/lang"
 
@@ -45,6 +46,21 @@ interface BalanceResponse {
     limit_remaining: number;
   };
 }
+
+// 数据埋点
+getUserId().then((userId: string) => {
+  console.log('getUserId:');
+  console.log(userId);
+
+  // 数据埋点
+  amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
+    defaultTracking: {
+      pageViews: false,
+      sessions: false,
+    },
+  });
+
+})
 
 const languageData: LanguageObject = lang;
 
@@ -84,98 +100,6 @@ export const Options = () => {
 
   };
 
-  // const items: TabsProps['items'] = [
-  //   {
-  //     key: '1',
-  //     label: (<span>
-  //       {!isUseOpenAIKey && <KeyActive />
-  //       }
-  //       License Key
-  //     </span>
-  //     ),
-  //     children:
-  //       <div>
-  //         <Form.Item
-  //           name="licenseKey"
-  //           label="🔑License Key"
-  //           style={{ marginBottom: '16px' }}
-  //           tooltip={
-  //             <div>
-  //               <p>When filling in both the License Key and OpenAI Key, the OpenAI Key should take precedence.</p>
-  //               <p>同时填写 License Key 和 OpenAI Key 时优先使用 OpenAI Key</p>
-  //             </div>
-  //           }
-  //           extra={
-  //             <div style={{
-  //               display: 'flex',
-  //               alignItems: 'center',
-  //               justifyContent: 'end'
-  //             }}>
-
-  //               {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : '🔴Invalid License'}</div>}
-
-  //               <Button style={{
-  //                 paddingLeft: '0',
-  //                 paddingRight: '0',
-  //               }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License</Button>
-  //             </div>
-  //           }
-  //         >
-  //           <Input placeholder="We will not use your Key for any other purposes." type="password" />
-  //         </Form.Item>
-
-  //         <Form.Item
-  //           name="model"
-  //           label="🤖Model"
-  //         >
-  //           <Select
-  //             placeholder=""
-  //             defaultValue={models[0]['name']}
-  //           >
-
-  //             {models.map((item) => <Option key={item.id} value={item.id}>{item.name}</Option>)}
-
-  //           </Select>
-
-  //         </Form.Item>
-
-  //       </div>
-
-  //   },
-  //   {
-  //     key: '2',
-  //     label: (<span>
-  //       {isUseOpenAIKey && <KeyActive />}
-  //       Open API Key
-  //     </span>
-  //     ),
-  //     children:
-  //       <div>
-  //         <Form.Item
-  //           name="openApiKey"
-  //           label="🔑Your Open API Key"
-  //         >
-  //           <Input placeholder="We will not use your Key for any other purposes." type="password" />
-  //         </Form.Item>
-
-
-  //         <Form.Item
-  //           name="openApiEndpoint"
-  //           label="🔗API Endpoint"
-  //           extra={
-  //             <p style={{
-  //               color: '#666'
-  //             }}>If you are using <strong>Azure</strong> or a third-party endpoint, please fill in the endpoint address. <a target='__blank' href='https://jiangzilong.notion.site/Set-up-your-API-Key-96266d5236fa462ca707683d9bb275c6?pvs=4'>Learn More↗️</a></p>
-  //           }
-  //         >
-  //           <Input placeholder="https://api.openai.com" type="url" />
-  //         </Form.Item>
-  //       </div>
-  //   }
-  // ];
-
-
-
   const onSelectChange = (value: string) => {
     // console.log(`selected ${value}`);
   };
@@ -190,6 +114,10 @@ export const Options = () => {
 
   const openBuyLicenseKeyDrawer = (isOpen: boolean) => {
     setPopoverOpen(isOpen)
+
+    if (isOpen) {
+      amplitude.track('openBuyLicenseKeyDrawer');
+    }
   }
 
 
@@ -199,6 +127,8 @@ export const Options = () => {
     //   console.log('历史记录已删除');
     // });
 
+
+    amplitude.track('openOptions');
 
     let defaultDeckName = ''
 
@@ -252,7 +182,7 @@ export const Options = () => {
     })
 
 
-  }, [ankiDeckNames.join('')]);
+  }, []);
 
   useEffect(() => {
 
@@ -266,6 +196,11 @@ export const Options = () => {
     })
 
   }, [ankiDeckNames.join(''), ankiClientIsopen])
+
+  // useEffect(() => {
+  //   console.log('open Options');
+
+  // }, [])
 
   // async function getSettings() {
   //   let items = await browser.storage.sync.get({
@@ -602,6 +537,7 @@ export const Options = () => {
             }}>
               <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://jiangzilong.notion.site/3dc5b8da86b6451296fc326c340ce6ba?v=c40102b71c3b48888ca7f37525f6a330')} >🌳 Find all Wiki</Button>
               <Button style={{ marginBottom: '14px' }} onClick={() => window.open('https://discord.com/invite/7Pm3vmz87n')} >💬 Join our Discord community</Button>
+              <Button style={{ marginBottom: '14px' }} onClick={() => window.open('mailto:jzlong666@gmail.com?subject=%5BScouter%20-%20feedback%5D&body=')} >📫 Feedback</Button>
               {/* <Button style={{}} onClick={() => window.open('https://www.buymeacoffee.com/jiangzilong')} >☕ Buy me a coffee</Button> */}
               {/* <div style={{
                 display: 'flex',

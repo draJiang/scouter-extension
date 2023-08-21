@@ -3,6 +3,8 @@ import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
 import { Button, ConfigProvider, Dropdown, Divider, Space } from 'antd';
 
+import * as amplitude from '@amplitude/analytics-browser';
+
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { DropdownMenuItem } from './DropdownMenuItem'
 
@@ -74,6 +76,9 @@ export function Nav(props: NavProps) {
         if (isPin) {
             pinPopupCard(false)
             setIsPin(false)
+
+            amplitude.track('pinPopupCard');
+            
         } else {
             pinPopupCard(true)
             setIsPin(true)

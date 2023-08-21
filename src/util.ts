@@ -2,6 +2,9 @@ import browser from 'webextension-polyfill'
 import { createApi } from 'unsplash-js';
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
+import { v4 as uuidv4 } from 'uuid';
+
+
 // 将信息添加到 Anki
 export function ankiAction(action: any, version: any, params = {}) {
   return new Promise((resolve, reject) => {
@@ -145,3 +148,28 @@ export const getBalance = (apiKey: string) => {
 
 
 }
+
+export const getUserId = (): Promise<string> => {
+
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get('userId', (result) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      }
+
+      if (result.userId) {
+        resolve(result.userId);
+      } else {
+        let uniqueId = uuidv4();
+        chrome.storage.sync.set({ userId: uniqueId }, () => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve(uniqueId);
+          }
+        });
+      }
+    });
+  });
+
+};

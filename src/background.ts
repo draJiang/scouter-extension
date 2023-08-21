@@ -1,6 +1,7 @@
 
 
 import browser from 'webextension-polyfill'
+import * as amplitude from '@amplitude/analytics-browser';
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
 import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "./util";
@@ -12,6 +13,8 @@ import { models } from './Options/models'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
+
+
 
 let controller = new AbortController();
 
@@ -79,6 +82,13 @@ browser.commands.onCommand.addListener(function (command) {
 browser.runtime.onConnect.addListener(port => {
   // 收到 content script 消息
   console.log('连接中------------')
+
+  console.log('process.env.AMPLITUDE_KEY:');
+  console.log(process.env.AMPLITUDE_KEY);
+  console.log(process.env);
+  // amplitude.init(process.env.AMPLITUDE_KEY as string);
+
+  // amplitude.track('executivePrompt');
 
   // 接收 content script 的消息
   port.onMessage.addListener(async (msg) => {

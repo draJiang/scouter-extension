@@ -1,6 +1,5 @@
 import browser from 'webextension-polyfill'
-
-
+import * as amplitude from '@amplitude/analytics-browser';
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 // import ReactDOM from "react-dom";
 
@@ -33,6 +32,7 @@ import settingGuide from '../assets/settingGuide.png'
 import { useCurrentLanguage } from '../lib/locale'
 
 import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
+import { getUserId } from '../util'
 
 
 let currentLanguage: string
@@ -61,6 +61,23 @@ type PromptType = {
   userPrompt: string;
   id: string;
 };
+
+
+getUserId().then((userId: string) => {
+  console.log('getUserId:');
+  console.log(userId);
+
+  // 数据埋点
+  amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
+    defaultTracking: {
+      pageViews: false,
+      sessions: false,
+    },
+  });
+
+})
+
+
 
 
 export function PopupCard(props: any) {
@@ -102,6 +119,9 @@ export function PopupCard(props: any) {
   const [form] = Form.useForm();
 
 
+
+
+
   let Lang = useCurrentLanguage()!
   currentLanguage = Lang['current']['name']
   targetLanguage = Lang['target']['name']
@@ -114,6 +134,7 @@ export function PopupCard(props: any) {
 
     // 渲染 Prompt 列表
     initializePromptList()
+
 
     if (props.runPrompt || props.runPrompt === undefined) {
 
@@ -137,7 +158,7 @@ export function PopupCard(props: any) {
 
 
       })
-      
+
 
     } else {
 
@@ -320,6 +341,8 @@ export function PopupCard(props: any) {
 
     if (needToRunPrompt) {
 
+      amplitude.track('executivePrompt');
+
       // 在消息历史中插入新记录
       setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '' }])
 
@@ -436,6 +459,10 @@ export function PopupCard(props: any) {
       setLastExecutedPrompt({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
       setAnswerDone(true)
       setIsLoading(false)
+
+      // 数据埋点
+      amplitude.track('openPopupCard');
+
     }
 
   }
@@ -476,6 +503,8 @@ export function PopupCard(props: any) {
       })
     }
 
+
+    amplitude.track('handlePromptEdited');
 
 
   }
@@ -661,6 +690,8 @@ export function PopupCard(props: any) {
     const msgHistory = messages.slice(-5).map((item) => { return { 'role': item.role, 'content': item.content } })
 
     getGPTMsg([...msgHistory, { "role": "user", "content": values.msg }])
+
+    amplitude.track('handleSendMessage');
 
   }
 
@@ -865,6 +896,9 @@ export function PopupCard(props: any) {
     let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
     sending.then(handleResponse, handleError);
 
+    // 数据埋点
+    amplitude.track('addToAnki');
+
   }
 
   // 点击保存到 Anki
@@ -965,6 +999,8 @@ export function PopupCard(props: any) {
     // 设置表单的默认设置
     if (data.isOpen) {
       setCustomPromptFormData(data.data)
+      // 开启表单
+      amplitude.track('openCustomPromptForm');
     }
     // 开启表单后禁止点击窗口外区域关闭窗口
     setDonotClosePopupCard(data.isOpen)

@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef } from "react";
 import { playTextToSpeech } from '../util'
 
-import { createUseStyles } from 'react-jss'
+import * as amplitude from '@amplitude/analytics-browser';
 
 
 import { Button } from 'antd';
@@ -74,6 +74,8 @@ export function Selection(props: SelectionProps) {
   // 语音播报
   const speaker = () => {
 
+
+
     // 识别语言
     // const lngDetector = new LanguageDetect();
     // lngDetector.setLanguageType('iso2')
@@ -112,7 +114,7 @@ export function Selection(props: SelectionProps) {
     }
 
 
-
+    amplitude.track('speak');
 
 
 
