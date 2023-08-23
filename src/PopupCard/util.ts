@@ -97,15 +97,18 @@ export const getUnsplashImages = (keyWord: string) => {
 
         // 请求 background 获取数据
         // 使用长连接
-        let port = browser.runtime.connect({
-            name: 'fromPopupCardUtil'
-        })
+        // let port = browser.runtime.connect({
+        //     name: 'fromPopupCardUtil'
+        // })
 
         // 使用 postMs 发送信息
-        port.postMessage({ 'type': 'getUnsplashImages', 'messages': '', 'keyWord': keyWord })
+        console.log('util getUnsplashImages:');
 
-        // 接收信息
-        port.onMessage.addListener(msg => {
+
+        let sending = browser.runtime.sendMessage({ 'type': 'getUnsplashImages', 'messages': '', 'keyWord': keyWord })
+
+        sending.then((msg: any) => {
+            console.log(msg);
 
             if (msg.type === 'sendImgData') {
 
@@ -115,7 +118,25 @@ export const getUnsplashImages = (keyWord: string) => {
                 }
             }
 
-        })
+
+
+        }, () => {
+            //error
+        });
+
+
+        // // 接收信息
+        // port.onMessage.addListener(msg => {
+
+        //     if (msg.type === 'sendImgData') {
+
+        //         if ('imgs' in msg) {
+        //             // console.log('unsplashSearchPhotos');
+        //             resolve(msg.imgs)
+        //         }
+        //     }
+
+        // })
 
     });
 
@@ -286,7 +307,7 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
     let newStr = str
 
     // 处理 keyword 高亮
-    newStr = newStr.replace(new RegExp(`(^|[^*])(${keyWord})([^*]|$)`, 'gi'), function(match, p1, p2, p3) {
+    newStr = newStr.replace(new RegExp(`(^|[^*])(${keyWord})([^*]|$)`, 'gi'), function (match, p1, p2, p3) {
         // 如果关键词前后没有*，则添加**，否则保留原样
         if (p1 !== '*' && p3 !== '*') {
             return p1 + '**' + p2 + '**' + p3;

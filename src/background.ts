@@ -11,9 +11,22 @@ import { getSettings } from './Options/util'
 
 import { models } from './Options/models'
 
+import { getUserId } from './util'
+
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
 
+getUserId().then((userId: string) => {
+
+  // 数据埋点
+  amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
+    defaultTracking: {
+      pageViews: false,
+      sessions: false,
+    },
+  });
+
+})
 
 
 let controller = new AbortController();
@@ -57,8 +70,6 @@ browser.contextMenus.create({
 // 右键菜单点击事件
 browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
-  console.log('右键菜单点击事件');
-  console.log(info);
 
   const runPrompt = info.menuItemId === '2' ? true : false
 
@@ -81,11 +92,8 @@ browser.commands.onCommand.addListener(function (command) {
 // 长连接，处理 GPT 数据
 browser.runtime.onConnect.addListener(port => {
   // 收到 content script 消息
-  console.log('连接中------------')
+  // console.log('连接中------------')
 
-  console.log('process.env.AMPLITUDE_KEY:');
-  console.log(process.env.AMPLITUDE_KEY);
-  console.log(process.env);
   // amplitude.init(process.env.AMPLITUDE_KEY as string);
 
   // amplitude.track('executivePrompt');
@@ -120,8 +128,6 @@ browser.runtime.onConnect.addListener(port => {
         controller = new AbortController();
 
         let messages = msg.messages
-
-        console.log(messages);
 
         //==================== 下面的代码用于调试使用，正式环境需要注释掉
 
@@ -252,8 +258,9 @@ browser.runtime.onConnect.addListener(port => {
           if (response.status !== 200) {
             // API KEY Error
             response.json().then((data) => {
-              console.log(data)
+
               port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message, 'code': data.error.code })
+
               return
             })
 
@@ -274,13 +281,12 @@ browser.runtime.onConnect.addListener(port => {
 
                   if (new_msg !== undefined) {
 
-                    console.log(JSON.parse(event.data).id);
-
                     // 将数据发送给 UI 以渲染内容
                     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
 
                   }
                 }
+
 
               } catch {
                 console.log(' createParser JSON.parse errow')
@@ -303,6 +309,7 @@ browser.runtime.onConnect.addListener(port => {
                 if (done) {
                   // 数据传输结束
                   console.log('Done');
+
                   port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
                   break
 
@@ -347,23 +354,23 @@ browser.runtime.onConnect.addListener(port => {
       }
 
       // 获取 Unsplash 图片
-      if (msg.type === 'getUnsplashImages') {
+      // if (msg.type === 'getUnsplashImages') {
 
-        // 获取图片
-        if (msg.keyWord) {
+      //   // 获取图片
+      //   if (msg.keyWord) {
 
-          // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
+      //     // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
 
-          unsplashSearchPhotos(process.env.UNSPLASH_API_KEY as string, msg.keyWord).then((imgs: any) => {
-            console.log(imgs);
-            port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
-          }).catch((error: any) => {
-            console.log(error);
-          });
+      //     unsplashSearchPhotos(process.env.UNSPLASH_API_KEY as string, msg.keyWord).then((imgs: any) => {
+      //       console.log(imgs);
+      //       port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
+      //     }).catch((error: any) => {
+      //       console.log(error);
+      //     });
 
-        }
+      //   }
 
-      }
+      // }
 
       // 停止渲染数据
       if (msg.type === 'StopTheConversation') {
@@ -391,6 +398,29 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
       console.error(error);
     }
   };
+
+  if (request.type === 'getUnsplashImages') {
+
+    console.log('background getUnsplashImages:');
+
+    // 获取图片
+    if (request.keyWord) {
+
+      // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
+
+      unsplashSearchPhotos(process.env.UNSPLASH_API_KEY as string, request.keyWord).then((imgs: any) => {
+        console.log(imgs);
+        // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
+        asyncSendResponse({ type: 'sendImgData', status: 'end', 'imgs': imgs });
+      }).catch((error: any) => {
+        console.log(error);
+      });
+
+    }
+
+    return true;
+
+  }
 
   if (request.type === 'addNote') {
     console.log('addNote');
@@ -579,6 +609,13 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
     });
 
+    return true;
+
+  }
+
+  if (request.type === 'amplitudeTrack') {
+
+    amplitude.track(request.name)
     return true;
 
   }

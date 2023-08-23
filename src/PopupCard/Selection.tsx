@@ -3,9 +3,6 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef } from "react";
 import { playTextToSpeech } from '../util'
 
-import * as amplitude from '@amplitude/analytics-browser';
-
-
 import { Button } from 'antd';
 
 import { useCurrentLanguage } from '../lib/locale'
@@ -114,7 +111,8 @@ export function Selection(props: SelectionProps) {
     }
 
 
-    amplitude.track('speak');
+    // amplitude.track('speak');
+    browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'speak' })
 
 
 

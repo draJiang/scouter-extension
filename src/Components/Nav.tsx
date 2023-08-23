@@ -59,7 +59,7 @@ export function Nav(props: NavProps) {
     useEffect(() => {
 
         // 当不自动自行 Prompt，自动打开 Prompt 菜单供用户选择
-        if(props.isOpenMenu){
+        if (props.isOpenMenu) {
             onMenuOpenChange(props.isOpenMenu)
         }
 
@@ -77,8 +77,9 @@ export function Nav(props: NavProps) {
             pinPopupCard(false)
             setIsPin(false)
 
-            amplitude.track('pinPopupCard');
-            
+            // amplitude.track('pinPopupCard');
+            browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'pinPopupCard' })
+
         } else {
             pinPopupCard(true)
             setIsPin(true)
@@ -165,14 +166,14 @@ export function Nav(props: NavProps) {
                                 }}
 
                                 >
-
+                                    <HamburgerMenuIcon />
                                     <span style={{
-                                        marginRight: '2px',
+                                        marginLeft: '4px',
                                         maxWidth: '170px',
                                         whiteSpace: 'nowrap',
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis'
-                                    }}>{props.lastExecutedPrompt.title}</span><HamburgerMenuIcon />
+                                    }}>{props.lastExecutedPrompt.title}</span>
                                 </button>
                             </DropdownMenu.Trigger>
 

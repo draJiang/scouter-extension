@@ -133,10 +133,8 @@ export const getBalance = (apiKey: string) => {
     fetch(url, {
       headers: headers
     }).then((response) => {
-      console.log(response);
 
       response.json().then((data) => {
-        console.log(data);
         resolve(data)
       })
 

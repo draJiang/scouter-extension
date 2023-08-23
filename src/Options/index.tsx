@@ -49,8 +49,6 @@ interface BalanceResponse {
 
 // 数据埋点
 getUserId().then((userId: string) => {
-  console.log('getUserId:');
-  console.log(userId);
 
   // 数据埋点
   amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
@@ -219,8 +217,6 @@ export const Options = () => {
   // 保存设置
   async function saveOptions(values: any) {
 
-
-    console.log(values);
 
     // if (values['openApiKey'] === '' || values['openApiKey'] === undefined) {
     //   // 使用 licenseKey

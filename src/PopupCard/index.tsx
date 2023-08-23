@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill'
-import * as amplitude from '@amplitude/analytics-browser';
+
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 // import ReactDOM from "react-dom";
 
@@ -32,16 +32,13 @@ import settingGuide from '../assets/settingGuide.png'
 import { useCurrentLanguage } from '../lib/locale'
 
 import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
-import { getUserId } from '../util'
+
 
 
 let currentLanguage: string
 let targetLanguage: string
 
-// // 使用长连接
-// let port = browser.runtime.connect({
-//   name: 'fromPopupCard'
-// })
+
 
 let ankiCards: Array<{}>
 getAnkiCards().then((cards: any) => {
@@ -63,19 +60,7 @@ type PromptType = {
 };
 
 
-getUserId().then((userId: string) => {
-  console.log('getUserId:');
-  console.log(userId);
 
-  // 数据埋点
-  amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
-    defaultTracking: {
-      pageViews: false,
-      sessions: false,
-    },
-  });
-
-})
 
 
 
@@ -119,7 +104,10 @@ export function PopupCard(props: any) {
   const [form] = Form.useForm();
 
 
-
+  // 使用长连接
+  let port = browser.runtime.connect({
+    name: 'fromPopupCard'
+  })
 
 
   let Lang = useCurrentLanguage()!
@@ -341,7 +329,8 @@ export function PopupCard(props: any) {
 
     if (needToRunPrompt) {
 
-      amplitude.track('executivePrompt');
+      // amplitude.track('executivePrompt');
+      browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
 
       // 在消息历史中插入新记录
       setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '' }])
@@ -461,7 +450,8 @@ export function PopupCard(props: any) {
       setIsLoading(false)
 
       // 数据埋点
-      amplitude.track('openPopupCard');
+      // amplitude.track('openPopupCard');
+      browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'openPopupCard' })
 
     }
 
@@ -504,7 +494,8 @@ export function PopupCard(props: any) {
     }
 
 
-    amplitude.track('handlePromptEdited');
+    // amplitude.track('handlePromptEdited');
+    browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handlePromptEdited' })
 
 
   }
@@ -512,10 +503,10 @@ export function PopupCard(props: any) {
   // 请求 GPT 数据
   const getGPTMsg = async (prompt: Array<{ role: string, content: string }>, keyWord?: string) => {
 
-    // 使用长连接
-    let port = browser.runtime.connect({
-      name: 'fromPopupCard'
-    })
+    // // 使用长连接
+    // let port = browser.runtime.connect({
+    //   name: 'fromPopupCard'
+    // })
 
     keyWord = keyWord || '';
 
@@ -691,7 +682,8 @@ export function PopupCard(props: any) {
 
     getGPTMsg([...msgHistory, { "role": "user", "content": values.msg }])
 
-    amplitude.track('handleSendMessage');
+    // amplitude.track('handleSendMessage');
+    browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleSendMessage' })
 
   }
 
@@ -897,7 +889,8 @@ export function PopupCard(props: any) {
     sending.then(handleResponse, handleError);
 
     // 数据埋点
-    amplitude.track('addToAnki');
+    // amplitude.track('addToAnki');
+    browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'addToAnki' })
 
   }
 
@@ -1000,7 +993,8 @@ export function PopupCard(props: any) {
     if (data.isOpen) {
       setCustomPromptFormData(data.data)
       // 开启表单
-      amplitude.track('openCustomPromptForm');
+      // amplitude.track('openCustomPromptForm');
+      browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'openCustomPromptForm' })
     }
     // 开启表单后禁止点击窗口外区域关闭窗口
     setDonotClosePopupCard(data.isOpen)

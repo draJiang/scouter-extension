@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
+import browser from 'webextension-polyfill'
 import { Button, Image, Input, Empty } from 'antd';
 import { LoadingOutlined, RightOutlined, LeftOutlined, CloseOutlined, CheckOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
 
 import { InputRef } from 'antd/lib/input';
+
+import * as amplitude from '@amplitude/analytics-browser';
 
 
 interface Image {
@@ -123,6 +126,9 @@ export function Images(props: ImagesProps) {
         if (inputValue && inputValue !== '') {
             props.getUnsplashImages(inputValue)
             setChangeImageStatus(false)
+
+            // amplitude.track('handleSearchImage');
+            browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleSearchImage' })
         }
 
 
@@ -144,7 +150,8 @@ export function Images(props: ImagesProps) {
 
         })
 
-        // 预加载下一张图
+        // amplitude.track('handleChangeImage');
+        browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleChangeImage' })
 
     };
 
