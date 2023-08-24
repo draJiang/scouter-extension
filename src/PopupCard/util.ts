@@ -102,13 +102,10 @@ export const getUnsplashImages = (keyWord: string) => {
         // })
 
         // 使用 postMs 发送信息
-        console.log('util getUnsplashImages:');
-
 
         let sending = browser.runtime.sendMessage({ 'type': 'getUnsplashImages', 'messages': '', 'keyWord': keyWord })
 
         sending.then((msg: any) => {
-            console.log(msg);
 
             if (msg.type === 'sendImgData') {
 

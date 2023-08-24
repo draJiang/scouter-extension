@@ -798,7 +798,10 @@ export function PopupCard(props: any) {
     let container = ''
     let images = ''
     let unsplash_download_location
-    const stc = keyWord.length <= 20 ? Sentence : ''
+    let stc = keyWord.length <= 20 ? Sentence : ''
+    // 在语境句子中将关键字突出显示
+    stc = stc.replace(new RegExp(keyWord, 'g'), '<span class="keyWord">' + keyWord + '</span>');
+
 
     if (windowElement.current) {
       // console.log(windowElement.current);
@@ -827,6 +830,9 @@ export function PopupCard(props: any) {
       opacity:0.65;
     }
     .ankiSpace {
+      color:#F08A24;
+    }
+    .keyWord {
       color:#F08A24;
     }
 
