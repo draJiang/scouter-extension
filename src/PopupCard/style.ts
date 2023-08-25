@@ -130,7 +130,7 @@ border:1px solid rgba(5, 5, 5, .06)
 
 }
 
-#LearningEnglish2023 #ScouterNav,#LearningEnglish2023 .images,#LearningEnglish2023 #ScouterSelection, #LearningEnglish2023 .messages>div  {
+#LearningEnglish2023 #ScouterNav,#LearningEnglish2023 #ScouterSelection, #LearningEnglish2023 .messages>div  {
   padding-left:18px;
   padding-right:18px;
 }

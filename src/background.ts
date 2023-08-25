@@ -38,6 +38,7 @@ console.log('I am background');
 browser.runtime.onInstalled.addListener(function () {
 
   console.log("插件已被安装");
+  amplitude.track("install")
 
 });
 

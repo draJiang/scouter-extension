@@ -5,82 +5,18 @@ import { LoadingOutlined, RightOutlined, LeftOutlined, CloseOutlined, CheckOutli
 
 import { InputRef } from 'antd/lib/input';
 
-import * as amplitude from '@amplitude/analytics-browser';
+import { ImageType } from '../types'
 
-
-interface Image {
-    id: string;
-    created_at: string;
-    updated_at: string;
-    promoted_at: string | null;
-    width: number;
-    height: number;
-    color: string;
-    blur_hash: string;
-    description: string;
-    alt_description: string;
-    urls: {
-        raw: string;
-        full: string;
-        regular: string;
-        small: string;
-        thumb: string;
-        small_s3: string;
-    };
-    links: {
-        self: string;
-        html: string;
-        download: string;
-        download_location: string;
-    };
-    likes: number;
-    liked_by_user: boolean;
-    current_user_collections: any[];
-    sponsorship: null;
-    topic_submissions: any;
-    user: {
-        id: string;
-        updated_at: string;
-        username: string;
-        name: string;
-        first_name: string;
-        last_name: string;
-        twitter_username: string;
-        portfolio_url: string;
-        bio: string;
-        location: string;
-        links: {
-            self: string;
-            html: string;
-            photos: string;
-            likes: string;
-            portfolio: string;
-            following: string;
-            followers: string;
-        };
-        profile_image: {
-            small: string;
-            medium: string;
-            large: string;
-        };
-        instagram_username: string;
-        total_collections: number;
-        total_likes: number;
-        total_photos: number;
-        accepted_tos: boolean;
-        for_hire: boolean;
-    };
-}
 
 interface ImagesProps {
-    images: Image[];
-    keyWord: string;
+    images: Array<ImageType>;
+    // keyWord: string;
     getUnsplashImages: (keyword: string) => void;
 }
 
 export function Images(props: ImagesProps) {
 
-    const [images, setImages] = useState<Array<Image>>([]);
+    const [images, setImages] = useState<Array<ImageType>>([]);
     const [imageIndex, setImageIndex] = useState(0);
     const [showControl, setShowControl] = useState(false)
     const [changeImage, setChangeImageStatus] = useState(false)
@@ -168,6 +104,7 @@ export function Images(props: ImagesProps) {
         if (e.type === 'mouseleave') {
 
             setShowControl(false)
+            // setShowControl(true)
 
         }
 
@@ -199,7 +136,7 @@ export function Images(props: ImagesProps) {
                             </div>
 
 
-                            <div
+                            <div className="imageQueue"
                                 style={{
                                     display: 'none'
                                 }}>
@@ -247,7 +184,7 @@ export function Images(props: ImagesProps) {
                             <div
                                 style={{
                                     padding: '6px 12px',
-                                    margin: '0px 18px',
+                                    // margin: '0px 18px',
                                     background: 'linear-gradient(360deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 27.6%, rgba(0, 0, 0, 0.2) 54.69%, rgba(0, 0, 0, 0.35) 100%)'
                                 }}
                             >
@@ -285,6 +222,7 @@ export function Images(props: ImagesProps) {
                                         style={{
                                             display: 'flex',
                                             flexGrow: 'inherit',
+                                            alignItems: 'center'
                                         }}
                                     >
 
@@ -313,7 +251,6 @@ export function Images(props: ImagesProps) {
                                                         color: '#fff',
                                                         fontWeight: '500',
                                                         padding: '0 4px',
-                                                        marginTop: '4px'
                                                     }}
                                                 >{imageIndex + 1 + '/' + images.length}
                                                 </div>
@@ -362,7 +299,8 @@ export function Images(props: ImagesProps) {
                         style={{
                             fontSize: '0.92em',
                             color: 'rgba(0, 0, 0, 0.4)',
-                            marginTop: '4px'
+                            marginTop: '4px',
+                            lineHeight: 'normal'
                         }}
                     >
                         Photo by <a style={{ textDecoration: 'underline' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>

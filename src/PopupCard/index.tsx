@@ -3,11 +3,11 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 // import ReactDOM from "react-dom";
 
-import ReactMarkdown from 'react-markdown'
-import breaks from 'remark-breaks';
-import rehypeParse from 'rehype-parse'
-import rehypeRaw from 'rehype-raw'
-import remarkGfm from 'remark-gfm'
+// import ReactMarkdown from 'react-markdown'
+// import breaks from 'remark-breaks';
+// import rehypeParse from 'rehype-parse'
+// import rehypeRaw from 'rehype-raw'
+// import remarkGfm from 'remark-gfm'
 
 import { useSpring, animated } from 'react-spring';
 
@@ -18,6 +18,7 @@ import { Nav } from "../Components/Nav"
 import { CustomPromptForm } from "../Components/CustomPromptForm"
 
 import { Images } from "../Components/Images"
+import { MessagesList } from "./Message"
 import Notice from '../Components/Notice';
 
 import { Selection } from "./Selection"
@@ -27,12 +28,13 @@ import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Drawer
 import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 
-import settingGuide from '../assets/settingGuide.png'
+
 
 import { useCurrentLanguage } from '../lib/locale'
 
 import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
+import { PromptType, ChatMessage, ImageType } from "../types"
 
 
 let currentLanguage: string
@@ -50,25 +52,15 @@ getAnkiCards().then((cards: any) => {
 
 const { TextArea } = Input;
 
-const AnkiContext = createContext(null);
-
-type PromptType = {
-  title: string;
-  getUnsplashImages: boolean;
-  userPrompt: string;
-  id: string;
-};
-
-
-
-
-
+// const AnkiContext = createContext(null);
 
 
 export function PopupCard(props: any) {
 
 
-  const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string, status: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '', 'status': '' }])
+  // const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string, status: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '', 'status': '' }])
+  const [messages, setMessages] = useState<Array<ChatMessage>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '', 'status': '', 'showImagesBox': true, 'images': [] }])
+
   const [images, setImages] = useState([])
   const [showImagesBox, setShowImagesBox] = useState(false)
   const [prompts, setPrompts] = useState<Array<PromptType>>([]);
@@ -215,14 +207,13 @@ export function PopupCard(props: any) {
 
 
     // 只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
-    if (messages.length > 0 && isAnswerDone && messages[0]['status'] !== 'erro') {
+    if (messages.length > 0 && isAnswerDone && messages[0]['status'] === 'success') {
 
       // console.log('Save');
-      // console.log(messages);
+      console.log(messages);
 
       const keyWord = props.data.keyWord
       const Sentence = props.data.Sentence
-
 
       // 将查询记录保存起来
       const newHistory = {
@@ -231,7 +222,8 @@ export function PopupCard(props: any) {
         'role': messages[0]['role'],
         'answer': messages[0]['content'],
         'source': window.location.href,
-        'prompt': messages[0]['prompt']
+        'prompt': messages[0]['prompt'],
+        'images': messages[0]['images']
       }
 
 
@@ -300,30 +292,48 @@ export function PopupCard(props: any) {
       needToRerenderImage = true
     }
 
-    // console.log('executivePrompt:');
-    // console.log(needToRunPrompt);
-    // console.log(prompt);
-
-    // promptRef.current = prompt
-
     const keyWord = props.data.keyWord
     const Sentence = props.data.Sentence
 
     // 初始化
     setMessages([])   // 对话列表
-    if (needToRerenderImage) {
-      setImages([])     // 图片列表
-    }
+
+    // if (needToRerenderImage) {
+    //   setImages([])     // 图片列表
+    // }
 
 
+    let showImagesBox = true
 
+    console.log('prompt.getUnsplashImages:');
+    console.log(prompt.getUnsplashImages);
 
     if (prompt.getUnsplashImages && needToRunPrompt) {
       // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
-      setShowImagesBox(true)
+      showImagesBox = true
+
+
     } else {
-      setShowImagesBox(false)
+      showImagesBox = false
     }
+
+    // // 设置是否显示图片
+    // setMessages(prevMessages => {
+
+    //   const lastMessage = prevMessages[prevMessages.length - 1];
+
+    //   if (prevMessages.length === 0) {
+    //     return []
+    //   }
+
+    //   const updatedLastMessage = {
+    //     ...lastMessage,
+    //     showImagesBox: showImagesBox
+    //   };
+
+    //   return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+    // })
 
 
 
@@ -333,7 +343,7 @@ export function PopupCard(props: any) {
       browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
 
       // 在消息历史中插入新记录
-      setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '' }])
+      setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '', 'showImagesBox': showImagesBox, 'images': [] }])
 
       // 设置最近执行的 Prompt
       setLastExecutedPrompt(prompt)
@@ -380,6 +390,11 @@ export function PopupCard(props: any) {
 
             bingo = true
 
+            console.log('历史记录：');
+            console.log(obj);
+
+
+
             // 直接显示历史记录中的回答
             setMessages(prevMessages => {
 
@@ -391,7 +406,8 @@ export function PopupCard(props: any) {
                 content: obj.answer,
                 prompt: newPrompt[0]['content'],
                 loading: false,
-                status: 'success'
+                status: 'success',
+                images: obj.images
               };
 
               return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
@@ -406,43 +422,82 @@ export function PopupCard(props: any) {
           }
         }
 
+        // 无历史记录
         if (!bingo) {
 
           // 请求 AI 数据
           getGPTMsg(newPrompt, keyWord)
 
-        }
 
-        if (prompt.id == 'Default') {
+          // 请求图片
+          if (prompt.id == 'Default') {
 
-          if (keyWord.length <= 20 && prompt.getUnsplashImages && needToRerenderImage) {
-            // 获取图片数据
-            getUnsplashImages(keyWord).then((imgs: any) => {
-              setImages(imgs)
-            })
+            if (keyWord.length <= 20 && prompt.getUnsplashImages && needToRerenderImage) {
+              // 获取图片数据
+              getUnsplashImages(keyWord).then((imgs: any) => {
+                // setImages(imgs)
+
+                // 保存图片数据
+                setMessages(prevMessages => {
+
+                  const lastMessage = prevMessages[prevMessages.length - 1];
+
+                  if (prevMessages.length === 0) {
+                    return []
+                  }
+
+                  const updatedLastMessage = {
+                    ...lastMessage,
+                    needToShowImg: true,
+                    images: imgs
+                  };
+
+                  return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+                })
+
+              })
+
+            }
+
+          } else {
+
+            if (prompt.getUnsplashImages && needToRerenderImage) {
+              // 获取图片数据
+              getUnsplashImages(keyWord).then((imgs: any) => {
+                // setImages(imgs)
+
+                // 保存图片数据
+                setMessages(prevMessages => {
+
+                  const lastMessage = prevMessages[prevMessages.length - 1];
+
+                  if (prevMessages.length === 0) {
+                    return []
+                  }
+
+                  const updatedLastMessage = {
+                    ...lastMessage,
+                    needToShowImg: true,
+                    images: imgs
+                  };
+
+                  return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+                })
+
+              })
+
+            }
 
           }
 
-        } else {
 
-          if (prompt.getUnsplashImages && needToRerenderImage) {
-            // 获取图片数据
-            getUnsplashImages(keyWord).then((imgs: any) => {
-              setImages(imgs)
-            })
-
-          }
 
         }
-
 
 
       })
-
-
-
-
-
 
     } else {
       setLastExecutedPrompt({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
@@ -508,7 +563,8 @@ export function PopupCard(props: any) {
     //   name: 'fromPopupCard'
     // })
 
-    keyWord = keyWord || '';
+    const thisKeyWord = keyWord || '';
+
 
     // 设置为回答中
     setAnswerDone(false)
@@ -521,7 +577,7 @@ export function PopupCard(props: any) {
 
     setTimeout(() => {
       // 使用 postMs 发送信息
-      port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': keyWord })
+      port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': thisKeyWord })
     }, 20);
 
 
@@ -538,7 +594,7 @@ export function PopupCard(props: any) {
           setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
           if (msg.code === 'invalid_api_key') {
-            setIsApiErro(true)
+            // setIsApiErro(true)
             msg.content += '\
             After that, you need to set the correct Open API Key in the Scouter:'
           }
@@ -552,8 +608,9 @@ export function PopupCard(props: any) {
               chatId: msg.chatId,
               content: msg.content,
               loading: false,
-              status: 'erro',
-              prompt: prompt[0]['content']
+              status: 'invalid_api_key',
+              prompt: prompt[0]['content'],
+              images: []
             };
             // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
             return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
@@ -563,7 +620,7 @@ export function PopupCard(props: any) {
           setAnswerDone(true)
 
         } else if (isApiErro) {
-          setIsApiErro(false)
+          // setIsApiErro(false)
         }
 
         // 请求 GPT 数据成功且数据流结束传输
@@ -580,23 +637,13 @@ export function PopupCard(props: any) {
         // 请求 GPT 数据成功且数据流开始传输
         if (msg.status === 'begin') {
 
-          // type === 'as2' ? setopenApiAnser2('') : setopenApiAnser('')
-
-          // console.log('begin');
 
         }
 
         // 请求 GPT 数据成功且数据流传输中
         if (msg.status === 'process') {
 
-          // if (windowElement.current) {
-          //   const container = windowElement.current.querySelectorAll('.container')[0]
-          //   shouldStayAtBottomRef.current = container.scrollHeight - container.scrollTop <= container.clientHeight + 20;
-          // }
-
           try {
-
-
 
             // 渲染数据
             setMessages(prevMessages => {
@@ -609,12 +656,6 @@ export function PopupCard(props: any) {
 
               const newMsgList = lastMessage
               let newContent = newMsgList.content + msg.content
-
-              // if (prompt[0]['content'].indexOf('{ankiCards}') >= 0) {
-              //   newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
-              // }else{
-              //   newContent = newContent.replace(new RegExp(props.data.keyWord, 'gi'), `**${props.data.keyWord}**`)
-              // }
 
               newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
 
@@ -666,15 +707,24 @@ export function PopupCard(props: any) {
         content: values.msg,
         loading: false,
         status: 'success',
-        prompt: prompt
+        prompt: prompt,
+        showImagesBox: false, // 用户发言不需要显示图片
+        images: []
       };
       // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
       return [...prevMessages, updatedLastMessage];
 
     });
 
-    // 在消息历史中插入新记录
-    setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '' }])
+    // 在消息历史中插入新 GPT 消息
+    setMessages(prevMessages => [...prevMessages, {
+      'content': '',
+      'role': 'assistant',
+      'loading': true,
+      'chatId': '', 'prompt': '', 'status': '',
+      'showImagesBox': false,
+      'images': []
+    }])
 
     // console.log(messages);
 
@@ -807,8 +857,24 @@ export function PopupCard(props: any) {
       // console.log(windowElement.current);
       container = windowElement.current.innerHTML
       container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
+
+      // 处理 container 中的图片，只保留 1 张
+      let parser = new DOMParser();
+      let doc = parser.parseFromString(container, 'text/html');
+      let elementsToRemove = doc.querySelectorAll('.imageQueue');
+
+      let img = doc.getElementsByClassName('imageBox')[0].getElementsByTagName('img')[0] as HTMLImageElement;
+      img.width = 0
+
+
+      elementsToRemove.forEach(el => el.parentNode?.removeChild(el));
+      container = doc.body.innerHTML;
+
       // 处理样式，避免 Anki 内显示异常
       container = container.replace(/style=/g, '');
+
+
+
 
       if (windowElement.current.getElementsByClassName('imageBox')[0] !== undefined) {
         images = windowElement.current.getElementsByClassName('imageBox')[0].innerHTML
@@ -828,6 +894,9 @@ export function PopupCard(props: any) {
 
     .sentence{
       opacity:0.65;
+    }
+    img {
+      width:auto;
     }
     .ankiSpace {
       color:#F08A24;
@@ -865,7 +934,7 @@ export function PopupCard(props: any) {
         "modelName": modelName,
         "fields": {
           [front]: keyWord,
-          [back]: cardStyle + '<p class="sentence">' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>'
+          [back]: cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">Source</a></p>' + container
         },
         "tags": [
           "Scouter"
@@ -879,7 +948,7 @@ export function PopupCard(props: any) {
           "deckName": deckName,
           "modelName": modelName,
           "fields": {
-            [front]: cardStyle + '<p class="sentence">' + stc + '</p>' + images + container + '<a href="' + window.location.href + '">Source</a>',
+            [front]: cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">Source</a></p>' + container,
             [back]: ''
           },
           "tags": [
@@ -962,27 +1031,11 @@ export function PopupCard(props: any) {
 
     if (windowElement.current !== null) {
       const container = windowElement.current.querySelectorAll('.container')[0]
-      // const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 14;
-
-      // console.log('isAtBottom ====== ');
-      // console.log(canSroll);
-      // console.log(isAtBottom);
-
-      // console.log(container.scrollHeight);
-      // console.log(container.scrollTop);
-      // console.log(container.clientHeight);
 
       if (canSroll) {
         // 位于底部，需要自动滚动
 
-        // const childElements = windowElement.current.querySelectorAll('.messages > :last-child');
-        // if (childElements.length > 0) {
-        //   const lastChildElement = childElements[childElements.length - 1];
-        //   lastChildElement.scrollIntoView();
-        // }
-
         container.scrollTop = container.scrollHeight + 20;
-
 
       }
     }
@@ -1060,58 +1113,14 @@ export function PopupCard(props: any) {
 
               <Selection text={props.data.keyWord} />
 
+              <MessagesList messages={messages} />
 
-              {showImagesBox && <Images images={images} keyWord={props.data.keyWord} getUnsplashImages={(keyWord) => {
+              {/* {showImagesBox && <Images images={images} keyWord={props.data.keyWord} getUnsplashImages={(keyWord) => {
                 getUnsplashImages(keyWord).then((imgs: any) => {
                   setImages(imgs)
                 })
-              }} />}
+              }} />} */}
 
-              <div
-                className='messages'
-                style={{
-                  lineHeight: '28px',
-                  wordWrap: 'break-word',
-                  margin: '0.4em 0'
-                }}
-              >
-                {messages.map((item) => {
-
-                  return <div key={item.chatId} className='' style={item.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
-                    <Skeleton loading={item.loading} active={true} title={false}>
-
-                      <ReactMarkdown
-                        remarkPlugins={[breaks, remarkGfm]}
-                        rehypePlugins={[rehypeRaw]}
-                        components={{
-                          table: ({ node, ...props }) => <div style={{ overflowX: 'scroll' }}>
-                            <table style={{
-                              width: 'max-content',
-                              maxWidth: '620px',
-                              border: "1px solid #ccc",
-                              borderCollapse: 'collapse',
-                              margin: 0,
-                              padding: 0,
-                            }} {...props} />
-                          </div>
-                        }}
-                        skipHtml={false}
-                        children={item.content} />
-
-                    </Skeleton>
-
-                  </div>
-
-                }
-
-                )}
-
-                {isApiErro ? <div className=''> <img src={settingGuide} style={{
-                  borderRadius: '4px'
-                }} /></div> : ''}
-
-
-              </div>
             </div>
           </div>
 
