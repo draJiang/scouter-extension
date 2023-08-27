@@ -19,6 +19,7 @@ import { CustomPromptForm } from "../Components/CustomPromptForm"
 
 import { Images } from "../Components/Images"
 import { MessagesList } from "./Message"
+import { PromptList } from "./PromptList"
 import Notice from '../Components/Notice';
 
 import { Selection } from "./Selection"
@@ -26,8 +27,6 @@ import { ErroTips } from "./ErroTips"
 
 import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Drawer, Space, Form, Button } from 'antd';
 import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
-
-
 
 
 import { useCurrentLanguage } from '../lib/locale'
@@ -80,6 +79,9 @@ export function PopupCard(props: any) {
 
   const [isAnswerDone, setAnswerDone] = useState(false);
 
+  const [followUpData, setFollowUpData] = useState({ keyWord: '', sentence: '' });
+  const [showFollowUpDataMenu, setShowFollowUpDataMenu] = useState({ show: false, style: {} })
+
   const [isApiErro, setIsApiErro] = useState(false);
 
   const [isAnswerInputed, setIsAnswerInputed] = useState(false);
@@ -98,14 +100,80 @@ export function PopupCard(props: any) {
 
   // 使用长连接
   let port = browser.runtime.connect({
-    name: 'fromPopupCard'
+    name: 'getGPT'
   })
-
 
   let Lang = useCurrentLanguage()!
   currentLanguage = Lang['current']['name']
   targetLanguage = Lang['target']['name']
 
+
+  // 控制追问菜单
+  useEffect(() => {
+
+    const port = browser.runtime.connect({
+      name: 'fromPopupCard'
+    })
+
+    port.onMessage.addListener((msg) => {
+
+      console.log('useEffect port.onMessage');
+
+      if (msg.type === "UPDATE_POPUP_CARD") {
+        // 显示 Prompt 菜单
+        setFollowUpData(msg.payload.followUpData)
+
+        //设置菜单的位置
+
+        setShowFollowUpDataMenu(prev => {
+
+          const newData = {
+            show: true,
+            style: msg.payload.style
+          };
+
+          return newData
+
+        })
+
+      }
+    });
+
+    windowElement.current?.addEventListener("click", handlePopupCardClick);
+    return () => {
+      // console.log('useEffect return');
+      windowElement.current?.removeEventListener("click", handlePopupCardClick);
+
+    };
+
+
+    function handlePopupCardClick() {
+      console.log('handlePopupCardClick');
+
+      setTimeout(() => {
+
+        if (showFollowUpDataMenu.show) {
+          console.log(showFollowUpDataMenu);
+
+          setShowFollowUpDataMenu(prev => {
+
+            const newData = {
+              style: {},
+              show: false,
+            };
+
+            return newData
+
+          })
+
+        }
+
+
+      }, 10);
+
+    }
+
+  }, [showFollowUpDataMenu]);
 
 
   useEffect(() => {
@@ -275,7 +343,10 @@ export function PopupCard(props: any) {
 
   }, [isAnswerDone]);
 
-  const executivePrompt = async (prompt: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => {
+  const executivePrompt = async (prompt: PromptType,
+    runPrompt?: boolean,
+    imageToRerender?: boolean,
+    data?: { keyWord: string, sentence: string }) => {
 
     // port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
@@ -292,11 +363,18 @@ export function PopupCard(props: any) {
       needToRerenderImage = true
     }
 
-    const keyWord = props.data.keyWord
-    const Sentence = props.data.Sentence
+    let keyWord = props.data.keyWord
+    let Sentence = props.data.Sentence
 
-    // 初始化
-    setMessages([])   // 对话列表
+    if (data !== undefined) {
+      keyWord = data.keyWord
+      Sentence = data.sentence
+    } else {
+      // 初始化
+      setMessages([])   // 对话列表
+    }
+
+
 
     // if (needToRerenderImage) {
     //   setImages([])     // 图片列表
@@ -317,25 +395,6 @@ export function PopupCard(props: any) {
       showImagesBox = false
     }
 
-    // // 设置是否显示图片
-    // setMessages(prevMessages => {
-
-    //   const lastMessage = prevMessages[prevMessages.length - 1];
-
-    //   if (prevMessages.length === 0) {
-    //     return []
-    //   }
-
-    //   const updatedLastMessage = {
-    //     ...lastMessage,
-    //     showImagesBox: showImagesBox
-    //   };
-
-    //   return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
-
-    // })
-
-
 
     if (needToRunPrompt) {
 
@@ -345,14 +404,21 @@ export function PopupCard(props: any) {
       // 在消息历史中插入新记录
       setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '', 'showImagesBox': showImagesBox, 'images': [] }])
 
-      // 设置最近执行的 Prompt
-      setLastExecutedPrompt(prompt)
-      // 记录最近 1 次使用的 Prompt
-      browser.storage.local.set(
-        {
-          lastExecutedPrompt: prompt
-        }
-      )
+      // 非追问时，才会记录最近执行的 Prompt
+      if (data === undefined) {
+
+        // 设置最近执行的 Prompt
+        setLastExecutedPrompt(prompt)
+
+        // 记录最近 1 次使用的 Prompt
+        browser.storage.local.set(
+          {
+            lastExecutedPrompt: prompt
+          }
+        )
+      }
+
+
 
 
       // 处理 Prompt 中的变量
@@ -582,9 +648,12 @@ export function PopupCard(props: any) {
 
 
     // 接收信息
-    port.onMessage.addListener(msg => {
+    port.onMessage.addListener((msg: any) => {
+
+      console.log('getGPTMsg port.onMessage');
 
       // console.log('port.onMessage.addListener');
+
       if (msg.type === 'sendGPTData') {
         // 请求 GPT 数据失败
         if (msg.status === 'erro') {
@@ -852,22 +921,37 @@ export function PopupCard(props: any) {
     // 在语境句子中将关键字突出显示
     stc = stc.replace(new RegExp(keyWord, 'g'), '<span class="keyWord">' + keyWord + '</span>');
 
+    let ScouterSelection = ''
+
 
     if (windowElement.current) {
+      // 选中的文字
+      ScouterSelection = windowElement.current?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
+      console.log(ScouterSelection);
+
       // console.log(windowElement.current);
       container = windowElement.current.innerHTML
       container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
 
-      // 处理 container 中的图片，只保留 1 张
+      // 处理 container 的内容
       let parser = new DOMParser();
       let doc = parser.parseFromString(container, 'text/html');
       let elementsToRemove = doc.querySelectorAll('.imageQueue');
+      let imageSource = doc.querySelectorAll('.imageSource');
 
-      let img = doc.getElementsByClassName('imageBox')[0].getElementsByTagName('img')[0] as HTMLImageElement;
-      img.width = 0
+      // 设置图片的尺寸、样式
+      if (doc.getElementsByClassName('imageBox').length > 0) {
+        let img = doc.getElementsByClassName('imageBox')[0].getElementsByTagName('img')[0] as HTMLImageElement;
+        img.width = 0
+      }
 
-
+      // 删除预加载的图片
       elementsToRemove.forEach(el => el.parentNode?.removeChild(el));
+
+      // 删除图片来源信息
+      imageSource.forEach(el => el.parentNode?.removeChild(el));
+
+
       container = doc.body.innerHTML;
 
       // 处理样式，避免 Anki 内显示异常
@@ -928,6 +1012,8 @@ export function PopupCard(props: any) {
     `
 
     // 请求 background 将数据保存到 Anki
+
+    // 常规类型
     let p = {
       "note": {
         "deckName": deckName,
@@ -942,13 +1028,14 @@ export function PopupCard(props: any) {
       }
     }
 
+    // 完形填空类型
     if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
       p = {
         "note": {
           "deckName": deckName,
           "modelName": modelName,
           "fields": {
-            [front]: cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">Source</a></p>' + container,
+            [front]: '<p>' + ScouterSelection + '</p>' + cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">Source</a></p>' + container,
             [back]: ''
           },
           "tags": [
@@ -1103,6 +1190,7 @@ export function PopupCard(props: any) {
             isOpenMenu={isOpenMenu}
             prompts={prompts}
             lastExecutedPrompt={lastExecutedPrompt}
+            keyWord={props.data.keyWord}
           />
 
           <div className='container flex-grow flex flex-col overflow-auto'>
@@ -1111,9 +1199,23 @@ export function PopupCard(props: any) {
               style={{ paddingTop: '54px' }}
             >
 
+
+
               <Selection text={props.data.keyWord} />
 
               <MessagesList messages={messages} />
+
+              <div className='followUpMenuBox' style={{
+                display: showFollowUpDataMenu.show ? 'block' : 'none',
+                position: "relative",
+                width: 'fit-content',
+                height: '1px'
+              }}>
+
+                <PromptList followUpData={followUpData} showFollowUpDataMenu={showFollowUpDataMenu}
+                  promptList={prompts} handleMenuItemClick={executivePrompt} />
+
+              </div>
 
               {/* {showImagesBox && <Images images={images} keyWord={props.data.keyWord} getUnsplashImages={(keyWord) => {
                 getUnsplashImages(keyWord).then((imgs: any) => {
@@ -1123,6 +1225,8 @@ export function PopupCard(props: any) {
 
             </div>
           </div>
+
+
 
 
           <div className='w-full'

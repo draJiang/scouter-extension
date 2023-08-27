@@ -296,6 +296,8 @@ export function Images(props: ImagesProps) {
                 {images.length > 0 &&
 
                     <div
+                        className="imageSource"
+
                         style={{
                             fontSize: '0.92em',
                             color: 'rgba(0, 0, 0, 0.4)',

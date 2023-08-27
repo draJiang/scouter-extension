@@ -13,7 +13,7 @@ export const popupCardStyle = `
   color:#ffffff;
 }
 
-.ankiSpaceButtonBox {
+.ankiSpaceButtonBox,.followUpMenu {
   display: flex;
   width: fit-content;
   padding: 4px 8px;
@@ -21,6 +21,7 @@ export const popupCardStyle = `
   border: 1px solid rgba(5, 5, 5, .06);
   border-radius: 4px;
   box-shadow: 0px 8px 28px rgba(0,0,0,.16);
+  z-index:9;
 }
 
 .setAnkiSpaceButton:first-of-type {

@@ -384,6 +384,8 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
  */
 export const getDefaultPrompt = (keyWord: string) => {
 
+    let getUnsplashImages = true
+
     let userPrompt = `
 
         Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence.
@@ -415,6 +417,7 @@ export const getDefaultPrompt = (keyWord: string) => {
     // 关键字长度较长时，按照句子进行处理
     if (keyWord.length > 20) {
 
+        getUnsplashImages = false
         userPrompt = `
       
                   As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
@@ -439,7 +442,7 @@ export const getDefaultPrompt = (keyWord: string) => {
     }
 
     const defaultPrompt: PromptType = {
-        'title': 'Default', 'getUnsplashImages': true, 'userPrompt': userPrompt,
+        'title': 'Default', 'getUnsplashImages': getUnsplashImages, 'userPrompt': userPrompt,
         'id': 'Default'
     }
 

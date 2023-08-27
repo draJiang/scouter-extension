@@ -42,18 +42,20 @@ interface NavProps {
     handleMenuItemClick: (data: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
+    keyWord: string;
 }
 
 export function Nav(props: NavProps) {
     const [isPin, setIsPin] = useState(false);
     const [currentURL, setCurrentURL] = useState<string>();
     const [isOpenPromptMenu, setIsOpenPromptMenu] = useState(false);
+    const defaultPrompt = useRef<PromptType>();
 
     // const { Option } = Select;
 
     const navElement = useRef<HTMLDivElement>(null);
 
-    const defaultPrompt = getDefaultPrompt('')
+
 
 
     useEffect(() => {
@@ -63,7 +65,15 @@ export function Nav(props: NavProps) {
             onMenuOpenChange(props.isOpenMenu)
         }
 
+
     }, [props.isOpenMenu]);
+
+    useEffect(() => {
+
+        defaultPrompt.current = getDefaultPrompt(props.keyWord)
+
+
+    }, []);
 
     // 点击保存到 Anki 按钮
     const handleSaveToAnkiBtnClick = () => {
@@ -203,13 +213,13 @@ export function Nav(props: NavProps) {
                                     </DropdownMenu.Item> */}
 
                                     <DropdownMenuItem
-                                        key={defaultPrompt.id}
-                                        data={defaultPrompt}
-                                        onSelect={() => handleMenuItemClick(defaultPrompt)}
-                                        handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: defaultPrompt })}
+                                        key={defaultPrompt.current?.id}
+                                        data={defaultPrompt.current!}
+                                        onSelect={() => handleMenuItemClick(defaultPrompt.current!)}
+                                        handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: defaultPrompt.current! })}
                                     >
 
-                                        {defaultPrompt.title}</DropdownMenuItem>
+                                        {defaultPrompt.current?.title}</DropdownMenuItem>
 
 
                                     {props.prompts.map(item => <DropdownMenuItem

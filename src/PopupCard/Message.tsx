@@ -105,7 +105,7 @@ export function MessagesList(props: MessagesListProps) {
             {props.messages.map((item: ChatMessage) => {
 
 
-                return <Message message={item} />
+                return <Message key={item.chatId} message={item} />
 
             }
 

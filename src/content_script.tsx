@@ -246,6 +246,7 @@ const handleMouseup = (event: any) => {
       // 显示完形填空操作按钮
       const selectedText = shadowRoot.getSelection()
       const selectedTextString = selectedText.toString()
+      const sentence = ''
 
       const PopupCardContainer = container.getElementsByClassName('container')[0]
       const messagesBox = container.getElementsByClassName('messages')[0]
@@ -260,7 +261,10 @@ const handleMouseup = (event: any) => {
         isInMessages = true
       }
 
-      if (PopupCardContainer && selectedTextString.length > 0 && isInMessages) {
+      if (PopupCardContainer && selectedTextString.length > 0) {
+
+        // 窗口 DOM
+        const popupCard = container.querySelector('#LearningEnglish2023')
 
         let ankiSpaceButtonBox = document.createElement('div');
         ankiSpaceButtonBox.className = 'ankiSpaceButtonBox'
@@ -273,9 +277,12 @@ const handleMouseup = (event: any) => {
         let newAnkiSpaceButton = document.createElement('div');
         newAnkiSpaceButton.textContent = '[...]+'
         newAnkiSpaceButton.className = 'setAnkiSpaceButton'
+        // 追加查询按钮
+        let lookUpButton = document.createElement('div');
+        lookUpButton.textContent = 'Prompt'
+        lookUpButton.className = 'lookUpButton'
 
         //设置按钮的位置
-
         const selectedTextX = selectedText.getRangeAt(0).getBoundingClientRect().x
         const selectedTextY = selectedText.getRangeAt(0).getBoundingClientRect().y
 
@@ -285,14 +292,19 @@ const handleMouseup = (event: any) => {
 
         ankiSpaceButtonBox.appendChild(setAnkiSpaceButton)
         ankiSpaceButtonBox.appendChild(newAnkiSpaceButton)
+        ankiSpaceButtonBox.appendChild(lookUpButton)
         PopupCardContainer.appendChild(ankiSpaceButtonBox)
 
         const buttonX = ankiSpaceButtonBox.getBoundingClientRect().x
         const buttonY = ankiSpaceButtonBox.getBoundingClientRect().y
 
+        // 最大 X 值
+        const maxX = (popupCard?.getBoundingClientRect().width || 0) - ankiSpaceButtonBox.getBoundingClientRect().width - 10
+        let left = selectedTextX - buttonX + selectedTextWidth - 40
+        left = left > maxX ? maxX : left
 
         ankiSpaceButtonBox.style.position = 'relative'
-        ankiSpaceButtonBox.style.left = (selectedTextX - buttonX + selectedTextWidth - 40).toString() + 'px'
+        ankiSpaceButtonBox.style.left = left.toString() + 'px'
         ankiSpaceButtonBox.style.top = (selectedTextY - buttonY - selectedTextHeight - 20).toString() + 'px'
 
 
@@ -310,6 +322,56 @@ const handleMouseup = (event: any) => {
 
           setAnkiSpace(range, selectedTextString, event, true)
           ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
+        });
+
+        // 追加查询
+        lookUpButton.addEventListener('click', (event) => {
+          console.log('selectedText:');
+          console.log(selectedText);
+
+          const followUpMenuBox = container.querySelector('.followUpMenuBox')
+          const messagesBox = container.querySelector('.messages')
+
+          console.log(messagesBox);
+
+
+          const selectedTextX = selectedText.getRangeAt(0).getBoundingClientRect().x
+          const selectedTextY = selectedText.getRangeAt(0).getBoundingClientRect().y
+
+          const selectedTextWidth = selectedText.getRangeAt(0).getBoundingClientRect().width
+          const selectedTextHeight = selectedText.getRangeAt(0).getBoundingClientRect().height
+
+
+          const followUpMenuBoxX = messagesBox?.getBoundingClientRect().x || 0
+          const followUpMenuBoxY = (messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)
+          const followUpMenuBoxWidth = 140
+          // const followUpMenuBoxHeight = followUpMenuBox?.getBoundingClientRect().height || 0
+
+          const maxX = (popupCard?.getBoundingClientRect().width || 0) - followUpMenuBoxWidth - 10
+          console.log(maxX);
+
+          // const maxY = popupCard?.getBoundingClientRect().width || 0 - followUpMenuBoxWidth
+          // const x = 0
+          // const y = 0
+
+
+          let left = (selectedTextX - followUpMenuBoxX - selectedTextWidth - 40)
+          let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight)
+
+          // X 坐标的最大最小值
+          left = left < 0 ? 0 : left
+          left = left > maxX ? maxX : left
+
+          browser.runtime.sendMessage({
+            type: 'UPDATE_POPUP_CARD', payload: {
+              style: {
+                left: left,
+                top: top,
+              }, followUpData: { keyWord: selectedTextString, sentence: sentence }
+            }
+          });
+          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
+
         });
 
       }

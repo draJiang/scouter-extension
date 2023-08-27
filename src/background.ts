@@ -90,10 +90,16 @@ browser.commands.onCommand.addListener(function (command) {
   }
 });
 
+let popupPort: any;
+
 // 长连接，处理 GPT 数据
 browser.runtime.onConnect.addListener(port => {
   // 收到 content script 消息
   // console.log('连接中------------')
+
+  if (port.name === 'fromPopupCard') {
+    popupPort = port
+  }
 
   // amplitude.init(process.env.AMPLITUDE_KEY as string);
 
@@ -130,39 +136,6 @@ browser.runtime.onConnect.addListener(port => {
 
         let messages = msg.messages
 
-        //==================== 下面的代码用于调试使用，正式环境需要注释掉
-
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 API Key error. Please modify and try again..' })
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Encountered some issues, please try again later.' })
-
-
-        // setTimeout(() => {
-        //   const now = new Date();
-
-        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-        //   port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${now}` })
-
-
-        //   setTimeout(() => {
-
-        //     for (let i = 0; i < 20; i++) {
-        //       port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': "W" })
-        //       // if (!isContinue) {
-        //       //   console.log('停止渲染数据')
-        //       //   break
-        //       // }
-        //     }
-
-        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': messages[messages.length - 1].content })
-        //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': "" })
-        //   }, 1000);
-
-        // }, 1400);
-
-        // return
-
-        // ====================
-
         if (openApiKey.length < 5 && licenseKey.length < 5) {
           port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
           return
@@ -171,7 +144,6 @@ browser.runtime.onConnect.addListener(port => {
         if (openApiEndpoint.length < 5) {
           openApiEndpoint = defaultOpenApiEndpoint
         }
-
 
 
         let headers = {}
@@ -353,25 +325,6 @@ browser.runtime.onConnect.addListener(port => {
         })
 
       }
-
-      // 获取 Unsplash 图片
-      // if (msg.type === 'getUnsplashImages') {
-
-      //   // 获取图片
-      //   if (msg.keyWord) {
-
-      //     // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
-
-      //     unsplashSearchPhotos(process.env.UNSPLASH_API_KEY as string, msg.keyWord).then((imgs: any) => {
-      //       console.log(imgs);
-      //       port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
-      //     }).catch((error: any) => {
-      //       console.log(error);
-      //     });
-
-      //   }
-
-      // }
 
       // 停止渲染数据
       if (msg.type === 'StopTheConversation') {
@@ -618,6 +571,14 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
     amplitude.track(request.name)
     return true;
+
+  }
+
+  if (request.type === 'UPDATE_POPUP_CARD') {
+
+    console.log('hello');
+    popupPort.postMessage(request);
+
 
   }
 
