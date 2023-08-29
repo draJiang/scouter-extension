@@ -114,7 +114,8 @@ export function Images(props: ImagesProps) {
         <div className="images"
             style={{
                 position: 'relative',
-                paddingBottom: '8px'
+                lineHeight: '0'
+                // paddingBottom: '8px'
             }}
         >
             <div>
@@ -181,9 +182,11 @@ export function Images(props: ImagesProps) {
                                 flexDirection: 'column',
                             }}
                         >
+
+                            {/* 图片控制 */}
                             <div
                                 style={{
-                                    padding: '6px 12px',
+                                    padding: '8px',
                                     // margin: '0px 18px',
                                     background: 'linear-gradient(360deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 27.6%, rgba(0, 0, 0, 0.2) 54.69%, rgba(0, 0, 0, 0.35) 100%)'
                                 }}
@@ -205,10 +208,11 @@ export function Images(props: ImagesProps) {
 
                                         <div style={{
                                             display: 'flex',
+                                            alignItems: 'center'
                                         }}>
 
-                                            <Button type="text" size="small" style={{ color: '#fff', marginBottom: '4px', marginRight: '10px' }} onClick={handleSearchBtnClick} icon={<CheckOutlined />} />
-                                            <Button type="text" size="small" style={{ color: '#fff', marginBottom: '4px' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
+                                            <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }} onClick={handleSearchBtnClick} icon={<CheckOutlined />} />
+                                            <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
 
                                         </div>
 
@@ -217,69 +221,80 @@ export function Images(props: ImagesProps) {
 
                                     :
 
-                                    // 显示图片导航控件
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            flexGrow: 'inherit',
-                                            alignItems: 'center'
-                                        }}
-                                    >
+                                    <div>
 
-                                        {/* Left Box */}
+                                        {/* 显示图片导航控件 */}
 
-                                        {images.length > 0 &&
-
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center'
-                                                }}
-                                            >
-
-                                                <Button
-                                                    style={{
-                                                        color: '#fff',
-                                                        lineHeight: '100%'
-                                                    }}
-                                                    type="text" size="small" icon={<LeftOutlined />} onClick={() => handleChangeImagesClick(-1)} />
-
-                                                <div
-                                                    style={{
-                                                        width: '40px',
-                                                        textAlign: 'center',
-                                                        color: '#fff',
-                                                        fontWeight: '500',
-                                                        padding: '0 4px',
-                                                    }}
-                                                >{imageIndex + 1 + '/' + images.length}
-                                                </div>
-
-                                                <Button
-                                                    style={{
-                                                        color: '#fff',
-                                                        lineHeight: '100%'
-                                                    }}
-                                                    type="text" size="small" icon={<RightOutlined />} onClick={() => handleChangeImagesClick(1)} />
-
-                                            </div>
-
-                                        }
-
-                                        {/* Right Box */}
                                         <div
                                             style={{
                                                 display: 'flex',
-                                                flexDirection: 'row-reverse',
-                                                flex: '1',
-                                                alignItems: 'end'
+                                                flexGrow: 'inherit',
+                                                alignItems: 'center'
                                             }}
-
                                         >
 
-                                            <Button type="text" size="small" style={{ color: '#fff' }} onClick={() => handleEditImagesClick()} icon={<FormOutlined />} />
+                                            {/* Left Box */}
 
+                                            {images.length > 0 &&
 
+                                                <div
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}
+                                                >
+
+                                                    <Button
+                                                        style={{
+                                                            color: '#fff',
+                                                            lineHeight: '100%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                        type="text" size="small" icon={<LeftOutlined />} onClick={() => handleChangeImagesClick(-1)} />
+
+                                                    <div
+                                                        style={{
+                                                            width: '40px',
+                                                            textAlign: 'center',
+                                                            color: '#fff',
+                                                            fontWeight: '500',
+                                                            padding: '0 4px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >{imageIndex + 1 + '/' + images.length}
+                                                    </div>
+
+                                                    <Button
+                                                        style={{
+                                                            color: '#fff',
+                                                            lineHeight: '100%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                        type="text" size="small" icon={<RightOutlined />} onClick={() => handleChangeImagesClick(1)} />
+
+                                                </div>
+
+                                            }
+
+                                            {/* Right Box */}
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'row-reverse',
+                                                    flex: '1',
+                                                }}
+
+                                            >
+
+                                                <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => handleEditImagesClick()} icon={<FormOutlined />} />
+
+                                            </div>
 
                                         </div>
 
@@ -288,29 +303,34 @@ export function Images(props: ImagesProps) {
                             </div>
 
 
+                            {/* 图片来源信息 */}
+                            {images.length > 0 &&
+
+                                <div
+                                    className="imageSource"
+
+                                    style={{
+                                        flex: '1',
+                                        display: 'flex',
+                                        alignItems: 'flex-end',
+                                        fontSize: '0.90em',
+                                        color: 'rgba(255, 255, 255, 0.8)',
+                                        padding: '8px',
+                                        marginTop: '4px',
+                                        lineHeight: 'normal',
+                                        textShadow: '2px 2px 5px rgba(0, 0, 0, 0.3)'
+                                    }}
+                                >
+                                    Photo by <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
+
+                                    {/* By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash */}
+                                </div>
+                            }
+
                         </div>
                     }
 
                 </div>
-
-                {images.length > 0 &&
-
-                    <div
-                        className="imageSource"
-
-                        style={{
-                            fontSize: '0.92em',
-                            color: 'rgba(0, 0, 0, 0.4)',
-                            marginTop: '4px',
-                            lineHeight: 'normal'
-                        }}
-                    >
-                        Photo by <a style={{ textDecoration: 'underline' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
-
-                        {/* By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash */}
-                    </div>
-                }
-
 
             </div>
 

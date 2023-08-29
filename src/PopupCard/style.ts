@@ -13,7 +13,7 @@ export const popupCardStyle = `
   color:#ffffff;
 }
 
-.ankiSpaceButtonBox,.followUpMenu {
+.contextBox,.followUpMenu {
   display: flex;
   width: fit-content;
   padding: 4px 8px;
@@ -22,18 +22,39 @@ export const popupCardStyle = `
   border-radius: 4px;
   box-shadow: 0px 8px 28px rgba(0,0,0,.16);
   z-index:9;
+
+}
+
+.contextBox {
+  align-items: center;
+}
+
+.contextBox * {
+  cursor: default;
+  padding: 2px;
+}
+
+.ankiSpaceButtonBox {
+  display: flex;
+  flex-direction: row;
+  margin-right: 8px;
+  border-right: 1px solid rgba(5, 5, 5, .12);
+  padding-right: 10px;
 }
 
 .setAnkiSpaceButton:first-of-type {
   margin-right:8px;
 }
 
-.setAnkiSpaceButton {
-  cursor: pointer;
-  padding: 2px;
-}
+// .lookUpButton {
+//   width: 18px;
+//   height: 18px;
+//   background-size: contain;
+//   background-repeat: no-repeat;
+//   background-position: center;
+// }
 
-.setAnkiSpaceButton:hover {
+.ankiSpaceButtonBox *:hover {
   
   background-color: rgba(0,0,59,0.051);
   border-radius: 2px;

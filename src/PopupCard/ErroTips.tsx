@@ -11,7 +11,7 @@ export function ErroTips() {
   
     const changeBackground = () => {
 
-      console.log('changeBackground');
+      // console.log('changeBackground');
       
     };
   

@@ -1,17 +1,23 @@
 import browser from 'webextension-polyfill'
 
-import React, { useEffect, useState, createContext, useContext } from "react";
+import React, { useEffect, useRef, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 
 import { PopupCard } from "./PopupCard"
 
 import { StyleProvider } from '@ant-design/cssinjs';
+import { StyleSheetManager } from 'styled-components';
+
 
 import { fetchcurrentLanguage } from './lib/lang';
 import { CurrentLanguageContext } from './lib/locale'
 import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 
 import { popupCardStyle } from './PopupCard/style'
+
+import LOGO from './assets/icon128.png'
+
+import styled from 'styled-components';
 
 // import './assets/tailwind.css';
 
@@ -150,12 +156,12 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
     container.onmousedown = (event) => {
       // 隐藏 setAnkiSpaceButton
-      const ankiSpaceButtonBox = container.getElementsByClassName('ankiSpaceButtonBox')[0]
+      const contextBox = container.getElementsByClassName('contextBox2')[0]
 
-      if (ankiSpaceButtonBox) {
+      if (contextBox) {
         // 点击的不是 setAnkiSpaceButton 时才隐藏
-        if (ankiSpaceButtonBox !== event.target && !ankiSpaceButtonBox.contains(event.target as Node)) {
-          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
+        if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
+          contextBox.parentNode?.removeChild(contextBox)
         }
 
       }
@@ -175,12 +181,18 @@ async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: a
 
   ReactDOM.render(
     <React.StrictMode>
+
       <CurrentLanguageContext.Provider value={lang}>
         <StyleProvider container={shadowRoot}>
-          <PopupCard data={data} selection={msg} runPrompt={runPrompt} isPin={isPin} />
+          <StyleSheetManager target={shadowRoot}>
+
+            <PopupCard data={data} selection={msg} runPrompt={runPrompt} isPin={isPin} />
+
+          </StyleSheetManager>
         </StyleProvider>
       </CurrentLanguageContext.Provider>
-    </React.StrictMode>,
+
+    </React.StrictMode >,
     MyBox
   );
 
@@ -260,119 +272,23 @@ const handleMouseup = (event: any) => {
         //在 messages 容器内操作，则显示操作按钮
         isInMessages = true
       }
+      
+      console.log(container.querySelector('.contextBox2'));
+      console.log(!container.querySelector('.contextBox2'));
+      
+      if (PopupCardContainer && selectedTextString.length > 0 && !container.querySelector('.contextBox2')) {
 
-      if (PopupCardContainer && selectedTextString.length > 0) {
+        let contextBox2 = document.createElement('div');
+        contextBox2.className = 'contextBox2'
+        contextBox2.style.position = 'relative'
 
-        // 窗口 DOM
-        const popupCard = container.querySelector('#LearningEnglish2023')
-
-        let ankiSpaceButtonBox = document.createElement('div');
-        ankiSpaceButtonBox.className = 'ankiSpaceButtonBox'
-
-        // 按钮：新增填空
-        let setAnkiSpaceButton = document.createElement('div');
-        setAnkiSpaceButton.textContent = '[...]'
-        setAnkiSpaceButton.className = 'setAnkiSpaceButton'
-        // 按钮：新增填空，并新增 1 个单独的卡片
-        let newAnkiSpaceButton = document.createElement('div');
-        newAnkiSpaceButton.textContent = '[...]+'
-        newAnkiSpaceButton.className = 'setAnkiSpaceButton'
-        // 追加查询按钮
-        let lookUpButton = document.createElement('div');
-        lookUpButton.textContent = 'Prompt'
-        lookUpButton.className = 'lookUpButton'
-
-        //设置按钮的位置
-        const selectedTextX = selectedText.getRangeAt(0).getBoundingClientRect().x
-        const selectedTextY = selectedText.getRangeAt(0).getBoundingClientRect().y
-
-        const selectedTextWidth = selectedText.getRangeAt(0).getBoundingClientRect().width
-        const selectedTextHeight = selectedText.getRangeAt(0).getBoundingClientRect().height
-
-
-        ankiSpaceButtonBox.appendChild(setAnkiSpaceButton)
-        ankiSpaceButtonBox.appendChild(newAnkiSpaceButton)
-        ankiSpaceButtonBox.appendChild(lookUpButton)
-        PopupCardContainer.appendChild(ankiSpaceButtonBox)
-
-        const buttonX = ankiSpaceButtonBox.getBoundingClientRect().x
-        const buttonY = ankiSpaceButtonBox.getBoundingClientRect().y
-
-        // 最大 X 值
-        const maxX = (popupCard?.getBoundingClientRect().width || 0) - ankiSpaceButtonBox.getBoundingClientRect().width - 10
-        let left = selectedTextX - buttonX + selectedTextWidth - 40
-        left = left > maxX ? maxX : left
-
-        ankiSpaceButtonBox.style.position = 'relative'
-        ankiSpaceButtonBox.style.left = left.toString() + 'px'
-        ankiSpaceButtonBox.style.top = (selectedTextY - buttonY - selectedTextHeight - 20).toString() + 'px'
-
+        PopupCardContainer.appendChild(contextBox2)
 
         let range = selectedText.getRangeAt(0);
-
-        // 新增填空
-        setAnkiSpaceButton.addEventListener('click', (event) => {
-
-          setAnkiSpace(range, selectedTextString, event, false)
-          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
-        });
-
-        // 新增填空，并新增 1 个单独的卡片
-        newAnkiSpaceButton.addEventListener('click', (event) => {
-
-          setAnkiSpace(range, selectedTextString, event, true)
-          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
-        });
-
-        // 追加查询
-        lookUpButton.addEventListener('click', (event) => {
-          console.log('selectedText:');
-          console.log(selectedText);
-
-          const followUpMenuBox = container.querySelector('.followUpMenuBox')
-          const messagesBox = container.querySelector('.messages')
-
-          console.log(messagesBox);
-
-
-          const selectedTextX = selectedText.getRangeAt(0).getBoundingClientRect().x
-          const selectedTextY = selectedText.getRangeAt(0).getBoundingClientRect().y
-
-          const selectedTextWidth = selectedText.getRangeAt(0).getBoundingClientRect().width
-          const selectedTextHeight = selectedText.getRangeAt(0).getBoundingClientRect().height
-
-
-          const followUpMenuBoxX = messagesBox?.getBoundingClientRect().x || 0
-          const followUpMenuBoxY = (messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)
-          const followUpMenuBoxWidth = 140
-          // const followUpMenuBoxHeight = followUpMenuBox?.getBoundingClientRect().height || 0
-
-          const maxX = (popupCard?.getBoundingClientRect().width || 0) - followUpMenuBoxWidth - 10
-          console.log(maxX);
-
-          // const maxY = popupCard?.getBoundingClientRect().width || 0 - followUpMenuBoxWidth
-          // const x = 0
-          // const y = 0
-
-
-          let left = (selectedTextX - followUpMenuBoxX - selectedTextWidth - 40)
-          let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight)
-
-          // X 坐标的最大最小值
-          left = left < 0 ? 0 : left
-          left = left > maxX ? maxX : left
-
-          browser.runtime.sendMessage({
-            type: 'UPDATE_POPUP_CARD', payload: {
-              style: {
-                left: left,
-                top: top,
-              }, followUpData: { keyWord: selectedTextString, sentence: sentence }
-            }
-          });
-          ankiSpaceButtonBox.parentNode?.removeChild(ankiSpaceButtonBox)
-
-        });
+        ReactDOM.render(
+          <StyleSheetManager target={shadowRoot}>
+            <ToolBar selectedText={selectedText.getRangeAt(0).getBoundingClientRect()} selectedTextString={selectedTextString} range={range} />
+          </StyleSheetManager>, contextBox2);
 
       }
 
@@ -457,4 +373,158 @@ const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew
   range?.deleteContents();
   range?.insertNode(span);
 
+}
+
+interface ToolBarProps {
+  selectedText: any;
+  range: any;
+  selectedTextString: string;
+}
+
+
+const StyledButton = styled.button`
+    
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    &:hover {
+      opacity: 0.8;
+    }
+`;
+
+function ToolBar(props: ToolBarProps) {
+
+  const [showMenu, setShowMenu] = useState(true)
+  const ContextBox = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+
+
+
+    const contextBox = ContextBox.current
+    const popupCard = container.querySelector('#LearningEnglish2023')
+
+    console.log('selectedText:');
+    console.log(props.selectedText);
+
+    //设置按钮的位置
+    const selectedTextX = props.selectedText.x
+    const selectedTextY = props.selectedText.y
+
+    const selectedTextWidth = props.selectedText.width
+    const selectedTextHeight = props.selectedText.height
+
+    const buttonX = contextBox?.getBoundingClientRect().x || 0
+    const buttonY = contextBox?.getBoundingClientRect().y || 0
+
+
+    // 最大 X 值
+    const maxX = (popupCard?.getBoundingClientRect().width || 0) - contextBox!.getBoundingClientRect().width - 10
+    let left = selectedTextX - buttonX + selectedTextWidth - 40
+    left = left > maxX ? maxX : left
+
+    // contextBox2!.style.position = 'relative'
+    // contextBox!.style.position = 'absolute'
+
+    contextBox!.style.left = left.toString() + 'px'
+    contextBox!.style.top = (selectedTextY - buttonY - 40).toString() + 'px'
+
+    setShowMenu(true)
+
+  }, [])
+
+
+  const handleSetAnkiSpaceButtonClick = (event: any, isAddNew: boolean) => {
+    setAnkiSpace(props.range, props.selectedTextString, event, isAddNew)
+
+    console.log('ContextBox:');
+    console.log(ContextBox);
+
+    // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
+    setShowMenu(false)
+  }
+
+  const handleFollowUpMenuClick = () => {
+
+    console.log('ContextBox:');
+    console.log(ContextBox);
+
+    // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
+
+    const PopupCardContainer = container.getElementsByClassName('container')[0]
+    const messagesBox = container.querySelector('.messages')
+    console.log('selectedText:');
+    console.log(props.selectedText);
+
+    const sentence = ''
+
+    const selectedTextX = props.selectedText.x
+    const selectedTextY = props.selectedText.y
+
+    const selectedTextWidth = props.selectedText.width
+    const selectedTextHeight = props.selectedText.height
+
+    const followUpMenuBoxX = messagesBox?.getBoundingClientRect().x || 0
+    const followUpMenuBoxY = (messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)
+    const followUpMenuBoxWidth = 140
+    // const followUpMenuBoxHeight = followUpMenuBox?.getBoundingClientRect().height || 0
+    console.log('PopupCardContainer?.getBoundingClientRect():');
+    console.log(PopupCardContainer?.getBoundingClientRect());
+
+    const maxX = (PopupCardContainer?.getBoundingClientRect().width || 0) - followUpMenuBoxWidth - 10
+    // console.log(maxX);
+    // console.log((messagesBox?.getBoundingClientRect().height || 0));
+    // console.log(messagesBox?.getBoundingClientRect());
+    // console.log(container.getElementsByClassName('followUpMenu')[0].getBoundingClientRect())
+    const minY = ((PopupCardContainer?.getBoundingClientRect().y || 0) + (PopupCardContainer?.getBoundingClientRect().height || 0)) - ((messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)) - 230
+
+    let left = (selectedTextX - followUpMenuBoxX + selectedTextWidth - 40)
+    let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight - 40)
+
+    // X 坐标的最大最小值
+    left = left < 0 ? 0 : left
+    left = left > maxX ? maxX : left
+
+    // Y 坐标的最大值
+    top = top > minY ? minY : top
+
+    browser.runtime.sendMessage({
+      type: 'UPDATE_POPUP_CARD', payload: {
+        style: {
+          left: left,
+          top: top,
+        }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
+      }
+    });
+
+    setShowMenu(false)
+
+  }
+
+  return (
+    <>
+      {showMenu && <div ref={ContextBox}
+        className='contextBox' style={{
+          position: 'absolute'
+        }}>
+        <div className='ankiSpaceButtonBox'>
+          <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>[...]</div>
+          <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>[...]+</div>
+        </div>
+        <div>
+          <StyledButton
+            className='lookUpButton' style={{
+              backgroundImage: `url(${LOGO})`,
+            }}
+            onClick={handleFollowUpMenuClick}
+          ></StyledButton>
+        </div>
+      </div>
+      }
+    </>
+
+  )
 }

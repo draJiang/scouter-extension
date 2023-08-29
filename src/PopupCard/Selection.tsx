@@ -141,7 +141,8 @@ export function Selection(props: SelectionProps) {
       <style>{style}</style>
       <div id="ScouterSelection" className=''
         style={{
-          paddingBottom: '10px'
+          paddingBottom: '10px',
+          margin: '8px 0'
         }}
       >
 

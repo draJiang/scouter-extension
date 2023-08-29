@@ -3,6 +3,12 @@ import React, { useEffect, useState, useRef, ReactNode } from "react";
 import { PromptType } from '../types'
 import { getDefaultPrompt } from './util'
 
+import styled from 'styled-components';
+
+
+
+
+
 interface PromptListProps {
     promptList: Array<PromptType>;
     followUpData: { keyWord: string, sentence: string }
@@ -17,11 +23,19 @@ interface PromptButtonProps {
 
 export function PromptList(props: PromptListProps) {
 
+    const PromptListDOM = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
+        console.log(PromptListDOM.current);
+        console.log(PromptListDOM.current?.clientHeight);
+
+        // //设置菜单的位置
+        // if (PromptListDOM.current) {
+        //     PromptListDOM.current.style.top = (parseInt(PromptListDOM.current.style.top, 10) - PromptListDOM.current.clientHeight).toString() + 'px'
+        // }
 
 
-
-    });
+    }, [props.showFollowUpDataMenu.show]);
 
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
@@ -34,13 +48,15 @@ export function PromptList(props: PromptListProps) {
 
     return (
         <div
+            ref={PromptListDOM}
             className='followUpMenu'
             style={{
                 ...props.showFollowUpDataMenu.style,
                 position: 'absolute',
                 display: "flex",
                 flexDirection: "column",
-                width: '120px'
+                width: '120px',
+                padding: '8px 8px 4px 8px'
                 // top: "50%",
                 // left: "50%",
                 // transform: "translate(-50%, -50%)",
@@ -70,17 +86,32 @@ export function PromptList(props: PromptListProps) {
     )
 }
 
+const StyledButton = styled.button`
+
+    padding: 6px;
+    margin-bottom: 4px;
+    border-radius: 2px;
+    cursor: unset;
+
+    &:hover {
+        background-color:#F6F6F6;
+    }
+`;
+
 function PromptButton(props: PromptButtonProps) {
+
+
     return (
 
-        <button style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            textAlign: 'left',
-            padding: '4px'
-        }}
-            onClick={props.handleMenuItemClick}>{props.children}</button>
+        <StyledButton
+            style={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                textAlign: 'left',
+                padding: '4px'
+            }}
+            onClick={props.handleMenuItemClick}>{props.children}</StyledButton>
 
     )
 }

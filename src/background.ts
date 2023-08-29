@@ -576,7 +576,6 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   if (request.type === 'UPDATE_POPUP_CARD') {
 
-    console.log('hello');
     popupPort.postMessage(request);
 
 

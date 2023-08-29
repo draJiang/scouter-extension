@@ -136,9 +136,9 @@ export const Options = () => {
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
 
-      console.log(items);
+      // console.log(items);
 
-      console.log('setRadioValue');
+      // console.log('setRadioValue');
 
 
       if (items.apiKeySelection === 'licenseKey') {
@@ -172,9 +172,7 @@ export const Options = () => {
         model: items.model
       });
 
-      console.log(items);
-
-
+      // console.log(items);
 
 
     })
@@ -256,16 +254,12 @@ export const Options = () => {
   };
 
   const thisGetBalance = (licenseKey: string) => {
-    console.log('licenseKey:');
-    console.log(licenseKey);
-
 
     if (licenseKey !== '' && licenseKey !== undefined) {
 
       // 更新 tokens 信息
       getBalance(licenseKey).then((balance: unknown) => {
 
-        console.log('data' in (balance as BalanceResponse));
 
         if ('data' in (balance as BalanceResponse)) {
 

@@ -977,7 +977,7 @@ export function PopupCard(props: any) {
     const cardStyle = `<style>
 
     .sentence{
-      opacity:0.65;
+      opacity:0.75;
     }
     img {
       width:auto;
@@ -1014,13 +1014,19 @@ export function PopupCard(props: any) {
     // 请求 background 将数据保存到 Anki
 
     // 常规类型
+
+    let ankiBack = '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>' + container
+    if (keyWord.length > 20) {
+      // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
+      ankiBack = container + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>'
+    }
     let p = {
       "note": {
         "deckName": deckName,
         "modelName": modelName,
         "fields": {
           [front]: keyWord,
-          [back]: cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">Source</a></p>' + container
+          [back]: cardStyle + ankiBack
         },
         "tags": [
           "Scouter"
@@ -1035,7 +1041,7 @@ export function PopupCard(props: any) {
           "deckName": deckName,
           "modelName": modelName,
           "fields": {
-            [front]: '<p>' + ScouterSelection + '</p>' + cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">Source</a></p>' + container,
+            [front]: '<p>' + ScouterSelection + '</p>' + cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>' + container,
             [back]: ''
           },
           "tags": [
@@ -1209,7 +1215,7 @@ export function PopupCard(props: any) {
                 display: showFollowUpDataMenu.show ? 'block' : 'none',
                 position: "relative",
                 width: 'fit-content',
-                height: '1px'
+                height: '0'
               }}>
 
                 <PromptList followUpData={followUpData} showFollowUpDataMenu={showFollowUpDataMenu}
