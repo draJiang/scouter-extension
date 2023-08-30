@@ -10,7 +10,8 @@ export async function getSettings() {
         "targetLanguage": '',
         "ankiDeckName": '',
         "licenseKey": '',
-        "model": models[0]['id'], "apiKeySelection": 'licenseKey'
+        "model": models[0]['id'], "apiKeySelection": 'licenseKey',
+        "newLicenseKey": ''
     })
     return items
 }

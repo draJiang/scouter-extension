@@ -11,13 +11,19 @@ import { getSettings } from './Options/util'
 
 import { models } from './Options/models'
 
-import { getUserId } from './util'
+import { getUserInfo, getBalance } from './util'
+
+import { userInfoType } from './types'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
 
-getUserId().then((userId: string) => {
+getUserInfo().then((userInfo: userInfoType) => {
 
+  const userId = userInfo.userId
+  console.log('userInfo:');
+  console.log(userInfo);
+  
   // 数据埋点
   amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
     defaultTracking: {
@@ -92,7 +98,7 @@ browser.commands.onCommand.addListener(function (command) {
 
 let popupPort: any;
 
-// 长连接，处理 GPT 数据
+// 长连接，主要处理 GPT 数据
 browser.runtime.onConnect.addListener(port => {
   // 收到 content script 消息
   // console.log('连接中------------')
@@ -109,21 +115,29 @@ browser.runtime.onConnect.addListener(port => {
   port.onMessage.addListener(async (msg) => {
     console.log('接收消息：', msg)
 
-    // 获取 API Key 等存储的数据
-    let openApiKey: string, apiKeySelection: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
-    getSettings().then((result) => {
+    // 停止渲染数据
+    if (msg.type === 'StopTheConversation') {
+      // isContinue = false
+      controller.abort();
+    }
 
-      apiKeySelection = result.apiKeySelection
-      licenseKey = result.licenseKey
-      openApiKey = result.openApiKey
-      openApiEndpoint = result.openApiEndpoint
-      currentLanguage = result.currentLanguage
-      targetLanguage = result.targetLanguage
-      model = result.model
+    if (msg.type === 'getGPTMsg') {
+
+      // 获取 API Key 等存储的数据
+      let openApiKey: string, apiKeySelection: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
+      getSettings().then((result) => {
+
+        apiKeySelection = result.apiKeySelection
+        licenseKey = result.licenseKey
+        openApiKey = result.openApiKey
+        openApiEndpoint = result.openApiEndpoint
+        currentLanguage = result.currentLanguage
+        targetLanguage = result.targetLanguage
+        model = result.model
 
 
-      // 请求  GPT 数据
-      if (msg.type === 'getGPTMsg') {
+        // 请求  GPT 数据
+
 
         console.log('getGPTMsg');
 
@@ -324,20 +338,22 @@ browser.runtime.onConnect.addListener(port => {
 
         })
 
-      }
 
-      // 停止渲染数据
-      if (msg.type === 'StopTheConversation') {
-        // isContinue = false
-        controller.abort();
 
-      }
+      })
 
-    })
+    }
+
+    if (msg.type === 'UPDATE_POPUP_CARD') {
+
+      popupPort.postMessage(msg);
+
+    }
 
   })
 })
 
+// 监听一次性消息
 browser.runtime.onMessage.addListener(handleMessage);
 
 function handleMessage(request: any, sender: any, sendResponse: any) {
@@ -520,7 +536,6 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
     browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
 
 
-
     })
 
 
@@ -574,12 +589,29 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   }
 
-  if (request.type === 'UPDATE_POPUP_CARD') {
+  if (request.type === 'getUserStatus') {
 
-    popupPort.postMessage(request);
+    // 获取用户的 License Key
+    getSettings().then((result) => {
+
+      const licenseKey = result.licenseKey
+      // 获取 Key 的余额，有余额则可开启高级功能
+      const data = getBalance(licenseKey)
+      asyncSendResponse(data);
+      console.log(data);
+
+      return true;
+
+    })
 
 
   }
+
+  // if (request.type === 'UPDATE_POPUP_CARD') {
+
+  //   popupPort.postMessage(request);
+
+  // }
 
 }
 

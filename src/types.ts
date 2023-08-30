@@ -79,3 +79,8 @@ export type ImageType = {
         for_hire: boolean;
     };
 }
+
+export type userInfoType = {
+    userId: string,
+    verified: boolean
+};

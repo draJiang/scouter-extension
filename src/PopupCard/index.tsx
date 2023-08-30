@@ -9,6 +9,9 @@ import React, { useEffect, useState, useRef, createContext, useContext } from "r
 // import rehypeRaw from 'rehype-raw'
 // import remarkGfm from 'remark-gfm'
 
+import { getUserInfo } from '../util'
+import { userInfoType } from '../types'
+
 import { useSpring, animated } from 'react-spring';
 
 
@@ -30,10 +33,12 @@ import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 
 import { useCurrentLanguage } from '../lib/locale'
+import { useUserInfoContext } from '../lib/userInfo'
 
 import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
 import { PromptType, ChatMessage, ImageType } from "../types"
+import { lang } from 'lib/lang';
 
 
 let currentLanguage: string
@@ -94,6 +99,7 @@ export function PopupCard(props: any) {
   const inputRef = useRef<HTMLDivElement>(null);
 
   const shouldStayAtBottomRef = useRef(false);
+  const userInfoRef = useRef<userInfoType>();
 
   const [form] = Form.useForm();
 
@@ -106,6 +112,12 @@ export function PopupCard(props: any) {
   let Lang = useCurrentLanguage()!
   currentLanguage = Lang['current']['name']
   targetLanguage = Lang['target']['name']
+
+
+  // const userInfo = useUserInfoContext()
+  // console.log('userInfo:');
+  // console.log(userInfo);
+
 
 
   // 控制追问菜单
@@ -177,8 +189,7 @@ export function PopupCard(props: any) {
 
 
   useEffect(() => {
-    // console.log('useEffect');
-    // console.log(props);
+
 
     // 渲染 Prompt 列表
     initializePromptList()
@@ -225,7 +236,7 @@ export function PopupCard(props: any) {
     windowInitialization({ 'isPin': props.isPin, 'windowElement': windowElement, 'selection': props.selection, 'messagesList': messagesList })
 
 
-  }, [props]);
+  }, []);
 
   // 聊天记录改变时
   useEffect(() => {

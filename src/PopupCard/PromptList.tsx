@@ -5,8 +5,10 @@ import { getDefaultPrompt } from './util'
 
 import styled from 'styled-components';
 
+import { userInfoType } from '../types'
 
-
+import { useUserInfoContext } from '../lib/userInfo'
+import { ProTag } from "../Components/ProTag";
 
 
 interface PromptListProps {
@@ -19,15 +21,21 @@ interface PromptListProps {
 interface PromptButtonProps {
     handleMenuItemClick: () => void;
     children: ReactNode;
+    disable?: boolean;
 }
 
 export function PromptList(props: PromptListProps) {
 
     const PromptListDOM = useRef<HTMLDivElement>(null);
+    const userInfo: userInfoType | null = useUserInfoContext()
+
+    // const userInfo = useUserInfoContext()
+    // console.log('userInfo:');
+    // console.log(userInfo);
 
     useEffect(() => {
-        console.log(PromptListDOM.current);
-        console.log(PromptListDOM.current?.clientHeight);
+        // console.log(PromptListDOM.current);
+        // console.log(PromptListDOM.current?.clientHeight);
 
         // //设置菜单的位置
         // if (PromptListDOM.current) {
@@ -39,10 +47,12 @@ export function PromptList(props: PromptListProps) {
 
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
-        console.log('handleMenuItemClick');
 
-        // 第 3 个参数 false 表示不重新渲染图片
-        props.handleMenuItemClick(data, true, true, props.followUpData)
+        if (userInfo?.verified) {
+            // 第 3 个参数 false 表示不重新渲染图片
+            props.handleMenuItemClick(data, true, true, props.followUpData)
+        }
+
 
     }
 
@@ -56,31 +66,45 @@ export function PromptList(props: PromptListProps) {
                 display: "flex",
                 flexDirection: "column",
                 width: '120px',
-                padding: '8px 8px 4px 8px'
-                // top: "50%",
-                // left: "50%",
-                // transform: "translate(-50%, -50%)",
-                // left: "50%",
-                // zIndex: 9,
-                // backgroundColor: "#fff",
-                // padding: "10px"
+                padding: '0'
             }}
         >
 
-            {/* <button onClick={() => {
-                const p = getDefaultPrompt(props.followUpData.keyWord)
-                handleMenuItemClick(p)
-            }}>Default</button> */}
+            <div style={{
+                display: 'flex',
+                justifyContent: 'end',
+                padding: '8px',
+                borderBottom: '1px solid rgba(5, 5, 5, .06)',
+                color: '#666'
+            }}>
+                <span style={{ flex: '1' }}>Prompt</span>
+                <ProTag />
+            </div>
 
-            <PromptButton handleMenuItemClick={() => {
-                const p = getDefaultPrompt(props.followUpData.keyWord)
-                handleMenuItemClick(p)
-            }}>Default</PromptButton>
 
-            {props.promptList.map((item) => {
-                // return <button onClick={() => handleMenuItemClick(item)}>{item.title}</button>
-                return <PromptButton handleMenuItemClick={() => handleMenuItemClick(item)}>{item.title}</PromptButton>
-            })}
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: '8px 8px 4px',
+                    cursor: !userInfo?.verified ? 'not-allowed' : '',
+                    opacity: !userInfo?.verified ? '0.7' : '1',
+                }}
+            >
+
+                <PromptButton disable={!userInfo?.verified} handleMenuItemClick={() => {
+                    const p = getDefaultPrompt(props.followUpData.keyWord)
+                    handleMenuItemClick(p)
+                }}>Default</PromptButton>
+
+                {props.promptList.map((item) => {
+                    // return <button onClick={() => handleMenuItemClick(item)}>{item.title}</button>
+                    return <PromptButton disable={!userInfo?.verified} handleMenuItemClick={() => handleMenuItemClick(item)}>{item.title}</PromptButton>
+                })}
+
+            </div>
+
+
 
         </div>
     )
@@ -109,7 +133,8 @@ function PromptButton(props: PromptButtonProps) {
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 textAlign: 'left',
-                padding: '4px'
+                padding: '4px',
+                pointerEvents: props.disable ? 'none' : 'auto'
             }}
             onClick={props.handleMenuItemClick}>{props.children}</StyledButton>
 

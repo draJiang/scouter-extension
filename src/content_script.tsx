@@ -11,7 +11,12 @@ import { StyleSheetManager } from 'styled-components';
 
 import { fetchcurrentLanguage } from './lib/lang';
 import { CurrentLanguageContext } from './lib/locale'
+import { UserInfoContext } from './lib/userInfo'
 import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
+
+import { getUserInfo } from './util'
+import { userInfoType } from './types'
+
 
 import { popupCardStyle } from './PopupCard/style'
 
@@ -73,6 +78,14 @@ if (MyBox === null || MyBox === undefined) {
 
 }
 
+let USER_INFO: userInfoType
+const thisGetUserInfo = async () => {
+
+  USER_INFO = await getUserInfo()
+
+}
+
+thisGetUserInfo()
 
 let port = browser.runtime.connect({
   name: 'fromContentScript'
@@ -175,28 +188,70 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
 // 显示应用窗口
 async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
-  // let a = await fetchcurrentLanguage()
-  // console.log(a);
-  const lang = await fetchcurrentLanguage()
+
+  let lang = await fetchcurrentLanguage()
 
   ReactDOM.render(
+
     <React.StrictMode>
 
       <CurrentLanguageContext.Provider value={lang}>
-        <StyleProvider container={shadowRoot}>
-          <StyleSheetManager target={shadowRoot}>
-
-            <PopupCard data={data} selection={msg} runPrompt={runPrompt} isPin={isPin} />
-
-          </StyleSheetManager>
-        </StyleProvider>
+        <UserInfoContext.Provider value={USER_INFO}>
+          <StyleProvider container={shadowRoot}>
+            <StyleSheetManager target={shadowRoot}>
+              <PopupCard data={data} selection={msg} runPrompt={runPrompt} isPin={isPin} />
+            </StyleSheetManager>
+          </StyleProvider>
+        </UserInfoContext.Provider>
       </CurrentLanguageContext.Provider>
 
+      {/* <PopupCardContext data={data} selection={msg} runPrompt={runPrompt} /> */}
+
     </React.StrictMode >,
+
     MyBox
   );
 
 }
+
+// interface PopupCardContextProps {
+//   data: any;
+//   selection: any;
+//   runPrompt: boolean;
+// }
+
+// function PopupCardContext(props: PopupCardContextProps) {
+
+//   const [userInfo, setUserInfo] = useState<userInfoType | null>(null);
+//   const [lang, setLang] = useState<any>(null);
+
+
+//   useEffect(() => {
+//     async function fetchUserInfo() {
+//       const info = await getUserInfo();
+//       const lang = await fetchcurrentLanguage()
+//       setLang(lang)
+//       setUserInfo(info);
+
+//     }
+
+//     fetchUserInfo();
+//   }, []);  // 跑一次，不依赖任何外部变量
+
+
+//   return (
+//     <CurrentLanguageContext.Provider value={lang}>
+//       <UserInfoContext.Provider value={USER_INFO}>
+//         <StyleProvider container={shadowRoot}>
+//           <StyleSheetManager target={shadowRoot}>
+//             <PopupCard data={props.data} selection={props.selection} runPrompt={props.runPrompt} isPin={isPin} />
+//           </StyleSheetManager>
+//         </StyleProvider>
+//       </UserInfoContext.Provider>
+//     </CurrentLanguageContext.Provider>
+//   )
+
+// }
 
 
 export const pinPopupCard = (value: boolean) => {
@@ -237,6 +292,8 @@ const handleMouseup = (event: any) => {
 
     // console.log('isTextSelected && !donotClosePopupCard');
 
+    console.log(event);
+
     if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
 
       // 在 PopupCard 范围外触发
@@ -263,7 +320,7 @@ const handleMouseup = (event: any) => {
       const PopupCardContainer = container.getElementsByClassName('container')[0]
       const messagesBox = container.getElementsByClassName('messages')[0]
 
-      // console.log(event);
+      console.log(event);
       // console.log(selectedText);
       // console.log(messagesBox?.contains(selectedText.baseNode.parentNode as Node));
 
@@ -272,10 +329,10 @@ const handleMouseup = (event: any) => {
         //在 messages 容器内操作，则显示操作按钮
         isInMessages = true
       }
-      
+
       console.log(container.querySelector('.contextBox2'));
       console.log(!container.querySelector('.contextBox2'));
-      
+
       if (PopupCardContainer && selectedTextString.length > 0 && !container.querySelector('.contextBox2')) {
 
         let contextBox2 = document.createElement('div');
@@ -285,6 +342,8 @@ const handleMouseup = (event: any) => {
         PopupCardContainer.appendChild(contextBox2)
 
         let range = selectedText.getRangeAt(0);
+        console.log('show ToolBar');
+
         ReactDOM.render(
           <StyleSheetManager target={shadowRoot}>
             <ToolBar selectedText={selectedText.getRangeAt(0).getBoundingClientRect()} selectedTextString={selectedTextString} range={range} />
@@ -402,8 +461,6 @@ function ToolBar(props: ToolBarProps) {
 
   useEffect(() => {
 
-
-
     const contextBox = ContextBox.current
     const popupCard = container.querySelector('#LearningEnglish2023')
 
@@ -491,16 +548,38 @@ function ToolBar(props: ToolBarProps) {
     // Y 坐标的最大值
     top = top > minY ? minY : top
 
-    browser.runtime.sendMessage({
+    if (typeof browser.runtime.sendMessage === "function") {
+      console.log('typeof browser.runtime.sendMessage === "function"');
+
+    }
+
+    // browser.runtime.sendMessage({
+    //   type: 'UPDATE_POPUP_CARD', payload: {
+    //     style: {
+    //       left: left,
+    //       top: top,
+    //     }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
+    //   }
+    // });
+
+    console.log('setShowMenu(false):');
+
+    setShowMenu(false)
+
+    // 取消文字选中，避免意外弹出菜单栏
+    window.getSelection()?.removeAllRanges();
+
+
+    port.postMessage({
       type: 'UPDATE_POPUP_CARD', payload: {
         style: {
           left: left,
           top: top,
         }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
       }
-    });
+    })
 
-    setShowMenu(false)
+
 
   }
 

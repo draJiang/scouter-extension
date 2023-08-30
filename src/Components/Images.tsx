@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import browser from 'webextension-polyfill'
-import { Button, Image, Input, Empty } from 'antd';
+import { Button, Image, Input, Empty, Tag } from 'antd';
 import { LoadingOutlined, RightOutlined, LeftOutlined, CloseOutlined, CheckOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
 
 import { InputRef } from 'antd/lib/input';
+import { ProTag } from "./ProTag";
 
-import { ImageType } from '../types'
+import { ImageType, userInfoType } from '../types'
+
+import { useUserInfoContext } from '../lib/userInfo'
 
 
 interface ImagesProps {
@@ -22,6 +25,7 @@ export function Images(props: ImagesProps) {
     const [changeImage, setChangeImageStatus] = useState(false)
     // const [searchImageIsLoading, setSearchImageIsLoading] = useState(false)
 
+    const userInfo: userInfoType | null = useUserInfoContext()
     // const [currentURL, setCurrentURL] = useState<string>();
 
     const inputElement = useRef<InputRef>(null);
@@ -38,7 +42,10 @@ export function Images(props: ImagesProps) {
         // console.log(inputElement);
         // console.log(inputElement.current);
         // console.log(inputElement.current?.input);
-        inputElement.current?.focus()
+        if (userInfo?.verified) {
+            inputElement.current?.focus()
+        }
+
 
     }, [changeImage]);
 
@@ -57,15 +64,25 @@ export function Images(props: ImagesProps) {
 
         event.stopPropagation()
 
-        let inputValue = inputElement.current?.input?.value
+        if (userInfo?.verified) {
 
-        if (inputValue && inputValue !== '') {
-            props.getUnsplashImages(inputValue)
-            setChangeImageStatus(false)
+            let inputValue = inputElement.current?.input?.value
 
-            // amplitude.track('handleSearchImage');
-            browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleSearchImage' })
+            if (inputValue && inputValue !== '') {
+                props.getUnsplashImages(inputValue)
+                setChangeImageStatus(false)
+
+                // amplitude.track('handleSearchImage');
+                browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleSearchImage' })
+            }
+
+        } else {
+
+            alert('Is not verified')
+
         }
+
+
 
 
     }
@@ -203,7 +220,13 @@ export function Images(props: ImagesProps) {
                                         }}
                                     >
                                         <div style={{ flex: '1', marginRight: '20px' }}>
-                                            <Input prefix={<SearchOutlined />} placeholder="Search images" onKeyDown={handleSearchInput} size="small" style={{ width: '100%' }} ref={inputElement} onPressEnter={handleSearchBtnClick} />
+                                            <Input style={{
+                                                backgroundColor: userInfo?.verified === false ? 'rgba(255, 255, 255, 0.9)' : '',
+                                                width: '100%',
+                                                paddingRight: '2px'
+                                            }}
+                                                suffix={<ProTag />}
+                                                disabled={!userInfo?.verified} prefix={<SearchOutlined />} placeholder="Search images" onKeyDown={handleSearchInput} size="small" ref={inputElement} onPressEnter={handleSearchBtnClick} />
                                         </div>
 
                                         <div style={{
@@ -211,7 +234,7 @@ export function Images(props: ImagesProps) {
                                             alignItems: 'center'
                                         }}>
 
-                                            <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }} onClick={handleSearchBtnClick} icon={<CheckOutlined />} />
+                                            <Button disabled={!userInfo?.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<CheckOutlined />} />
                                             <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
 
                                         </div>

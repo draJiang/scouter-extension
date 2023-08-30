@@ -8,17 +8,18 @@ import * as amplitude from '@amplitude/analytics-browser';
 import { ankiAction, getDefaultDeckName } from '../util'
 
 import { BuyLicenseKeyDrawer } from './BuyLicenseKeyDrawer'
+import { ProTag } from "../Components/ProTag";
 
 import { Button, Radio, Tooltip, Tabs, Input, Form, Space, Divider, ConfigProvider, Select, Drawer, Tag } from 'antd';
 import type { TabsProps } from 'antd';
 
-import { ThunderboltTwoTone, ThunderboltFilled } from '@ant-design/icons';
+import { ThunderboltTwoTone, CheckCircleTwoTone, InfoCircleOutlined } from '@ant-design/icons';
 
 import { getSettings } from './util'
 
 import "./index.css"
 
-import { getBalance, getUserId } from '../util'
+import { getBalance, getUserInfo } from '../util'
 
 import { lang } from "../lib/lang"
 
@@ -26,6 +27,8 @@ import { models } from "./models"
 
 import type { RadioChangeEvent } from 'antd';
 import { Timeout } from 'microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common/Timeout';
+
+import { userInfoType } from '../types'
 
 type LanguageObject = Record<string, {
   name: string;
@@ -47,18 +50,9 @@ interface BalanceResponse {
   };
 }
 
-// 数据埋点
-getUserId().then((userId: string) => {
 
-  // 数据埋点
-  amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
-    defaultTracking: {
-      pageViews: false,
-      sessions: false,
-    },
-  });
+let USER_INFO: userInfoType
 
-})
 
 const languageData: LanguageObject = lang;
 
@@ -66,7 +60,7 @@ const languageData: LanguageObject = lang;
 export const Options = () => {
 
   const [radioValue, setRadioValue] = useState<string | null>('licenseKey');
-  const [points, setPoints] = useState<string | null>('');
+  const [verified, setVerified] = useState<boolean | null>(false);
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [isUseOpenAIKey, setIsUseOpenAIKey] = useState(true);
@@ -125,8 +119,42 @@ export const Options = () => {
     //   console.log('历史记录已删除');
     // });
 
+    thisGetUserStatus().then((userInfo: userInfoType) => {
 
-    amplitude.track('openOptions');
+      const userId = userInfo.userId
+
+      // 数据埋点
+      amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
+        defaultTracking: {
+          pageViews: false,
+          sessions: false,
+        },
+      });
+
+      amplitude.track('openOptions');
+
+    })
+
+    // 数据埋点
+    // getUserInfo().then((userInfo: userInfoType) => {
+
+    //   USER_INFO = userInfo
+    //   const userId = userInfo.userId
+
+    //   // 数据埋点
+    //   amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
+    //     defaultTracking: {
+    //       pageViews: false,
+    //       sessions: false,
+    //     },
+    //   });
+
+    //   amplitude.track('openOptions');
+
+    // })
+
+
+
 
     let defaultDeckName = ''
 
@@ -135,11 +163,6 @@ export const Options = () => {
     // 获取配置信息
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
-
-      // console.log(items);
-
-      // console.log('setRadioValue');
-
 
       if (items.apiKeySelection === 'licenseKey') {
         // 显示 licenseKey
@@ -156,7 +179,7 @@ export const Options = () => {
       })
 
       // 获取 Token
-      thisGetBalance(items.licenseKey)
+      // thisGetBalance(items.licenseKey)
 
 
       // 更新 input 文本框的默认值
@@ -169,7 +192,8 @@ export const Options = () => {
         targetLanguage: items.targetLanguage,
         ankiDeckName: defaultDeckName,
         licenseKey: items.licenseKey,
-        model: items.model
+        model: items.model,
+        newLicenseKey: items.newLicenseKey
       });
 
       // console.log(items);
@@ -192,25 +216,6 @@ export const Options = () => {
     })
 
   }, [ankiDeckNames.join(''), ankiClientIsopen])
-
-  // useEffect(() => {
-  //   console.log('open Options');
-
-  // }, [])
-
-  // async function getSettings() {
-  //   let items = await browser.storage.sync.get({
-  //     "openApiKey": '',
-  //     "openApiEndpoint": '',
-  //     "unsplashApiKey": '',
-  //     "currentLanguage": '',
-  //     "targetLanguage": '',
-  //     "ankiDeckName": '',
-  //     "licenseKey": '',
-  //     "model": models[0]['id'], "apiKeySelection": 'licenseKey'
-  //   })
-  //   return items
-  // }
 
   // 保存设置
   async function saveOptions(values: any) {
@@ -236,7 +241,8 @@ export const Options = () => {
         ankiDeckName: values['ankiDeckName'],
         licenseKey: values['licenseKey'],
         model: values['model'],
-        apiKeySelection: values['apiKeySelection']
+        apiKeySelection: values['apiKeySelection'],
+        newLicenseKey: values['newLicenseKey']
       }
     ).then(item => {
 
@@ -249,32 +255,32 @@ export const Options = () => {
 
     })
 
-    thisGetBalance(values['licenseKey'])
+    // thisGetBalance(values['licenseKey'])
+
+    // 更新订阅状态
+    thisGetUserStatus()
 
   };
 
-  const thisGetBalance = (licenseKey: string) => {
+  const thisGetUserStatus = (): Promise<userInfoType> => {
 
-    if (licenseKey !== '' && licenseKey !== undefined) {
+    return new Promise((resolve, reject) => {
 
-      // 更新 tokens 信息
-      getBalance(licenseKey).then((balance: unknown) => {
+      getUserInfo().then((userInfo: userInfoType) => {
+
+        // 更新 UI
+        setVerified(userInfo.verified)
 
 
-        if ('data' in (balance as BalanceResponse)) {
-
-          setPoints(Math.floor((balance as BalanceResponse).data.limit_remaining / 2 * 100 * 100) / 100 + '%')
-
-        } else {
-
-          setPoints(null)
-
-        }
+        resolve(userInfo)
 
       })
-    } else {
-      setPoints('')
-    }
+
+    })
+
+
+
+
 
   }
 
@@ -290,18 +296,6 @@ export const Options = () => {
             },
           }}
         >
-          {/* <header style={{
-            display: 'flex'
-            , alignItems: 'center'
-            , marginBottom: '20px'
-          }}>
-            <span style={{ flexGrow: '1' }}>
-              <img style={{
-                width: '24px',
-              }} src={Icon} />
-            </span>
-            
-          </header> */}
 
           <Form
 
@@ -311,25 +305,43 @@ export const Options = () => {
 
           >
 
+            <section>
+              <Form.Item
+                name="newLicenseKey"
+                label={<> <ProTag /></>}
+                style={{}}
+                extra={
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    // justifyContent: 'end'
+                  }}>
+                    Unlock Focus Mode
+                    <Button style={{
+                      paddingLeft: '2px',
+                      paddingRight: '0',
+                    }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License⚡</Button>
+
+                  </div>
+                }
+              >
+                <Input suffix={verified && <CheckCircleTwoTone twoToneColor="#52c41a" />} placeholder="License Key" type="password" />
+              </Form.Item>
+            </section>
+
 
             <section style={{
               // padding: '0px 20px 20px 20px'
             }}>
 
 
-              {/* <Tabs className='keyTabs'
-
-                defaultActiveKey="1" items={items} onChange={onTabsChange} /> */}
-
-              {/* <Divider /> */}
-
               <Form.Item
                 name="apiKeySelection"
                 label="🔋In use"
               >
                 <Radio.Group onChange={onRadioChange} value={radioValue} style={{ marginBottom: 0, display: 'flex' }}>
-                  <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>License Key</Radio.Button>
-                  <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI key</Radio.Button>
+                  <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>OpenRouter</Radio.Button>
+                  <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI</Radio.Button>
                 </Radio.Group>
               </Form.Item>
 
@@ -362,23 +374,24 @@ export const Options = () => {
               }}>
                 <Form.Item
                   name="licenseKey"
-                  label="🔑License Key"
+                  label="🔑Key"
                   style={{ marginBottom: '16px' }}
-                  extra={
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'end'
-                    }}>
+                // extra={
+                //   <div style={{
+                //     display: 'flex',
+                //     alignItems: 'center',
+                //     justifyContent: 'end'
+                //   }}>
 
-                      {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : '🔴Invalid License'}</div>}
+                //     {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : '🔴Invalid License'}</div>}
 
-                      <Button style={{
-                        paddingLeft: '0',
-                        paddingRight: '0',
-                      }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License</Button>
-                    </div>
-                  }
+                //     <Button style={{
+                //       paddingLeft: '0',
+                //       paddingRight: '0',
+                //     }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License</Button>
+
+                //   </div>
+                // }
                 >
                   <Input placeholder="We will not use your Key for any other purposes." type="password" />
                 </Form.Item>
@@ -455,14 +468,6 @@ export const Options = () => {
               </Form.Item>
 
             </section>
-
-            <section>
-              <div style={{ padding: '0 0 8px' }}>
-                <label>⌨️Keyboard shortcut</label>
-              </div>
-              <a target='__blank' href='https://jiangzilong.notion.site/keyboard-shortcut-94a604055ef148a3b7c835e6436543f0?pvs=4'>Viewing and Setting Keyboard Shortcuts ↗️</a>
-            </section>
-
 
             <Form.Item
               style={{

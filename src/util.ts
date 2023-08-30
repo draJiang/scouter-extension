@@ -4,6 +4,10 @@ import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { userInfoType } from './types'
+
+
+
 
 // 将信息添加到 Anki
 export function ankiAction(action: any, version: any, params = {}) {
@@ -143,31 +147,78 @@ export const getBalance = (apiKey: string) => {
 
   })
 
-
-
 }
 
-export const getUserId = (): Promise<string> => {
+export const getUserInfo = (): Promise<userInfoType> => {
 
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get('userId', (result) => {
-      if (chrome.runtime.lastError) {
+    // chrome.storage.sync.get('userId', (result) => {
+    //   if (chrome.runtime.lastError) {
+    //     reject(chrome.runtime.lastError);
+    //   }
+
+    //   if (result.userId) {
+    //     resolve(result.userId);
+    //   } else {
+    //     let uniqueId = uuidv4();
+    //     chrome.storage.sync.set({ userId: uniqueId }, () => {
+    //       if (chrome.runtime.lastError) {
+    //         reject(chrome.runtime.lastError);
+    //       } else {
+    //         resolve(uniqueId);
+    //       }
+    //     });
+    //   }
+    // });
+
+    browser.storage.sync.get(['userId', 'newLicenseKey']).then(async (result) => {
+
+      if (browser.runtime.lastError) {
         reject(chrome.runtime.lastError);
       }
 
-      if (result.userId) {
-        resolve(result.userId);
-      } else {
-        let uniqueId = uuidv4();
-        chrome.storage.sync.set({ userId: uniqueId }, () => {
-          if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError);
-          } else {
-            resolve(uniqueId);
-          }
-        });
+      let verified = false
+
+      if (result.newLicenseKey) {
+        // 判断用户
+        const url = 'https://6r4atckmdr.us.aircode.run/index'
+        const headers = { 'Authorization': 'Bearer ' + result.newLicenseKey, 'Content-Type': 'application/json', }
+
+        await fetch(url, {
+          headers: headers
+        }).then( async (response) => {
+
+          await response.json().then((data) => {
+            verified = data.verified
+          })
+
+        })
       }
-    });
+
+      let uniqueId: string
+
+      // 获取用户 ID
+      if (result.userId) {
+        uniqueId = uuidv4();
+      } else {
+        uniqueId = uuidv4();
+        browser.storage.sync.set({ userId: uniqueId }).then(() => {
+          if (chrome.runtime.lastError) {
+            reject(browser.runtime.lastError);
+          } else {
+            // resolve(uniqueId);
+          }
+        })
+
+      }
+
+      console.log({ 'userId': uniqueId!, 'verified': verified });
+
+      resolve({ 'userId': uniqueId!, 'verified': verified })
+
+    })
+
+
   });
 
 };
