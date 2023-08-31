@@ -97,7 +97,7 @@ export function MessagesList(props: MessagesListProps) {
         <div
             className='messages'
             style={{
-                lineHeight: '28px',
+                lineHeight: '1.8',
                 wordWrap: 'break-word',
                 margin: '0.4em 0'
             }}

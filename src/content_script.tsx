@@ -292,7 +292,6 @@ const handleMouseup = (event: any) => {
 
     // console.log('isTextSelected && !donotClosePopupCard');
 
-    console.log(event);
 
     if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
 
@@ -320,7 +319,6 @@ const handleMouseup = (event: any) => {
       const PopupCardContainer = container.getElementsByClassName('container')[0]
       const messagesBox = container.getElementsByClassName('messages')[0]
 
-      console.log(event);
       // console.log(selectedText);
       // console.log(messagesBox?.contains(selectedText.baseNode.parentNode as Node));
 
@@ -330,8 +328,6 @@ const handleMouseup = (event: any) => {
         isInMessages = true
       }
 
-      console.log(container.querySelector('.contextBox2'));
-      console.log(!container.querySelector('.contextBox2'));
 
       if (PopupCardContainer && selectedTextString.length > 0 && !container.querySelector('.contextBox2')) {
 
@@ -342,7 +338,6 @@ const handleMouseup = (event: any) => {
         PopupCardContainer.appendChild(contextBox2)
 
         let range = selectedText.getRangeAt(0);
-        console.log('show ToolBar');
 
         ReactDOM.render(
           <StyleSheetManager target={shadowRoot}>
@@ -414,7 +409,6 @@ const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew
 
   span.onclick = function () {
 
-
     // 恢复为默认样式
     // span.innerText
     if (span.textContent) {
@@ -463,9 +457,10 @@ function ToolBar(props: ToolBarProps) {
 
     const contextBox = ContextBox.current
     const popupCard = container.querySelector('#LearningEnglish2023')
+    const PopupCardContainer = container.getElementsByClassName('container')[0]
+    const messagesBox = container.querySelector('.messages')
 
-    console.log('selectedText:');
-    console.log(props.selectedText);
+
 
     //设置按钮的位置
     const selectedTextX = props.selectedText.x
@@ -479,15 +474,29 @@ function ToolBar(props: ToolBarProps) {
 
 
     // 最大 X 值
-    const maxX = (popupCard?.getBoundingClientRect().width || 0) - contextBox!.getBoundingClientRect().width - 10
-    let left = selectedTextX - buttonX + selectedTextWidth - 40
-    left = left > maxX ? maxX : left
+    const maxX = (popupCard?.getBoundingClientRect().width || 0) - contextBox!.getBoundingClientRect().width - 20
+
+    const messageBoxHeight = messagesBox?.getBoundingClientRect().height!
+    const containerBoxHeight = PopupCardContainer?.getBoundingClientRect().height!
+    const height = messageBoxHeight > containerBoxHeight ? messageBoxHeight + 60 : containerBoxHeight
+
+    const minY = 0 - height
+
+    let left = selectedTextX - buttonX + selectedTextWidth - 60
+    // left = left > maxX ? maxX : left
+    left = Math.max(10, Math.min(maxX, left));
+
+    let top = selectedTextY - buttonY - 40
+    // top = top < minY ? minY : top
+    top = Math.max(minY, Math.min(60, top));
+
+
 
     // contextBox2!.style.position = 'relative'
     // contextBox!.style.position = 'absolute'
 
     contextBox!.style.left = left.toString() + 'px'
-    contextBox!.style.top = (selectedTextY - buttonY - 40).toString() + 'px'
+    contextBox!.style.top = top.toString() + 'px'
 
     setShowMenu(true)
 
@@ -497,8 +506,6 @@ function ToolBar(props: ToolBarProps) {
   const handleSetAnkiSpaceButtonClick = (event: any, isAddNew: boolean) => {
     setAnkiSpace(props.range, props.selectedTextString, event, isAddNew)
 
-    console.log('ContextBox:');
-    console.log(ContextBox);
 
     // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
     setShowMenu(false)
@@ -506,15 +513,11 @@ function ToolBar(props: ToolBarProps) {
 
   const handleFollowUpMenuClick = () => {
 
-    console.log('ContextBox:');
-    console.log(ContextBox);
 
     // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
 
     const PopupCardContainer = container.getElementsByClassName('container')[0]
     const messagesBox = container.querySelector('.messages')
-    console.log('selectedText:');
-    console.log(props.selectedText);
 
     const sentence = ''
 
@@ -528,30 +531,28 @@ function ToolBar(props: ToolBarProps) {
     const followUpMenuBoxY = (messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)
     const followUpMenuBoxWidth = 140
     // const followUpMenuBoxHeight = followUpMenuBox?.getBoundingClientRect().height || 0
-    console.log('PopupCardContainer?.getBoundingClientRect():');
-    console.log(PopupCardContainer?.getBoundingClientRect());
 
     const maxX = (PopupCardContainer?.getBoundingClientRect().width || 0) - followUpMenuBoxWidth - 10
     // console.log(maxX);
     // console.log((messagesBox?.getBoundingClientRect().height || 0));
     // console.log(messagesBox?.getBoundingClientRect());
     // console.log(container.getElementsByClassName('followUpMenu')[0].getBoundingClientRect())
-    const minY = ((PopupCardContainer?.getBoundingClientRect().y || 0) + (PopupCardContainer?.getBoundingClientRect().height || 0)) - ((messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)) - 230
+    const maxY = ((PopupCardContainer?.getBoundingClientRect().y || 0) + (PopupCardContainer?.getBoundingClientRect().height || 0)) - ((messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)) - 230
+
+    const messageBoxHeight = messagesBox?.getBoundingClientRect().height!
+    const containerBoxHeight = PopupCardContainer?.getBoundingClientRect().height!
+    const height = messageBoxHeight > containerBoxHeight ? messageBoxHeight + 180 : containerBoxHeight
+
+    const minY = 0 - height + 130
 
     let left = (selectedTextX - followUpMenuBoxX + selectedTextWidth - 40)
-    let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight - 40)
+    let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight - 10)
 
     // X 坐标的最大最小值
-    left = left < 0 ? 0 : left
-    left = left > maxX ? maxX : left
+    left = Math.max(10, Math.min(maxX, left));
 
     // Y 坐标的最大值
-    top = top > minY ? minY : top
-
-    if (typeof browser.runtime.sendMessage === "function") {
-      console.log('typeof browser.runtime.sendMessage === "function"');
-
-    }
+    top = Math.max(minY, Math.min(maxY, top));
 
     // browser.runtime.sendMessage({
     //   type: 'UPDATE_POPUP_CARD', payload: {
@@ -562,7 +563,6 @@ function ToolBar(props: ToolBarProps) {
     //   }
     // });
 
-    console.log('setShowMenu(false):');
 
     setShowMenu(false)
 
@@ -593,7 +593,11 @@ function ToolBar(props: ToolBarProps) {
           <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>[...]</div>
           <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>[...]+</div>
         </div>
-        <div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           <StyledButton
             className='lookUpButton' style={{
               backgroundImage: `url(${LOGO})`,

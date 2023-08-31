@@ -186,7 +186,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
         await fetch(url, {
           headers: headers
-        }).then( async (response) => {
+        }).then(async (response) => {
 
           await response.json().then((data) => {
             verified = data.verified
@@ -199,7 +199,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       // 获取用户 ID
       if (result.userId) {
-        uniqueId = uuidv4();
+        uniqueId = result.userId;
       } else {
         uniqueId = uuidv4();
         browser.storage.sync.set({ userId: uniqueId }).then(() => {
@@ -212,7 +212,6 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       }
 
-      console.log({ 'userId': uniqueId!, 'verified': verified });
 
       resolve({ 'userId': uniqueId!, 'verified': verified })
 

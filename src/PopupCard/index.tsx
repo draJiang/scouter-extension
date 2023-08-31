@@ -129,8 +129,6 @@ export function PopupCard(props: any) {
 
     port.onMessage.addListener((msg) => {
 
-      console.log('useEffect port.onMessage');
-
       if (msg.type === "UPDATE_POPUP_CARD") {
         // 显示 Prompt 菜单
         setFollowUpData(msg.payload.followUpData)
@@ -160,12 +158,10 @@ export function PopupCard(props: any) {
 
 
     function handlePopupCardClick() {
-      console.log('handlePopupCardClick');
 
       setTimeout(() => {
 
         if (showFollowUpDataMenu.show) {
-          console.log(showFollowUpDataMenu);
 
           setShowFollowUpDataMenu(prev => {
 
@@ -236,7 +232,7 @@ export function PopupCard(props: any) {
     windowInitialization({ 'isPin': props.isPin, 'windowElement': windowElement, 'selection': props.selection, 'messagesList': messagesList })
 
 
-  }, []);
+  }, [props]);
 
   // 聊天记录改变时
   useEffect(() => {
@@ -289,7 +285,6 @@ export function PopupCard(props: any) {
     if (messages.length > 0 && isAnswerDone && messages[0]['status'] === 'success') {
 
       // console.log('Save');
-      console.log(messages);
 
       const keyWord = props.data.keyWord
       const Sentence = props.data.Sentence
@@ -394,9 +389,6 @@ export function PopupCard(props: any) {
 
     let showImagesBox = true
 
-    console.log('prompt.getUnsplashImages:');
-    console.log(prompt.getUnsplashImages);
-
     if (prompt.getUnsplashImages && needToRunPrompt) {
       // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
       showImagesBox = true
@@ -466,11 +458,6 @@ export function PopupCard(props: any) {
             }
 
             bingo = true
-
-            console.log('历史记录：');
-            console.log(obj);
-
-
 
             // 直接显示历史记录中的回答
             setMessages(prevMessages => {
@@ -660,8 +647,6 @@ export function PopupCard(props: any) {
 
     // 接收信息
     port.onMessage.addListener((msg: any) => {
-
-      console.log('getGPTMsg port.onMessage');
 
       // console.log('port.onMessage.addListener');
 
@@ -938,7 +923,6 @@ export function PopupCard(props: any) {
     if (windowElement.current) {
       // 选中的文字
       ScouterSelection = windowElement.current?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
-      console.log(ScouterSelection);
 
       // console.log(windowElement.current);
       container = windowElement.current.innerHTML
@@ -987,8 +971,9 @@ export function PopupCard(props: any) {
 
     const cardStyle = `<style>
 
-    .sentence{
+    .sentence span{
       opacity:0.75;
+      text-align: left;
     }
     img {
       width:auto;
@@ -1026,11 +1011,12 @@ export function PopupCard(props: any) {
 
     // 常规类型
 
-    let ankiBack = '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>' + container
+    let ankiBack = '<p class="sentence"> <span>' + stc + '</span><a href="' + window.location.href + '">[Source]</a></p>' + container
     if (keyWord.length > 20) {
       // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
-      ankiBack = container + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>'
+      ankiBack = container + '<p class="sentence" <span>' + stc + '</span><a href="' + window.location.href + '">[Source]</a></p>'
     }
+
     let p = {
       "note": {
         "deckName": deckName,
@@ -1047,12 +1033,22 @@ export function PopupCard(props: any) {
 
     // 完形填空类型
     if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
+
+      let newFront: string
+
+      newFront = '<p>' + ScouterSelection + '</p>' + cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>' + container
+
+      if (keyWord.length > 20) {
+        // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
+        newFront = '<p>' + ScouterSelection + '</p>' + cardStyle + container + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>'
+      }
+
       p = {
         "note": {
           "deckName": deckName,
           "modelName": modelName,
           "fields": {
-            [front]: '<p>' + ScouterSelection + '</p>' + cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>' + container,
+            [front]: newFront,
             [back]: ''
           },
           "tags": [
@@ -1060,6 +1056,7 @@ export function PopupCard(props: any) {
           ]
         }
       }
+
     }
 
 
@@ -1188,7 +1185,7 @@ export function PopupCard(props: any) {
       >
 
         {/* <Notice type='info' message='hello' actionName='action' action={() => {
-          console.log('hello')
+          
         }} /> */}
 
         <ConfigProvider
@@ -1210,10 +1207,14 @@ export function PopupCard(props: any) {
             keyWord={props.data.keyWord}
           />
 
-          <div className='container flex-grow flex flex-col overflow-auto'>
+          <div className='container flex-grow flex flex-col overflow-auto'
+            style={{
+              marginTop: '48px'
+            }}
+          >
             <div className='flex-grow'
               ref={messagesList}
-              style={{ paddingTop: '54px' }}
+              style={{}}
             >
 
 

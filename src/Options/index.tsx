@@ -10,7 +10,7 @@ import { ankiAction, getDefaultDeckName } from '../util'
 import { BuyLicenseKeyDrawer } from './BuyLicenseKeyDrawer'
 import { ProTag } from "../Components/ProTag";
 
-import { Button, Radio, Tooltip, Tabs, Input, Form, Space, Divider, ConfigProvider, Select, Drawer, Tag } from 'antd';
+import { theme, Button, Radio, Tooltip, Tabs, Input, Form, Space, Divider, ConfigProvider, Select, Drawer, Tag } from 'antd';
 import type { TabsProps } from 'antd';
 
 import { ThunderboltTwoTone, CheckCircleTwoTone, InfoCircleOutlined } from '@ant-design/icons';
@@ -59,7 +59,7 @@ const languageData: LanguageObject = lang;
 
 export const Options = () => {
 
-  const [radioValue, setRadioValue] = useState<string | null>('licenseKey');
+  const [radioValue, setRadioValue] = useState<string | null>('myOwnOpenAiKey');
   const [verified, setVerified] = useState<boolean | null>(false);
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -291,9 +291,19 @@ export const Options = () => {
       >
         <ConfigProvider
           theme={{
+            // algorithm: theme.defaultAlgorithm,
             token: {
               colorPrimary: '#F08A24',
+              colorLink: "#F08A24",
+              colorLinkHover: "#ffc478",
+              colorLinkActive: "#c96914"
+              // colorText: "#F08A24"
             },
+            // components: {
+            //   Button: {
+            //     colorPrimary: '#F08A24',
+            //   },
+            // },
           }}
         >
 
@@ -305,10 +315,13 @@ export const Options = () => {
 
           >
 
-            <section>
+            <section style={{
+              border: '1px solid #ffd9a1',
+              backgroundColor: '#fffaf0'
+            }}>
               <Form.Item
                 name="newLicenseKey"
-                label={<> <ProTag /></>}
+                // label={<> <ProTag /></>}
                 style={{}}
                 extra={
                   <div style={{
@@ -316,16 +329,23 @@ export const Options = () => {
                     alignItems: 'center',
                     // justifyContent: 'end'
                   }}>
-                    Unlock Focus Mode
+
+                    Unlock more features
+
                     <Button style={{
                       paddingLeft: '2px',
                       paddingRight: '0',
                     }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License⚡</Button>
 
+                    {/* <a style={{
+                      paddingLeft: '2px',
+                      paddingRight: '0',
+                    }} onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License⚡</a> */}
+
                   </div>
                 }
               >
-                <Input suffix={verified && <CheckCircleTwoTone twoToneColor="#52c41a" />} placeholder="License Key" type="password" />
+                <Input style={{ paddingLeft: '5px' }} prefix={<span style={{ marginRight: '4px' }}> <ProTag /></span>} suffix={verified && <CheckCircleTwoTone twoToneColor="#52c41a" />} placeholder="License Key" type="password" />
               </Form.Item>
             </section>
 
@@ -340,8 +360,10 @@ export const Options = () => {
                 label="🔋In use"
               >
                 <Radio.Group onChange={onRadioChange} value={radioValue} style={{ marginBottom: 0, display: 'flex' }}>
-                  <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>OpenRouter</Radio.Button>
+
                   <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI</Radio.Button>
+                  <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>OpenRouter</Radio.Button>
+
                 </Radio.Group>
               </Form.Item>
 

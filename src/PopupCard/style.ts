@@ -126,11 +126,11 @@ border:1px solid rgba(5, 5, 5, .06)
 }
 
 #LearningEnglish2023 .container::-webkit-scrollbar  {
-  width:0px;
+  // width:0px;
 }
 
 #LearningEnglish2023 .container::-webkit-scrollbar-track  {
-  background: #fff; /* 设置滚动条轨道背景色 */
+  // background: #fff; /* 设置滚动条轨道背景色 */
 }
 
 // #LearningEnglish2023 .container::-webkit-scrollbar-thumb {
@@ -157,9 +157,6 @@ border:1px solid rgba(5, 5, 5, .06)
   padding-right:18px;
 }
 
-#LearningEnglish2023 .openAIAnswer {
-line-height: 30px;
-}
 
 #LearningEnglish2023 .userInput {
 margin: 10px 0;

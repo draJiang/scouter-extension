@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { Divider, Button } from 'antd';
+import { Divider, Button, Tag } from 'antd';
 
 import * as amplitude from '@amplitude/analytics-browser';
 
@@ -26,18 +26,21 @@ export function BuyLicenseKeyDrawer() {
 
                 <h2 style={{ margin: 0 }}>CN¥19.99</h2>
                 <div style={{ color: '#333', textAlign: 'center' }}>
-                    
-                    <p>解锁专属功能 <Button type="link" style={{ padding: '0', fontSize: '13pxf' }} onClick={() => window.open('https://jiang.lemonsqueezy.com/checkout/buy/e31f8c18-7bf2-4f6b-85c2-508fb500ce84')}>了解更多↗️</Button> </p>
-                    
+
+
                 </div>
 
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center'
                 }}>
-                    <div style={{ textAlign: 'center' }}>
+                    <div style={{ textAlign: 'center', margin: '10px' }}>
                         <img style={{ width: '50%' }} src={WeChatPay} />
                     </div>
+                </div>
+                <div style={{ }}>
+                    <Tag style={{ border: 0 }} color="orange" >搜索图片</Tag>
+                    <Tag style={{ border: 0 }} color="orange">追加提问</Tag>
                 </div>
                 <p style={{ marginBottom: '8px' }}>请在付款时备注<strong>你的邮箱</strong></p>
                 {/* <p style={{ margin: '0', color: '#666' }}> License Key 会发送到你的邮箱</p> */}
