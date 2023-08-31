@@ -21,9 +21,9 @@ import { userInfoType } from './types'
 getUserInfo().then((userInfo: userInfoType) => {
 
   const userId = userInfo.userId
-  console.log('userInfo:');
-  console.log(userInfo);
-  
+  // console.log('userInfo:');
+  // console.log(userInfo);
+
   // 数据埋点
   amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
     defaultTracking: {
@@ -39,11 +39,8 @@ let controller = new AbortController();
 
 const defaultOpenApiEndpoint = 'https://api.openai.com'
 
-console.log('I am background');
-
 browser.runtime.onInstalled.addListener(function () {
 
-  console.log("插件已被安装");
   amplitude.track("install")
 
 });
@@ -88,11 +85,15 @@ browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 // 监听快捷键
 browser.commands.onCommand.addListener(function (command) {
 
-  console.log('hello');
 
   if (command === 'RunLastPrompt') {
     // 执行相关代码
     sendMessageToContent()
+  }
+
+  if (command === 'Open') {
+    // 执行相关代码
+    sendMessageToContent(false)
   }
 });
 
@@ -137,9 +138,6 @@ browser.runtime.onConnect.addListener(port => {
 
 
         // 请求  GPT 数据
-
-
-        console.log('getGPTMsg');
 
 
         // isContinue = true 时才会渲染数据
@@ -379,7 +377,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
       // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
 
       unsplashSearchPhotos(process.env.UNSPLASH_API_KEY as string, request.keyWord).then((imgs: any) => {
-        console.log(imgs);
+
         // port.postMessage({ 'type': 'sendImgData', 'status': 'end', 'imgs': imgs })
         asyncSendResponse({ type: 'sendImgData', status: 'end', 'imgs': imgs });
       }).catch((error: any) => {
@@ -401,7 +399,6 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
       accessKey: process.env.UNSPLASH_API_KEY as string
     });
 
-    console.log('unsplash.photos.trackDownload');
 
     if (request.messages.unsplash_download_location !== undefined) {
       unsplash.photos.trackDownload({ downloadLocation: request.messages.unsplash_download_location, }).then((result) => console.log(result))
@@ -409,7 +406,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
     ankiAction(request.messages.anki_action_type, 6, request.messages.anki_arguments).then((result: any) => {
 
-      console.log(`got list of decks: ${result}`);
+
       // 反馈处理结果
       asyncSendResponse({ type: 'addToAnki', result: 'success', data: result.result, error: result.error });
 
@@ -548,7 +545,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
     ankiAction(request.messages.anki_action_type, 6, request.messages.anki_arguments).then((result: any) => {
 
-      console.log(`got list of decks: ${result}`);
+
       // 反馈处理结果
       asyncSendResponse({ type: 'guiEditNote', result: 'success', data: result.result, error: result.error });
 
@@ -617,14 +614,14 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
 
 const sendMessageToContent = (runPrompt?: boolean) => {
-  console.log('sendMessageToContent:');
+
   let needToRunPrompt = runPrompt
   if (needToRunPrompt === undefined) {
     needToRunPrompt = true
   }
 
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-    console.log(tabs);
+
     const activeTab = tabs[0]
     let tID = activeTab.id ?? -1
 

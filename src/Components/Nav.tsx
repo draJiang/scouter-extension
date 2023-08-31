@@ -88,11 +88,13 @@ export function Nav(props: NavProps) {
             setIsPin(false)
 
             // amplitude.track('pinPopupCard');
-            browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'pinPopupCard' })
+            
 
         } else {
             pinPopupCard(true)
             setIsPin(true)
+
+            browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'pinPopupCard' })
         }
 
     }
