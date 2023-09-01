@@ -546,7 +546,7 @@ function ToolBar(props: ToolBarProps) {
     const minY = 0 - height + 130
 
     let left = (selectedTextX - followUpMenuBoxX + selectedTextWidth - 40)
-    let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight - 10)
+    let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight)
 
     // X 坐标的最大最小值
     left = Math.max(10, Math.min(maxX, left));

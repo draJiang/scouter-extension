@@ -10,7 +10,7 @@ import React, { useEffect, useState, useRef, createContext, useContext } from "r
 // import remarkGfm from 'remark-gfm'
 
 import { getUserInfo } from '../util'
-import { userInfoType } from '../types'
+import { userInfoType, langType } from '../types'
 
 import { useSpring, animated } from 'react-spring';
 
@@ -34,17 +34,15 @@ import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 import { useCurrentLanguage } from '../lib/locale'
 import { useUserInfoContext } from '../lib/userInfo'
+import { lang } from '../lib/lang';
 
 import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
 import { PromptType, ChatMessage, ImageType } from "../types"
-import { lang } from 'lib/lang';
 
 
 let currentLanguage: string
 let targetLanguage: string
-
-
 
 let ankiCards: Array<{}>
 getAnkiCards().then((cards: any) => {
@@ -1011,11 +1009,31 @@ export function PopupCard(props: any) {
 
     // 常规类型
 
+
+
     let ankiBack = '<p class="sentence"> <span>' + stc + '</span><a href="' + window.location.href + '">[Source]</a></p>' + container
     if (keyWord.length > 20) {
       // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
       ankiBack = container + '<p class="sentence" <span>' + stc + '</span><a href="' + window.location.href + '">[Source]</a></p>'
     }
+
+
+
+
+    // 单词发音
+    interface LangObject {
+      [key: string]: langType;
+    }
+    const thisLang: LangObject = lang
+    console.log(thisLang);
+    console.log(targetLanguage);
+
+
+    let audioUrl: string = 'http://dict.youdao.com/dictvoice?type=0&audio='
+    audioUrl = thisLang[Lang['target']['id']]['audioURL']
+    console.log(audioUrl);
+
+    const filename = keyWord.length >= 10 ? keyWord.substring(0, 10) : keyWord
 
     let p = {
       "note": {
@@ -1025,6 +1043,14 @@ export function PopupCard(props: any) {
           [front]: keyWord,
           [back]: cardStyle + ankiBack
         },
+        "audio": [{
+          "url": audioUrl + keyWord,
+          "filename": "Scouter_" + filename + ".mp3",
+          "skipHash": "7e2c2f954ef6051373ba916f000168dc",
+          "fields": [
+            "Front"
+          ]
+        }],
         "tags": [
           "Scouter"
         ]
@@ -1051,6 +1077,7 @@ export function PopupCard(props: any) {
             [front]: newFront,
             [back]: ''
           },
+          "audio": [],
           "tags": [
             "Scouter"
           ]

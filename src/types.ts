@@ -84,3 +84,12 @@ export type userInfoType = {
     userId: string,
     verified: boolean
 };
+
+export type langType = {
+    name: string;
+    id: string;
+    Prompt1: { explanation: string; };
+    Prompt2: { translate: string; explanation: string; };
+    Prompt3: { validation: string; };
+    audioURL: string;
+}

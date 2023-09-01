@@ -39,9 +39,10 @@ let controller = new AbortController();
 
 const defaultOpenApiEndpoint = 'https://api.openai.com'
 
+// 用户安装或者升级插件或者手动重新载入插件时会触发此事件
 browser.runtime.onInstalled.addListener(function () {
 
-  amplitude.track("install")
+  // amplitude.track("install")
 
 });
 

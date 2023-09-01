@@ -17,8 +17,8 @@
         },
         "Open": {
             "suggested_key": {
-                "default": "Ctrl+Shift+D",
-                "mac": "Command+Shift+D"
+                "default": "Ctrl+Shift+F",
+                "mac": "Command+Shift+F"
             },
             "description": "Open"
         }
