@@ -50,6 +50,8 @@ export function Selection(props: SelectionProps) {
   const [showFullText, setShowFullText] = useState(true);
   const [playStatus, setPlayStatus] = useState(false);
 
+  const lastSpeakTime = useRef<number>(Math.floor(Date.now()))
+
   // 获取用户设置的语言信息
   let Lang = useCurrentLanguage()!
 
@@ -78,8 +80,18 @@ export function Selection(props: SelectionProps) {
     // lngDetector.setLanguageType('iso2')
     // console.log(lngDetector.detect(props.text, 2));
 
-    try {
+    console.log(Math.floor(Date.now()));
+    console.log(lastSpeakTime.current);
+    
+    
+    if (Math.floor(Date.now()) - lastSpeakTime.current < 1800) {
+      // x 毫秒内只可点击一次
+      return
+    }
 
+
+    try {
+      lastSpeakTime.current = Math.floor(Date.now())
       playTextToSpeech(props.text, languageCodes[targetLanguage as keyof typeof languageCodes])
 
     } catch (error) {

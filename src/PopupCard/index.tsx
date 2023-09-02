@@ -1025,15 +1025,27 @@ export function PopupCard(props: any) {
       [key: string]: langType;
     }
     const thisLang: LangObject = lang
-    console.log(thisLang);
-    console.log(targetLanguage);
-
 
     let audioUrl: string = 'http://dict.youdao.com/dictvoice?type=0&audio='
-    audioUrl = thisLang[Lang['target']['id']]['audioURL']
-    console.log(audioUrl);
+    let audio: [] | [{}], filename
+    try {
+      audioUrl = thisLang[Lang['target']['id']]['audioURL']
+      filename = keyWord.length >= 10 ? keyWord.substring(0, 10) : keyWord
 
-    const filename = keyWord.length >= 10 ? keyWord.substring(0, 10) : keyWord
+      audio = [{
+        "url": audioUrl + keyWord,
+        "filename": "Scouter_" + filename + ".mp3",
+        "fields": [
+          "Front"
+        ]
+      }]
+
+    } catch (error) {
+      audio = []
+    }
+
+
+
 
     let p = {
       "note": {
@@ -1043,14 +1055,7 @@ export function PopupCard(props: any) {
           [front]: keyWord,
           [back]: cardStyle + ankiBack
         },
-        "audio": [{
-          "url": audioUrl + keyWord,
-          "filename": "Scouter_" + filename + ".mp3",
-          "skipHash": "7e2c2f954ef6051373ba916f000168dc",
-          "fields": [
-            "Front"
-          ]
-        }],
+        "audio": audio,
         "tags": [
           "Scouter"
         ]

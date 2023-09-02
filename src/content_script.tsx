@@ -11,11 +11,21 @@ import { StyleSheetManager } from 'styled-components';
 
 import { fetchcurrentLanguage } from './lib/lang';
 import { CurrentLanguageContext } from './lib/locale'
+import { useCurrentLanguage } from './lib/locale'
+
 import { UserInfoContext } from './lib/userInfo'
 import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 
-import { getUserInfo } from './util'
+import { Button } from 'antd';
+import {
+  CustomerServiceOutlined
+} from '@ant-design/icons';
+
+import { getUserInfo, playTextToSpeech } from './util'
 import { userInfoType } from './types'
+
+import { languageCodes } from "./lib/lang"
+
 
 
 import { popupCardStyle } from './PopupCard/style'
@@ -444,6 +454,20 @@ const StyledButton = styled.button`
     background-position: center;
 
     &:hover {
+      background-color: rgba(0,0,59,0.051);
+      border-radius: 2px;
+    }
+`;
+
+const IconButton = styled.button`
+    
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    &:hover {
       opacity: 0.8;
     }
 `;
@@ -452,6 +476,8 @@ function ToolBar(props: ToolBarProps) {
 
   const [showMenu, setShowMenu] = useState(true)
   const ContextBox = useRef<HTMLDivElement>(null);
+
+
 
   useEffect(() => {
 
@@ -589,23 +615,84 @@ function ToolBar(props: ToolBarProps) {
         className='contextBox' style={{
           position: 'absolute'
         }}>
-        <div className='ankiSpaceButtonBox'>
-          <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>[...]</div>
-          <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>[...]+</div>
+        <div style={{
+          display: "flex",
+          flexDirection: "row",
+          marginRight: "8px",
+          borderRight: "1px solid rgba(5, 5, 5, .12)",
+          paddingRight: "16px"
+        }}>
+          {/* <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>[...]</div> */}
+
+          <StyledButton style={{ marginRight: '10px' }} onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>
+            [...]
+          </StyledButton>
+
+          <StyledButton onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>
+            [...]+
+          </StyledButton>
+
+          {/* <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>[...]+</div> */}
+        </div>
+
+        <div>
+
+          <StyledButton style={{
+            fontSize: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: '6px'
+          }}
+
+            onClick={async () => {
+
+              let lang = await fetchcurrentLanguage()
+              if (lang) {
+
+                const targetLanguage = lang['target']['id']
+                playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes])
+                setShowMenu(false)
+
+              }
+
+
+            }}
+          >
+            <CustomerServiceOutlined />
+          </StyledButton>
+
+          {/* <Button style={{
+            // display: 'inline-block',
+            // position: 'relative',
+            // bottom: '2px'
+          }}
+            type="text" icon={<CustomerServiceOutlined style={{ width: '20px', height: '20px' }} />} onClick={async () => {
+
+              let lang = await fetchcurrentLanguage()
+              if (lang) {
+
+                const targetLanguage = lang['target']['id']
+                playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes])
+
+              }
+
+
+            }} /> */}
         </div>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <StyledButton
+          <IconButton
             className='lookUpButton' style={{
               backgroundImage: `url(${LOGO})`,
             }}
             onClick={handleFollowUpMenuClick}
-          ></StyledButton>
+          ></IconButton>
         </div>
-      </div>
+      </div >
       }
     </>
 
