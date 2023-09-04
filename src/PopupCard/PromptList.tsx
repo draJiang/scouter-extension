@@ -99,7 +99,7 @@ export function PromptList(props: PromptListProps) {
 
                 {props.promptList.map((item) => {
                     // return <button onClick={() => handleMenuItemClick(item)}>{item.title}</button>
-                    return <PromptButton disable={!userInfo?.verified} handleMenuItemClick={() => handleMenuItemClick(item)}>{item.title}</PromptButton>
+                    return <PromptButton key={item.id} disable={!userInfo?.verified} handleMenuItemClick={() => handleMenuItemClick(item)}>{item.title}</PromptButton>
                 })}
 
             </div>

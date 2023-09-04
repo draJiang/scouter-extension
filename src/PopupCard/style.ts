@@ -29,22 +29,22 @@ export const popupCardStyle = `
   align-items: center;
 }
 
-.contextBox * {
-  cursor: default;
-  padding: 2px;
-}
+// .contextBox * {
+//   cursor: default;
+//   padding: 2px;
+// }
 
-.ankiSpaceButtonBox {
-  display: flex;
-  flex-direction: row;
-  margin-right: 8px;
-  border-right: 1px solid rgba(5, 5, 5, .12);
-  padding-right: 10px;
-}
+// .ankiSpaceButtonBox {
+//   display: flex;
+//   flex-direction: row;
+//   margin-right: 8px;
+//   border-right: 1px solid rgba(5, 5, 5, .12);
+//   padding-right: 10px;
+// }
 
-.setAnkiSpaceButton:first-of-type {
-  margin-right:8px;
-}
+// .setAnkiSpaceButton:first-of-type {
+//   margin-right:8px;
+// }
 
 // .lookUpButton {
 //   width: 18px;
@@ -54,12 +54,12 @@ export const popupCardStyle = `
 //   background-position: center;
 // }
 
-.ankiSpaceButtonBox *:hover {
+// .ankiSpaceButtonBox *:hover {
   
-  background-color: rgba(0,0,59,0.051);
-  border-radius: 2px;
+//   background-color: rgba(0,0,59,0.051);
+//   border-radius: 2px;
 
-}
+// }
 
 .ant-carousel .slick-prev,
 .ant-carousel .slick-next,
@@ -89,33 +89,33 @@ export const popupCardStyle = `
 }
 
 
-#LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3{
-  font-weight: bold;
-}
+// #LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3{
+//   font-weight: bold;
+// }
 
-#LearningEnglish2023 h1{
-  font-size:20px;
-}
-#LearningEnglish2023 h2{
-  font-size:17px;
-}
+// #LearningEnglish2023 h1{
+//   font-size:20px;
+// }
+// #LearningEnglish2023 h2{
+//   font-size:17px;
+// }
 
-#LearningEnglish2023 {
-font-family: sans-serif;
-width: 390px;
-height: 560px;
-color: rgb(0 0 0 / 80%);
-position: fixed;
-display: flex;
-flex-direction: column;
-font-size: 13.2px;
-background-color: #fff;
-z-index: 9999;
-overflow: hidden;
-box-shadow: 0px 8px 28px rgba(0,0,0,.16);
-border-radius: 6px;
-border:1px solid rgba(5, 5, 5, .06)
-}
+// #LearningEnglish2023 {
+// font-family: sans-serif;
+// width: 390px;
+// height: 560px;
+// color: rgb(0 0 0 / 80%);
+// position: fixed;
+// display: flex;
+// flex-direction: column;
+// font-size: 13.2px;
+// background-color: #fff;
+// z-index: 9999;
+// overflow: hidden;
+// box-shadow: 0px 8px 28px rgba(0,0,0,.16);
+// border-radius: 6px;
+// border:1px solid rgba(5, 5, 5, .06)
+// }
 
 ::selection {
   background-color: #FFD5B2;
@@ -152,7 +152,7 @@ border:1px solid rgba(5, 5, 5, .06)
 
 }
 
-#LearningEnglish2023 #ScouterNav,#LearningEnglish2023 #ScouterSelection, #LearningEnglish2023 .messages>div  {
+#LearningEnglish2023 #ScouterSelection, #LearningEnglish2023 .messages>div  {
   padding-left:18px;
   padding-right:18px;
 }
@@ -171,19 +171,19 @@ overflow: scroll;
 }
 
 #LearningEnglish2023 #ScouterNav {
-display: flex;
-justify-content: start;
-align-items: center;
-padding-top: 10px;
-padding-bottom: 10px;
-border-bottom: 1px solid rgba(5, 5, 5, .06);
-user-select: none;
+// display: flex;
+// justify-content: start;
+// align-items: center;
+// padding-top: 12px;
+// padding-bottom: 12px;
+// border-bottom: 1px solid rgba(5, 5, 5, .06);
+// user-select: none;
 }
 
 #LearningEnglish2023 #ScouterNav img {
-width: auto;
-height: 24px;
-margin-right: 6px;
+// width: auto;
+// height: 24px;
+// margin-right: 6px;
 }
 
 .messages ul{

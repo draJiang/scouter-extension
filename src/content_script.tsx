@@ -9,6 +9,8 @@ import { StyleProvider } from '@ant-design/cssinjs';
 import { StyleSheetManager } from 'styled-components';
 
 
+import { useUserInfoContext } from './lib/userInfo'
+
 import { fetchcurrentLanguage } from './lib/lang';
 import { CurrentLanguageContext } from './lib/locale'
 import { useCurrentLanguage } from './lib/locale'
@@ -16,7 +18,7 @@ import { useCurrentLanguage } from './lib/locale'
 import { UserInfoContext } from './lib/userInfo'
 import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 
-import { Button } from 'antd';
+// import { Button, message } from 'antd';
 import {
   CustomerServiceOutlined
 } from '@ant-design/icons';
@@ -32,7 +34,7 @@ import { popupCardStyle } from './PopupCard/style'
 
 import LOGO from './assets/icon128.png'
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 // import './assets/tailwind.css';
 
@@ -350,9 +352,11 @@ const handleMouseup = (event: any) => {
         let range = selectedText.getRangeAt(0);
 
         ReactDOM.render(
-          <StyleSheetManager target={shadowRoot}>
-            <ToolBar selectedText={selectedText.getRangeAt(0).getBoundingClientRect()} selectedTextString={selectedTextString} range={range} />
-          </StyleSheetManager>, contextBox2);
+          <UserInfoContext.Provider value={USER_INFO}>
+            <StyleSheetManager target={shadowRoot}>
+              <ToolBar selectedText={selectedText.getRangeAt(0).getBoundingClientRect()} selectedTextString={selectedTextString} range={range} />
+            </StyleSheetManager></UserInfoContext.Provider >, contextBox2);
+
 
       }
 
@@ -445,27 +449,44 @@ interface ToolBarProps {
 }
 
 
-const StyledButton = styled.button`
+const StyledButton = styled.button<{ $disable?: boolean }>`
     
     width: 18px;
     height: 18px;
+    display: flex;
+    align-items: center;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    cursor: default;
+    padding: 2px;
+    
 
     &:hover {
       background-color: rgba(0,0,59,0.051);
       border-radius: 2px;
     }
+
+    ${props => props.$disable && css`
+      opacity: 0.5;
+      cursor: help;
+    `}
+
+    // ${props => !props.$disable && css`
+    //   cursor: default;
+    // `}
+
+
 `;
 
 const IconButton = styled.button`
     
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    cursor: default;
 
     &:hover {
       opacity: 0.8;
@@ -477,9 +498,13 @@ function ToolBar(props: ToolBarProps) {
   const [showMenu, setShowMenu] = useState(true)
   const ContextBox = useRef<HTMLDivElement>(null);
 
+  const userInfo: userInfoType | null = useUserInfoContext()
 
+  // let portFromMenu: any
 
   useEffect(() => {
+
+
 
     const contextBox = ContextBox.current
     const popupCard = container.querySelector('#LearningEnglish2023')
@@ -537,13 +562,21 @@ function ToolBar(props: ToolBarProps) {
     setShowMenu(false)
   }
 
-  const handleFollowUpMenuClick = () => {
+  const handleFollowUpMenuClick = (event: any) => {
 
+    // portFromMenu = browser.runtime.connect({
+    //   name: 'fromContentScript'
+    // })
+    
+    
 
     // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
 
     const PopupCardContainer = container.getElementsByClassName('container')[0]
     const messagesBox = container.querySelector('.messages')
+
+    console.log(event);
+    console.log(PopupCardContainer?.getBoundingClientRect());
 
     const sentence = ''
 
@@ -574,6 +607,8 @@ function ToolBar(props: ToolBarProps) {
     let left = (selectedTextX - followUpMenuBoxX + selectedTextWidth - 40)
     let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight)
 
+
+
     // X 坐标的最大最小值
     left = Math.max(10, Math.min(maxX, left));
 
@@ -596,14 +631,33 @@ function ToolBar(props: ToolBarProps) {
     window.getSelection()?.removeAllRanges();
 
 
-    port.postMessage({
-      type: 'UPDATE_POPUP_CARD', payload: {
-        style: {
-          left: left,
-          top: top,
-        }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
-      }
-    })
+    try {
+
+      // portFromMenu.postMessage({
+      //   type: 'UPDATE_POPUP_CARD', payload: {
+      //     style: {
+      //       left: left,
+      //       top: top,
+      //     }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
+      //   }
+      // })
+
+      browser.runtime.sendMessage({
+        type: 'UPDATE_POPUP_CARD', payload: {
+          style: {
+            left: left,
+            top: top,
+          }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
+        }
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+
 
 
 
@@ -611,6 +665,7 @@ function ToolBar(props: ToolBarProps) {
 
   return (
     <>
+
       {showMenu && <div ref={ContextBox}
         className='contextBox' style={{
           position: 'absolute'
@@ -620,7 +675,7 @@ function ToolBar(props: ToolBarProps) {
           flexDirection: "row",
           marginRight: "8px",
           borderRight: "1px solid rgba(5, 5, 5, .12)",
-          paddingRight: "16px"
+          paddingRight: "18px"
         }}>
           {/* <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>[...]</div> */}
 
@@ -637,24 +692,29 @@ function ToolBar(props: ToolBarProps) {
 
         <div>
 
-          <StyledButton style={{
-            fontSize: '20px',
+          <StyledButton $disable={userInfo?.verified ? false : true} title='⚡Pro' style={{
+            fontSize: '16px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            marginRight: '6px'
+            marginRight: '10px'
           }}
 
             onClick={async () => {
 
               let lang = await fetchcurrentLanguage()
-              if (lang) {
+              if (userInfo?.verified) {
+                if (lang) {
 
-                const targetLanguage = lang['target']['id']
-                playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes])
-                setShowMenu(false)
+                  const targetLanguage = lang['target']['id']
+                  playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes])
+                  setShowMenu(false)
 
+                }
+              } else {
+                // alert(' You are not Pro')
               }
+
 
 
             }}
@@ -662,30 +722,13 @@ function ToolBar(props: ToolBarProps) {
             <CustomerServiceOutlined />
           </StyledButton>
 
-          {/* <Button style={{
-            // display: 'inline-block',
-            // position: 'relative',
-            // bottom: '2px'
-          }}
-            type="text" icon={<CustomerServiceOutlined style={{ width: '20px', height: '20px' }} />} onClick={async () => {
-
-              let lang = await fetchcurrentLanguage()
-              if (lang) {
-
-                const targetLanguage = lang['target']['id']
-                playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes])
-
-              }
-
-
-            }} /> */}
         </div>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <IconButton
+          <IconButton title='⚡Pro'
             className='lookUpButton' style={{
               backgroundImage: `url(${LOGO})`,
             }}

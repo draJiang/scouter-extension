@@ -99,7 +99,7 @@ export function MessagesList(props: MessagesListProps) {
             style={{
                 lineHeight: '1.8',
                 wordWrap: 'break-word',
-                margin: '0.4em 0'
+                marginBottom: '18px'
             }}
         >
             {props.messages.map((item: ChatMessage) => {

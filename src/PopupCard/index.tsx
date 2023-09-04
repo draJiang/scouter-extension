@@ -40,6 +40,8 @@ import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightl
 
 import { PromptType, ChatMessage, ImageType } from "../types"
 
+import styled, { css } from 'styled-components';
+
 
 let currentLanguage: string
 let targetLanguage: string
@@ -55,6 +57,40 @@ getAnkiCards().then((cards: any) => {
 const { TextArea } = Input;
 
 // const AnkiContext = createContext(null);
+
+const ScouterDiv = styled.div`
+
+left:10;
+top:10;
+
+font-family: sans-serif;
+width: 390px;
+height: 560px;
+color: rgb(0 0 0 / 80%);
+position: fixed;
+display: flex;
+flex-direction: column;
+font-size: 13.2px;
+background-color: #fff;
+z-index: 9999;
+overflow: hidden;
+box-shadow: 0px 8px 28px rgba(0,0,0,.16);
+border-radius: 6px;
+border:1px solid rgba(5, 5, 5, .06)
+
+h1,h2,h2{
+  font-weight: bold;
+}
+
+h1 {
+  font-size:20px;
+}
+
+h2 {
+  font-size:17px;
+}
+
+`;
 
 
 export function PopupCard(props: any) {
@@ -1204,10 +1240,12 @@ export function PopupCard(props: any) {
     border: '1px solid red'
   });
 
+
+
   return (
     <>
 
-      <div id="LearningEnglish2023"
+      <ScouterDiv id="LearningEnglish2023"
         ref={windowElement}
 
         style={{
@@ -1384,7 +1422,7 @@ export function PopupCard(props: any) {
 
         </ConfigProvider >
 
-      </div >
+      </ScouterDiv >
     </>
 
   );

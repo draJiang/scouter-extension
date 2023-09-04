@@ -21,7 +21,7 @@ export function BuyLicenseKeyDrawer() {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                fontSize: '13px'
+                fontSize: '14px'
             }}>
 
                 <h2 style={{ margin: 0 }}>CN¥19.99</h2>
@@ -41,6 +41,7 @@ export function BuyLicenseKeyDrawer() {
                 <div style={{ }}>
                     <Tag style={{ border: 0 }} color="orange" >搜索图片</Tag>
                     <Tag style={{ border: 0 }} color="orange">追加提问</Tag>
+                    <Tag style={{ border: 0 }} color="orange">划词发音</Tag>
                 </div>
                 <p style={{ marginBottom: '8px' }}>请在付款时备注<strong>你的邮箱</strong></p>
                 {/* <p style={{ margin: '0', color: '#666' }}> License Key 会发送到你的邮箱</p> */}

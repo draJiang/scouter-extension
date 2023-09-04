@@ -1,7 +1,6 @@
 
 
 import browser from 'webextension-polyfill'
-import * as amplitude from '@amplitude/analytics-browser';
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
 import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "./util";
@@ -18,22 +17,31 @@ import { userInfoType } from './types'
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
 
-getUserInfo().then((userInfo: userInfoType) => {
+let userId: string
 
-  const userId = userInfo.userId
-  // console.log('userInfo:');
-  // console.log(userInfo);
+try {
 
-  // 数据埋点
-  amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
-    defaultTracking: {
-      pageViews: false,
-      sessions: false,
-    },
-  });
+  getUserInfo().then((userInfo: userInfoType) => {
 
-})
+    userId = userInfo.userId
+    // console.log('userInfo:');
+    // console.log(userInfo);
 
+    // 数据埋点
+    // amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
+    //   defaultTracking: {
+    //     pageViews: false,
+    //     sessions: false,
+    //   },
+    // });
+
+  })
+
+} catch (error) {
+
+  console.log(error);
+
+}
 
 let controller = new AbortController();
 
@@ -355,6 +363,7 @@ browser.runtime.onConnect.addListener(port => {
 // 监听一次性消息
 browser.runtime.onMessage.addListener(handleMessage);
 
+
 function handleMessage(request: any, sender: any, sendResponse: any) {
   console.log("Message from the content script: " +
     request.type);
@@ -582,8 +591,30 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   if (request.type === 'amplitudeTrack') {
 
-    amplitude.track(request.name)
-    return true;
+
+    fetch('https://api.amplitude.com/2/httpapi', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        api_key: process.env.AMPLITUDE_KEY,
+        events: [
+          {
+            user_id: userId,
+            event_type: request.name,
+          }
+        ]
+      })
+    })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+
+
+    // return true;
 
   }
 
@@ -605,13 +636,15 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   }
 
-  // if (request.type === 'UPDATE_POPUP_CARD') {
+  if (request.type === 'UPDATE_POPUP_CARD') {
+    console.log('sendMessage');
 
-  //   popupPort.postMessage(request);
+    popupPort.postMessage(request);
 
-  // }
+  }
 
 }
+
 
 
 const sendMessageToContent = (runPrompt?: boolean) => {

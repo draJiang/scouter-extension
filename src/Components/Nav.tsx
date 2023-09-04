@@ -88,7 +88,7 @@ export function Nav(props: NavProps) {
             setIsPin(false)
 
             // amplitude.track('pinPopupCard');
-            
+
 
         } else {
             pinPopupCard(true)
@@ -154,11 +154,19 @@ export function Nav(props: NavProps) {
                     ref={navElement}
                     className='p-4'
                     style={{
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        paddingTop: '12px',
+                        paddingBottom: '12px',
+                        borderBottom: '1px solid rgba(5, 5, 5, .06)',
+                        userSelect: 'none',
                         cursor: 'move',
                         position: 'absolute',
                         width: '100%', top: 0,
                         background: 'white',
-                        zIndex: 9
+                        zIndex: 9,
+                        padding: '12px 18px'
                     }}
                     onMouseDown={props.onMouseDown}>
 

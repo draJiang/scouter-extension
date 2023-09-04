@@ -476,7 +476,7 @@ export const Options = () => {
                 label="📘Anki Deck Name"
                 extra={!ankiClientIsopen && <p style={{
                   color: '#666'
-                }}>Anki client and related settings not found. Please <a target='__blank' href='https://jiangzilong.notion.site/Use-the-Add-to-Anki-feature-7ab95ff8aa5e419c978e8a2a0a451324'>configure</a> and try again</p>}
+                }}>Anki client and related settings not found. Please <a target='__blank' href='https://jiangzilong.notion.site/Use-the-Add-to-Anki-feature-7ab95ff8aa5e419c978e8a2a0a451324'>configure↗️</a> and try again</p>}
               >
                 <Select
                   placeholder="Anki Deck Name"
