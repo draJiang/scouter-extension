@@ -91,7 +91,7 @@ export function MessagesList(props: MessagesListProps) {
 
 
 
-    });
+    }, []);
 
     return (
         <div

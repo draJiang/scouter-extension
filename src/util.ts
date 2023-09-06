@@ -21,6 +21,7 @@ export function ankiAction(action: any, version: any, params = {}) {
       resolve(data)
 
     }).catch((error) => {
+      console.log('util');
       reject({ 'result': [], 'error': 'Please open the Anki client and install the Anki-Connect plugin before trying again.' })
     })
 
@@ -221,3 +222,63 @@ export const getUserInfo = (): Promise<userInfoType> => {
   });
 
 };
+
+export const cardStyle = `
+
+/* 卡片样式可能随着版本迭代不断更新，(删掉括号内的文字可以暂停自动更新) | Card styles may be updated with each version iteration, (deleting the text in the parentheses can pause the auto-update). */
+
+  .card {
+    font-family: arial;
+    font-size: 18px;
+    color: rgb(0 0 0 / 84%);
+    background-color: white;
+    text-align: left;
+    line-height: 1.6;
+  }
+
+  blockquote {
+    border-left: 5px solid #ccc;
+    padding: 8px 16px;
+    margin-left:0;
+    margin-right:0;
+		background-color: rgb(0 0 0 / 4%);
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  img {
+    max-height: 320px;
+  }
+
+  .ankiSpace {
+    color:#F08A24;
+  }
+
+  .keyWord {
+    color:#F08A24;
+  }
+
+  table {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    margin:0;
+    padding:0;
+    width: 100%;
+  }
+
+  table tr {
+    border: 1px solid #ddd;
+    padding: 5px;
+  }
+
+  table th, table td {
+    padding: 10px;
+    text-align: left;
+  }
+
+  table th {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }`

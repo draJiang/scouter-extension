@@ -3,19 +3,19 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useRef, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 
-import { PopupCard } from "./PopupCard"
+import { PopupCard } from "../PopupCard"
 
 import { StyleProvider } from '@ant-design/cssinjs';
 import { StyleSheetManager } from 'styled-components';
 
 
-import { useUserInfoContext } from './lib/userInfo'
+import { useUserInfoContext } from '../lib/userInfo'
 
-import { fetchcurrentLanguage } from './lib/lang';
-import { CurrentLanguageContext } from './lib/locale'
-import { useCurrentLanguage } from './lib/locale'
+import { fetchcurrentLanguage } from '../lib/lang';
+import { CurrentLanguageContext } from '../lib/locale'
+import { useCurrentLanguage } from '../lib/locale'
 
-import { UserInfoContext } from './lib/userInfo'
+import { UserInfoContext } from '../lib/userInfo'
 import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
 
 // import { Button, message } from 'antd';
@@ -23,16 +23,16 @@ import {
   CustomerServiceOutlined
 } from '@ant-design/icons';
 
-import { getUserInfo, playTextToSpeech } from './util'
-import { userInfoType } from './types'
+import { getUserInfo, playTextToSpeech } from '../util'
+import { userInfoType } from '../types'
 
-import { languageCodes } from "./lib/lang"
+import { languageCodes } from "../lib/lang"
 
+import { cardStyle } from '../util'
 
+import { popupCardStyle } from '../PopupCard/style'
 
-import { popupCardStyle } from './PopupCard/style'
-
-import LOGO from './assets/icon128.png'
+import LOGO from '../assets/icon128.png'
 
 import styled, { css } from 'styled-components';
 
@@ -90,10 +90,47 @@ if (MyBox === null || MyBox === undefined) {
 
 }
 
-let USER_INFO: userInfoType
-const thisGetUserInfo = async () => {
 
+let USER_INFO: userInfoType = { userId: 'unknow', verified: false }
+let ANKI_INFO: any
+
+const thisGetUserInfo = async () => {
+  // 获取用户信息
   USER_INFO = await getUserInfo()
+
+  // 获取 Anki 牌组信息
+  browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, }).then((result) => {
+
+    ANKI_INFO = result.data
+
+    // 更新 Anki style
+    try {
+
+
+      for (let i = 0; i < ANKI_INFO.length; i++) {
+
+        const p = {
+          "model": {
+            "name": ANKI_INFO[i]['modelName'],
+            "css": cardStyle
+          }
+        }
+
+        // 获取 Anki 牌组信息
+        browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
+
+          console.log(result);
+
+        })
+
+      }
+
+
+    } catch (error) {
+
+    }
+
+  })
 
 }
 
@@ -208,7 +245,7 @@ async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: a
     <React.StrictMode>
 
       <CurrentLanguageContext.Provider value={lang}>
-        <UserInfoContext.Provider value={USER_INFO}>
+        <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
           <StyleProvider container={shadowRoot}>
             <StyleSheetManager target={shadowRoot}>
               <PopupCard data={data} selection={msg} runPrompt={runPrompt} isPin={isPin} />
@@ -352,7 +389,7 @@ const handleMouseup = (event: any) => {
         let range = selectedText.getRangeAt(0);
 
         ReactDOM.render(
-          <UserInfoContext.Provider value={USER_INFO}>
+          <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
             <StyleSheetManager target={shadowRoot}>
               <ToolBar selectedText={selectedText.getRangeAt(0).getBoundingClientRect()} selectedTextString={selectedTextString} range={range} />
             </StyleSheetManager></UserInfoContext.Provider >, contextBox2);
@@ -498,7 +535,7 @@ function ToolBar(props: ToolBarProps) {
   const [showMenu, setShowMenu] = useState(true)
   const ContextBox = useRef<HTMLDivElement>(null);
 
-  const userInfo: userInfoType | null = useUserInfoContext()
+  const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
 
   // let portFromMenu: any
 
@@ -567,8 +604,8 @@ function ToolBar(props: ToolBarProps) {
     // portFromMenu = browser.runtime.connect({
     //   name: 'fromContentScript'
     // })
-    
-    
+
+
 
     // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
 
@@ -692,7 +729,7 @@ function ToolBar(props: ToolBarProps) {
 
         <div>
 
-          <StyledButton $disable={userInfo?.verified ? false : true} title='⚡Pro' style={{
+          <StyledButton $disable={userInfo?.user.verified ? false : true} title='⚡Pro' style={{
             fontSize: '16px',
             display: 'flex',
             alignItems: 'center',
@@ -703,7 +740,7 @@ function ToolBar(props: ToolBarProps) {
             onClick={async () => {
 
               let lang = await fetchcurrentLanguage()
-              if (userInfo?.verified) {
+              if (userInfo?.user.verified) {
                 if (lang) {
 
                   const targetLanguage = lang['target']['id']
@@ -741,3 +778,5 @@ function ToolBar(props: ToolBarProps) {
 
   )
 }
+
+

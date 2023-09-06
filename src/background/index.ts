@@ -3,21 +3,66 @@
 import browser from 'webextension-polyfill'
 import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
-import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "./util";
+import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "../util";
 import { createApi } from 'unsplash-js';
 
-import { getSettings } from './Options/util'
+import { getSettings } from '../Options/util'
 
-import { models } from './Options/models'
+import { models } from '../Options/models'
 
-import { getUserInfo, getBalance } from './util'
+import { getUserInfo, getBalance } from '../util'
 
-import { userInfoType } from './types'
+import { userInfoType } from '../types'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
 
 let userId: string
+
+export const cardStyle = `
+
+/* 卡片样式可能随着版本迭代不断更新，删掉这行文字可以暂停自动更新 The card style may be updated continuously with version iterations, deleting this line of text can pause the auto-update.*/
+
+.card {
+  font-family: arial;
+  font-size: 20px;
+  color: rgb(0 0 0 / 84%);
+  background-color: white;
+  text-align: left;
+}
+
+.sentence span{
+    opacity:0.75;
+  }
+  img {
+    width:auto;
+  }
+  .ankiSpace {
+    color:#F08A24;
+  }
+  .keyWord {
+    color:#F08A24;
+  }
+
+  table {
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+    margin:0;
+    padding:0;
+    width: 100%;
+  }
+  table tr {
+    border: 1px solid #ddd;
+    padding: 5px;
+  }
+  table th, table td {
+    padding: 10px;
+    text-align: left;
+  }
+  table th {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }`
 
 try {
 
@@ -440,7 +485,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
 
     // 获取 DeckName
-    getDefaultDeckName().then((result: any) => {
+    getDefaultDeckName().then(async (result: any) => {
 
       let defaultDeckName = result.defaultDeckName
 
@@ -448,102 +493,290 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
         defaultDeckName = 'Default'
       }
 
-      // 获取所有 Model
-      ankiAction('modelNames', 6).then((result: any) => {
+      // 获取用户的所有 model 名称
 
-        console.log(result.result);
+      try {
 
-        if (!result.error) {
+        const modelNames: any = await ankiAction('modelNames', 6)
 
-          let defaultModelName = 'Scouter'
-          let cardTemplates = [
+        console.log('modelNames:');
+        console.log(modelNames);
+
+        if (!modelNames.error) {
+
+          const models = [
             {
-              'name': 'Card1',
-              'Front': '{{Front}}',
-              'Back': `{{Front}}
-              <hr id=answer>
-              {{Back}}`
+              'modelName': 'Scouter',
+              'cardTemplates': [
+                {
+                  'name': 'Card1',
+                  'Front': '{{Front}}',
+                  'Back': `{{Front}}
+                  <hr id=answer>
+                  {{Back}}`
 
+                }
+              ],
+              'inOrderFields': ["Front", "Back"],
+              'isAnkiSpace': false
+
+            },
+            {
+              'modelName': 'Scouter Cloze Text',
+              'cardTemplates': [
+                {
+                  'name': 'Card2',
+                  'Front': '{{cloze:Text}}',
+                  'Back': `{{cloze:Text}}
+                            <br>{{More}}`
+                }
+              ],
+              'inOrderFields': ["Text", "More"],
+              'isAnkiSpace': true
             }
           ]
-          let inOrderFields = ["Front", "Back"]
 
-          if (isAnkiSpace) {
-            // Anki 完形填空
-            defaultModelName = 'Scouter Cloze Text'
-            cardTemplates = [
-              {
-                'name': 'Card2',
-                'Front': '{{cloze:Text}}',
-                'Back': `{{cloze:Text}}
-                        <br>{{More}}`
-              }
-            ]
-            inOrderFields = ["Text", "More"]
-          }
+          // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
 
-          if (result.result.includes(defaultModelName)) {
-            // 如果有 Scouter Model 则获取 Model 的字段
+          // 用于存储 model 相关的数据，返回给 content 将笔记添加到 Anki
+          let modelData: any = []
 
-            ankiAction('modelFieldNames', 6, { 'modelName': defaultModelName }).then((result: any) => {
-              if (result.result.length < 2) {
-                // 字段少于 2 个时无法添加笔记，引导用户修改
 
-                asyncSendResponse({ type: 'setModel', result: 'failure', data: {}, error: 'The Scouter model in Anki needs to include at least 2 fields. Please modify and try again.' });
+
+          let promises = models.map((model) => {
+
+            return new Promise<void>((resolve, reject) => {
+
+              if (modelNames.result.includes(model.modelName)) {
+
+                // 如果有 Scouter Model 则获取 Model 的字段
+                ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
+
+                  if (result.result.length < 2) {
+                    // 字段少于 2 个时无法添加笔记，引导用户修改
+
+                    modelData.push(
+                      { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': null, 'isAnkiSpace': model.isAnkiSpace }
+                    )
+
+                  } else {
+
+                    modelData.push(
+                      { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': result.result[1], 'isAnkiSpace': model.isAnkiSpace }
+                    )
+
+                  }
+
+                  resolve(); // Resolve the Promise
+
+                })
 
               } else {
+                // 如果没有 Scouter 默认的 Model，则创建
 
-                // 反馈处理结果
-                asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelName': defaultModelName, 'field1': result.result[0], 'field2': result.result[1] }, error: result.error });
+                ankiAction('createModel', 6, {
+                  'modelName': model.modelName,
+                  'inOrderFields': model.inOrderFields,
+                  'cardTemplates': model.cardTemplates,
+                  'isCloze': model.isAnkiSpace,
+                  'css': cardStyle
+                }).then((result: any) => {
+
+                  if (!result.error) {
+
+                    modelData.push(
+                      { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result.flds[0].name, 'field2': result.result.flds[1].name, 'isAnkiSpace': model.isAnkiSpace }
+                    )
+
+                  }
+
+                  resolve(); // Resolve the Promise
+                })
 
               }
+
+
             })
 
-          } else {
-            // 如果没有 Scouter 默认的 Model，则创建
 
-            ankiAction('createModel', 6, {
-              'modelName': defaultModelName,
-              'inOrderFields': inOrderFields,
-              'cardTemplates': cardTemplates,
-              'isCloze': isAnkiSpace
-            }).then((result: any) => {
-              if (!result.error) {
-                // 反馈处理结果
-                asyncSendResponse({
-                  type: 'setModel', result: 'success', data: {
-                    'defaultDeckName': defaultDeckName,
-                    'modelName': defaultModelName,
-                    'field1': result.result.flds[0].name,
-                    'field2': result.result.flds[1].name
 
-                  }, error: result.error
-                });
-              }
-            })
+          })
 
-          }
+          // 等待所有 Promise 完成
+          Promise.all(promises).then(() => {
+            console.log(modelData);
+            asyncSendResponse({ type: 'setModel', result: 'success', data: modelData, error: result.error });
+          }).catch((error) => {
+            console.error('Error:', error);
+          });
+
 
 
         }
 
+      } catch (error) {
+
+        asyncSendResponse({ type: 'setModel', result: 'failure', error: error });
+
+      }
 
 
 
-      })
-        .catch((error) => {
+      // 获取所有 Model
+      // ankiAction('modelNames', 6).then((result: any) => {
 
-          console.error(error);
-          asyncSendResponse({ type: 'setModel', result: 'failure', error: error.error });
+      //   console.log(result.result);
 
-        });
+      //   if (!result.error) {
+
+      //     // 默认的卡片类型
+      //     // let defaultModelName = 'Scouter'
+      //     // let defaultCardTemplates = [
+      //     //   {
+      //     //     'name': 'Card1',
+      //     //     'Front': '{{Front}}',
+      //     //     'Back': `{{Front}}
+      //     //     <hr id=answer>
+      //     //     {{Back}}`
+
+      //     //   }
+      //     // ]
+      //     // let defaultInOrderFields = ["Front", "Back"]
+
+      //     // Anki 完形填空类型
+      //     // let ClozeModelName = 'Scouter Cloze Text'
+      //     // let ClozeCardTemplates = [
+      //     //   {
+      //     //     'name': 'Card2',
+      //     //     'Front': '{{cloze:Text}}',
+      //     //     'Back': `{{cloze:Text}}
+      //     //               <br>{{More}}`
+      //     //   }
+      //     // ]
+      //     // let ClozeInOrderFields = ["Text", "More"]
+
+      //     // const models = [
+      //     //   {
+      //     //     'modelName': 'Scouter',
+      //     //     'cardTemplates': [
+      //     //       {
+      //     //         'name': 'Card1',
+      //     //         'Front': '{{Front}}',
+      //     //         'Back': `{{Front}}
+      //     //         <hr id=answer>
+      //     //         {{Back}}`
+
+      //     //       }
+      //     //     ],
+      //     //     'inOrderFields': ["Front", "Back"],
+      //     //     'isAnkiSpace': false
+
+      //     //   },
+      //     //   {
+      //     //     'modelName': 'Scouter Cloze Text',
+      //     //     'cardTemplates': [
+      //     //       {
+      //     //         'name': 'Card2',
+      //     //         'Front': '{{cloze:Text}}',
+      //     //         'Back': `{{cloze:Text}}
+      //     //                   <br>{{More}}`
+      //     //       }
+      //     //     ],
+      //     //     'inOrderFields': ["Text", "More"],
+      //     //     'isAnkiSpace': true
+      //     //   }
+      //     // ]
+
+      //     // // 存储 model 相关的数据，返回给 content 将笔记添加到 Anki
+      //     // let modelData = []
+
+      //     // // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
+      //     // models.forEach(async (model) => {
+
+      //     //   if (result.result.includes(model.modelName)) {
+
+      //     //     // 如果有 Scouter Model 则获取 Model 的字段
+      //     //     ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
+      //     //       if (result.result.length < 2) {
+      //     //         // 字段少于 2 个时无法添加笔记，引导用户修改
+
+      //     //         // asyncSendResponse({ type: 'setModel', result: 'failure', data: {}, error: 'The Scouter model in Anki needs to include at least 2 fields. Please modify and try again.' });
+
+      //     //         modelData.push(
+      //     //           { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': null }
+      //     //         )
+
+      //     //       } else {
+
+      //     //         modelData.push(
+      //     //           { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': result.result[1] }
+      //     //         )
+      //     //         // asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelName': defaultModelName, 'field1': result.result[0], 'field2': result.result[1] }, error: result.error });
+
+      //     //       }
+      //     //     })
+
+      //     //   } else {
+      //     //     // 如果没有 Scouter 默认的 Model，则创建
+
+      //     //     ankiAction('createModel', 6, {
+      //     //       'modelName': model.modelName,
+      //     //       'inOrderFields': model.inOrderFields,
+      //     //       'cardTemplates': model.cardTemplates,
+      //     //       'isCloze': model.isAnkiSpace,
+      //     //       'css': cardStyle
+      //     //     }).then((result: any) => {
+
+      //     //       if (!result.error) {
+
+      //     //         modelData.push(
+      //     //           { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result.flds[0].name, 'field2': result.result.flds[1].name }
+      //     //         )
+
+
+      //     //         // 反馈处理结果
+      //     //         // asyncSendResponse({
+      //     //         //   type: 'setModel', result: 'success', data: {
+      //     //         //     'defaultDeckName': defaultDeckName,
+      //     //         //     'modelName': defaultModelName,
+      //     //         //     'field1': result.result.flds[0].name,
+      //     //         //     'field2': result.result.flds[1].name
+
+      //     //         //   }, error: result.error
+      //     //         // });
+
+      //     //       }
+      //     //     })
+
+      //     //   }
+
+
+
+      //     // });
+
+
+
+
+
+      //   }
+
+
+
+
+      // })
+      //   .catch((error) => {
+
+      //     console.error(error);
+      //     asyncSendResponse({ type: 'setModel', result: 'failure', error: error.error });
+
+      //   });
 
     })
 
-    browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
+    // browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
 
 
-    })
+    // })
 
 
 

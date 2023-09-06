@@ -25,9 +25,8 @@ export function Images(props: ImagesProps) {
     const [changeImage, setChangeImageStatus] = useState(false)
     // const [searchImageIsLoading, setSearchImageIsLoading] = useState(false)
 
-    const userInfo: userInfoType | null = useUserInfoContext()
+    const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
     // const [currentURL, setCurrentURL] = useState<string>();
-
     const inputElement = useRef<InputRef>(null);
 
     useEffect(() => {
@@ -42,7 +41,7 @@ export function Images(props: ImagesProps) {
         // console.log(inputElement);
         // console.log(inputElement.current);
         // console.log(inputElement.current?.input);
-        if (userInfo?.verified) {
+        if (userInfo?.user.verified) {
             inputElement.current?.focus()
         }
 
@@ -64,7 +63,7 @@ export function Images(props: ImagesProps) {
 
         event.stopPropagation()
 
-        if (userInfo?.verified) {
+        if (userInfo?.user.verified) {
 
             let inputValue = inputElement.current?.input?.value
 
@@ -221,12 +220,12 @@ export function Images(props: ImagesProps) {
                                     >
                                         <div style={{ flex: '1', marginRight: '20px' }}>
                                             <Input style={{
-                                                backgroundColor: userInfo?.verified === false ? 'rgba(255, 255, 255, 0.9)' : '',
+                                                backgroundColor: userInfo?.user.verified === false ? 'rgba(255, 255, 255, 0.9)' : '',
                                                 width: '100%',
                                                 paddingRight: '2px'
                                             }}
                                                 suffix={<ProTag />}
-                                                disabled={!userInfo?.verified} prefix={<SearchOutlined />} placeholder="Search images" onKeyDown={handleSearchInput} size="small" ref={inputElement} onPressEnter={handleSearchBtnClick} />
+                                                disabled={!userInfo?.user.verified} prefix={<SearchOutlined />} placeholder="Search images" onKeyDown={handleSearchInput} size="small" ref={inputElement} onPressEnter={handleSearchBtnClick} />
                                         </div>
 
                                         <div style={{
@@ -234,7 +233,7 @@ export function Images(props: ImagesProps) {
                                             alignItems: 'center'
                                         }}>
 
-                                            <Button disabled={!userInfo?.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<CheckOutlined />} />
+                                            <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<CheckOutlined />} />
                                             <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
 
                                         </div>

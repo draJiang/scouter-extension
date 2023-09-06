@@ -15,7 +15,7 @@ import { userInfoType, langType } from '../types'
 import { useSpring, animated } from 'react-spring';
 
 
-import { setDonotClosePopupCard } from '../content_script'
+import { setDonotClosePopupCard } from '../contentScript'
 
 import { Nav } from "../Components/Nav"
 import { CustomPromptForm } from "../Components/CustomPromptForm"
@@ -46,6 +46,7 @@ import styled, { css } from 'styled-components';
 let currentLanguage: string
 let targetLanguage: string
 
+// 获取 Anki 卡片，用于编写故事
 let ankiCards: Array<{}>
 getAnkiCards().then((cards: any) => {
   ankiCards = cards
@@ -53,6 +54,8 @@ getAnkiCards().then((cards: any) => {
   // console.log(error);
 
 })
+
+// 初始化 Anki 的 Model，为后续导入到 Anki 提速
 
 const { TextArea } = Input;
 
@@ -113,7 +116,7 @@ export function PopupCard(props: any) {
   const [customPromptFormData, setCustomPromptFormData] = useState<PromptType>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' });
 
   // standby,normal,loading,success
-  const [addToAnkiStatus, setAddToAnkiStatus] = useState<{ status: string, noteId: number }>({ 'status': 'standby', 'noteId': 0 });
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState<{ status: string, noteId: number }>({ 'status': 'normal', 'noteId': 0 });
 
 
   const [isAnswerDone, setAnswerDone] = useState(false);
@@ -143,16 +146,14 @@ export function PopupCard(props: any) {
     name: 'getGPT'
   })
 
+  const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
+
   let Lang = useCurrentLanguage()!
   currentLanguage = Lang['current']['name']
   targetLanguage = Lang['target']['name']
 
 
   // const userInfo = useUserInfoContext()
-  // console.log('userInfo:');
-  // console.log(userInfo);
-
-
 
   // 控制追问菜单
   useEffect(() => {
@@ -235,11 +236,19 @@ export function PopupCard(props: any) {
         if (item.lastExecutedPrompt === '') {
 
           // 执行默认 Prompt、获取 Unsplash 图片
-          executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': 'Default' })
+          const pormpt = getDefaultPrompt(props.data.keyWord)
+          executivePrompt(pormpt)
 
         } else {
           // 执行 Prompt、获取 Unsplash 图片
-          executivePrompt(item.lastExecutedPrompt)
+          if (item.lastExecutedPrompt.id === "Default") {
+            const pormpt = getDefaultPrompt(props.data.keyWord)
+            executivePrompt(pormpt)
+          } else {
+            executivePrompt(item.lastExecutedPrompt)
+          }
+
+
 
 
         }
@@ -252,9 +261,7 @@ export function PopupCard(props: any) {
     } else {
 
       // 不执行任何 Prompt，由用户自行选择
-      // console.log('不执行任何 Prompt，由用户自行选择');
 
-      // 执行默认 Prompt、获取 Unsplash 图片
       executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': 'Default' }, false)
       setIsOpenMenu(true)
 
@@ -421,19 +428,22 @@ export function PopupCard(props: any) {
     // }
 
 
-    let showImagesBox = true
 
-    if (prompt.getUnsplashImages && needToRunPrompt) {
-      // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
-      showImagesBox = true
-
-
-    } else {
-      showImagesBox = false
-    }
 
 
     if (needToRunPrompt) {
+
+
+      let showImagesBox = true
+
+      if (prompt.getUnsplashImages && needToRunPrompt) {
+        // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
+        showImagesBox = true
+
+
+      } else {
+        showImagesBox = false
+      }
 
       // amplitude.track('executivePrompt');
       browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
@@ -462,11 +472,11 @@ export function PopupCard(props: any) {
       let newPrompt: Array<{ role: string, content: string }>;
       let p = prompt.userPrompt
 
-      if (prompt.id == 'Default') {
+      // if (prompt.id == 'Default') {
 
-        p = getDefaultPrompt(keyWord)['userPrompt']
+      //   p = defaultPrompt['userPrompt']
 
-      }
+      // }
 
       // 处理 Prompt 中的变量
       p = await handlePromptVariables(p, keyWord, Sentence, Lang)
@@ -968,10 +978,30 @@ export function PopupCard(props: any) {
       let elementsToRemove = doc.querySelectorAll('.imageQueue');
       let imageSource = doc.querySelectorAll('.imageSource');
 
+      // 创建新的 img 标签
+
+
       // 设置图片的尺寸、样式
       if (doc.getElementsByClassName('imageBox').length > 0) {
         let img = doc.getElementsByClassName('imageBox')[0].getElementsByTagName('img')[0] as HTMLImageElement;
         img.width = 0
+
+        const imgUrl = img.src;
+        let newImg = document.createElement("img");
+        newImg.src = imgUrl;
+
+        // 获取要替换的 div
+        let div = doc.getElementsByClassName('imageBox')[0];
+        if (div) {
+          // 使用新的 img 标签替换 div
+          div.parentNode?.replaceChild(newImg, div);
+        }
+
+
+      } else {
+        // 没有图片
+        const imgs = doc.getElementsByClassName('images')[0]
+        imgs.parentNode?.removeChild(imgs)
       }
 
       // 删除预加载的图片
@@ -985,8 +1015,6 @@ export function PopupCard(props: any) {
 
       // 处理样式，避免 Anki 内显示异常
       container = container.replace(/style=/g, '');
-
-
 
 
       if (windowElement.current.getElementsByClassName('imageBox')[0] !== undefined) {
@@ -1003,57 +1031,9 @@ export function PopupCard(props: any) {
 
     }
 
-    const cardStyle = `<style>
-
-    .sentence span{
-      opacity:0.75;
-      text-align: left;
-    }
-    img {
-      width:auto;
-    }
-    .ankiSpace {
-      color:#F08A24;
-    }
-    .keyWord {
-      color:#F08A24;
-    }
-
-    table {
-      border: 1px solid #ccc;
-      border-collapse: collapse;
-      margin:0;
-      padding:0;
-      width: 100%;
-    }
-    table tr {
-      border: 1px solid #ddd;
-      padding: 5px;
-    }
-    table th, table td {
-      padding: 10px;
-      text-align: left;
-    }
-    table th {
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    </style>
-    `
+    const cardStyle = ``
 
     // 请求 background 将数据保存到 Anki
-
-    // 常规类型
-
-
-
-    let ankiBack = '<p class="sentence"> <span>' + stc + '</span><a href="' + window.location.href + '">[Source]</a></p>' + container
-    if (keyWord.length > 20) {
-      // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
-      ankiBack = container + '<p class="sentence" <span>' + stc + '</span><a href="' + window.location.href + '">[Source]</a></p>'
-    }
-
-
 
 
     // 单词发音
@@ -1081,6 +1061,12 @@ export function PopupCard(props: any) {
     }
 
 
+    // 常规类型
+    let ankiBack = '<p> <blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote></p>' + container
+    if (keyWord.length > 20) {
+      // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
+      ankiBack = container + '<p><a href="' + window.location.href + '">Source</a></p>'
+    }
 
 
     let p = {
@@ -1099,15 +1085,15 @@ export function PopupCard(props: any) {
     }
 
     // 完形填空类型
-    if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
+    if (ScouterSelection.indexOf('class="ankiSpace"') >= 0 || container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
 
       let newFront: string
 
-      newFront = '<p>' + ScouterSelection + '</p>' + cardStyle + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>' + container
+      newFront = '<p>' + ScouterSelection + '</p>' + '<blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote>' + container
 
       if (keyWord.length > 20) {
         // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
-        newFront = '<p>' + ScouterSelection + '</p>' + cardStyle + container + '<p class="sentence">' + stc + '<a href="' + window.location.href + '">[Source]</a></p>'
+        newFront = '<p>' + ScouterSelection + '</p>' + container + '<p> <a href="' + window.location.href + '">Source</a></p>'
       }
 
       p = {
@@ -1142,10 +1128,11 @@ export function PopupCard(props: any) {
   const handleSaveToAnkiBtnClick = () => {
 
     // 根据是否为完形填空申请不同的卡片模板
-    const container = windowElement.current?.getElementsByClassName('messages')[0].innerHTML
+    const container = windowElement.current?.getElementsByClassName('messages')[0].innerHTML!
+    const selectionText = windowElement.current?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
     let isAnkiSpace = false
-    if (container) {
-      if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
+    if (container || selectionText) {
+      if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0 || selectionText.indexOf('class="ankiSpace') >= 0) {
         isAnkiSpace = true
       }
     }
@@ -1153,22 +1140,76 @@ export function PopupCard(props: any) {
     setAddToAnkiStatus({ 'status': 'loading', 'noteId': 0 })
 
     // 先预处理 Anki 的 model
-    let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': { 'isAnkiSpace': isAnkiSpace }, })
-    sending.then((message: any) => {
+    // let sending = browser.runtime.sendMessage({ 'type': 'setModel', 'messages': { 'isAnkiSpace': isAnkiSpace }, })
+    // sending.then((message: any) => {
 
-      if (message.result == 'success') {
-        // 添加到 Anki 中
-        addToAnki(message.data.defaultDeckName, message.data.modelName, message.data.field1, message.data.field2)
-      } else {
-        // 反馈错误信息
-        alert(message.error)
-        setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
+
+
+    function setAnkiInfo(models: []) {
+
+      let defaultDeckName: string = '', modelName: string = '', field1: string = '', field2: string = ''
+
+      models.forEach((model: any) => {
+
+        if (model.isAnkiSpace === isAnkiSpace) {
+          defaultDeckName = model.defaultDeckName
+          modelName = model.modelName
+          field1 = model.field1
+          field2 = model.field2
+        }
+
+
+
+      });
+
+      return {
+        'defaultDeckName': defaultDeckName,
+        'modelName': modelName,
+        'field1': field1,
+        'field2': field2
       }
 
+    }
 
-    }, () => {
-      //error
-    });
+    if (userInfo?.anki) {
+
+      const ankiInfo = setAnkiInfo(userInfo?.anki)
+
+      // 添加到 Anki 中
+      addToAnki(ankiInfo.defaultDeckName!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+
+    } else {
+
+      // 获取 Anki 牌组信息
+      browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, }).then((result) => {
+
+        if (result.result === 'success') {
+
+          const ankiInfo = setAnkiInfo(result.data)
+
+          // 添加到 Anki 中
+          addToAnki(ankiInfo.defaultDeckName!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+
+
+        } else {
+
+          // 反馈错误信息
+          alert(result.error.error)
+          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
+
+        }
+
+
+
+      })
+
+
+    }
+
+
+    // }, () => {
+    //   //error
+    // });
 
 
 

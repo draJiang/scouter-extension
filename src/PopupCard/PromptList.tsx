@@ -27,7 +27,7 @@ interface PromptButtonProps {
 export function PromptList(props: PromptListProps) {
 
     const PromptListDOM = useRef<HTMLDivElement>(null);
-    const userInfo: userInfoType | null = useUserInfoContext()
+    const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
 
     // const userInfo = useUserInfoContext()
     // console.log('userInfo:');
@@ -48,7 +48,7 @@ export function PromptList(props: PromptListProps) {
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
 
-        if (userInfo?.verified) {
+        if (userInfo?.user.verified) {
             // 第 3 个参数 false 表示不重新渲染图片
             props.handleMenuItemClick(data, true, true, props.followUpData)
         }
@@ -87,19 +87,19 @@ export function PromptList(props: PromptListProps) {
                     display: "flex",
                     flexDirection: "column",
                     padding: '8px 8px 4px',
-                    cursor: !userInfo?.verified ? 'not-allowed' : '',
-                    opacity: !userInfo?.verified ? '0.7' : '1',
+                    cursor: !userInfo?.user.verified ? 'not-allowed' : '',
+                    opacity: !userInfo?.user.verified ? '0.7' : '1',
                 }}
             >
 
-                <PromptButton disable={!userInfo?.verified} handleMenuItemClick={() => {
+                <PromptButton disable={!userInfo?.user.verified} handleMenuItemClick={() => {
                     const p = getDefaultPrompt(props.followUpData.keyWord)
                     handleMenuItemClick(p)
                 }}>Default</PromptButton>
 
                 {props.promptList.map((item) => {
                     // return <button onClick={() => handleMenuItemClick(item)}>{item.title}</button>
-                    return <PromptButton key={item.id} disable={!userInfo?.verified} handleMenuItemClick={() => handleMenuItemClick(item)}>{item.title}</PromptButton>
+                    return <PromptButton key={item.id} disable={!userInfo?.user.verified} handleMenuItemClick={() => handleMenuItemClick(item)}>{item.title}</PromptButton>
                 })}
 
             </div>

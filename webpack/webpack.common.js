@@ -8,10 +8,10 @@ const DotenvWebpackPlugin = require('dotenv-webpack');
 
 module.exports = {
     entry: {
-        popup: path.join(srcDir, 'popup.tsx'),
+        popup: path.join(srcDir, '/popup/index.tsx'),
         options: path.join(srcDir, '/Options/index.tsx'),
-        background: path.join(srcDir, 'background.ts'),
-        content_script: path.join(srcDir, 'content_script.tsx'),
+        background: path.join(srcDir, '/background/index.ts'),
+        content_script: path.join(srcDir, '/contentScript/index.tsx'),
     },
     output: {
         path: path.join(__dirname, "../dist/js"),

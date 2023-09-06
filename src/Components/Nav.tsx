@@ -23,7 +23,7 @@ import {
 // import type { MenuProps } from 'antd';
 
 
-import { pinPopupCard } from '../content_script'
+import { pinPopupCard } from '../contentScript'
 import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
 
 // type PromptType = {
