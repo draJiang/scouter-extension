@@ -4,7 +4,9 @@ import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { userInfoType } from './types'
+import { userInfoType, aiParameterType } from './types'
+
+import { getSettings } from './Options/util'
 
 
 
@@ -51,6 +53,228 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
       reject(error);
     });
   });
+}
+
+export function generationsImages(prompt: string) {
+
+  console.log('generationsImages');
+
+
+  return new Promise((resolve, reject) => {
+
+    getAIParameter().then((result) => {
+
+
+
+      const openApiEndpoint = result.data?.imagesGenerations.url
+
+
+
+      if (!result.data || openApiEndpoint === undefined) {
+
+      } else {
+
+        // 使用 open router 和 aiproxy 服务时无法获取图片
+        if (result.apiKeySelection === 'licenseKey' || openApiEndpoint?.indexOf('api.aiproxy') >= 0) {
+          resolve({ 'succeeded': false, data: [] })
+        }
+
+        const body = {
+          "prompt": prompt,
+          "n": 2,
+          "size": "512x512"
+        }
+
+        const headers = result.data.imagesGenerations.headers
+
+        fetch(openApiEndpoint!, {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: headers
+
+        }).then(async (response) => {
+          response.json().then((data) => {
+
+            if (data.status === "notRunning") {
+
+              // azure
+
+              const stringList = openApiEndpoint.split('/openai/')
+              const url = stringList[0] + '/openai/' + 'operations/images/' + data.id + '?api-version=2023-06-01-preview'
+
+
+              const intervalId = setInterval(() => {
+                fetch(url, {
+                  method: "GET",
+                  headers: headers
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.status === 'succeeded') {
+                      resolve({'succeeded':true,'data':data.result})
+                      clearInterval(intervalId); // 任务成功时清除轮询
+                    }
+                  });
+              }, 1000);
+
+            } else {
+
+              resolve({'succeeded':true,'data':data})
+
+            }
+
+
+          })
+        }).catch((error) => {
+
+          console.log(error);
+
+        })
+
+      }
+
+
+
+    })
+
+  })
+
+}
+
+export function getAIParameter(): Promise<aiParameterType> {
+
+  return new Promise((resolve, reject) => {
+
+    const defaultOpenApiEndpoint = 'https://api.openai.com'
+
+    getSettings().then((result) => {
+
+      const apiKeySelection = result.apiKeySelection
+      const licenseKey = result.licenseKey
+      let openApiKey = result.openApiKey
+      const currentLanguage = result.currentLanguage
+      const targetLanguage = result.targetLanguage
+      const model = result.model
+
+      let openApiEndpoint: string = result.openApiEndpoint
+
+      if (openApiKey.length < 5 && licenseKey.length < 5) {
+        // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
+
+        resolve({
+          'result': 'failure',
+          'apiKeySelection': apiKeySelection,
+          'data': null
+        })
+
+      }
+
+      if (openApiEndpoint.length < 5) {
+        openApiEndpoint = defaultOpenApiEndpoint
+      }
+
+
+      let headers = {}
+      let body
+      let imgOpenApiEndpoint = ''
+
+      // 优先使用自己的 Key
+      if (apiKeySelection === 'licenseKey') {
+
+        // 使用许可证
+        openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
+        imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
+        openApiKey = licenseKey
+        headers = {
+          'Authorization': 'Bearer ' + openApiKey,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://notes.dabing.one/', // To identify your app
+          'X-Title': 'Scouter'
+        }
+        body = {
+          "model": model,
+          "messages": [],
+          "temperature": 0.7,
+          "max_tokens": 420,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 2,
+          "stream": true
+        }
+
+      } else {
+
+        // 使用用户自己的 Key
+
+        if (openApiEndpoint.indexOf('azure.com') > -1) {
+
+          // Azure
+          // 'https://YOURDEPLOYMENTS.openai.azure.com/openai/deployments/YOURDEPLOYMENTS/chat/completions?api-version=2023-03-15-preview'
+          const stringList = openApiEndpoint.split('/openai/')
+          imgOpenApiEndpoint = stringList[0] + '/openai/' + 'images/generations:submit?api-version=2023-06-01-preview'
+
+          headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
+          body = {
+            "model": "gpt-35-turbo",
+            "messages": [],
+            "temperature": 0.7,
+            "max_tokens": 420,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 2,
+            "stream": true
+          }
+
+        } else {
+
+          // OpenAI
+          headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+
+          // 去除端点末尾的 \ 符号
+          if (openApiEndpoint.slice(-1) === "/") {
+            openApiEndpoint = openApiEndpoint.slice(0, -1);
+          }
+
+          imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
+          openApiEndpoint += '/v1/chat/completions'
+
+
+          body = {
+            "model": "gpt-3.5-turbo",
+            "messages": [],
+            "temperature": 0.7,
+            "max_tokens": 420,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 2,
+            "stream": true
+          }
+
+        }
+
+      }
+
+      resolve({
+        'result': 'success',
+        'apiKeySelection': apiKeySelection,
+        'data': {
+          'chatCompletions': {
+            'url': openApiEndpoint,
+            'headers': headers,
+            'body': body
+          },
+          'imagesGenerations': {
+            'url': imgOpenApiEndpoint,
+            'headers': headers,
+          }
+        }
+
+      })
+
+    })
+
+  })
+
 }
 
 // 获取 Anki 的 Deck 名称，添加到卡片会存放到这里
@@ -223,9 +447,9 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
 };
 
-export const cardStyle = `
-
 /* 卡片样式可能随着版本迭代不断更新，(删掉括号内的文字可以暂停自动更新) | Card styles may be updated with each version iteration, (deleting the text in the parentheses can pause the auto-update). */
+
+export const cardStyle = `
 
   .card {
     font-family: arial;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import browser from 'webextension-polyfill'
-import { Button, Image, Input, Empty, Tag } from 'antd';
-import { LoadingOutlined, RightOutlined, LeftOutlined, CloseOutlined, CheckOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Image, Input, Empty, Tag, Tooltip } from 'antd';
+import { LoadingOutlined, ThunderboltOutlined, RightOutlined, LeftOutlined, CloseOutlined, CheckOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
 
 import { InputRef } from 'antd/lib/input';
 import { ProTag } from "./ProTag";
@@ -10,11 +10,16 @@ import { ImageType, userInfoType } from '../types'
 
 import { useUserInfoContext } from '../lib/userInfo'
 
+import { useSpring, animated } from 'react-spring';
+
+import { generationsImages } from '../util'
+
 
 interface ImagesProps {
     images: Array<ImageType>;
     // keyWord: string;
     getUnsplashImages: (keyword: string) => void;
+    generationsImages: (keyword: string) => void;
 }
 
 export function Images(props: ImagesProps) {
@@ -23,13 +28,33 @@ export function Images(props: ImagesProps) {
     const [imageIndex, setImageIndex] = useState(0);
     const [showControl, setShowControl] = useState(false)
     const [changeImage, setChangeImageStatus] = useState(false)
+
+    const [imagesLoading, setImagesLoading] = useState(true)
     // const [searchImageIsLoading, setSearchImageIsLoading] = useState(false)
 
     const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
     // const [currentURL, setCurrentURL] = useState<string>();
     const inputElement = useRef<InputRef>(null);
 
+    const imageBoxElement = useRef<HTMLDivElement>(null);
+
+    const composing = useRef(false);
+
+    const handleCompositionStart = () => {
+        composing.current = true;
+    };
+
+    const handleCompositionEnd = () => {
+        composing.current = false;
+    };
+
+
     useEffect(() => {
+
+        setTimeout(() => {
+            setImagesLoading(false)
+        }, 1000);
+
 
         setImages(props.images)
         setImageIndex(0)
@@ -61,13 +86,22 @@ export function Images(props: ImagesProps) {
 
     const handleSearchBtnClick = (event: any) => {
 
+
+
+
         event.stopPropagation()
 
         if (userInfo?.user.verified) {
 
             let inputValue = inputElement.current?.input?.value
 
-            if (inputValue && inputValue !== '') {
+
+
+            if (inputValue && inputValue !== '' && !composing.current) {
+
+                setImagesLoading(true)
+
+                // 搜索图片
                 props.getUnsplashImages(inputValue)
                 setChangeImageStatus(false)
 
@@ -77,11 +111,39 @@ export function Images(props: ImagesProps) {
 
         } else {
 
-            alert('Is not verified')
+            alert('Please activate Pro')
 
         }
 
 
+    }
+
+    const handleGenerationsImages = (event: any) => {
+
+        event.stopPropagation()
+
+        if (userInfo?.user.verified) {
+
+
+
+            let inputValue = inputElement.current?.input?.value
+
+            if (inputValue && inputValue !== '') {
+
+                setImagesLoading(true)
+
+                // 生成图片
+                props.generationsImages(inputValue)
+                setChangeImageStatus(false)
+
+                browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleGenerationsImages' })
+            }
+
+        } else {
+
+            alert('Please activate Pro')
+
+        }
 
 
     }
@@ -119,15 +181,32 @@ export function Images(props: ImagesProps) {
 
         if (e.type === 'mouseleave') {
 
-            setShowControl(false)
+            // 显示图片搜索框时不自动隐藏控件
+
+            if (!changeImage || inputElement.current?.input?.value === '') {
+                setShowControl(false)
+                setChangeImageStatus(false)
+            }
+
             // setShowControl(true)
 
         }
 
     }
 
+    const animationStyle = useSpring({
+        from: { transform: 'rotate(0deg)' },
+        to: { transform: 'rotate(360deg)' },
+        config: { duration: 1000 },
+        loop: true,
+        width: '32px',
+        height: '32px',
+        border: '1px solid red'
+    });
+
     return (
         <div className="images"
+            ref={imageBoxElement}
             style={{
                 position: 'relative',
                 lineHeight: '0'
@@ -137,6 +216,24 @@ export function Images(props: ImagesProps) {
             <div>
 
                 <div onMouseEnter={handleImagesBoxHover} onMouseLeave={handleImagesBoxHover}>
+
+                    {imagesLoading &&
+
+                        <div
+                            style={{
+                                position: 'absolute',
+                                color: '#ffffff',
+                                backgroundColor: 'rgb(0, 0, 0,0.5)',
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: '9'
+                            }}
+                        >
+                            <animated.div style={animationStyle}><LoadingOutlined /></animated.div>
+                        </div>}
 
                     {/* 图片 */}
                     {images.length > 0 ?
@@ -183,7 +280,7 @@ export function Images(props: ImagesProps) {
                     }
 
                     {/* 图片控制控件 */}
-                    {showControl &&
+                    {showControl && !imagesLoading &&
                         <div
                             style={{
                                 position: 'absolute',
@@ -225,7 +322,12 @@ export function Images(props: ImagesProps) {
                                                 paddingRight: '2px'
                                             }}
                                                 suffix={<ProTag />}
-                                                disabled={!userInfo?.user.verified} prefix={<SearchOutlined />} placeholder="Search images" onKeyDown={handleSearchInput} size="small" ref={inputElement} onPressEnter={handleSearchBtnClick} />
+                                                disabled={!userInfo?.user.verified}
+                                                placeholder="Search images"
+                                                onKeyDown={handleSearchInput}
+                                                onCompositionStart={handleCompositionStart}
+                                                onCompositionEnd={handleCompositionEnd}
+                                                size="small" ref={inputElement} onPressEnter={handleSearchBtnClick} />
                                         </div>
 
                                         <div style={{
@@ -233,7 +335,19 @@ export function Images(props: ImagesProps) {
                                             alignItems: 'center'
                                         }}>
 
-                                            <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<CheckOutlined />} />
+                                            <Tooltip placement="bottom"
+                                                title={'Search Images(Enter ⏎)'}
+                                                getPopupContainer={() => imageBoxElement.current || document.body}
+                                            >
+                                                <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<SearchOutlined />} />
+                                            </Tooltip>
+
+                                            <Tooltip placement="bottom"
+                                                title={'Generate Images with AI'}
+                                                getPopupContainer={() => imageBoxElement.current || document.body}
+                                            >
+                                                <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleGenerationsImages} icon={<ThunderboltOutlined />} />
+                                            </Tooltip>
                                             <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
 
                                         </div>
@@ -343,7 +457,16 @@ export function Images(props: ImagesProps) {
                                         textShadow: '2px 2px 5px rgba(0, 0, 0, 0.3)'
                                     }}
                                 >
-                                    Photo by <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
+                                    {images[imageIndex].type === 'ai' ?
+                                        <>
+                                            Photo by AI
+                                        </>
+                                        :
+                                        <>
+                                            Photo by <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
+                                        </>
+                                    }
+
 
                                     {/* By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash */}
                                 </div>
@@ -357,7 +480,7 @@ export function Images(props: ImagesProps) {
             </div>
 
 
-        </div>
+        </div >
     )
 
 }

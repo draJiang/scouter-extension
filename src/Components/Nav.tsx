@@ -123,13 +123,17 @@ export function Nav(props: NavProps) {
 
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
+        
         // 第 3 个参数 false 表示不重新渲染图片
-        // 如果上一个 Prompt 是不显示图片，且当前 Prompt 需要显示图片，则本次任务需要渲染图片，否则不重新渲染图片
-        if (props.lastExecutedPrompt.getUnsplashImages !== true && data.getUnsplashImages) {
-            props.handleMenuItemClick(data)
-        } else {
-            props.handleMenuItemClick(data, true, false)
-        }
+
+        // // 如果上一个 Prompt 是不显示图片，且当前 Prompt 需要显示图片，则本次任务需要渲染图片，否则不重新渲染图片
+        // if (props.lastExecutedPrompt.getUnsplashImages !== true && data.getUnsplashImages) {
+        //     props.handleMenuItemClick(data)
+        // } else {
+        //     props.handleMenuItemClick(data, true, false)
+        // }
+
+        props.handleMenuItemClick(data)
 
     }
 

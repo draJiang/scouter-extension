@@ -11,6 +11,38 @@ import { useUserInfoContext } from '../lib/userInfo'
 import { ProTag } from "../Components/ProTag";
 
 
+let StyledButton = styled.button`
+
+    padding: 6px;
+    margin-bottom: 4px;
+    border-radius: 2px;
+    cursor: unset;
+
+    &:hover {
+        background-color:#F6F6F6;
+    }
+`;
+
+function PromptButton(props: PromptButtonProps) {
+
+
+    return (
+
+        <StyledButton
+            style={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                textAlign: 'left',
+                padding: '4px',
+                pointerEvents: props.disable ? 'none' : 'auto'
+            }}
+            onClick={props.handleMenuItemClick}>{props.children}</StyledButton>
+
+    )
+}
+
+
 interface PromptListProps {
     promptList: Array<PromptType>;
     followUpData: { keyWord: string, sentence: string }
@@ -110,33 +142,3 @@ export function PromptList(props: PromptListProps) {
     )
 }
 
-const StyledButton = styled.button`
-
-    padding: 6px;
-    margin-bottom: 4px;
-    border-radius: 2px;
-    cursor: unset;
-
-    &:hover {
-        background-color:#F6F6F6;
-    }
-`;
-
-function PromptButton(props: PromptButtonProps) {
-
-
-    return (
-
-        <StyledButton
-            style={{
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                textAlign: 'left',
-                padding: '4px',
-                pointerEvents: props.disable ? 'none' : 'auto'
-            }}
-            onClick={props.handleMenuItemClick}>{props.children}</StyledButton>
-
-    )
-}

@@ -34,6 +34,7 @@ function Message(props: MessageProps) {
 
     const [images, setImages] = useState<Array<ImageType>>([])
 
+
     useEffect(() => {
 
         setImages(props.message.images)
@@ -46,11 +47,78 @@ function Message(props: MessageProps) {
 
                 {/* 图片 */}
                 {props.message.showImagesBox &&
-                    <Images images={images} getUnsplashImages={(keyWord) => {
-                        getUnsplashImages(keyWord).then((imgs: any) => {
-                            setImages(imgs)
-                        })
-                    }} />}
+                    <Images images={images}
+                        getUnsplashImages={(keyWord) => {
+                            getUnsplashImages(keyWord).then((imgs: any) => {
+
+                                // 处理图片的数据格式
+                                let newImages: Array<ImageType> = []
+                                imgs.forEach((img: any) => {
+                                    const obj = {
+                                        type: 'unsplash',
+                                        id: img.id,
+                                        urls: {
+                                            small: img.urls.small
+                                        },
+                                        links: {
+                                            download_location: img.links.download_location
+                                        },
+                                        description: img.description,
+                                        user: {
+                                            username: img.user.username,
+                                            name: img.user.name
+                                        }
+                                    }
+
+                                    newImages.push(obj)
+                                });
+
+                                setImages(newImages)
+                            })
+                        }}
+
+                        generationsImages={(keyWord) => {
+                            browser.runtime.sendMessage({ 'type': 'generationsImages', 'data': { 'prompt': keyWord } }).then((response) => {
+
+                                // 处理图片的数据格式
+                                let newImages: Array<ImageType> = []
+
+                                if (response.succeeded) {
+
+                                    response.data.data.forEach((img: any) => {
+                                        const obj = {
+                                            type: 'ai',
+                                            id: img.url,
+                                            urls: {
+                                                small: img.url
+                                            },
+                                            links: {
+                                                download_location: ''
+                                            },
+                                            description: '',
+                                            user: {
+                                                username: 'AI',
+                                                name: 'AI'
+                                            }
+                                        }
+
+                                        newImages.push(obj)
+                                    });
+
+                                    setImages(newImages)
+
+                                } else {
+                                    setImages([])
+                                    alert('The current AI endpoint does not support image generation.')
+                                }
+
+
+
+                            })
+                        }}
+
+
+                    />}
 
 
                 {/* 文字 */}

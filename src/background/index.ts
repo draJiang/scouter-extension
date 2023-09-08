@@ -10,59 +10,16 @@ import { getSettings } from '../Options/util'
 
 import { models } from '../Options/models'
 
-import { getUserInfo, getBalance } from '../util'
+import { cardStyle } from '../util';
 
-import { userInfoType } from '../types'
+import { getUserInfo, getBalance, getAIParameter, generationsImages } from '../util'
+
+import { userInfoType, aiParameterType } from '../types'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
 
 let userId: string
-
-export const cardStyle = `
-
-/* 卡片样式可能随着版本迭代不断更新，删掉这行文字可以暂停自动更新 The card style may be updated continuously with version iterations, deleting this line of text can pause the auto-update.*/
-
-.card {
-  font-family: arial;
-  font-size: 20px;
-  color: rgb(0 0 0 / 84%);
-  background-color: white;
-  text-align: left;
-}
-
-.sentence span{
-    opacity:0.75;
-  }
-  img {
-    width:auto;
-  }
-  .ankiSpace {
-    color:#F08A24;
-  }
-  .keyWord {
-    color:#F08A24;
-  }
-
-  table {
-    border: 1px solid #ccc;
-    border-collapse: collapse;
-    margin:0;
-    padding:0;
-    width: 100%;
-  }
-  table tr {
-    border: 1px solid #ddd;
-    padding: 5px;
-  }
-  table th, table td {
-    padding: 10px;
-    text-align: left;
-  }
-  table th {
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }`
 
 try {
 
@@ -90,7 +47,7 @@ try {
 
 let controller = new AbortController();
 
-const defaultOpenApiEndpoint = 'https://api.openai.com'
+
 
 // 用户安装或者升级插件或者手动重新载入插件时会触发此事件
 browser.runtime.onInstalled.addListener(function () {
@@ -179,16 +136,16 @@ browser.runtime.onConnect.addListener(port => {
     if (msg.type === 'getGPTMsg') {
 
       // 获取 API Key 等存储的数据
-      let openApiKey: string, apiKeySelection: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
+      // let openApiKey: string, apiKeySelection: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
       getSettings().then((result) => {
 
-        apiKeySelection = result.apiKeySelection
-        licenseKey = result.licenseKey
-        openApiKey = result.openApiKey
-        openApiEndpoint = result.openApiEndpoint
-        currentLanguage = result.currentLanguage
-        targetLanguage = result.targetLanguage
-        model = result.model
+        // apiKeySelection = result.apiKeySelection
+        // licenseKey = result.licenseKey
+        // openApiKey = result.openApiKey
+        // openApiEndpoint = result.openApiEndpoint
+        // currentLanguage = result.currentLanguage
+        // targetLanguage = result.targetLanguage
+        // model = result.model
 
 
         // 请求  GPT 数据
@@ -202,193 +159,128 @@ browser.runtime.onConnect.addListener(port => {
 
         let messages = msg.messages
 
-        if (openApiKey.length < 5 && licenseKey.length < 5) {
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
-          return
-        }
+        getAIParameter().then((result: aiParameterType) => {
 
-        if (openApiEndpoint.length < 5) {
-          openApiEndpoint = defaultOpenApiEndpoint
-        }
-
-
-        let headers = {}
-        let body
-
-        // 优先使用自己的 Key
-        if (apiKeySelection === 'licenseKey') {
-
-          // 使用许可证
-          openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
-          openApiKey = licenseKey
-          headers = {
-            'Authorization': 'Bearer ' + openApiKey,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://notes.dabing.one/', // To identify your app
-            'X-Title': 'Scouter'
-          }
-          body = JSON.stringify({
-            "model": model,
-            "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 420,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 2,
-            "stream": true
-          })
-
-        } else {
-
-          // 使用用户自己的 Key
-
-          if (openApiEndpoint.indexOf('azure.com') > -1) {
-
-            // Azure
-            headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
-            body = JSON.stringify({
-              "model": "gpt-35-turbo",
-              "messages": messages,
-              "temperature": 0.7,
-              "max_tokens": 420,
-              "top_p": 1,
-              "frequency_penalty": 0,
-              "presence_penalty": 2,
-              "stream": true
-            })
-
+          const openApiEndpoint = result.data?.chatCompletions.url
+          if (!result.data || openApiEndpoint === undefined) {
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
           } else {
 
-            // OpenAI
-            headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+            let body = result.data.chatCompletions.body
+            body.messages = messages
 
-            // 去除端点末尾的 \ 符号
-            if (openApiEndpoint.slice(-1) === "/") {
-              openApiEndpoint = openApiEndpoint.slice(0, -1);
-            }
+            fetch(openApiEndpoint!, {
+              signal: controller.signal,
+              method: "POST",
+              body: JSON.stringify(body),
+              headers: result.data.chatCompletions.headers
 
-            openApiEndpoint += '/v1/chat/completions'
+            }).then(async (response) => {
 
-            body = JSON.stringify({
-              "model": "gpt-3.5-turbo",
-              "messages": messages,
-              "temperature": 0.7,
-              "max_tokens": 420,
-              "top_p": 1,
-              "frequency_penalty": 0,
-              "presence_penalty": 2,
-              "stream": true
-            })
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
 
-          }
+              if (response.status !== 200) {
+                // API KEY Error
+                response.json().then((data) => {
 
-        }
+                  port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message, 'code': data.error.code })
 
-        fetch(openApiEndpoint, {
-          signal: controller.signal,
-          method: "POST",
-          body: body,
-          headers: headers
-
-        }).then(async (response) => {
-
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-
-          if (response.status !== 200) {
-            // API KEY Error
-            response.json().then((data) => {
-
-              port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message, 'code': data.error.code })
-
-              return
-            })
+                  return
+                })
 
 
-          }
+              }
 
-          // 处理 server-sent events
-          const parser = createParser((event) => {
+              // 处理 server-sent events
+              const parser = createParser((event) => {
 
 
-            if (event.type === 'event') {
-              // console.log('createParser:');
-              try {
+                if (event.type === 'event') {
+                  // console.log('createParser:');
+                  try {
 
-                if (event.data !== '[DONE]') {
+                    if (event.data !== '[DONE]') {
 
-                  let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
+                      let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
 
-                  if (new_msg !== undefined) {
+                      if (new_msg !== undefined) {
 
-                    // 将数据发送给 UI 以渲染内容
-                    port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
+                        // 将数据发送给 UI 以渲染内容
+                        port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
+
+                      }
+                    }
+
+
+                  } catch {
+                    console.log(' createParser JSON.parse errow')
+                  }
+
+                }
+              })
+
+
+              const reader = response.body?.getReader();
+              if (reader !== undefined) {
+                try {
+
+
+                  // eslint-disable-next-line no-constant-condition
+                  while (true) {
+                    const { done, value } = await reader.read()
+                    // const { done:boolean, value:uint8Array } = await Promise.race([reader.read(), cancelPromise]);
+
+                    if (done) {
+                      // 数据传输结束
+                      console.log('Done');
+
+                      port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
+                      break
+
+                    }
+
+                    // if (!isContinue) {
+                    //   console.log('停止渲染数据')
+                    //   break
+                    // }
+
+                    const str = new TextDecoder().decode(value)
+                    parser.feed(str)
+
 
                   }
-                }
 
+                } finally {
 
-              } catch {
-                console.log(' createParser JSON.parse errow')
-              }
-
-            }
-          })
-
-
-          const reader = response.body?.getReader();
-          if (reader !== undefined) {
-            try {
-
-
-              // eslint-disable-next-line no-constant-condition
-              while (true) {
-                const { done, value } = await reader.read()
-                // const { done:boolean, value:uint8Array } = await Promise.race([reader.read(), cancelPromise]);
-
-                if (done) {
-                  // 数据传输结束
-                  console.log('Done');
-
-                  port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
-                  break
+                  reader.releaseLock()
 
                 }
-
-                // if (!isContinue) {
-                //   console.log('停止渲染数据')
-                //   break
-                // }
-
-                const str = new TextDecoder().decode(value)
-                parser.feed(str)
-
-
+                parser.reset()
               }
 
-            } finally {
 
-              reader.releaseLock()
+            }).catch((error) => {
+              console.log('error');
+              console.log(error);
+              if (error.message.indexOf('aborted') >= 0) {
+                // 开启新的请求，中断旧请求
 
-            }
-            parser.reset()
+              } else {
+                const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
+
+                port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
+              }
+
+              // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
+
+            })
+
           }
 
-
-        }).catch((error) => {
-          console.log('error');
-          console.log(error);
-          if (error.message.indexOf('aborted') >= 0) {
-            // 开启新的请求，中断旧请求
-
-          } else {
-            const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
-
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
-          }
-
-          // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
 
         })
+        //
+
 
 
 
@@ -455,7 +347,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
     });
 
 
-    if (request.messages.unsplash_download_location !== undefined) {
+    if (request.messages.unsplash_download_location !== undefined && request.messages.unsplash_download_location !== '') {
       unsplash.photos.trackDownload({ downloadLocation: request.messages.unsplash_download_location, }).then((result) => console.log(result))
     }
 
@@ -866,6 +758,16 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
     })
 
+
+  }
+
+  if (request.type === 'generationsImages') {
+
+    const data = generationsImages(request.data.prompt)
+
+    asyncSendResponse(data);
+
+    return true;
 
   }
 

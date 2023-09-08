@@ -330,6 +330,7 @@ const handleMouseup = (event: any) => {
   // console.log(isTextSelected);
   // console.log(donotClosePopupCard);
 
+  // 获取用户在宿主网页上选中的内容
   const selection = getSelection()
 
   if (selection) {
@@ -352,7 +353,7 @@ const handleMouseup = (event: any) => {
       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
       // 显示窗口
-      if (selection && selection?.keyWord.length > 0) {
+      if (selection && selection?.keyWord.length > 0 && selection.selection.anchorNode?.nodeName === '#text') {
         showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, true)
       }
 
@@ -372,13 +373,16 @@ const handleMouseup = (event: any) => {
       // console.log(messagesBox?.contains(selectedText.baseNode.parentNode as Node));
 
       let isInMessages = false
-      if (messagesBox === selectedText.baseNode.parentNode || messagesBox?.contains(selectedText.baseNode.parentNode as Node)) {
-        //在 messages 容器内操作，则显示操作按钮
-        isInMessages = true
+      if (selectedText.baseNode) {
+        if (messagesBox === selectedText.baseNode.parentNode || messagesBox?.contains(selectedText.baseNode.parentNode as Node)) {
+          //在 messages 容器内操作，则显示操作按钮
+          isInMessages = true
+        }
       }
 
 
-      if (PopupCardContainer && selectedTextString.length > 0 && !container.querySelector('.contextBox2')) {
+
+      if (PopupCardContainer && selectedText.type === 'Range' && !container.querySelector('.contextBox2')) {
 
         let contextBox2 = document.createElement('div');
         contextBox2.className = 'contextBox2'
@@ -611,9 +615,6 @@ function ToolBar(props: ToolBarProps) {
 
     const PopupCardContainer = container.getElementsByClassName('container')[0]
     const messagesBox = container.querySelector('.messages')
-
-    console.log(event);
-    console.log(PopupCardContainer?.getBoundingClientRect());
 
     const sentence = ''
 

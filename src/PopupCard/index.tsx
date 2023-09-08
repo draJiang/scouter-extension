@@ -273,7 +273,7 @@ export function PopupCard(props: any) {
     windowInitialization({ 'isPin': props.isPin, 'windowElement': windowElement, 'selection': props.selection, 'messagesList': messagesList })
 
 
-  }, [props]);
+  }, [props.data.keyWord]);
 
   // 聊天记录改变时
   useEffect(() => {
@@ -440,9 +440,10 @@ export function PopupCard(props: any) {
         // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
         showImagesBox = true
 
-
       } else {
+
         showImagesBox = false
+
       }
 
       // amplitude.track('executivePrompt');
@@ -719,7 +720,7 @@ export function PopupCard(props: any) {
               loading: false,
               status: 'invalid_api_key',
               prompt: prompt[0]['content'],
-              images: []
+              // images: []
             };
             // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
             return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
@@ -1001,7 +1002,10 @@ export function PopupCard(props: any) {
       } else {
         // 没有图片
         const imgs = doc.getElementsByClassName('images')[0]
-        imgs.parentNode?.removeChild(imgs)
+        if (imgs) {
+          imgs.parentNode?.removeChild(imgs)
+        }
+
       }
 
       // 删除预加载的图片
@@ -1059,7 +1063,6 @@ export function PopupCard(props: any) {
     } catch (error) {
       audio = []
     }
-
 
     // 常规类型
     let ankiBack = '<p> <blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote></p>' + container
@@ -1354,9 +1357,6 @@ export function PopupCard(props: any) {
 
             </div>
           </div>
-
-
-
 
           <div className='w-full'
             ref={inputRef}
