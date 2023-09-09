@@ -24,7 +24,7 @@ interface ImagesProps {
 
 export function Images(props: ImagesProps) {
 
-    const [images, setImages] = useState<Array<ImageType>>([]);
+    // const [images, setImages] = useState<Array<ImageType>>([]);
     const [imageIndex, setImageIndex] = useState(0);
     const [showControl, setShowControl] = useState(false)
     const [changeImage, setChangeImageStatus] = useState(false)
@@ -51,13 +51,9 @@ export function Images(props: ImagesProps) {
 
     useEffect(() => {
 
-        setTimeout(() => {
-            setImagesLoading(false)
-        }, 1000);
-
-
-        setImages(props.images)
+        // setImages(props.images)
         setImageIndex(0)
+        setImagesLoading(false)
 
     }, [props.images]);
 
@@ -152,11 +148,11 @@ export function Images(props: ImagesProps) {
 
         setImageIndex(index => {
             index = index + offset
-            if (index >= images.length) {
+            if (index >= props.images.length) {
                 index = 0
             }
             if (index < 0) {
-                index = images.length - 1
+                index = props.images.length - 1
             }
 
 
@@ -236,13 +232,13 @@ export function Images(props: ImagesProps) {
                         </div>}
 
                     {/* 图片 */}
-                    {images.length > 0 ?
+                    {props.images.length > 0 ?
                         <>
                             <div className="imageBox">
                                 <Image
-                                    data-downloadlocation={images[imageIndex].links.download_location}
-                                    src={images[imageIndex].urls.small}
-                                    alt={images[imageIndex]['description']}
+                                    data-downloadlocation={props.images[imageIndex].links.download_location}
+                                    src={props.images[imageIndex].urls.small}
+                                    alt={props.images[imageIndex]['description']}
                                     height={240}
                                     width={'100%'}
                                     preview={false}
@@ -254,7 +250,7 @@ export function Images(props: ImagesProps) {
                                 style={{
                                     display: 'none'
                                 }}>
-                                {images.map(img => <img key={img.id}
+                                {props.images.map(img => <img key={img.id}
                                     src={img.urls.small}></img>)}
 
                             </div>
@@ -336,7 +332,8 @@ export function Images(props: ImagesProps) {
                                         }}>
 
                                             <Tooltip placement="bottom"
-                                                title={'Search Images(Enter ⏎)'}
+                                                title={'Search Images(⏎)'}
+                                                arrow={false}
                                                 getPopupContainer={() => imageBoxElement.current || document.body}
                                             >
                                                 <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<SearchOutlined />} />
@@ -344,6 +341,7 @@ export function Images(props: ImagesProps) {
 
                                             <Tooltip placement="bottom"
                                                 title={'Generate Images with AI'}
+                                                arrow={false}
                                                 getPopupContainer={() => imageBoxElement.current || document.body}
                                             >
                                                 <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleGenerationsImages} icon={<ThunderboltOutlined />} />
@@ -371,7 +369,7 @@ export function Images(props: ImagesProps) {
 
                                             {/* Left Box */}
 
-                                            {images.length > 0 &&
+                                            {props.images.length > 0 &&
 
                                                 <div
                                                     style={{
@@ -401,7 +399,7 @@ export function Images(props: ImagesProps) {
                                                             alignItems: 'center',
                                                             justifyContent: 'center'
                                                         }}
-                                                    >{imageIndex + 1 + '/' + images.length}
+                                                    >{imageIndex + 1 + '/' + props.images.length}
                                                     </div>
 
                                                     <Button
@@ -440,7 +438,7 @@ export function Images(props: ImagesProps) {
 
 
                             {/* 图片来源信息 */}
-                            {images.length > 0 &&
+                            {props.images.length > 0 &&
 
                                 <div
                                     className="imageSource"
@@ -457,13 +455,13 @@ export function Images(props: ImagesProps) {
                                         textShadow: '2px 2px 5px rgba(0, 0, 0, 0.3)'
                                     }}
                                 >
-                                    {images[imageIndex].type === 'ai' ?
+                                    {props.images[imageIndex].type === 'ai' ?
                                         <>
                                             Photo by AI
                                         </>
                                         :
                                         <>
-                                            Photo by <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href={"https://unsplash.com/@" + images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
+                                            Photo by <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href={"https://unsplash.com/@" + props.images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{props.images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
                                         </>
                                     }
 

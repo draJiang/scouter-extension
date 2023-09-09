@@ -9,7 +9,7 @@ export type ChatMessage = {
     chatId: string,
     role: string,
     content: string,
-    loading: boolean,
+    // loading: boolean,
     prompt: string,
     status: string,
     showImagesBox: boolean,

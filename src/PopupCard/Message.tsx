@@ -43,7 +43,7 @@ function Message(props: MessageProps) {
 
     return (
         <div key={props.message.chatId} className='' style={props.message.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
-            <Skeleton loading={props.message.loading} active={true} title={false}>
+            <Skeleton loading={props.message.status === 'begin' || props.message.status === 'process' ? true : false} active={true} title={false}>
 
                 {/* 图片 */}
                 {props.message.showImagesBox &&

@@ -100,17 +100,15 @@ export function PopupCard(props: any) {
 
 
   // const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string, status: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '', 'status': '' }])
-  const [messages, setMessages] = useState<Array<ChatMessage>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '', 'status': '', 'showImagesBox': true, 'images': [] }])
+  const [messages, setMessages] = useState<Array<ChatMessage>>([{ 'content': '', 'role': 'user', 'chatId': '', 'prompt': '', 'status': '', 'showImagesBox': true, 'images': [] }])
 
-  const [images, setImages] = useState([])
-  const [showImagesBox, setShowImagesBox] = useState(false)
   const [prompts, setPrompts] = useState<Array<PromptType>>([]);
   const [lastExecutedPrompt, setLastExecutedPrompt] = useState<PromptType>({ 'title': '👉🏼 Please choose a prompt', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);
 
-
-  const [isLoading, setIsLoading] = useState(true);
+  // 表示 GPT 生成的文字数据正在加载中
+  // const [isLoading, setIsLoading] = useState(true);
 
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [customPromptFormData, setCustomPromptFormData] = useState<PromptType>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' });
@@ -119,7 +117,7 @@ export function PopupCard(props: any) {
   const [addToAnkiStatus, setAddToAnkiStatus] = useState<{ status: string, noteId: number }>({ 'status': 'normal', 'noteId': 0 });
 
 
-  const [isAnswerDone, setAnswerDone] = useState(false);
+  // const [isAnswerDone, setAnswerDone] = useState(false);
 
   const [followUpData, setFollowUpData] = useState({ keyWord: '', sentence: '' });
   const [showFollowUpDataMenu, setShowFollowUpDataMenu] = useState({ show: false, style: {} })
@@ -286,7 +284,7 @@ export function PopupCard(props: any) {
       // 自动滚动到消息底部，方便看到最新的文字
       if (messages.length > 1) {
 
-        if (messages[messages.length - 1].loading) {
+        if (messages[messages.length - 1].status === 'process' || messages[messages.length - 1].status === 'begin') {
           scrollToBottom(true)
         } else {
           scrollToBottom(shouldStayAtBottomRef.current)
@@ -303,27 +301,8 @@ export function PopupCard(props: any) {
     }
 
 
-  }, [messages])
-
-  // 窗口拖拽时触发
-  useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      // console.log('useEffect return');
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [dragging]);
-
-  // 保存历史记录
-  useEffect(() => {
-    // 在 openApiAnser 更新后将其保存到浏览器存储中
-
-
     // 只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
-    if (messages.length > 0 && isAnswerDone && messages[0]['status'] === 'success') {
+    if (messages.length === 1 && messages[0]['status'] === 'done') {
 
       // console.log('Save');
 
@@ -388,17 +367,101 @@ export function PopupCard(props: any) {
 
     }
 
-  }, [isAnswerDone]);
+
+  }, [messages])
+
+  // 窗口拖拽时触发
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      // console.log('useEffect return');
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragging]);
+
+  // 保存历史记录
+  useEffect(() => {
+    // 在 openApiAnser 更新后将其保存到浏览器存储中
+
+
+    // // 只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
+    // if (messages.length === 1 && messages[0]['status'] === 'done') {
+
+    //   // console.log('Save');
+
+    //   const keyWord = props.data.keyWord
+    //   const Sentence = props.data.Sentence
+
+    //   // 将查询记录保存起来
+    //   const newHistory = {
+    //     'keyWord': keyWord,
+    //     'sentence': Sentence,
+    //     'role': messages[0]['role'],
+    //     'answer': messages[0]['content'],
+    //     'source': window.location.href,
+    //     'prompt': messages[0]['prompt'],
+    //     'images': messages[0]['images']
+    //   }
+
+
+    //   if (keyWord !== '' && Sentence !== '' && messages[0]['content'] !== '') {
+    //     browser.storage.local.get({ "history": [] }).then((item) => {
+
+    //       // console.log(item.history);
+
+    //       let newHistoryList: any = []
+    //       let bingo = false
+    //       newHistoryList.push(newHistory)
+    //       if (Array.isArray(item.history)) {
+
+    //         // 如果记录已存在，则不重复保存
+    //         for (let i = 0; i < item.history.length; i++) {
+
+    //           let obj = item.history[i]
+
+
+    //           if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence'] && obj.prompt === newHistory['prompt']) {
+
+    //             bingo = true
+    //             break
+
+    //           }
+
+    //         }
+
+    //         newHistoryList = item.history
+    //         newHistoryList.unshift(newHistory)
+    //         newHistoryList.splice(8)
+
+    //         // console.log(newHistoryList);
+
+    //       }
+
+    //       if (!bingo) {
+    //         browser.storage.local.set(
+    //           {
+    //             history: newHistoryList
+    //           }
+    //         )
+    //       }
+
+    //     })
+    //   }
+
+    // }
+
+  }, []);
 
   const executivePrompt = async (prompt: PromptType,
     runPrompt?: boolean,
     imageToRerender?: boolean,
     data?: { keyWord: string, sentence: string }) => {
 
-    // port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
-
     // 设置加载状态
-    setIsLoading(true)
+    // setIsLoading(true)
 
     let needToRunPrompt = runPrompt
     if (needToRunPrompt === undefined) {
@@ -422,15 +485,6 @@ export function PopupCard(props: any) {
     }
 
 
-
-    // if (needToRerenderImage) {
-    //   setImages([])     // 图片列表
-    // }
-
-
-
-
-
     if (needToRunPrompt) {
 
 
@@ -450,7 +504,14 @@ export function PopupCard(props: any) {
       browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
 
       // 在消息历史中插入新记录
-      setMessages(prevMessages => [...prevMessages, { 'content': '', 'role': 'assistant', 'loading': true, 'chatId': '', 'prompt': '', 'status': '', 'showImagesBox': showImagesBox, 'images': [] }])
+      setMessages(prevMessages => [...prevMessages,
+      {
+        'content': '', 'role': 'assistant',
+        // 'loading': true,
+        'chatId': '', 'prompt': '',
+        'status': 'begin',
+        'showImagesBox': showImagesBox, 'images': []
+      }])
 
       // 非追问时，才会记录最近执行的 Prompt
       if (data === undefined) {
@@ -514,8 +575,8 @@ export function PopupCard(props: any) {
                 role: obj.role,
                 content: obj.answer,
                 prompt: newPrompt[0]['content'],
-                loading: false,
-                status: 'success',
+                // loading: false,
+                status: 'done',
                 images: obj.images
               };
 
@@ -523,8 +584,8 @@ export function PopupCard(props: any) {
 
             })
 
-            setIsLoading(false)
-            setAnswerDone(true)
+            // setIsLoading(false)
+            // setAnswerDone(true)
 
             setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
             break
@@ -610,8 +671,8 @@ export function PopupCard(props: any) {
 
     } else {
       setLastExecutedPrompt({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
-      setAnswerDone(true)
-      setIsLoading(false)
+      // setAnswerDone(true)
+      // setIsLoading(false)
 
       // 数据埋点
       // amplitude.track('openPopupCard');
@@ -676,7 +737,7 @@ export function PopupCard(props: any) {
 
 
     // 设置为回答中
-    setAnswerDone(false)
+    // setAnswerDone(false)
     // 禁用保存到 Anki 按钮
     setAddToAnkiStatus({ 'status': 'standby', 'noteId': 0 })
 
@@ -700,7 +761,7 @@ export function PopupCard(props: any) {
         if (msg.status === 'erro') {
 
           // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
-          setIsLoading(false)
+          // setIsLoading(false)
           setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
           if (msg.code === 'invalid_api_key') {
@@ -717,7 +778,7 @@ export function PopupCard(props: any) {
               ...lastMessage,
               chatId: msg.chatId,
               content: msg.content,
-              loading: false,
+              // loading: false,
               status: 'invalid_api_key',
               prompt: prompt[0]['content'],
               // images: []
@@ -727,21 +788,10 @@ export function PopupCard(props: any) {
 
           })
 
-          setAnswerDone(true)
+          // setAnswerDone(true)
 
         } else if (isApiErro) {
           // setIsApiErro(false)
-        }
-
-        // 请求 GPT 数据成功且数据流结束传输
-        if (msg.status === 'end') {
-
-          // 记录消息回答完毕（触发保存历史记录）
-          setAnswerDone(true)
-
-          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
-          setIsLoading(false)
-
         }
 
         // 请求 GPT 数据成功且数据流开始传输
@@ -775,8 +825,8 @@ export function PopupCard(props: any) {
                 ...lastMessage,
                 chatId: msg.chatId,
                 content: newContent,
-                loading: false,
-                status: 'success',
+                // loading: false,
+                status: 'process',
                 prompt: prompt[0]['content']
               };
               // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
@@ -790,6 +840,40 @@ export function PopupCard(props: any) {
 
 
         }
+
+
+        // 请求 GPT 数据成功且数据流结束传输
+        if (msg.status === 'end') {
+
+          // 记录消息回答完毕（触发保存历史记录）
+
+          // setAnswerDone(true)
+          // setIsLoading(false)
+
+          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
+
+          setMessages(prevMessages => {
+
+            const lastMessage = prevMessages[prevMessages.length - 1];
+
+            if (prevMessages.length === 0) {
+              return []
+            }
+
+            const updatedLastMessage = {
+              ...lastMessage,
+              loading: false,
+              status: 'done'
+            };
+
+            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+          })
+
+
+        }
+
+
       }
 
     })
@@ -815,8 +899,8 @@ export function PopupCard(props: any) {
         role: 'user',
         chatId: Date.now().toString(),
         content: values.msg,
-        loading: false,
-        status: 'success',
+        // loading: false,
+        status: 'done',
         prompt: prompt,
         showImagesBox: false, // 用户发言不需要显示图片
         images: []
@@ -830,8 +914,8 @@ export function PopupCard(props: any) {
     setMessages(prevMessages => [...prevMessages, {
       'content': '',
       'role': 'assistant',
-      'loading': true,
-      'chatId': '', 'prompt': '', 'status': '',
+      // 'loading': true,
+      'chatId': '', 'prompt': '', 'status': 'begin',
       'showImagesBox': false,
       'images': []
     }])
@@ -858,7 +942,7 @@ export function PopupCard(props: any) {
 
 
       // 敲击回车键
-      if (!isLoading && isAnswerInputed) {
+      if (messages.length === 0 || (messages[messages.length - 1]['status'] !== 'begin' || messages[messages.length - 1]['status'] !== 'process') && isAnswerInputed) {
         // 非加载状态、GPT 消息发送完毕时用户可发送消息
         handleSendMessage({ 'msg': event.target.value })
       } else {
@@ -1331,8 +1415,6 @@ export function PopupCard(props: any) {
               style={{}}
             >
 
-
-
               <Selection text={props.data.keyWord} />
 
               <MessagesList messages={messages} />
@@ -1391,16 +1473,16 @@ export function PopupCard(props: any) {
               <Form.Item
                 style={{ marginRight: '0' }}
               >
-                {isAnswerDone ?
+                {messages.length === 0 || messages[messages.length - 1].status !== 'begin' && messages[messages.length - 1].status !== 'process' ?
                   <Button
                     type="text"
                     htmlType="submit"
-                    disabled={isLoading || !isAnswerInputed}
+                    disabled={messages.length > 0 ? messages[messages.length - 1]['status'] === 'begin' || messages[messages.length - 1]['status'] === 'process' || !isAnswerInputed : false}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: !isLoading && isAnswerInputed ? '#F08A24' : ''
+                      // color: !isLoading && isAnswerInputed ? '#F08A24' : ''
                     }}
                     icon={<SendOutlined />}
                   /> : <div style={{ marginRight: '8px' }}>
