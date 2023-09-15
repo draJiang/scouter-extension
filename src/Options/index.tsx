@@ -335,7 +335,7 @@ export const Options = () => {
                     <Button style={{
                       paddingLeft: '2px',
                       paddingRight: '0',
-                    }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License⚡</Button>
+                    }} type='link' onClick={() => { window.open('https://jiang.lemonsqueezy.com/checkout/buy/e31f8c18-7bf2-4f6b-85c2-508fb500ce84') }} >Get License⚡</Button>
 
                     {/* <a style={{
                       paddingLeft: '2px',

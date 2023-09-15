@@ -80,19 +80,17 @@ export function Selection(props: SelectionProps) {
     // lngDetector.setLanguageType('iso2')
     // console.log(lngDetector.detect(props.text, 2));
 
-    console.log(Math.floor(Date.now()));
-    console.log(lastSpeakTime.current);
-    
-    
-    if (Math.floor(Date.now()) - lastSpeakTime.current < 1800) {
+    if (Math.floor(Date.now()) - lastSpeakTime.current < 1000) {
       // x 毫秒内只可点击一次
       return
     }
 
 
     try {
+
+      
+      playTextToSpeech(props.text, languageCodes[targetLanguage as keyof typeof languageCodes], targetLanguage)
       lastSpeakTime.current = Math.floor(Date.now())
-      playTextToSpeech(props.text, languageCodes[targetLanguage as keyof typeof languageCodes])
 
     } catch (error) {
 

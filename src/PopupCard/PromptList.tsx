@@ -11,7 +11,7 @@ import { useUserInfoContext } from '../lib/userInfo'
 import { ProTag } from "../Components/ProTag";
 
 
-let StyledButton = styled.button`
+let MyButton = styled.button`
 
     padding: 6px;
     margin-bottom: 4px;
@@ -28,7 +28,7 @@ function PromptButton(props: PromptButtonProps) {
 
     return (
 
-        <StyledButton
+        <MyButton
             style={{
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -37,7 +37,7 @@ function PromptButton(props: PromptButtonProps) {
                 padding: '4px',
                 pointerEvents: props.disable ? 'none' : 'auto'
             }}
-            onClick={props.handleMenuItemClick}>{props.children}</StyledButton>
+            onClick={props.handleMenuItemClick}>{props.children}</MyButton>
 
     )
 }

@@ -8,6 +8,8 @@ import { userInfoType, aiParameterType } from './types'
 
 import { getSettings } from './Options/util'
 
+import { lang } from './lib/lang'
+
 
 
 
@@ -111,7 +113,7 @@ export function generationsImages(prompt: string) {
                   .then(response => response.json())
                   .then(data => {
                     if (data.status === 'succeeded') {
-                      resolve({'succeeded':true,'data':data.result})
+                      resolve({ 'succeeded': true, 'data': data.result })
                       clearInterval(intervalId); // 任务成功时清除轮询
                     }
                   });
@@ -119,7 +121,7 @@ export function generationsImages(prompt: string) {
 
             } else {
 
-              resolve({'succeeded':true,'data':data})
+              resolve({ 'succeeded': true, 'data': data })
 
             }
 
@@ -322,35 +324,84 @@ export function getDefaultDeckName() {
 }
 
 
-export const playTextToSpeech = (text: string, voice: string) => {
+export const playTextToSpeech = (text: string, voice: string, targetLanguage: string) => {
 
-  const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
-  const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_TTS_API_KEY as string, process.env.AZURE_TTS_SPEECH_REGION as string);
-  speechConfig.speechSynthesisVoiceName = voice;
+  if (navigator.userAgent.indexOf('Firefox') >= 0) {
 
-  const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+    const audioUrl = (lang as any)[targetLanguage]['audioURL']
+    let audio = new Audio(audioUrl + text);
+    audio.addEventListener('loadeddata', (event) => {
+      audio.play();
+    });
 
-  synthesizer.speakTextAsync(
-    text,
-    function (result) {
-      if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-        // console.log('synthesis finished.');
-      } else {
-        console.error(
-          'Speech synthesis canceled, ' + result.errorDetails + '\nDid you set the speech resource key and region values?'
-        );
+  } else {
+
+    const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
+    const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_TTS_API_KEY as string, process.env.AZURE_TTS_SPEECH_REGION as string);
+    speechConfig.speechSynthesisVoiceName = voice;
+    speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
+
+
+
+    const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+    synthesizer.speakTextAsync(
+      text,
+      function (result) {
+        if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+          // console.log('synthesis finished.');
+        } else {
+          console.error(
+            'Speech synthesis canceled, ' + result.errorDetails + '\nDid you set the speech resource key and region values?'
+          );
+        }
+        synthesizer.close();
+      },
+      function (err) {
+        // console.trace('err - ' + err);
+        synthesizer.close();
       }
-      synthesizer.close();
-    },
-    function (err) {
-      // console.trace('err - ' + err);
-      synthesizer.close();
-    }
-  );
+    );
+
+
+  }
+
 
   // console.log('Now synthesizing...');
 
 };
+
+
+// export const playTextToSpeech = async (text: string, voice: string) => {
+//   const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_TTS_API_KEY as string, process.env.AZURE_TTS_SPEECH_REGION as string);
+//   speechConfig.speechSynthesisVoiceName = voice;
+//   speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm;
+
+//   const synthesizer = new sdk.SpeechSynthesizer(speechConfig, undefined);
+
+//   await new Promise((resolve, reject) => {
+//     synthesizer.speakTextAsync(
+//       text,
+//       function (result) {
+//         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+//           const audio = new Audio(URL.createObjectURL(new Blob([result.audioData])));
+//           audio.play();
+//           resolve(true);
+//         } else {
+//           reject(
+//             'Speech synthesis canceled, ' + result.errorDetails + '\nDid you set the speech resource key and region values?'
+//           );
+//         }
+//       },
+//       function (err) {
+//         reject('err - ' + err);
+//       }
+//     );
+//   }).finally(() => {
+//     synthesizer.close();
+//   });
+// };
+
 
 export const getBalance = (apiKey: string) => {
   return new Promise((resolve, reject) => {

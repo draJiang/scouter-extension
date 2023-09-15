@@ -42,6 +42,10 @@ import styled, { css } from 'styled-components';
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
 
+declare var InstallTrigger: any;
+const isFirefox = typeof InstallTrigger !== 'undefined';
+
+
 // 记录当前窗口是否 Pin 住
 let isPin = false
 // 设置当前窗口是否允许关闭
@@ -119,7 +123,7 @@ const thisGetUserInfo = async () => {
         // 获取 Anki 牌组信息
         browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
 
-          console.log(result);
+          // console.log(result);
 
         })
 
@@ -361,8 +365,16 @@ const handleMouseup = (event: any) => {
 
       // 在 PopupCard 范围内触发
 
+      let selectedText
+
       // 显示完形填空操作按钮
-      const selectedText = shadowRoot.getSelection()
+
+      if (isFirefox) {
+        selectedText = window.getSelection()
+      } else {
+        selectedText = shadowRoot.getSelection()
+      }
+
       const selectedTextString = selectedText.toString()
       const sentence = ''
 
@@ -745,7 +757,7 @@ function ToolBar(props: ToolBarProps) {
                 if (lang) {
 
                   const targetLanguage = lang['target']['id']
-                  playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes])
+                  playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes], targetLanguage)
                   setShowMenu(false)
 
                 }
