@@ -301,7 +301,7 @@ export function PopupCard(props: any) {
     }
 
 
-    // 只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
+    // 保存历史记录，只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
     if (messages.length === 1 && messages[0]['status'] === 'done') {
 
       // console.log('Save');
@@ -382,78 +382,6 @@ export function PopupCard(props: any) {
     };
   }, [dragging]);
 
-  // 保存历史记录
-  useEffect(() => {
-    // 在 openApiAnser 更新后将其保存到浏览器存储中
-
-
-    // // 只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
-    // if (messages.length === 1 && messages[0]['status'] === 'done') {
-
-    //   // console.log('Save');
-
-    //   const keyWord = props.data.keyWord
-    //   const Sentence = props.data.Sentence
-
-    //   // 将查询记录保存起来
-    //   const newHistory = {
-    //     'keyWord': keyWord,
-    //     'sentence': Sentence,
-    //     'role': messages[0]['role'],
-    //     'answer': messages[0]['content'],
-    //     'source': window.location.href,
-    //     'prompt': messages[0]['prompt'],
-    //     'images': messages[0]['images']
-    //   }
-
-
-    //   if (keyWord !== '' && Sentence !== '' && messages[0]['content'] !== '') {
-    //     browser.storage.local.get({ "history": [] }).then((item) => {
-
-    //       // console.log(item.history);
-
-    //       let newHistoryList: any = []
-    //       let bingo = false
-    //       newHistoryList.push(newHistory)
-    //       if (Array.isArray(item.history)) {
-
-    //         // 如果记录已存在，则不重复保存
-    //         for (let i = 0; i < item.history.length; i++) {
-
-    //           let obj = item.history[i]
-
-
-    //           if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence'] && obj.prompt === newHistory['prompt']) {
-
-    //             bingo = true
-    //             break
-
-    //           }
-
-    //         }
-
-    //         newHistoryList = item.history
-    //         newHistoryList.unshift(newHistory)
-    //         newHistoryList.splice(8)
-
-    //         // console.log(newHistoryList);
-
-    //       }
-
-    //       if (!bingo) {
-    //         browser.storage.local.set(
-    //           {
-    //             history: newHistoryList
-    //           }
-    //         )
-    //       }
-
-    //     })
-    //   }
-
-    // }
-
-  }, []);
 
   const executivePrompt = async (prompt: PromptType,
     runPrompt?: boolean,
@@ -816,6 +744,7 @@ export function PopupCard(props: any) {
 
               const newMsgList = lastMessage
               let newContent = newMsgList.content + msg.content
+
 
               newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
 

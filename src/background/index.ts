@@ -162,6 +162,7 @@ browser.runtime.onConnect.addListener(port => {
         getAIParameter().then((result: aiParameterType) => {
 
           const openApiEndpoint = result.data?.chatCompletions.url
+
           if (!result.data || openApiEndpoint === undefined) {
             port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
           } else {
@@ -204,7 +205,7 @@ browser.runtime.onConnect.addListener(port => {
                       let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
 
                       if (new_msg !== undefined) {
-
+                        // console.log(JSON.parse(event.data))
                         // 将数据发送给 UI 以渲染内容
                         port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
 

@@ -34,16 +34,16 @@ function Message(props: MessageProps) {
 
     const [images, setImages] = useState<Array<ImageType>>([])
 
-
     useEffect(() => {
 
         setImages(props.message.images)
 
     }, [props.message.images]);
 
+
     return (
-        <div key={props.message.chatId} className='' style={props.message.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
-            <Skeleton loading={props.message.status === 'begin' || props.message.status === 'process' ? true : false} active={true} title={false}>
+        <div className='' style={props.message.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
+            <Skeleton loading={props.message.status === 'begin' ? true : false} active={true} title={false}>
 
                 {/* 图片 */}
                 {props.message.showImagesBox &&
@@ -154,12 +154,6 @@ function Message(props: MessageProps) {
 };
 
 export function MessagesList(props: MessagesListProps) {
-
-    useEffect(() => {
-
-
-
-    }, []);
 
     return (
         <div
