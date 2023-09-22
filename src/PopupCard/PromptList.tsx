@@ -5,7 +5,7 @@ import { getDefaultPrompt } from './util'
 
 import styled from 'styled-components';
 
-import { userInfoType } from '../types'
+import { userInfoType,runPromptType } from '../types'
 
 import { useUserInfoContext } from '../lib/userInfo'
 import { ProTag } from "../Components/ProTag";
@@ -47,7 +47,7 @@ interface PromptListProps {
     promptList: Array<PromptType>;
     followUpData: { keyWord: string, sentence: string }
     showFollowUpDataMenu: { show: boolean, style: {} }
-    handleMenuItemClick: (data: PromptType, runPrompt?: boolean, imageToRerender?: boolean, promptData?: { keyWord: string, sentence: string }) => void;
+    handleMenuItemClick: (data: PromptType, runPrompt?: runPromptType, imageToRerender?: boolean, promptData?: { keyWord: string, sentence: string }) => void;
 }
 
 interface PromptButtonProps {
@@ -82,7 +82,7 @@ export function PromptList(props: PromptListProps) {
 
         if (userInfo?.user.verified) {
             // 第 3 个参数 false 表示不重新渲染图片
-            props.handleMenuItemClick(data, true, true, props.followUpData)
+            props.handleMenuItemClick(data, 'yes', true, props.followUpData)
         }
 
 

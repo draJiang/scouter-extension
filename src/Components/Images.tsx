@@ -52,7 +52,6 @@ export function Images(props: ImagesProps) {
     useEffect(() => {
 
         // setImages(props.images)
-        setImageIndex(0)
         setImagesLoading(false)
 
     }, [props.images]);
@@ -83,7 +82,7 @@ export function Images(props: ImagesProps) {
     const handleSearchBtnClick = (event: any) => {
 
 
-
+        setImageIndex(0)
 
         event.stopPropagation()
 
@@ -115,6 +114,8 @@ export function Images(props: ImagesProps) {
     }
 
     const handleGenerationsImages = (event: any) => {
+
+        setImageIndex(0)
 
         event.stopPropagation()
 

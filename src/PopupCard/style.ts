@@ -89,9 +89,9 @@ export const popupCardStyle = `
 }
 
 
-// #LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3{
-//   font-weight: bold;
-// }
+#LearningEnglish2023 h1,#LearningEnglish2023 h2,#LearningEnglish2023 h3{
+  margin: 10px 0;
+}
 
 // #LearningEnglish2023 h1{
 //   font-size:20px;
@@ -167,7 +167,7 @@ overflow: scroll;
 }
 
 #LearningEnglish2023 .messages > * > * {
-  margin: 0.7em 0;
+  // margin: 18px 0;
 }
 
 #LearningEnglish2023 #ScouterNav {

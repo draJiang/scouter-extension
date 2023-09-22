@@ -10,7 +10,7 @@ import { DropdownMenuItem } from './DropdownMenuItem'
 
 import { getDefaultPrompt } from '../PopupCard/util'
 
-import { PromptType } from '../types'
+import { PromptType,runPromptType } from '../types'
 
 import {
     HamburgerMenuIcon,
@@ -39,7 +39,7 @@ interface NavProps {
     lastExecutedPrompt: PromptType;
     handleSaveToAnkiBtnClick: () => void;
     openCustomPromptForm: (data: { isOpen: boolean, data: PromptType }) => void;
-    handleMenuItemClick: (data: PromptType, runPrompt?: boolean, imageToRerender?: boolean) => void;
+    handleMenuItemClick: (data: PromptType, runPrompt?: runPromptType, imageToRerender?: boolean) => void;
     addToAnkiStatus: { status: string, noteId: number };
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
     keyWord: string;

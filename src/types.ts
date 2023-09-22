@@ -5,13 +5,17 @@ export type PromptType = {
     id: string;
 };
 
+export type runPromptType = 'yes' | 'no' | 'regenerate' | undefined
+
 export type ChatMessage = {
-    chatId: string,
     role: string,
-    content: string,
-    // loading: boolean,
+    content: Array<{
+        chatId: string,
+        content: string,
+        status: 'begin' | 'loading' | 'process' | 'done' | 'invalid_api_key',
+    }>,
+    // loading: boolean,ty
     prompt: string,
-    status: string,
     showImagesBox: boolean,
     images: Array<ImageType>
 };
