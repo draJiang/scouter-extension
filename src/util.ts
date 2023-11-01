@@ -358,7 +358,6 @@ export const playTextToSpeech = (text: string, voice: string, targetLanguage: st
         synthesizer.close();
       },
       function (err) {
-        // console.trace('err - ' + err);
         synthesizer.close();
       }
     );
@@ -366,10 +365,60 @@ export const playTextToSpeech = (text: string, voice: string, targetLanguage: st
 
   }
 
-
-  // console.log('Now synthesizing...');
-
 };
+
+
+export const textToSpeechDownload = (text: string, voice: string) => {
+
+  const pullStream = sdk.AudioOutputStream.createPullStream();
+
+  const audioConfig = sdk.AudioConfig.fromStreamOutput(pullStream);
+  const speechConfig = sdk.SpeechConfig.fromSubscription(process.env.AZURE_TTS_API_KEY!, process.env.AZURE_TTS_SPEECH_REGION!);
+
+  speechConfig.speechSynthesisVoiceName = voice;
+  speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz128KBitRateMonoMp3;
+
+  const synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+
+  synthesizer.speakTextAsync(
+    text,
+    async function (result) {
+      synthesizer.close();
+      if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+        let allChunks = [];
+        let chunk;
+        do {
+          const audioBuffer = new ArrayBuffer(16000);
+          const chunkCount = await pullStream.read(audioBuffer);
+          chunk = audioBuffer.slice(0, chunkCount);
+          if (chunkCount > 0) {
+            allChunks.push(chunk);
+          }
+        } while (chunk.byteLength > 0);
+        let blob = new Blob(allChunks, { 'type': 'audio/mp3' });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Audio_${new Date().getTime()}.mp3`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        console.error(`TTS Failed: ${result.errorDetails}`);
+      }
+      pullStream.close();
+    },
+    function (error) {
+      console.error(`TTS Failed: ${error}`);
+      synthesizer.close();
+      pullStream.close();
+    }
+  );
+};
+
+
 
 
 // export const playTextToSpeech = async (text: string, voice: string) => {

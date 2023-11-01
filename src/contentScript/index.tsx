@@ -423,9 +423,13 @@ const handleMouseup = (event: any) => {
   }
 }
 
-const getSelection = () => {
+const getSelection = (isInShadow?: boolean) => {
 
-  const selection = window.getSelection();
+  let selection = window.getSelection();
+
+  if (isInShadow) {
+    selection = shadowRoot.getSelection();
+  }
 
   if (selection !== null) {
 
@@ -617,18 +621,10 @@ function ToolBar(props: ToolBarProps) {
 
   const handleFollowUpMenuClick = (event: any) => {
 
-    // portFromMenu = browser.runtime.connect({
-    //   name: 'fromContentScript'
-    // })
-
-
-
-    // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
-
     const PopupCardContainer = container.getElementsByClassName('container')[0]
     const messagesBox = container.querySelector('.messages')
 
-    const sentence = ''
+    const sentence = getSelection(true)
 
     const selectedTextX = props.selectedText.x
     const selectedTextY = props.selectedText.y
@@ -665,16 +661,6 @@ function ToolBar(props: ToolBarProps) {
     // Y 坐标的最大值
     top = Math.max(minY, Math.min(maxY, top));
 
-    // browser.runtime.sendMessage({
-    //   type: 'UPDATE_POPUP_CARD', payload: {
-    //     style: {
-    //       left: left,
-    //       top: top,
-    //     }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
-    //   }
-    // });
-
-
     setShowMenu(false)
 
     // 取消文字选中，避免意外弹出菜单栏
@@ -683,21 +669,12 @@ function ToolBar(props: ToolBarProps) {
 
     try {
 
-      // portFromMenu.postMessage({
-      //   type: 'UPDATE_POPUP_CARD', payload: {
-      //     style: {
-      //       left: left,
-      //       top: top,
-      //     }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
-      //   }
-      // })
-
       browser.runtime.sendMessage({
         type: 'UPDATE_POPUP_CARD', payload: {
           style: {
             left: left,
             top: top,
-          }, followUpData: { keyWord: props.selectedTextString, sentence: sentence }
+          }, followUpData: { keyWord: props.selectedTextString, sentence: sentence?.sentence }
         }
       });
 

@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef } from "react";
-import { playTextToSpeech } from '../util'
+import { playTextToSpeech, textToSpeechDownload } from '../util'
 
 import { Button } from 'antd';
 
@@ -88,8 +88,9 @@ export function Selection(props: SelectionProps) {
 
     try {
 
-      
+
       playTextToSpeech(props.text, languageCodes[targetLanguage as keyof typeof languageCodes], targetLanguage)
+      textToSpeechDownload(props.text, languageCodes[targetLanguage as keyof typeof languageCodes])
       lastSpeakTime.current = Math.floor(Date.now())
 
     } catch (error) {
@@ -151,7 +152,7 @@ export function Selection(props: SelectionProps) {
       <style>{style}</style>
       <div id="ScouterSelection" className=''
         style={{
-          margin: '18px 0',
+          marginTop: '18px',
           lineHeight: '1.5'
         }}
       >

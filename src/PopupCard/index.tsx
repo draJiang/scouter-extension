@@ -444,40 +444,19 @@ export function PopupCard(props: any) {
       browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
 
 
-      if (needToRunPrompt === 'regenerate') {
-        // 当前 Prompt 类型是重新生成
-
-        // 在消息历史中插入新记录
-        setMessages(prevMessages => {
-
-
-          let newMessages = [...prevMessages]
-          newMessages[newMessages.length - 1].content.push({
-            'chatId': '',
-            'content': '',
-            'status': 'begin'
-          })
-
-          return newMessages
-
-        })
-
-      } else {
-        // 在消息历史中插入新记录
-        setMessages(prevMessages => [...prevMessages,
-        {
-          'content': [{
-            'chatId': '',
-            'content': '',
-            'status': 'begin'
-          }],
-          'role': 'assistant',
-          // 'loading': true,
-          'chatId': '', 'prompt': '',
-          'status': 'begin',
-          'showImagesBox': showImagesBox, 'images': []
-        }])
-      }
+      // 在消息历史中插入新记录
+      setMessages(prevMessages => [...prevMessages,
+      {
+        'content': [{
+          'chatId': Date.now().toString(),
+          'content': '',
+          'status': 'begin'
+        }],
+        'role': 'assistant',
+        'prompt': '',
+        'showImagesBox': showImagesBox,
+        'images': []
+      }])
 
 
 
@@ -539,6 +518,7 @@ export function PopupCard(props: any) {
 
               }],
               prompt: newPrompt[0]['content'],
+              showImagesBox: showImagesBox,
               images: obj.images
             };
 
@@ -903,7 +883,7 @@ export function PopupCard(props: any) {
     // 在消息历史中插入新 GPT 消息
     setMessages(prevMessages => [...prevMessages, {
       content: [{
-        chatId: '',
+        chatId: Date.now().toString(),
         content: '',
         status: 'begin',
       }],

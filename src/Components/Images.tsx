@@ -206,8 +206,8 @@ export function Images(props: ImagesProps) {
             ref={imageBoxElement}
             style={{
                 position: 'relative',
-                lineHeight: '0'
-                // paddingBottom: '8px'
+                lineHeight: '0',
+                marginTop: '18px'
             }}
         >
             <div>

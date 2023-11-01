@@ -44,6 +44,7 @@ let IconButton = styled(Button)`
 const MessageBox = styled.div`
     
     padding:18px 0;
+
     &:hover{
         // background-color: rgb(0,0,0,0.04);
     }
@@ -89,7 +90,6 @@ function Message(props: MessageProps) {
     const handleMessageHover = (e: React.MouseEvent) => {
 
 
-        console.log(e);
         if (e.type === 'mouseleave') {
             setIsMessageHover(false)
         } else {
@@ -101,16 +101,16 @@ function Message(props: MessageProps) {
 
     // const lastStatus = props.message.content[props.message.content.length - 1].status
     let content
-    if (messageIndex > props.message.content.length-1) {
-        
-        content = props.message.content[props.message.content.length-1];
-    }else{
+    if (messageIndex > props.message.content.length - 1) {
+
+        content = props.message.content[props.message.content.length - 1];
+    } else {
         content = props.message.content[messageIndex];
     }
 
     return (
         <div className='' style={props.message.role === 'user' ? { backgroundColor: '#F6F6F6', paddingTop: '2px', paddingBottom: '2px' } : {}}>
-            <Skeleton loading={props.message.content[props.message.content.length - 1]['status'] === 'begin' ? true : false} active={true} title={false}>
+            <Skeleton style={{ margin: '18px 0' }} loading={props.message.content[props.message.content.length - 1]['status'] === 'begin' ? true : false} active={true} title={false}>
 
                 {/* 图片 */}
                 {props.message.showImagesBox &&
@@ -190,6 +190,55 @@ function Message(props: MessageProps) {
 
                 {/* GPT 生成的内容 */}
                 <MessageBox style={{}} onMouseEnter={handleMessageHover} onMouseLeave={handleMessageHover} >
+
+                    {/* 重新生成后，可以在多个生成结果之间切换 */}
+                    {props.message.content.length > 1 && isMessageHover &&
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            position: 'relative',
+                            top: '-30px',
+                            width: 'fit-content',
+                            alignItems: 'center',
+                            height: '0',
+                            zIndex: '9'
+                        }}>
+
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                width: 'fit-content',
+                                // position: 'absolute',
+                                backgroundColor: '#fff',
+                                boxShadow: 'rgba(0, 0, 0, 0.08) 0px 6px 16px 0px, rgba(0, 0, 0, 0.12) 0px 3px 6px -4px, rgba(0, 0, 0, 0.05) 0px 9px 28px 8px',
+                                borderRadius: '4px',
+                            }}>
+
+                                <IconButton type='text' size='small' icon={<ChevronLeftIcon />} onClick={() => {
+                                    handleMessageIndexChange(- 1)
+                                }} />
+                                <div style={{ margin: '0 2px' }}>{messageIndex + 1 + '/' + props.message.content.length}</div>
+                                <IconButton type='text' size='small' icon={<ChevronRightIcon />} onClick={() => {
+                                    handleMessageIndexChange(1)
+                                }} />
+
+                            </div>
+
+                            <div style={{
+                                clipPath: "path('M 0 8 A 4 4 0 0 0 2.82842712474619 6.82842712474619 L 6.585786437626905 3.0710678118654755 A 2 2 0 0 1 9.414213562373096 3.0710678118654755 L 13.17157287525381 6.82842712474619 A 4 4 0 0 0 16 8 Z')",
+                                width: '16px',
+                                height: '8px',
+                                backgroundColor: '#fff',
+                                transform: 'rotate(180deg)',
+                                boxShadow: 'rgba(0, 0, 0, 0.08) 0px 6px 16px 0px, rgba(0, 0, 0, 0.12) 0px 3px 6px -4px, rgba(0, 0, 0, 0.05) 0px 9px 28px 8px',
+                                position: 'absolute',
+                                top: '26px'
+                            }}></div>
+
+                        </div>
+                    }
+
                     <div>
                         <ReactMarkdown
                             remarkPlugins={[breaks, remarkGfm]}
@@ -217,52 +266,7 @@ function Message(props: MessageProps) {
 
                     </div>
 
-                    {/* 重新生成后，可以在多个生成结果之间切换 */}
-                    {props.message.content.length > 1 && isMessageHover &&
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            position: 'sticky',
-                            bottom: '34px',
-                            width: 'fit-content',
-                            alignItems: 'center',
-                            height: '0',
-                        }}>
 
-                            <div style={{
-                                clipPath: "path('M 0 8 A 4 4 0 0 0 2.82842712474619 6.82842712474619 L 6.585786437626905 3.0710678118654755 A 2 2 0 0 1 9.414213562373096 3.0710678118654755 L 13.17157287525381 6.82842712474619 A 4 4 0 0 0 16 8 Z')",
-                                width: '16px',
-                                height: '8px',
-                                backgroundColor: '#fff',
-                                // transform: 'rotate(180deg)',
-                                boxShadow: 'rgba(0, 0, 0, 0.08) 0px 6px 16px 0px, rgba(0, 0, 0, 0.12) 0px 3px 6px -4px, rgba(0, 0, 0, 0.05) 0px 9px 28px 8px',
-                                position: 'absolute',
-                                top: '-8px'
-                            }}></div>
-
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                width: 'fit-content',
-                                // position: 'absolute',
-                                backgroundColor: '#fff',
-                                boxShadow: 'rgba(0, 0, 0, 0.08) 0px -8px 16px 0px, rgba(0, 0, 0, 0.12) 0px 3px 6px -4px, rgba(0, 0, 0, 0.05) 0px 9px 28px 8px',
-                                borderRadius: '4px',
-                            }}>
-
-                                <IconButton type='text' size='small' icon={<ChevronLeftIcon />} onClick={() => {
-                                    handleMessageIndexChange(- 1)
-                                }} />
-                                <div style={{ margin: '0 2px' }}>{messageIndex + 1 + '/' + props.message.content.length}</div>
-                                <IconButton type='text' size='small' icon={<ChevronRightIcon />} onClick={() => {
-                                    handleMessageIndexChange(1)
-                                }} />
-
-                            </div>
-
-                        </div>
-                    }
 
 
 
