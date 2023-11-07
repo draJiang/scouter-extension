@@ -1,13 +1,6 @@
 import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
-// import ReactDOM from "react-dom";
-
-// import ReactMarkdown from 'react-markdown'
-// import breaks from 'remark-breaks';
-// import rehypeParse from 'rehype-parse'
-// import rehypeRaw from 'rehype-raw'
-// import remarkGfm from 'remark-gfm'
 
 import { getUserInfo } from '../util'
 import { userInfoType, langType } from '../types'
@@ -74,7 +67,7 @@ display: flex;
 flex-direction: column;
 font-size: 13.2px;
 background-color: #fff;
-z-index: 9999;
+z-index: 999;
 overflow: hidden;
 box-shadow: 0px 8px 28px rgba(0,0,0,.16);
 border-radius: 6px;
@@ -394,7 +387,7 @@ export function PopupCard(props: any) {
     };
   }, [dragging]);
 
-
+  // 执行 Prompt
   const executivePrompt = async (prompt: PromptType,
     runPrompt?: runPromptType,
     imageToRerender?: boolean,
@@ -425,24 +418,41 @@ export function PopupCard(props: any) {
     }
 
 
+    // 如果需要立即执行 Prompt
     if (needToRunPrompt !== 'no') {
 
-
+      //初始化图片容器
       let showImagesBox = true
+      if (prompt.id === 'dict' || prompt.id === 'Default') {
 
-      if (prompt.getUnsplashImages && needToRunPrompt) {
-        // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
-        showImagesBox = true
+        // 特殊的方法
+        if (keyWord.length < 20) {
+          showImagesBox = true
+        } else {
+          showImagesBox = false
+        }
 
       } else {
+        // 自定义 Prompt
+        if (prompt.getUnsplashImages && needToRunPrompt) {
+          // 如果当前 Prompt 需要显示图片，且当前需要立即执行 Prompt
+          showImagesBox = true
 
-        showImagesBox = false
+        } else {
 
+          showImagesBox = false
+
+        }
       }
 
-      // amplitude.track('executivePrompt');
-      browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
 
+
+      console.log('showImagesBox:');
+      console.log(showImagesBox);
+
+
+      // 埋点
+      browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
 
       // 在消息历史中插入新记录
       setMessages(prevMessages => [...prevMessages,
@@ -458,8 +468,6 @@ export function PopupCard(props: any) {
         'images': []
       }])
 
-
-
       // 非追问时，才会记录最近执行的 Prompt
       if (data === undefined) {
 
@@ -473,11 +481,6 @@ export function PopupCard(props: any) {
           }
         )
       }
-
-
-
-
-
 
       let newPrompt: Array<{ role: string, content: string }>;
       let p = prompt.userPrompt
@@ -505,6 +508,9 @@ export function PopupCard(props: any) {
             }
 
             bingo = true
+
+            // console.log('历史记录：');
+            // console.log(obj);
 
             // 直接显示历史记录中的回答
             updatedLastMessage = {
@@ -541,11 +547,12 @@ export function PopupCard(props: any) {
       } else {
 
 
-        // 请求 AI 数据
-        getGPTMsg(newPrompt, keyWord)
+        // 获取语言知识
+        getKnowledge(newPrompt, keyWord, prompt.id)
+
 
         // 请求图片
-        if (prompt.id == 'Default') {
+        if (prompt.id == 'Default' || prompt.id == 'dict') {
 
           if (keyWord.length <= 20 && prompt.getUnsplashImages && needToRerenderImage) {
             // 获取图片数据
@@ -612,18 +619,16 @@ export function PopupCard(props: any) {
 
 
     } else {
+      // 打开 Popup 窗口，不需要立即执行 Prompt
       setLastExecutedPrompt({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' })
-      // setAnswerDone(true)
-      // setIsLoading(false)
-
       // 数据埋点
-      // amplitude.track('openPopupCard');
       browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'openPopupCard' })
 
     }
 
   }
 
+  // 点击「重新生成」按钮
   const handleRegenerateButtonClick = () => {
 
     // 在消息历史中插入新记录
@@ -645,7 +650,8 @@ export function PopupCard(props: any) {
 
     })
 
-    getGPTMsg(lastPromptRef.current!, props.data.keyWord)
+    // 获取最近执行的 Prompt，再次执行
+    getKnowledge(lastPromptRef.current!, props.data.keyWord, lastExecutedPrompt.id)
 
   }
 
@@ -659,6 +665,7 @@ export function PopupCard(props: any) {
 
   }
 
+  // 编辑自定义 Prompt 成功后
   const handlePromptEdited = async (isNew: boolean) => {
     // 初始化 Prompt 列表
     initializePromptList()
@@ -685,15 +692,12 @@ export function PopupCard(props: any) {
       })
     }
 
-
-    // amplitude.track('handlePromptEdited');
     browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handlePromptEdited' })
-
 
   }
 
   // 请求 GPT 数据
-  const getGPTMsg = async (prompt: Array<{ role: string, content: string }>, keyWord?: string) => {
+  const getKnowledge = async (prompt: Array<{ role: string, content: string }>, keyWord?: string, promptId?: string) => {
 
     // // 使用长连接
     // let port = browser.runtime.connect({
@@ -704,17 +708,24 @@ export function PopupCard(props: any) {
     lastPromptRef.current = prompt
 
     const thisKeyWord = keyWord || '';
+    const thisPromptId = promptId || '';
 
 
     // 禁用保存到 Anki 按钮
     setAddToAnkiStatus({ 'status': 'standby', 'noteId': 0 })
 
 
-    setTimeout(() => {
-      // 使用 postMs 发送信息
-      port.postMessage({ 'type': 'getGPTMsg', 'messages': prompt, 'keyWord': thisKeyWord })
-    }, 20);
-
+    if (thisPromptId === 'dict') {
+      setTimeout(() => {
+        // 使用 postMs 发送信息
+        port.postMessage({ 'type': 'getDictionaryData', 'messages': prompt, 'keyWord': thisKeyWord })
+      }, 20);
+    } else {
+      setTimeout(() => {
+        // 使用 postMs 发送信息
+        port.postMessage({ 'type': 'getKnowledge', 'messages': prompt, 'keyWord': thisKeyWord })
+      }, 20);
+    }
 
     // 接收信息
     port.onMessage.addListener((msg: any) => {
@@ -769,7 +780,7 @@ export function PopupCard(props: any) {
         }
 
         // 请求 GPT 数据成功且数据流传输中
-        if (msg.status === 'process') {
+        if (msg.status === 'process' || msg.status === 'end') {
 
           try {
 
@@ -895,7 +906,7 @@ export function PopupCard(props: any) {
 
     const msgHistory = messages.slice(-5).map((item) => { return { 'role': item.role, 'content': item.content[item.content.length - 1]['content'] } })
 
-    getGPTMsg([...msgHistory, { "role": "user", "content": values }])
+    getKnowledge([...msgHistory, { "role": "user", "content": values }])
 
     // amplitude.track('handleSendMessage');
     browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleSendMessage' })

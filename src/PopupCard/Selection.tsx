@@ -90,7 +90,7 @@ export function Selection(props: SelectionProps) {
 
 
       playTextToSpeech(props.text, languageCodes[targetLanguage as keyof typeof languageCodes], targetLanguage)
-      textToSpeechDownload(props.text, languageCodes[targetLanguage as keyof typeof languageCodes])
+      // textToSpeechDownload(props.text, languageCodes[targetLanguage as keyof typeof languageCodes])
       lastSpeakTime.current = Math.floor(Date.now())
 
     } catch (error) {

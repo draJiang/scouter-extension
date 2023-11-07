@@ -5,7 +5,7 @@ import { getDefaultPrompt } from './util'
 
 import styled from 'styled-components';
 
-import { userInfoType,runPromptType } from '../types'
+import { userInfoType, runPromptType } from '../types'
 
 import { useUserInfoContext } from '../lib/userInfo'
 import { ProTag } from "../Components/ProTag";
@@ -66,14 +66,6 @@ export function PromptList(props: PromptListProps) {
     // console.log(userInfo);
 
     useEffect(() => {
-        // console.log(PromptListDOM.current);
-        // console.log(PromptListDOM.current?.clientHeight);
-
-        // //设置菜单的位置
-        // if (PromptListDOM.current) {
-        //     PromptListDOM.current.style.top = (parseInt(PromptListDOM.current.style.top, 10) - PromptListDOM.current.clientHeight).toString() + 'px'
-        // }
-
 
     }, [props.showFollowUpDataMenu.show]);
 
@@ -128,6 +120,16 @@ export function PromptList(props: PromptListProps) {
                     const p = getDefaultPrompt(props.followUpData.keyWord)
                     handleMenuItemClick(p)
                 }}>Default</PromptButton>
+
+                <PromptButton disable={!userInfo?.user.verified} handleMenuItemClick={() => {
+                    const p = {
+                        title: '词典',
+                        id: 'dict',
+                        getUnsplashImages: true,
+                        userPrompt: '',
+                    }
+                    handleMenuItemClick(p)
+                }}>词典</PromptButton>
 
                 {props.promptList.map((item) => {
                     // return <button onClick={() => handleMenuItemClick(item)}>{item.title}</button>

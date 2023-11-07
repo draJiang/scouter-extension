@@ -1,16 +1,19 @@
 
 
 import browser from 'webextension-polyfill'
-import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
-import { ankiAction, unsplashSearchPhotos, getDefaultDeckName } from "../util";
+import { ChatGPTUnofficialProxyAPI } from 'chatgpt'
+
+import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
+import { v4 as uuidv4 } from 'uuid';
+import { ankiAction, unsplashSearchPhotos, getDefaultDeckName, getDictionaryData } from "../util";
 import { createApi } from 'unsplash-js';
 
 import { getSettings } from '../Options/util'
 
 import { models } from '../Options/models'
 
-import { cardStyle } from '../util';
+import { cardStyle, fetchSSE, getChatGPTSession } from '../util';
 
 import { getUserInfo, getBalance, getAIParameter, generationsImages } from '../util'
 
@@ -133,24 +136,13 @@ browser.runtime.onConnect.addListener(port => {
       controller.abort();
     }
 
-    if (msg.type === 'getGPTMsg') {
+    if (msg.type === 'getKnowledge') {
 
       // 获取 API Key 等存储的数据
       // let openApiKey: string, apiKeySelection: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
       getSettings().then((result) => {
 
-        // apiKeySelection = result.apiKeySelection
-        // licenseKey = result.licenseKey
-        // openApiKey = result.openApiKey
-        // openApiEndpoint = result.openApiEndpoint
-        // currentLanguage = result.currentLanguage
-        // targetLanguage = result.targetLanguage
-        // model = result.model
-
-
         // 请求  GPT 数据
-
-
         // isContinue = true 时才会渲染数据
         // isContinue = true
 
@@ -170,111 +162,150 @@ browser.runtime.onConnect.addListener(port => {
             let body = result.data.chatCompletions.body
             body.messages = messages
 
-            fetch(openApiEndpoint!, {
+
+            const init = {
+              method: 'POST',
               signal: controller.signal,
-              method: "POST",
+              headers: result.data.chatCompletions.headers,
               body: JSON.stringify(body),
-              headers: result.data.chatCompletions.headers
+            }
 
-            }).then(async (response) => {
+            fetchSSE(openApiEndpoint, init, {
+              onMessage: (data) => {
+                // 处理接收到的数据
+                console.log(data);
 
-              port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-
-              if (response.status !== 200) {
-                // API KEY Error
-                response.json().then((data) => {
-
-                  port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message, 'code': data.error.code })
-
-                  return
-                })
-
-
-              }
-
-              // 处理 server-sent events
-              const parser = createParser((event) => {
-
-
-                if (event.type === 'event') {
-                  // console.log('createParser:');
-                  try {
-
-                    if (event.data !== '[DONE]') {
-
-                      let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
-
-                      if (new_msg !== undefined) {
-                        // console.log(JSON.parse(event.data))
-                        // 将数据发送给 UI 以渲染内容
-                        port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
-
-                      }
-                    }
-
-
-                  } catch {
-                    console.log(' createParser JSON.parse errow')
-                  }
-
+                if (data.choices[0].finish_reason !== 'stop') {
+                  port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': data.choices[0].delta.content })
                 }
-              })
 
+              },
+              onEnd: () => {
+                // 处理 SSE 连接结束的逻辑
+                port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
 
-              const reader = response.body?.getReader();
-              if (reader !== undefined) {
-                try {
+              },
+              onError: error => {
+                // 处理错误的逻辑
+                console.log(error);
+                if (error.message.indexOf('aborted') >= 0) {
+                  // 开启新的请求，中断旧请求
 
+                } else {
+                  const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
 
-                  // eslint-disable-next-line no-constant-condition
-                  while (true) {
-                    const { done, value } = await reader.read()
-                    // const { done:boolean, value:uint8Array } = await Promise.race([reader.read(), cancelPromise]);
-
-                    if (done) {
-                      // 数据传输结束
-                      console.log('Done');
-
-                      port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
-                      break
-
-                    }
-
-                    // if (!isContinue) {
-                    //   console.log('停止渲染数据')
-                    //   break
-                    // }
-
-                    const str = new TextDecoder().decode(value)
-                    parser.feed(str)
-
-
-                  }
-
-                } finally {
-
-                  reader.releaseLock()
-
+                  port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
                 }
-                parser.reset()
+
               }
+            });
 
 
-            }).catch((error) => {
-              console.log('error');
-              console.log(error);
-              if (error.message.indexOf('aborted') >= 0) {
-                // 开启新的请求，中断旧请求
+            // fetch(openApiEndpoint!, {
+            //   signal: controller.signal,
+            //   method: "POST",
+            //   body: JSON.stringify(body),
+            //   headers: result.data.chatCompletions.headers
 
-              } else {
-                const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
+            // }).then(async (response) => {
 
-                port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
-              }
+            //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
 
-              // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
+            //   if (response.status !== 200) {
+            //     // API KEY Error
+            //     response.json().then((data) => {
 
-            })
+            //       port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message, 'code': data.error.code })
+
+            //       return
+            //     })
+
+
+            //   }
+
+            //   // 处理 server-sent events
+            //   const parser = createParser((event) => {
+
+
+            //     if (event.type === 'event') {
+            //       // console.log('createParser:');
+            //       try {
+
+            //         if (event.data !== '[DONE]') {
+
+            //           let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
+
+            //           if (new_msg !== undefined) {
+            //             // console.log(JSON.parse(event.data))
+            //             // 将数据发送给 UI 以渲染内容
+            //             port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
+
+            //           }
+            //         }
+
+
+            //       } catch {
+            //         console.log(' createParser JSON.parse errow')
+            //       }
+
+            //     }
+            //   })
+
+
+            //   const reader = response.body?.getReader();
+            //   if (reader !== undefined) {
+            //     try {
+
+
+            //       // eslint-disable-next-line no-constant-condition
+            //       while (true) {
+            //         const { done, value } = await reader.read()
+            //         // const { done:boolean, value:uint8Array } = await Promise.race([reader.read(), cancelPromise]);
+
+            //         if (done) {
+            //           // 数据传输结束
+            //           console.log('Done');
+
+            //           port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
+            //           break
+
+            //         }
+
+            //         // if (!isContinue) {
+            //         //   console.log('停止渲染数据')
+            //         //   break
+            //         // }
+
+            //         const str = new TextDecoder().decode(value)
+            //         parser.feed(str)
+
+
+            //       }
+
+            //     } finally {
+
+            //       reader.releaseLock()
+
+            //     }
+            //     parser.reset()
+            //   }
+
+
+            // }).catch((error) => {
+            //   console.log('error');
+            //   console.log(error);
+            //   if (error.message.indexOf('aborted') >= 0) {
+            //     // 开启新的请求，中断旧请求
+
+            //   } else {
+            //     const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
+
+            //     port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
+            //   }
+
+            //   // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
+
+            // })
 
           }
 
@@ -286,6 +317,137 @@ browser.runtime.onConnect.addListener(port => {
 
 
       })
+
+    }
+
+    if (msg.type === 'getDictionaryData') {
+
+
+      // const url = 'https://chat.openai.com/backend-api/conversation'
+      // const session = getChatGPTSession()
+      // const headers = {
+      //   'Content-Type': 'application/json',
+      //   'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJqemxvbmc2NjZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsicG9pZCI6Im9yZy1TTVVSR281QkVJUlV6TjFLQXJzSGlwRnEiLCJ1c2VyX2lkIjoidXNlci03STVCMG42SmJQWFlQZVFIZFF1YkNpbmMifSwiaXNzIjoiaHR0cHM6Ly9hdXRoMC5vcGVuYWkuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTAxNTE4MjY1MTA0Njc4MDY4ODU5IiwiYXVkIjpbImh0dHBzOi8vYXBpLm9wZW5haS5jb20vdjEiLCJodHRwczovL29wZW5haS5vcGVuYWkuYXV0aDBhcHAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY5OTExNDI0MywiZXhwIjoxNjk5OTc4MjQzLCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9yZ2FuaXphdGlvbi53cml0ZSBvZmZsaW5lX2FjY2VzcyJ9.s7cUAbaXwneQtyf6C7Zy7DLFSbwKsLDII9sEvSaBsJAY2dQaD-n-jflNvPQxKO4bKPkOlskp9TaEl-3-d8NDWd2ds68xoo1ywGaX8VCvGCDLVQOmHmIoho2dICnWCjfjIRYLG-TZ9DumbWP5TrRYNnYq3izGvy1wnAzyH7TkZBFrGY7VIN7CTdthnSURhqU4zp6HNh77HPrbodK9QFFR46FpI6MB1cDiSsvGxlx81BZDo0cJr9hvigLdCSxesL19aViao9wTx5FIYbTWH39VA8pOTulOZATKu8dV_OPAaqYV_gwQB4SX5qCtbWNllCL_4xFWkXUnVuR78Pwb5DLzkw'
+      // }
+
+      // const messages = msg.messages.map((item: { role: string, content: string }) => {
+      //   return {
+      //     id: uuidv4(),
+      //     role: item.role,
+      //     content: {
+      //       content_type: 'text',
+      //       parts: [item.content],
+      //     },
+      //   }
+      // })
+
+      // const body = {
+      //   action: 'next',
+      //   messages: messages,
+      //   model: 'text-davinci-002-render-sha', // 'text-davinci-002-render-sha'
+      //   parent_message_id: uuidv4(),
+      //   history_and_training_disabled: true,
+      // }
+
+      // const init = {
+      //   method: 'POST',
+      //   headers: headers,
+      //   body: JSON.stringify(body),
+      // }
+
+      // fetchSSE(url, init, {
+      //   onMessage: (data) => {
+      //     // 处理接收到的数据
+      //     console.log(data);
+      //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': data.message.content.parts[0] })
+      //   },
+      //   onEnd: () => {
+      //     // 处理 SSE 连接结束的逻辑
+      //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
+
+      //   },
+      //   onError: error => {
+      //     // 处理错误的逻辑
+      //     console.log(error);
+
+      //   }
+      // });
+
+
+      // fetch(url, {
+      //   method: 'POST',
+      //   headers,
+      //   body: JSON.stringify(body),
+      // })
+      //   .then(response => {
+      //     if (!response.ok) {
+      //       throw new Error('Network response was not ok');
+      //     }
+      //     return response.json(); // 返回一个包含响应数据的 JSON 对象
+      //   })
+      //   .then(data => {
+      //     console.log(data)
+      //   }) // 打印响应数据
+      //   .catch(error => console.error('There has been a problem with your fetch operation: ', error));
+
+      // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': '' })
+      // // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': 'Hello World ', 'chatId': '' })
+
+
+      // 获取词典数据
+      const result = await getDictionaryData(msg.keyWord)
+      port.postMessage(result)
+
+
+      // 定义基础的 URL 和查询参数
+      // let url = new URL('http://dict.youdao.com/jsonapi');
+      // let params = {
+      //   xmlVersion: '5.1',
+      //   le: 'eng',
+      //   q: msg.keyWord
+      // };
+
+      // // 创建一个新的 URL 对象
+      // url = new URL(url);
+
+      // // 使用 URLSearchParams 对象附加查询参数
+      // url.search = new URLSearchParams(params).toString();
+      // const ErrorMsg = '🥲 An Error Occurred with the Dictionary, Please Try Again Later.'
+      // // 使用 fetch API 发送 GET 请求
+      // fetch(url)
+      //   .then(response => {
+      //     if (!response.ok) {
+      //       port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' })
+      //       throw new Error('Network response was not ok');
+      //     }
+      //     return response.json(); // 返回一个包含响应数据的 JSON 对象
+      //   })
+      //   .then(data => {
+      //     console.log(data)
+      //     let msg = ''
+      //     if ('ec' in data) {
+      //       msg = data.ec.word[0].trs[0].tr[0].l.i[0]
+      //     } else if ('fanyi' in data) {
+      //       msg = data.fanyi.tran
+      //     }
+
+      //     if ('ec' in data || 'fanyi' in data) {
+
+      //       // 数据请求失败
+      //       port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' })
+
+      //     } else {
+
+      //       port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' })
+
+      //     }
+
+
+
+      //   }) // 打印响应数据
+      //   .catch(error =>
+      //     port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' })
+      //   );
 
     }
 
@@ -515,154 +677,6 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
 
 
-      // 获取所有 Model
-      // ankiAction('modelNames', 6).then((result: any) => {
-
-      //   console.log(result.result);
-
-      //   if (!result.error) {
-
-      //     // 默认的卡片类型
-      //     // let defaultModelName = 'Scouter'
-      //     // let defaultCardTemplates = [
-      //     //   {
-      //     //     'name': 'Card1',
-      //     //     'Front': '{{Front}}',
-      //     //     'Back': `{{Front}}
-      //     //     <hr id=answer>
-      //     //     {{Back}}`
-
-      //     //   }
-      //     // ]
-      //     // let defaultInOrderFields = ["Front", "Back"]
-
-      //     // Anki 完形填空类型
-      //     // let ClozeModelName = 'Scouter Cloze Text'
-      //     // let ClozeCardTemplates = [
-      //     //   {
-      //     //     'name': 'Card2',
-      //     //     'Front': '{{cloze:Text}}',
-      //     //     'Back': `{{cloze:Text}}
-      //     //               <br>{{More}}`
-      //     //   }
-      //     // ]
-      //     // let ClozeInOrderFields = ["Text", "More"]
-
-      //     // const models = [
-      //     //   {
-      //     //     'modelName': 'Scouter',
-      //     //     'cardTemplates': [
-      //     //       {
-      //     //         'name': 'Card1',
-      //     //         'Front': '{{Front}}',
-      //     //         'Back': `{{Front}}
-      //     //         <hr id=answer>
-      //     //         {{Back}}`
-
-      //     //       }
-      //     //     ],
-      //     //     'inOrderFields': ["Front", "Back"],
-      //     //     'isAnkiSpace': false
-
-      //     //   },
-      //     //   {
-      //     //     'modelName': 'Scouter Cloze Text',
-      //     //     'cardTemplates': [
-      //     //       {
-      //     //         'name': 'Card2',
-      //     //         'Front': '{{cloze:Text}}',
-      //     //         'Back': `{{cloze:Text}}
-      //     //                   <br>{{More}}`
-      //     //       }
-      //     //     ],
-      //     //     'inOrderFields': ["Text", "More"],
-      //     //     'isAnkiSpace': true
-      //     //   }
-      //     // ]
-
-      //     // // 存储 model 相关的数据，返回给 content 将笔记添加到 Anki
-      //     // let modelData = []
-
-      //     // // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
-      //     // models.forEach(async (model) => {
-
-      //     //   if (result.result.includes(model.modelName)) {
-
-      //     //     // 如果有 Scouter Model 则获取 Model 的字段
-      //     //     ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
-      //     //       if (result.result.length < 2) {
-      //     //         // 字段少于 2 个时无法添加笔记，引导用户修改
-
-      //     //         // asyncSendResponse({ type: 'setModel', result: 'failure', data: {}, error: 'The Scouter model in Anki needs to include at least 2 fields. Please modify and try again.' });
-
-      //     //         modelData.push(
-      //     //           { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': null }
-      //     //         )
-
-      //     //       } else {
-
-      //     //         modelData.push(
-      //     //           { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': result.result[1] }
-      //     //         )
-      //     //         // asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelName': defaultModelName, 'field1': result.result[0], 'field2': result.result[1] }, error: result.error });
-
-      //     //       }
-      //     //     })
-
-      //     //   } else {
-      //     //     // 如果没有 Scouter 默认的 Model，则创建
-
-      //     //     ankiAction('createModel', 6, {
-      //     //       'modelName': model.modelName,
-      //     //       'inOrderFields': model.inOrderFields,
-      //     //       'cardTemplates': model.cardTemplates,
-      //     //       'isCloze': model.isAnkiSpace,
-      //     //       'css': cardStyle
-      //     //     }).then((result: any) => {
-
-      //     //       if (!result.error) {
-
-      //     //         modelData.push(
-      //     //           { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result.flds[0].name, 'field2': result.result.flds[1].name }
-      //     //         )
-
-
-      //     //         // 反馈处理结果
-      //     //         // asyncSendResponse({
-      //     //         //   type: 'setModel', result: 'success', data: {
-      //     //         //     'defaultDeckName': defaultDeckName,
-      //     //         //     'modelName': defaultModelName,
-      //     //         //     'field1': result.result.flds[0].name,
-      //     //         //     'field2': result.result.flds[1].name
-
-      //     //         //   }, error: result.error
-      //     //         // });
-
-      //     //       }
-      //     //     })
-
-      //     //   }
-
-
-
-      //     // });
-
-
-
-
-
-      //   }
-
-
-
-
-      // })
-      //   .catch((error) => {
-
-      //     console.error(error);
-      //     asyncSendResponse({ type: 'setModel', result: 'failure', error: error.error });
-
-      //   });
 
     })
 

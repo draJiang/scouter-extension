@@ -20,6 +20,13 @@ export type ChatMessage = {
     images: Array<ImageType>
 };
 
+export type BackgroundToPopup = {
+    type: string,
+    status: string,
+    content: string,
+    chatId: string
+}
+
 // export type ImageType = {
 //     id: string;
 //     created_at: string;

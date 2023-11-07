@@ -10,7 +10,7 @@ import { DropdownMenuItem } from './DropdownMenuItem'
 
 import { getDefaultPrompt } from '../PopupCard/util'
 
-import { PromptType,runPromptType } from '../types'
+import { PromptType, runPromptType } from '../types'
 
 import {
     HamburgerMenuIcon,
@@ -55,6 +55,15 @@ export function Nav(props: NavProps) {
 
     const navElement = useRef<HTMLDivElement>(null);
 
+    const dictPrompt: PromptType = {
+        title: '词典',
+        id: 'dict',
+        getUnsplashImages: true,
+        userPrompt: '',
+    }
+
+    console.log(props);
+    console.log(dictPrompt);
 
 
 
@@ -123,7 +132,7 @@ export function Nav(props: NavProps) {
 
     // Prompt 菜单 item 点击
     const handleMenuItemClick = (data: PromptType) => {
-        
+
         // 第 3 个参数 false 表示不重新渲染图片
 
         // // 如果上一个 Prompt 是不显示图片，且当前 Prompt 需要显示图片，则本次任务需要渲染图片，否则不重新渲染图片
@@ -217,15 +226,8 @@ export function Nav(props: NavProps) {
                                     willChange: 'transform, opacity'
                                 }}>
 
-                                    {/* <DropdownMenu.Item className="DropdownMenuItem" style={{
-                                        padding: '6px',
-                                        marginBottom: '4px',
-                                        borderRadius: '2px'
-                                    }}
-                                        onSelect={() => handleMenuItemClick(defaultPrompt)}>
-                                        Default
-                                    </DropdownMenu.Item> */}
 
+                                    {/* 默认 Prompt */}
                                     <DropdownMenuItem
                                         key={defaultPrompt.current?.id}
                                         data={defaultPrompt.current!}
@@ -233,9 +235,23 @@ export function Nav(props: NavProps) {
                                         handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: defaultPrompt.current! })}
                                     >
 
-                                        {defaultPrompt.current?.title}</DropdownMenuItem>
+                                        {defaultPrompt.current?.title}
+                                    </DropdownMenuItem>
 
+                                    {/* 词典 */}
+                                    <DropdownMenuItem
+                                        key={dictPrompt.id}
+                                        data={dictPrompt}
+                                        onSelect={() => handleMenuItemClick(dictPrompt)}
+                                        handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: dictPrompt })}
+                                    >
 
+                                        词典
+                                    </DropdownMenuItem>
+
+                                    <Divider style={{ margin: '8px 0' }} />
+
+                                    {/* 用户自定义的 Prompt */}
                                     {props.prompts.map(item => <DropdownMenuItem
                                         key={item.id}
                                         data={item}
@@ -247,11 +263,12 @@ export function Nav(props: NavProps) {
 
                                     <DropdownMenu.Separator className="DropdownMenuSeparator" />
 
+
+                                    {/* 新建自定义 Prompt 按钮 */}
                                     {props.prompts.length < 6 ? <Button style={{ marginTop: '4px' }} size='small' onClick={() => openCustomPromptForm({ isOpen: true, data: { 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' } })}>Create prompt</Button> :
                                         <Button style={{ marginTop: '4px' }} size='small' disabled>At most 7 Prompts</Button>}
 
 
-                                    {/* <DropdownMenu.Arrow className="DropdownMenuArrow" /> */}
                                 </DropdownMenu.Content>
 
                             </DropdownMenu.Portal>

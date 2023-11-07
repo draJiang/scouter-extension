@@ -4,12 +4,13 @@ import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { userInfoType, aiParameterType } from './types'
+import { userInfoType, aiParameterType, BackgroundToPopup } from './types'
 
 import { getSettings } from './Options/util'
 
 import { lang } from './lib/lang'
 
+import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
 
 
 
@@ -56,6 +57,47 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
     });
   });
 }
+
+// 获取词典数据
+export const getDictionaryData = (keyWord: string): Promise<BackgroundToPopup> => {
+  let url = new URL('http://dict.youdao.com/jsonapi');
+  let params = {
+    xmlVersion: '5.1',
+    le: 'eng',
+    q: keyWord
+  };
+
+  // 使用 URLSearchParams 对象附加查询参数
+  url.search = new URLSearchParams(params).toString();
+  const ErrorMsg = '🥲 An Error Occurred with the Dictionary, Please Try Again Later.';
+  const ErrorResult = { 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' };
+
+  // 使用 fetch API 发送 GET 请求
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        return ErrorResult;
+      }
+      return response.json(); // 返回一个包含响应数据的 JSON 对象
+    })
+    .then(data => {
+      console.log(data)
+      let msg = '';
+      if ('ec' in data) {
+        msg = keyWord + ' /' + data.ec.word[0].usphone + '/' + '\n' + data.ec.word[0].trs[0].tr[0].l.i[0];
+      } else if ('fanyi' in data) {
+        msg = data.fanyi.tran;
+      }
+
+      if ('ec' in data || 'fanyi' in data) {
+        return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+      } else {
+        return ErrorResult;
+      }
+    })
+    .catch(error => ErrorResult);
+}
+
 
 export function generationsImages(prompt: string) {
 
@@ -418,6 +460,72 @@ export const textToSpeechDownload = (text: string, voice: string) => {
   );
 };
 
+export const getChatGPTSession = async () => {
+  const URL = 'https://chat.openai.com/api/auth/session'
+  try {
+    const response = await fetch(URL);
+    // 可能需要处理除200外的其他状态码：
+    if (!response.ok) {
+      throw new Error(`HTTP error, status = ${response.status}`);
+    }
+    // 假设服务器返回了JSON格式的响应体：
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`Failed to fetch session: ${error}`);
+    throw error; // 或者返回一个默认的/错误的结果
+  }
+}
+
+
+type SSEDataOptions = {
+  onMessage?(data: any): void;
+  onEnd?(): void;
+  onError?(error: Error): void;
+};
+
+export const fetchSSE = async (url: string, requestInit: RequestInit, options: SSEDataOptions) => {
+  const { onMessage, onEnd, onError } = options;
+
+  const response = await fetch(url, requestInit);
+  if (!response.ok) {
+    onError && onError(new Error(`HTTP error, status = ${response.status}`));
+    return;
+  }
+
+  const parser = createParser((event) => {
+    if (event.type === 'event') {
+      try {
+        if (event.data !== '[DONE]') {
+          const data = JSON.parse(event.data);
+          onMessage && onMessage(data);
+        }
+      } catch {
+        console.log('createParser JSON.parse error');
+        onError && onError(new Error('Failed to parse SSE event data'));
+      }
+    }
+  });
+
+  const reader = response.body?.getReader();
+  if (reader !== undefined) {
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          console.log('Done');
+          onEnd && onEnd();
+          break;
+        }
+        const str = new TextDecoder().decode(value);
+        parser.feed(str);
+      }
+    } finally {
+      reader.releaseLock();
+    }
+    parser.reset();
+  }
+}
 
 
 

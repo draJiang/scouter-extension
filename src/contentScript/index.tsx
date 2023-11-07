@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState, createContext, useContext } from "r
 import ReactDOM from "react-dom";
 
 import { PopupCard } from "../PopupCard"
-
+import { Tooltip } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';
 import { StyleSheetManager } from 'styled-components';
 
@@ -561,14 +561,13 @@ function ToolBar(props: ToolBarProps) {
 
   useEffect(() => {
 
+    console.log(shadowRoot.querySelectorAll('.container'));
 
 
     const contextBox = ContextBox.current
     const popupCard = container.querySelector('#LearningEnglish2023')
     const PopupCardContainer = container.getElementsByClassName('container')[0]
     const messagesBox = container.querySelector('.messages')
-
-
 
     //设置按钮的位置
     const selectedTextX = props.selectedText.x
@@ -704,17 +703,22 @@ function ToolBar(props: ToolBarProps) {
           borderRight: "1px solid rgba(5, 5, 5, .12)",
           paddingRight: "18px"
         }}>
-          {/* <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>[...]</div> */}
 
-          <StyledButton style={{ marginRight: '10px' }} onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>
-            [...]
-          </StyledButton>
+          <Tooltip placement="bottom"
+            title={'Generate Images with AI'}
+            arrow={false}
+            // style={{ zIndex: '9999999999' }}
+          // getPopupContainer={() => ContextBox.current as HTMLDivElement}
+          >
+            <StyledButton style={{ marginRight: '10px' }} onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>
+              [...]
+            </StyledButton>
+          </Tooltip>
 
           <StyledButton onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>
             [...]+
           </StyledButton>
 
-          {/* <div className='setAnkiSpaceButton' onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>[...]+</div> */}
         </div>
 
         <div>

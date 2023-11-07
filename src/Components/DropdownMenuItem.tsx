@@ -56,7 +56,7 @@ export function DropdownMenuItem(props: DropdownMenuItemProps) {
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
-            }}>{props.children}</span>{isHovered && (props.data.id === 'Default' ? <button onClick={()=>{window.open('https://jiangzilong.notion.site/What-is-the-default-Prompt-Prompt-5b55e3fc303d425f8cca16d5bee19e7c')}}><QuestionMarkCircledIcon /></button> : <button onClick={handleEditPrompt}><Pencil2Icon /></button>)}
+            }}>{props.children}</span>{isHovered && (props.data.id === 'Default' || props.data.id === 'dict' ? <button onClick={() => { window.open('https://jiangzilong.notion.site/What-is-the-default-Prompt-Prompt-5b55e3fc303d425f8cca16d5bee19e7c') }}><QuestionMarkCircledIcon /></button> : <button onClick={handleEditPrompt}><Pencil2Icon /></button>)}
         </DropdownMenu.Item >
     )
 }
