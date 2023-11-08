@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { userInfoType, aiParameterType, BackgroundToPopup } from './types'
 
 import { getSettings } from './Options/util'
+import ISO6391 from 'iso-639-1';
+
 
 import { lang } from './lib/lang'
 
@@ -59,20 +61,26 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
 }
 
 // 获取词典数据
-export const getDictionaryData = (keyWord: string): Promise<BackgroundToPopup> => {
+export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPopup> => {
+
+  // 获取用户语言
+  const Settings = await getSettings()
+  const targetLanguage = Settings.targetLanguage
+  console.log(Settings);
+  console.log(ISO6391.getCode(targetLanguage))
+
+  // 获取词典数据
   let url = new URL('http://dict.youdao.com/jsonapi');
   let params = {
     xmlVersion: '5.1',
-    le: 'eng',
+    le: ISO6391.getCode(targetLanguage),
     q: keyWord
   };
 
-  // 使用 URLSearchParams 对象附加查询参数
   url.search = new URLSearchParams(params).toString();
-  const ErrorMsg = '🥲 An Error Occurred with the Dictionary, Please Try Again Later.';
+  const ErrorMsg = '🥲 Sorry, No Results Found for this Word.';
   const ErrorResult = { 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' };
 
-  // 使用 fetch API 发送 GET 请求
   return fetch(url)
     .then(response => {
       if (!response.ok) {
@@ -83,17 +91,64 @@ export const getDictionaryData = (keyWord: string): Promise<BackgroundToPopup> =
     .then(data => {
       console.log(data)
       let msg = '';
-      if ('ec' in data) {
-        msg = keyWord + ' /' + data.ec.word[0].usphone + '/' + '\n' + data.ec.word[0].trs[0].tr[0].l.i[0];
-      } else if ('fanyi' in data) {
-        msg = data.fanyi.tran;
+
+      switch (targetLanguage) {
+        case 'Spanish':
+          if ('multle' in data) {
+            msg = keyWord + ' /' + data.multle.word[0].phone + '/' + '\n' + data.multle.word[0].trs[0].tr[0].l.i[0];
+          } else if ('fanyi' in data) {
+            msg = data.fanyi.tran;
+          }
+
+          if ('multle' in data || 'fanyi' in data) {
+            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+          } else {
+            return ErrorResult;
+          }
+        case 'French':
+          if ('fc' in data) {
+            msg = keyWord + ' /' + data.fc.word[0].phone + '/' + '\n' + data.fc.word[0].trs[0].tr[0].l.i[0];
+          } else if ('fanyi' in data) {
+            msg = data.fanyi.tran;
+          }
+
+          if ('fc' in data || 'fanyi' in data) {
+            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+          } else {
+            return ErrorResult;
+          }
+        case 'Japanese':
+          if ('jc' in data) {
+            msg = keyWord + ' /' + data.jc.word[0]["return-phrase"].l.i + '/' + '\n' + data.jc.word[0].trs[0].tr[0].l.i[0];
+          } else if ('fanyi' in data) {
+            msg = data.jaTransPjm.fanyi.tran;
+          }
+
+          if ('jc' in data || 'fanyi' in data) {
+            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+          } else {
+            return ErrorResult;
+          }
+          break;
+
+        default:
+          // English
+          if ('ec' in data) {
+            msg = keyWord + ' /' + data.ec.word[0].usphone + '/' + '\n' + data.ec.word[0].trs[0].tr[0].l.i[0];
+          } else if ('fanyi' in data) {
+            msg = data.fanyi.tran;
+          }
+
+          if ('ec' in data || 'fanyi' in data) {
+            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+          } else {
+            return ErrorResult;
+          }
+          break;
       }
 
-      if ('ec' in data || 'fanyi' in data) {
-        return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
-      } else {
-        return ErrorResult;
-      }
+
+
     })
     .catch(error => ErrorResult);
 }

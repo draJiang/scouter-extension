@@ -734,44 +734,44 @@ export function PopupCard(props: any) {
 
       if (msg.type === 'sendGPTData') {
         // 请求 GPT 数据失败
-        if (msg.status === 'erro') {
+        // if (msg.status === 'erro') {
 
-          // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
-          // setIsLoading(false)
-          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
+        //   // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
+        //   // setIsLoading(false)
+        //   setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
-          let newContentList = [...messages[messages.length - 1].content]
+        //   let newContentList = [...messages[messages.length - 1].content]
 
-          if (msg.code === 'invalid_api_key') {
-            // setIsApiErro(true)
-            newContentList[newContentList.length - 1].content = msg.content + '\
-            After that, you need to set the correct Open API Key in the Scouter:'
-            newContentList[newContentList.length - 1].status = 'invalid_api_key'
-          }
+        //   if (msg.code === 'invalid_api_key') {
+        //     // setIsApiErro(true)
+        //     newContentList[newContentList.length - 1].content = msg.content + '\
+        //     After that, you need to set the correct Open API Key in the Scouter:'
+        //     newContentList[newContentList.length - 1].status = 'invalid_api_key'
+        //   }
 
-          console.log(newContentList);
+        //   console.log(newContentList);
 
 
-          setMessages(prevMessages => {
+        //   setMessages(prevMessages => {
 
-            const lastMessage = prevMessages[prevMessages.length - 1];
-            // const newMsgList = lastMessage
-            const updatedLastMessage: ChatMessage = {
-              ...lastMessage,
-              content: newContentList,
-              prompt: prompt[0]['content'],
-              // images: []
-            };
-            // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
-            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+        //     const lastMessage = prevMessages[prevMessages.length - 1];
+        //     // const newMsgList = lastMessage
+        //     const updatedLastMessage: ChatMessage = {
+        //       ...lastMessage,
+        //       content: newContentList,
+        //       prompt: prompt[0]['content'],
+        //       // images: []
+        //     };
+        //     // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
+        //     return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
-          })
+        //   })
 
-          // setAnswerDone(true)
+        //   // setAnswerDone(true)
 
-        } else if (isApiErro) {
-          // setIsApiErro(false)
-        }
+        // } else if (isApiErro) {
+        //   // setIsApiErro(false)
+        // }
 
         // 请求 GPT 数据成功且数据流开始传输
         if (msg.status === 'begin') {
@@ -780,48 +780,48 @@ export function PopupCard(props: any) {
         }
 
         // 请求 GPT 数据成功且数据流传输中
-        if (msg.status === 'process' || msg.status === 'end') {
+        // if (msg.status === 'process' || msg.status === 'end') {
 
-          try {
+        try {
 
-            // 渲染数据
-            setMessages(prevMessages => {
+          // 渲染数据
+          setMessages(prevMessages => {
 
-              const newMessages = [...prevMessages]
-              const lastMessage = newMessages[newMessages.length - 1];
+            const newMessages = [...prevMessages]
+            const lastMessage = newMessages[newMessages.length - 1];
 
-              // 深度拷贝
-              let contentList = JSON.parse(JSON.stringify(lastMessage.content));
+            // 深度拷贝
+            let contentList = JSON.parse(JSON.stringify(lastMessage.content));
 
-              let newContent = contentList[contentList.length - 1]['content'] + msg.content
-              newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
+            let newContent = contentList[contentList.length - 1]['content'] + msg.content
+            newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
 
-              contentList[contentList.length - 1]['content'] = newContent
-              contentList[contentList.length - 1]['status'] = 'process'
+            contentList[contentList.length - 1]['content'] = newContent
+            contentList[contentList.length - 1]['status'] = msg.status
 
-              const newContentList = [...contentList]
+            const newContentList = [...contentList]
 
-              const updatedLastMessage: ChatMessage = {
-                ...lastMessage,
-                content: newContentList,
-                prompt: prompt[0]['content']
-              };
+            const updatedLastMessage: ChatMessage = {
+              ...lastMessage,
+              content: newContentList,
+              prompt: prompt[0]['content']
+            };
 
-              return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
 
-            })
+          })
 
-          } catch (error) {
-
-          }
-
+        } catch (error) {
 
         }
 
 
+        // }
+
+
         // 请求 GPT 数据成功且数据流结束传输
-        if (msg.status === 'end') {
+        if (msg.status === 'end' || msg.status === 'erro') {
 
           // 记录消息回答完毕（触发保存历史记录）
 
@@ -830,23 +830,23 @@ export function PopupCard(props: any) {
 
           setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
-          setMessages(prevMessages => {
+          // setMessages(prevMessages => {
 
-            const lastMessage = prevMessages[prevMessages.length - 1];
+          //   const lastMessage = prevMessages[prevMessages.length - 1];
 
-            if (prevMessages.length === 0) {
-              return []
-            }
-            const lastContentList = lastMessage.content
-            const updatedLastMessage: ChatMessage = {
-              ...lastMessage,
-              // loading: false,
-              content: [...lastContentList.slice(0, lastContentList.length - 1), { ...lastContentList[lastContentList.length - 1], status: 'done' }]
-            };
+          //   if (prevMessages.length === 0) {
+          //     return []
+          //   }
+          //   const lastContentList = lastMessage.content
+          //   const updatedLastMessage: ChatMessage = {
+          //     ...lastMessage,
+          //     // loading: false,
+          //     content: [...lastContentList.slice(0, lastContentList.length - 1), { ...lastContentList[lastContentList.length - 1], status: 'done' }]
+          //   };
 
-            return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+          //   return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
-          })
+          // })
 
 
         }
