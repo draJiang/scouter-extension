@@ -3,6 +3,13 @@ import { ankiAction } from '../util'
 
 import { PromptType } from '../types'
 
+export const dictionaryPrompt: PromptType = {
+    title: 'Dictionary',
+    id: 'dict',
+    getUnsplashImages: true,
+    userPrompt: '',
+}
+
 export const getClipboard = () => {
 
     return new Promise((resolve, reject) => {

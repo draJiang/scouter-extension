@@ -8,8 +8,7 @@ import * as amplitude from '@amplitude/analytics-browser';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { DropdownMenuItem } from './DropdownMenuItem'
 
-import { getDefaultPrompt } from '../PopupCard/util'
-
+import { getDefaultPrompt, dictionaryPrompt } from '../PopupCard/util'
 import { PromptType, runPromptType } from '../types'
 
 import {
@@ -54,17 +53,6 @@ export function Nav(props: NavProps) {
     // const { Option } = Select;
 
     const navElement = useRef<HTMLDivElement>(null);
-
-    const dictPrompt: PromptType = {
-        title: '词典',
-        id: 'dict',
-        getUnsplashImages: true,
-        userPrompt: '',
-    }
-
-    console.log(props);
-    console.log(dictPrompt);
-
 
 
     useEffect(() => {
@@ -240,13 +228,13 @@ export function Nav(props: NavProps) {
 
                                     {/* 词典 */}
                                     <DropdownMenuItem
-                                        key={dictPrompt.id}
-                                        data={dictPrompt}
-                                        onSelect={() => handleMenuItemClick(dictPrompt)}
-                                        handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: dictPrompt })}
+                                        key={dictionaryPrompt.id}
+                                        data={dictionaryPrompt}
+                                        onSelect={() => handleMenuItemClick(dictionaryPrompt)}
+                                        handleEditPrompt={() => openCustomPromptForm({ isOpen: true, data: dictionaryPrompt })}
                                     >
 
-                                        词典
+                                        {dictionaryPrompt.title}
                                     </DropdownMenuItem>
 
                                     <Divider style={{ margin: '8px 0' }} />

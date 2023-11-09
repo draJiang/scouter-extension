@@ -182,7 +182,7 @@ browser.runtime.onConnect.addListener(port => {
               },
               onEnd: () => {
                 // 处理 SSE 连接结束的逻辑
-                port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
+                port.postMessage({ 'type': 'sendGPTData', 'status': 'done', 'content': '' })
 
               },
               onError: error => {

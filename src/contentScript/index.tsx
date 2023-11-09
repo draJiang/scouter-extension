@@ -705,53 +705,61 @@ function ToolBar(props: ToolBarProps) {
         }}>
 
           <Tooltip placement="bottom"
-            title={'Generate Images with AI'}
+            title={'Cloze deletion(same card)'}
             arrow={false}
-            // style={{ zIndex: '9999999999' }}
-          // getPopupContainer={() => ContextBox.current as HTMLDivElement}
           >
             <StyledButton style={{ marginRight: '10px' }} onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>
               [...]
             </StyledButton>
           </Tooltip>
 
-          <StyledButton onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>
-            [...]+
-          </StyledButton>
+          <Tooltip placement="bottom"
+            title={'Cloze deletion(new card)'}
+            arrow={false}
+          >
+            <StyledButton onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>
+              [...]+
+            </StyledButton>
+          </Tooltip>
 
         </div>
 
         <div>
 
-          <StyledButton $disable={userInfo?.user.verified ? false : true} title='⚡Pro' style={{
-            fontSize: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: '10px'
-          }}
-
-            onClick={async () => {
-
-              let lang = await fetchcurrentLanguage()
-              if (userInfo?.user.verified) {
-                if (lang) {
-
-                  const targetLanguage = lang['target']['id']
-                  playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes], targetLanguage)
-                  setShowMenu(false)
-
-                }
-              } else {
-                // alert(' You are not Pro')
-              }
-
-
-
-            }}
+          <Tooltip placement="bottom"
+            title={'Pronunciation(⚡Pro)'}
+            arrow={false}
           >
-            <CustomerServiceOutlined />
-          </StyledButton>
+            <StyledButton $disable={userInfo?.user.verified ? false : true} style={{
+              fontSize: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '10px'
+            }}
+
+              onClick={async () => {
+
+                let lang = await fetchcurrentLanguage()
+                if (userInfo?.user.verified) {
+                  if (lang) {
+
+                    const targetLanguage = lang['target']['id']
+                    playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes], targetLanguage)
+                    setShowMenu(false)
+
+                  }
+                } else {
+                  // alert(' You are not Pro')
+                }
+
+
+
+              }}
+            >
+              <CustomerServiceOutlined />
+            </StyledButton>
+          </Tooltip>
 
         </div>
         <div style={{
@@ -759,12 +767,17 @@ function ToolBar(props: ToolBarProps) {
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <IconButton title='⚡Pro'
-            className='lookUpButton' style={{
-              backgroundImage: `url(${LOGO})`,
-            }}
-            onClick={handleFollowUpMenuClick}
-          ></IconButton>
+          <Tooltip placement="bottom"
+            title={'Invoke Prompt(⚡Pro)'}
+            arrow={false}
+          >
+            <IconButton
+              className='lookUpButton' style={{
+                backgroundImage: `url(${LOGO})`,
+              }}
+              onClick={handleFollowUpMenuClick}
+            ></IconButton>
+          </Tooltip>
         </div>
       </div >
       }

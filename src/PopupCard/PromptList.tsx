@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, ReactNode } from "react";
 
 import { PromptType } from '../types'
-import { getDefaultPrompt } from './util'
+import { getDefaultPrompt, dictionaryPrompt } from './util'
 
 import styled from 'styled-components';
 
@@ -122,14 +122,8 @@ export function PromptList(props: PromptListProps) {
                 }}>Default</PromptButton>
 
                 <PromptButton disable={!userInfo?.user.verified} handleMenuItemClick={() => {
-                    const p = {
-                        title: '词典',
-                        id: 'dict',
-                        getUnsplashImages: true,
-                        userPrompt: '',
-                    }
-                    handleMenuItemClick(p)
-                }}>词典</PromptButton>
+                    handleMenuItemClick(dictionaryPrompt)
+                }}>{dictionaryPrompt.title}</PromptButton>
 
                 {props.promptList.map((item) => {
                     // return <button onClick={() => handleMenuItemClick(item)}>{item.title}</button>

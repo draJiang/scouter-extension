@@ -101,7 +101,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
           }
 
           if ('multle' in data || 'fanyi' in data) {
-            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
           } else {
             return ErrorResult;
           }
@@ -113,7 +113,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
           }
 
           if ('fc' in data || 'fanyi' in data) {
-            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
           } else {
             return ErrorResult;
           }
@@ -125,7 +125,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
           }
 
           if ('jc' in data || 'fanyi' in data) {
-            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
           } else {
             return ErrorResult;
           }
@@ -140,7 +140,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
           }
 
           if ('ec' in data || 'fanyi' in data) {
-            return { 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' };
+            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
           } else {
             return ErrorResult;
           }

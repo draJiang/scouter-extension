@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, ReactNode } from "react";
-import browser from 'webextension-polyfill'
-
+import { dictionaryPrompt } from '../PopupCard/util'
 import { Button } from 'antd';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
@@ -56,7 +55,19 @@ export function DropdownMenuItem(props: DropdownMenuItemProps) {
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis'
-            }}>{props.children}</span>{isHovered && (props.data.id === 'Default' || props.data.id === 'dict' ? <button onClick={() => { window.open('https://jiangzilong.notion.site/What-is-the-default-Prompt-Prompt-5b55e3fc303d425f8cca16d5bee19e7c') }}><QuestionMarkCircledIcon /></button> : <button onClick={handleEditPrompt}><Pencil2Icon /></button>)}
+            }}>{props.children}</span>{isHovered &&
+                (props.data.id === 'Default' ?
+                    <button onClick={(event) => {
+                        event.stopPropagation();
+                        window.open('https://jiangzilong.notion.site/What-is-the-default-Prompt-Prompt-5b55e3fc303d425f8cca16d5bee19e7c')
+                    }}><QuestionMarkCircledIcon /></button>
+                    :
+                    props.data.id === dictionaryPrompt.id ?
+                        <button onClick={(event) => { 
+                            event.stopPropagation();
+                            window.open('https://jiangzilong.notion.site/Online-Dictionary-43737527dc134bceb2d40ed79be1e0e3?pvs=4') }}><QuestionMarkCircledIcon /></button>
+                        :
+                        <button onClick={handleEditPrompt}><Pencil2Icon /></button>)}
         </DropdownMenu.Item >
     )
 }

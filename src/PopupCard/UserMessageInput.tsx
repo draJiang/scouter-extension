@@ -31,8 +31,12 @@ export function UserMessageInput(props: MessageProps) {
         if (event.keyCode === 13 && !event.shiftKey) {
 
             const contents = props.messages[props.messages.length - 1]['content']
+            // console.log(props.messages);
+
             // 敲击回车键
-            if (props.messages.length === 0 || (contents[contents.length - 1]['status'] !== 'begin' || contents[contents.length - 1]['status'] !== 'process') && isAnswerInputed) {
+            if (props.messages.length === 0 ||
+                (contents[contents.length - 1]['status'] !== 'begin' &&
+                    contents[contents.length - 1]['status'] !== 'process') && isAnswerInputed) {
                 // 非加载状态、GPT 消息发送完毕时用户可发送消息
                 handleSendMessage({ 'msg': event.target.value })
             } else {

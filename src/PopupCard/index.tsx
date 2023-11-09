@@ -5,6 +5,7 @@ import React, { useEffect, useState, useRef, createContext, useContext } from "r
 import { getUserInfo } from '../util'
 import { userInfoType, langType } from '../types'
 
+import { v4 as uuidv4 } from 'uuid';
 
 import { setDonotClosePopupCard } from '../contentScript'
 
@@ -91,7 +92,6 @@ h2 {
 export function PopupCard(props: any) {
 
 
-  // const [messages, setMessages] = useState<Array<{ content: string, role: string, loading: boolean, chatId: string, prompt: string, status: string }>>([{ 'content': '', 'role': 'user', 'loading': false, 'chatId': '', 'prompt': '', 'status': '' }])
   const [messages, setMessages] = useState<Array<ChatMessage>>([{
     'content': [{
       'status': 'begin',
@@ -447,10 +447,6 @@ export function PopupCard(props: any) {
 
 
 
-      console.log('showImagesBox:');
-      console.log(showImagesBox);
-
-
       // 埋点
       browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'executivePrompt' })
 
@@ -458,7 +454,7 @@ export function PopupCard(props: any) {
       setMessages(prevMessages => [...prevMessages,
       {
         'content': [{
-          'chatId': Date.now().toString(),
+          'chatId': uuidv4(),
           'content': '',
           'status': 'begin'
         }],
@@ -518,7 +514,7 @@ export function PopupCard(props: any) {
               role: obj.role,
               content: [{
 
-                'chatId': Date.now().toString(),
+                'chatId': uuidv4(),
                 'content': obj.answer,
                 'status': 'done'
 
@@ -543,6 +539,32 @@ export function PopupCard(props: any) {
         setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
         lastPromptRef.current = newPrompt
+
+        // 如果历史记录中没有图片，则重新
+        if (result.updatedLastMessage?.images.length === 0){
+          // 获取图片数据
+          getUnsplashImages(keyWord).then((imgs: any) => {
+            // 保存图片数据
+            setMessages(prevMessages => {
+
+              const lastMessage = prevMessages[prevMessages.length - 1];
+
+              if (prevMessages.length === 0) {
+                return []
+              }
+
+              const updatedLastMessage = {
+                ...lastMessage,
+                needToShowImg: true,
+                images: imgs
+              };
+
+              return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+            })
+
+          })
+        }
 
       } else {
 
@@ -733,51 +755,6 @@ export function PopupCard(props: any) {
       // console.log('port.onMessage.addListener');
 
       if (msg.type === 'sendGPTData') {
-        // 请求 GPT 数据失败
-        // if (msg.status === 'erro') {
-
-        //   // type === 'as2' ? setopenApiAnser2(msg.content) : setopenApiAnser(msg.content)
-        //   // setIsLoading(false)
-        //   setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
-
-        //   let newContentList = [...messages[messages.length - 1].content]
-
-        //   if (msg.code === 'invalid_api_key') {
-        //     // setIsApiErro(true)
-        //     newContentList[newContentList.length - 1].content = msg.content + '\
-        //     After that, you need to set the correct Open API Key in the Scouter:'
-        //     newContentList[newContentList.length - 1].status = 'invalid_api_key'
-        //   }
-
-        //   console.log(newContentList);
-
-
-        //   setMessages(prevMessages => {
-
-        //     const lastMessage = prevMessages[prevMessages.length - 1];
-        //     // const newMsgList = lastMessage
-        //     const updatedLastMessage: ChatMessage = {
-        //       ...lastMessage,
-        //       content: newContentList,
-        //       prompt: prompt[0]['content'],
-        //       // images: []
-        //     };
-        //     // const newMsgList = [...prevMessages.slice(0, prevMessages.length - 1), lastMessage]
-        //     return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
-
-        //   })
-
-        //   // setAnswerDone(true)
-
-        // } else if (isApiErro) {
-        //   // setIsApiErro(false)
-        // }
-
-        // 请求 GPT 数据成功且数据流开始传输
-        if (msg.status === 'begin') {
-
-
-        }
 
         // 请求 GPT 数据成功且数据流传输中
         // if (msg.status === 'process' || msg.status === 'end') {
@@ -821,33 +798,9 @@ export function PopupCard(props: any) {
 
 
         // 请求 GPT 数据成功且数据流结束传输
-        if (msg.status === 'end' || msg.status === 'erro') {
-
-          // 记录消息回答完毕（触发保存历史记录）
-
-          // setAnswerDone(true)
-          // setIsLoading(false)
+        if (msg.status === 'done' || msg.status === 'erro') {
 
           setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
-
-          // setMessages(prevMessages => {
-
-          //   const lastMessage = prevMessages[prevMessages.length - 1];
-
-          //   if (prevMessages.length === 0) {
-          //     return []
-          //   }
-          //   const lastContentList = lastMessage.content
-          //   const updatedLastMessage: ChatMessage = {
-          //     ...lastMessage,
-          //     // loading: false,
-          //     content: [...lastContentList.slice(0, lastContentList.length - 1), { ...lastContentList[lastContentList.length - 1], status: 'done' }]
-          //   };
-
-          //   return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
-
-          // })
-
 
         }
 
