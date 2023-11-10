@@ -176,7 +176,12 @@ function Message(props: MessageProps) {
 
                                 } else {
                                     setImages([])
-                                    alert('The current AI endpoint does not support image generation.')
+                                    if ('message' in response.data) {
+                                        alert(response.data.message)
+                                    } else {
+                                        alert('The current AI endpoint does not support image generation.')
+                                    }
+
                                 }
 
 

@@ -561,9 +561,6 @@ function ToolBar(props: ToolBarProps) {
 
   useEffect(() => {
 
-    console.log(shadowRoot.querySelectorAll('.container'));
-
-
     const contextBox = ContextBox.current
     const popupCard = container.querySelector('#LearningEnglish2023')
     const PopupCardContainer = container.getElementsByClassName('container')[0]
@@ -679,7 +676,7 @@ function ToolBar(props: ToolBarProps) {
 
     } catch (error) {
 
-      console.log(error);
+      // console.log(error);
 
     }
 

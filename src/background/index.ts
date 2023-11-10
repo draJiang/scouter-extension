@@ -176,7 +176,7 @@ browser.runtime.onConnect.addListener(port => {
                 console.log(data);
 
                 if (data.choices[0].finish_reason !== 'stop') {
-                  port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': data.choices[0].delta.content })
+                  port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                 }
 
               },

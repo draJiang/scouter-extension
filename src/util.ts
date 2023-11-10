@@ -153,7 +153,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
     .catch(error => ErrorResult);
 }
 
-
+// AI 绘图
 export function generationsImages(prompt: string) {
 
   console.log('generationsImages');
@@ -213,12 +213,23 @@ export function generationsImages(prompt: string) {
                       resolve({ 'succeeded': true, 'data': data.result })
                       clearInterval(intervalId); // 任务成功时清除轮询
                     }
+
+                    if (data.status === 'failed') {
+                      //生成图片失败
+                      resolve({ 'succeeded': false, 'data': data.error })
+                      clearInterval(intervalId); // 任务成功时清除轮询
+                    }
                   });
               }, 1000);
 
             } else {
 
-              resolve({ 'succeeded': true, 'data': data })
+              if ('error' in data) {
+                resolve({ 'succeeded': false, 'data': data.error })
+              } else {
+                resolve({ 'succeeded': true, 'data': data })
+              }
+
 
             }
 
