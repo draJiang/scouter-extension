@@ -306,40 +306,46 @@ export function PopupCard(props: any) {
     }
 
 
+
     // 保存历史记录，只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
     if (messages.length === 1 && messages[0]['content'][0]['status'] === 'done') {
 
-      // console.log('Save');
+      async () => {
 
-      const keyWord = props.data.keyWord
-      const Sentence = props.data.Sentence
+        const storage = await browser.storage.local.get({ "history": [], "lastExecutedPrompt": '' })
 
-      // 将查询记录保存起来
-      const newHistory = {
-        'keyWord': keyWord,
-        'sentence': Sentence,
-        'role': messages[0]['role'],
-        'answer': messages[0]['content'][messages[0]['content'].length - 1]['content'],
-        'source': window.location.href,
-        'prompt': messages[0]['prompt'],
-        'images': messages[0]['images']
-      }
+        const keyWord = props.data.keyWord
+        const Sentence = props.data.Sentence
+
+        // 将查询记录保存起来
+        const newHistory = {
+          'keyWord': keyWord,
+          'sentence': Sentence,
+          'role': messages[0]['role'],
+          'answer': messages[0]['content'][messages[0]['content'].length - 1]['content'],
+          'source': window.location.href,
+          'prompt': messages[0]['prompt'],
+          'images': messages[0]['images']
+        }
+
+        console.log('newHistory:');
+        console.log(newHistory);
 
 
-      if (keyWord !== '' && Sentence !== '' && messages[0]['content'][0]['content'] !== '') {
-        browser.storage.local.get({ "history": [] }).then((item) => {
+        if (keyWord !== '' && Sentence !== '' && messages[0]['content'][0]['content'] !== '' && storage.lastExecutedPrompt.id !== 'dict') {
 
           // console.log(item.history);
 
           let newHistoryList: any = []
           let bingo = false
           newHistoryList.push(newHistory)
-          if (Array.isArray(item.history)) {
+          // 如果最近执行的是在线词典，则不保存历史记录
+          if (Array.isArray(storage.history)) {
 
             // 如果记录已存在，则不重复保存
-            for (let i = 0; i < item.history.length; i++) {
+            for (let i = 0; i < storage.history.length; i++) {
 
-              let obj = item.history[i]
+              let obj = storage.history[i]
 
 
               if (obj.keyWord === newHistory['keyWord'] && obj.sentence === newHistory['sentence'] && obj.prompt === newHistory['prompt']) {
@@ -351,7 +357,7 @@ export function PopupCard(props: any) {
 
             }
 
-            newHistoryList = item.history
+            newHistoryList = storage.history
             newHistoryList.unshift(newHistory)
             newHistoryList.splice(8)
 
@@ -367,8 +373,12 @@ export function PopupCard(props: any) {
             )
           }
 
-        })
+        }
+
       }
+
+
+
 
     }
 
@@ -495,6 +505,9 @@ export function PopupCard(props: any) {
           let obj = item.history[i]
           if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === newPrompt[0]['content']) {
 
+            console.log('obj:');
+            console.log(obj);
+
             if ('role' in obj) {
 
             } else {
@@ -541,7 +554,7 @@ export function PopupCard(props: any) {
         lastPromptRef.current = newPrompt
 
         // 如果历史记录中没有图片，则重新
-        if (result.updatedLastMessage?.images.length === 0){
+        if (result.updatedLastMessage?.images.length === 0) {
           // 获取图片数据
           getUnsplashImages(keyWord).then((imgs: any) => {
             // 保存图片数据
