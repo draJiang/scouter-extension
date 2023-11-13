@@ -398,7 +398,7 @@ export const getDefaultPrompt = (keyWord: string) => {
         Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence.
 
         Example：
-        """
+        
         -  Meaning: <Explain the meaning using {nativeLanguage}>
         -  Part of Speech: <Indicate the part of speech using {nativeLanguage}>
         
@@ -413,7 +413,7 @@ export const getDefaultPrompt = (keyWord: string) => {
         -  <{nativeLanguage} sentence>
         -  <{nativeLanguage} sentence>
         
-        """ 
+        ---
         
         Word:{selection}, sentence: {sentence},You must reply in the specified language
 
@@ -430,7 +430,7 @@ export const getDefaultPrompt = (keyWord: string) => {
                   As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
       
                   Example:
-                  """
+                  
       
                   ## Translation
                   <Translate to {nativeLanguage}>
@@ -442,7 +442,7 @@ export const getDefaultPrompt = (keyWord: string) => {
                   -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
                   -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
       
-                  """
+                  ---
                   
                   Sentence: {selection}`
 

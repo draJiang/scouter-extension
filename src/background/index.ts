@@ -149,9 +149,9 @@ browser.runtime.onConnect.addListener(port => {
         // controller.abort();
         controller = new AbortController();
 
-        let messages = msg.messages
+        // let messages = msg.messages
 
-        getAIParameter().then((result: aiParameterType) => {
+        getAIParameter(msg.messages).then((result: aiParameterType) => {
 
           const openApiEndpoint = result.data?.chatCompletions.url
 
@@ -160,7 +160,7 @@ browser.runtime.onConnect.addListener(port => {
           } else {
 
             let body = result.data.chatCompletions.body
-            body.messages = messages
+            // body.messages = messages
 
 
             const init = {
@@ -170,14 +170,25 @@ browser.runtime.onConnect.addListener(port => {
               body: JSON.stringify(body),
             }
 
+            const ApiType = result.apiKeySelection
+
             fetchSSE(openApiEndpoint, init, {
               onMessage: (data) => {
                 // 处理接收到的数据
-                console.log(data);
 
-                if (data.choices[0].finish_reason !== 'stop') {
-                  port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                if (ApiType === 'chatGPTWeb') {
+
+                  if ('is_completion' in data !== true) {
+                    port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.message.content.parts[0] })
+                  }
+
+                } else {
+                  if (data.choices[0].finish_reason !== 'stop') {
+                    port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                  }
                 }
+
+
 
               },
               onEnd: () => {
@@ -201,112 +212,6 @@ browser.runtime.onConnect.addListener(port => {
             });
 
 
-            // fetch(openApiEndpoint!, {
-            //   signal: controller.signal,
-            //   method: "POST",
-            //   body: JSON.stringify(body),
-            //   headers: result.data.chatCompletions.headers
-
-            // }).then(async (response) => {
-
-            //   port.postMessage({ 'type': 'sendGPTData', 'status': 'begin', 'content': '' })
-
-            //   if (response.status !== 200) {
-            //     // API KEY Error
-            //     response.json().then((data) => {
-
-            //       port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 ' + data.error.message, 'code': data.error.code })
-
-            //       return
-            //     })
-
-
-            //   }
-
-            //   // 处理 server-sent events
-            //   const parser = createParser((event) => {
-
-
-            //     if (event.type === 'event') {
-            //       // console.log('createParser:');
-            //       try {
-
-            //         if (event.data !== '[DONE]') {
-
-            //           let new_msg = JSON.parse(event.data)['choices'][0]['delta']['content']
-
-            //           if (new_msg !== undefined) {
-            //             // console.log(JSON.parse(event.data))
-            //             // 将数据发送给 UI 以渲染内容
-            //             port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': JSON.parse(event.data)['choices'][0]['delta']['content'], 'chatId': JSON.parse(event.data).id })
-
-            //           }
-            //         }
-
-
-            //       } catch {
-            //         console.log(' createParser JSON.parse errow')
-            //       }
-
-            //     }
-            //   })
-
-
-            //   const reader = response.body?.getReader();
-            //   if (reader !== undefined) {
-            //     try {
-
-
-            //       // eslint-disable-next-line no-constant-condition
-            //       while (true) {
-            //         const { done, value } = await reader.read()
-            //         // const { done:boolean, value:uint8Array } = await Promise.race([reader.read(), cancelPromise]);
-
-            //         if (done) {
-            //           // 数据传输结束
-            //           console.log('Done');
-
-            //           port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
-            //           break
-
-            //         }
-
-            //         // if (!isContinue) {
-            //         //   console.log('停止渲染数据')
-            //         //   break
-            //         // }
-
-            //         const str = new TextDecoder().decode(value)
-            //         parser.feed(str)
-
-
-            //       }
-
-            //     } finally {
-
-            //       reader.releaseLock()
-
-            //     }
-            //     parser.reset()
-            //   }
-
-
-            // }).catch((error) => {
-            //   console.log('error');
-            //   console.log(error);
-            //   if (error.message.indexOf('aborted') >= 0) {
-            //     // 开启新的请求，中断旧请求
-
-            //   } else {
-            //     const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
-
-            //     port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
-            //   }
-
-            //   // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': "🥲 Encountered some issues, please try again later." })
-
-            // })
-
           }
 
 
@@ -327,7 +232,7 @@ browser.runtime.onConnect.addListener(port => {
       // const session = getChatGPTSession()
       // const headers = {
       //   'Content-Type': 'application/json',
-      //   'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik1UaEVOVUpHTkVNMVFURTRNMEZCTWpkQ05UZzVNRFUxUlRVd1FVSkRNRU13UmtGRVFrRXpSZyJ9.eyJodHRwczovL2FwaS5vcGVuYWkuY29tL3Byb2ZpbGUiOnsiZW1haWwiOiJqemxvbmc2NjZAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJodHRwczovL2FwaS5vcGVuYWkuY29tL2F1dGgiOnsicG9pZCI6Im9yZy1TTVVSR281QkVJUlV6TjFLQXJzSGlwRnEiLCJ1c2VyX2lkIjoidXNlci03STVCMG42SmJQWFlQZVFIZFF1YkNpbmMifSwiaXNzIjoiaHR0cHM6Ly9hdXRoMC5vcGVuYWkuY29tLyIsInN1YiI6Imdvb2dsZS1vYXV0aDJ8MTAxNTE4MjY1MTA0Njc4MDY4ODU5IiwiYXVkIjpbImh0dHBzOi8vYXBpLm9wZW5haS5jb20vdjEiLCJodHRwczovL29wZW5haS5vcGVuYWkuYXV0aDBhcHAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTY5OTExNDI0MywiZXhwIjoxNjk5OTc4MjQzLCJhenAiOiJUZEpJY2JlMTZXb1RIdE45NW55eXdoNUU0eU9vNkl0RyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgbW9kZWwucmVhZCBtb2RlbC5yZXF1ZXN0IG9yZ2FuaXphdGlvbi5yZWFkIG9yZ2FuaXphdGlvbi53cml0ZSBvZmZsaW5lX2FjY2VzcyJ9.s7cUAbaXwneQtyf6C7Zy7DLFSbwKsLDII9sEvSaBsJAY2dQaD-n-jflNvPQxKO4bKPkOlskp9TaEl-3-d8NDWd2ds68xoo1ywGaX8VCvGCDLVQOmHmIoho2dICnWCjfjIRYLG-TZ9DumbWP5TrRYNnYq3izGvy1wnAzyH7TkZBFrGY7VIN7CTdthnSURhqU4zp6HNh77HPrbodK9QFFR46FpI6MB1cDiSsvGxlx81BZDo0cJr9hvigLdCSxesL19aViao9wTx5FIYbTWH39VA8pOTulOZATKu8dV_OPAaqYV_gwQB4SX5qCtbWNllCL_4xFWkXUnVuR78Pwb5DLzkw'
+      //   'Authorization': 'Bearer '
       // }
 
       // const messages = msg.messages.map((item: { role: string, content: string }) => {

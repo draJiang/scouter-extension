@@ -4,7 +4,7 @@ import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { userInfoType, aiParameterType, BackgroundToPopup } from './types'
+import { userInfoType, aiParameterType, BackgroundToPopup, BodyType, MessageForGPTType, MessageForGPTWebType } from './types'
 
 import { getSettings } from './Options/util'
 import ISO6391 from 'iso-639-1';
@@ -28,7 +28,6 @@ export function ankiAction(action: any, version: any, params = {}) {
       resolve(data)
 
     }).catch((error) => {
-      console.log('util');
       reject({ 'result': [], 'error': 'Please open the Anki client and install the Anki-Connect plugin before trying again.' })
     })
 
@@ -66,8 +65,6 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
   // 获取用户语言
   const Settings = await getSettings()
   const targetLanguage = Settings.targetLanguage
-  console.log(Settings);
-  console.log(ISO6391.getCode(targetLanguage))
 
   // 获取词典数据
   let url = new URL('http://dict.youdao.com/jsonapi');
@@ -156,12 +153,9 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
 // AI 绘图
 export function generationsImages(prompt: string) {
 
-  console.log('generationsImages');
-
-
   return new Promise((resolve, reject) => {
 
-    getAIParameter().then((result) => {
+    getAIParameter([]).then((result) => {
 
 
 
@@ -237,7 +231,7 @@ export function generationsImages(prompt: string) {
           })
         }).catch((error) => {
 
-          console.log(error);
+          // console.log(error);
 
         })
 
@@ -251,7 +245,9 @@ export function generationsImages(prompt: string) {
 
 }
 
-export function getAIParameter(): Promise<aiParameterType> {
+export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParameterType> {
+
+
 
   return new Promise((resolve, reject) => {
 
@@ -285,48 +281,24 @@ export function getAIParameter(): Promise<aiParameterType> {
 
 
       let headers = {}
-      let body
+      let body: BodyType
       let imgOpenApiEndpoint = ''
 
-      // 优先使用自己的 Key
-      if (apiKeySelection === 'licenseKey') {
-
-        // 使用许可证
-        openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
-        imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
-        openApiKey = licenseKey
-        headers = {
-          'Authorization': 'Bearer ' + openApiKey,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://notes.dabing.one/', // To identify your app
-          'X-Title': 'Scouter'
-        }
-        body = {
-          "model": model,
-          "messages": [],
-          "temperature": 0.7,
-          "max_tokens": 420,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 2,
-          "stream": true
-        }
-
-      } else {
-
-        // 使用用户自己的 Key
-
-        if (openApiEndpoint.indexOf('azure.com') > -1) {
-
-          // Azure
-          // 'https://YOURDEPLOYMENTS.openai.azure.com/openai/deployments/YOURDEPLOYMENTS/chat/completions?api-version=2023-03-15-preview'
-          const stringList = openApiEndpoint.split('/openai/')
-          imgOpenApiEndpoint = stringList[0] + '/openai/' + 'images/generations:submit?api-version=2023-06-01-preview'
-
-          headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
+      switch (apiKeySelection) {
+        case 'licenseKey':
+          // 使用许可证
+          openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
+          imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
+          openApiKey = licenseKey
+          headers = {
+            'Authorization': 'Bearer ' + openApiKey,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://notes.dabing.one/', // To identify your app
+            'X-Title': 'Scouter'
+          }
           body = {
-            "model": "gpt-35-turbo",
-            "messages": [],
+            "model": model,
+            "messages": messages,
             "temperature": 0.7,
             "max_tokens": 420,
             "top_p": 1,
@@ -335,57 +307,165 @@ export function getAIParameter(): Promise<aiParameterType> {
             "stream": true
           }
 
-        } else {
 
-          // OpenAI
-          headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+          resolve({
+            'result': 'success',
+            'apiKeySelection': apiKeySelection,
+            'data': {
+              'chatCompletions': {
+                'url': openApiEndpoint,
+                'headers': headers,
+                'body': body
+              },
+              'imagesGenerations': {
+                'url': imgOpenApiEndpoint,
+                'headers': headers,
+              }
+            }
 
-          // 去除端点末尾的 \ 符号
-          if (openApiEndpoint.slice(-1) === "/") {
-            openApiEndpoint = openApiEndpoint.slice(0, -1);
+          })
+
+          break;
+        case 'myOwnOpenAiKey':
+          // 使用用户自己的 Key
+
+          if (openApiEndpoint.indexOf('azure.com') > -1) {
+
+            // Azure
+            // 'https://YOURDEPLOYMENTS.openai.azure.com/openai/deployments/YOURDEPLOYMENTS/chat/completions?api-version=2023-03-15-preview'
+            const stringList = openApiEndpoint.split('/openai/')
+            imgOpenApiEndpoint = stringList[0] + '/openai/' + 'images/generations:submit?api-version=2023-06-01-preview'
+
+            headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
+            body = {
+              "model": "gpt-35-turbo",
+              "messages": messages,
+              "temperature": 0.7,
+              "max_tokens": 420,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 2,
+              "stream": true
+            }
+
+          } else {
+
+            // OpenAI
+            headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+
+            // 去除端点末尾的 \ 符号
+            if (openApiEndpoint.slice(-1) === "/") {
+              openApiEndpoint = openApiEndpoint.slice(0, -1);
+            }
+
+            imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
+            openApiEndpoint += '/v1/chat/completions'
+
+
+            body = {
+              "model": "gpt-3.5-turbo",
+              "messages": messages,
+              "temperature": 0.7,
+              "max_tokens": 420,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 2,
+              "stream": true
+            }
+
           }
 
-          imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
-          openApiEndpoint += '/v1/chat/completions'
+
+          resolve({
+            'result': 'success',
+            'apiKeySelection': apiKeySelection,
+            'data': {
+              'chatCompletions': {
+                'url': openApiEndpoint,
+                'headers': headers,
+                'body': body
+              },
+              'imagesGenerations': {
+                'url': imgOpenApiEndpoint,
+                'headers': headers,
+              }
+            }
+
+          })
+
+          break
+
+        default:
+
+          // 获取 token
+          getChatGPTWebToken().then(token => {
+
+            const newMessages: MessageForGPTWebType = messages.map((item: { role: string, content: string }) => {
+              return {
+                id: uuidv4(),
+                role: item.role,
+                content: {
+                  content_type: 'text',
+                  parts: [item.content],
+                },
+              }
+            })
+
+            openApiEndpoint = 'https://chat.openai.com/backend-api/conversation'
+            imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
+
+            headers = {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+
+            body = {
+              action: 'next',
+              messages: newMessages,
+              model: 'text-davinci-002-render-sha',
+              parent_message_id: uuidv4(),
+              history_and_training_disabled: true,
+            }
 
 
-          body = {
-            "model": "gpt-3.5-turbo",
-            "messages": [],
-            "temperature": 0.7,
-            "max_tokens": 420,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 2,
-            "stream": true
-          }
+            resolve({
+              'result': 'success',
+              'apiKeySelection': apiKeySelection,
+              'data': {
+                'chatCompletions': {
+                  'url': openApiEndpoint,
+                  'headers': headers,
+                  'body': body
+                },
+                'imagesGenerations': {
+                  'url': imgOpenApiEndpoint,
+                  'headers': headers,
+                }
+              }
 
-        }
+            })
 
+          })
+
+
+
+          break;
       }
 
-      resolve({
-        'result': 'success',
-        'apiKeySelection': apiKeySelection,
-        'data': {
-          'chatCompletions': {
-            'url': openApiEndpoint,
-            'headers': headers,
-            'body': body
-          },
-          'imagesGenerations': {
-            'url': imgOpenApiEndpoint,
-            'headers': headers,
-          }
-        }
-
-      })
 
     })
 
   })
 
 }
+
+async function getChatGPTWebToken() {
+  const response = await fetch('https://chat.openai.com/api/auth/session')
+  if (!response.ok) throw new Error("Couldn't fetch the token")
+  const data = await response.json()
+  return data.accessToken   // 这将取决于返回数据的格式，你可能需要调整这个
+}
+
 
 // 获取 Anki 的 Deck 名称，添加到卡片会存放到这里
 export function getDefaultDeckName() {
@@ -560,14 +640,17 @@ export const fetchSSE = async (url: string, requestInit: RequestInit, options: S
   }
 
   const parser = createParser((event) => {
+    console.log(event);
     if (event.type === 'event') {
       try {
         if (event.data !== '[DONE]') {
           const data = JSON.parse(event.data);
+          console.log(data);
+          
           onMessage && onMessage(data);
         }
       } catch {
-        console.log('createParser JSON.parse error');
+        // console.log('createParser JSON.parse error');
         onError && onError(new Error('Failed to parse SSE event data'));
       }
     }
@@ -579,7 +662,6 @@ export const fetchSSE = async (url: string, requestInit: RequestInit, options: S
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
-          console.log('Done');
           onEnd && onEnd();
           break;
         }

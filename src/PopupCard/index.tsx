@@ -310,7 +310,7 @@ export function PopupCard(props: any) {
     // 保存历史记录，只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
     if (messages.length === 1 && messages[0]['content'][0]['status'] === 'done') {
 
-      async () => {
+      (async () => {
 
         const storage = await browser.storage.local.get({ "history": [], "lastExecutedPrompt": '' })
 
@@ -327,10 +327,6 @@ export function PopupCard(props: any) {
           'prompt': messages[0]['prompt'],
           'images': messages[0]['images']
         }
-
-        console.log('newHistory:');
-        console.log(newHistory);
-
 
         if (keyWord !== '' && Sentence !== '' && messages[0]['content'][0]['content'] !== '' && storage.lastExecutedPrompt.id !== 'dict') {
 
@@ -376,7 +372,7 @@ export function PopupCard(props: any) {
         }
 
       }
-
+      )()
 
 
 
@@ -505,9 +501,6 @@ export function PopupCard(props: any) {
           let obj = item.history[i]
           if (obj.keyWord === keyWord && obj.sentence === Sentence && obj.prompt === newPrompt[0]['content']) {
 
-            console.log('obj:');
-            console.log(obj);
-
             if ('role' in obj) {
 
             } else {
@@ -553,8 +546,8 @@ export function PopupCard(props: any) {
 
         lastPromptRef.current = newPrompt
 
-        // 如果历史记录中没有图片，则重新
-        if (result.updatedLastMessage?.images.length === 0) {
+        // 如果需要显示图片，且历史记录中没有图片，则获取图片
+        if (showImagesBox && result.updatedLastMessage?.images.length === 0) {
           // 获取图片数据
           getUnsplashImages(keyWord).then((imgs: any) => {
             // 保存图片数据
@@ -672,7 +665,7 @@ export function PopupCard(props: any) {
 
       let newMessages = [...prevMessages]
       newMessages[newMessages.length - 1].content.push({
-        chatId: Date.now().toString(),
+        chatId: uuidv4(),
         content: '',
         status: 'begin',
       })
@@ -783,7 +776,7 @@ export function PopupCard(props: any) {
             // 深度拷贝
             let contentList = JSON.parse(JSON.stringify(lastMessage.content));
 
-            let newContent = contentList[contentList.length - 1]['content'] + msg.content
+            let newContent = msg.ApiType === 'chatGPTWeb' ? msg.content : contentList[contentList.length - 1]['content'] + msg.content
             newContent = handleHightlight(newContent, props.data.keyWord, ankiCards, windowElement?.current)
 
             contentList[contentList.length - 1]['content'] = newContent
@@ -843,7 +836,7 @@ export function PopupCard(props: any) {
         role: 'user',
         content: [
           {
-            chatId: Date.now().toString(),
+            chatId: uuidv4(),
             content: values,
             status: 'done',
           }
@@ -860,7 +853,7 @@ export function PopupCard(props: any) {
     // 在消息历史中插入新 GPT 消息
     setMessages(prevMessages => [...prevMessages, {
       content: [{
-        chatId: Date.now().toString(),
+        chatId: uuidv4(),
         content: '',
         status: 'begin',
       }],
@@ -1304,7 +1297,11 @@ export function PopupCard(props: any) {
 
               <MessagesList messages={messages} />
 
-              <RegenerateButton messages={messages} handleRegenerateButtonClick={handleRegenerateButtonClick} />
+              {/* 当只有 1 条消息且是在线词典触发的则不显示「重新生成」按钮 */}
+              {messages.length > 0 &&
+                (messages[messages.length - 1].prompt === '' ? ''
+                  :
+                  <RegenerateButton messages={messages} handleRegenerateButtonClick={handleRegenerateButtonClick} />)}
 
               <div className='followUpMenuBox' style={{
                 display: showFollowUpDataMenu.show ? 'block' : 'none',

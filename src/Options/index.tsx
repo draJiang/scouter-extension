@@ -192,6 +192,7 @@ export const Options = () => {
         targetLanguage: items.targetLanguage,
         ankiDeckName: defaultDeckName,
         licenseKey: items.licenseKey,
+        chatGPTWeb: items.chatGPTWeb,
         model: items.model,
         newLicenseKey: items.newLicenseKey
       });
@@ -240,6 +241,7 @@ export const Options = () => {
         targetLanguage: values['targetLanguage'],
         ankiDeckName: values['ankiDeckName'],
         licenseKey: values['licenseKey'],
+        chatGPTWeb: values['chatGPTWeb'],
         model: values['model'],
         apiKeySelection: values['apiKeySelection'],
         newLicenseKey: values['newLicenseKey']
@@ -363,10 +365,12 @@ export const Options = () => {
 
                   <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI</Radio.Button>
                   <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>OpenRouter</Radio.Button>
+                  <Radio.Button value="chatGPTWeb" style={{ flex: '1', textAlign: 'center' }}>ChatGPT</Radio.Button>
 
                 </Radio.Group>
               </Form.Item>
 
+              {/* myOwnOpenAiKey */}
               <div style={{
                 display: radioValue === 'myOwnOpenAiKey' ? 'block' : 'none'
               }}>
@@ -391,29 +395,14 @@ export const Options = () => {
                 </Form.Item>
               </div>
 
+              {/* OpenRouter */}
               <div style={{
-                display: radioValue === 'myOwnOpenAiKey' ? 'none' : 'block'
+                display: radioValue === 'licenseKey' ? 'block' : 'none'
               }}>
                 <Form.Item
                   name="licenseKey"
                   label="🔑Key"
                   style={{ marginBottom: '16px' }}
-                // extra={
-                //   <div style={{
-                //     display: 'flex',
-                //     alignItems: 'center',
-                //     justifyContent: 'end'
-                //   }}>
-
-                //     {points !== '' && <div style={{ marginRight: '10px' }}>{points ? 'Balance:' + points : '🔴Invalid License'}</div>}
-
-                //     <Button style={{
-                //       paddingLeft: '0',
-                //       paddingRight: '0',
-                //     }} type='link' onClick={() => { openBuyLicenseKeyDrawer(true) }} >Get License</Button>
-
-                //   </div>
-                // }
                 >
                   <Input placeholder="We will not use your Key for any other purposes." type="password" />
                 </Form.Item>
@@ -433,6 +422,13 @@ export const Options = () => {
 
                 </Form.Item>
 
+              </div>
+
+              {/* chatGPTWeb */}
+              <div style={{
+                display: radioValue === 'chatGPTWeb' ? 'block' : 'none'
+              }}>
+                chatGPT Web
               </div>
 
 

@@ -128,16 +128,7 @@ export type aiParameterType = {
         chatCompletions: {
             url: string,
             headers: HeadersInit,
-            body: {
-                model: string,
-                messages: any,
-                temperature: Number,
-                max_tokens: Number,
-                top_p: Number,
-                frequency_penalty: Number,
-                presence_penalty: Number,
-                stream: boolean
-            }
+            body: BodyType
         },
         imagesGenerations: {
             url: string,
@@ -145,3 +136,31 @@ export type aiParameterType = {
         }
     }
 }
+
+export type MessageForGPTType =
+    { role: string, content: string }
+// |
+// { id: string, role: string, content: { content_type: string, parts: any[] }[] }
+
+type BodyType1 = {
+    model: string;
+    messages: MessageForGPTType[];
+    temperature: number;
+    max_tokens: number;
+    top_p: number;
+    frequency_penalty: number;
+    presence_penalty: number;
+    stream: boolean;
+}
+
+type BodyType2 = {
+    action: string;
+    messages: MessageForGPTWebType
+    model: string;
+    parent_message_id: string;
+    history_and_training_disabled: boolean;
+}
+
+export type MessageForGPTWebType = { id: string, role: string, content: { content_type: string, parts: any[] } }[];
+
+export type BodyType = BodyType1 | BodyType2;
