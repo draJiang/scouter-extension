@@ -247,8 +247,6 @@ export function generationsImages(prompt: string) {
 
 export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParameterType> {
 
-
-
   return new Promise((resolve, reject) => {
 
     const defaultOpenApiEndpoint = 'https://api.openai.com'
@@ -265,7 +263,6 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
       let openApiEndpoint: string = result.openApiEndpoint
 
       if (openApiKey.length < 5 && licenseKey.length < 5) {
-        // port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
 
         resolve({
           'result': 'failure',
@@ -445,7 +442,12 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
             })
 
-          })
+          }).catch(error => {
+            // 错误处理
+            console.error('Error fetching token: ', error);
+            reject('Error fetching token: ' + error)
+
+          });
 
 
 
@@ -460,11 +462,48 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 }
 
 async function getChatGPTWebToken() {
-  const response = await fetch('https://chat.openai.com/api/auth/session')
-  if (!response.ok) throw new Error("Couldn't fetch the token")
-  const data = await response.json()
-  return data.accessToken   // 这将取决于返回数据的格式，你可能需要调整这个
+  return new Promise((resolve, reject) => {
+    browser.storage.local.get(['authData']).then(async (result) => {
+
+      const authData = result.authData;
+
+      const now = new Date().getTime();
+
+      if (authData && authData.token && authData.expiry && authData.expiry > now) {
+        resolve(authData.token);
+      } else {
+        try {
+
+          const response = await fetch('https://chat.openai.com/api/auth/session');
+
+          if (!response.ok) {
+            reject("Couldn't fetch the token");
+            throw new Error("Couldn't fetch the token");
+          }
+          const data = await response.json();
+
+          const updatedAuthData = {
+            token: data.accessToken,
+            expiry: Date.parse(data.expires)
+          }
+
+          browser.storage.local.set({ authData: updatedAuthData }).then(() => {
+            resolve(updatedAuthData.token);
+          })
+
+        } catch (error) {
+          reject(error);
+        }
+      }
+
+    })
+
+
+  });
 }
+
+
+
 
 
 // 获取 Anki 的 Deck 名称，添加到卡片会存放到这里
@@ -633,45 +672,54 @@ type SSEDataOptions = {
 export const fetchSSE = async (url: string, requestInit: RequestInit, options: SSEDataOptions) => {
   const { onMessage, onEnd, onError } = options;
 
-  const response = await fetch(url, requestInit);
-  if (!response.ok) {
-    onError && onError(new Error(`HTTP error, status = ${response.status}`));
-    return;
-  }
+  try {
 
-  const parser = createParser((event) => {
-    console.log(event);
-    if (event.type === 'event') {
+
+
+    const response = await fetch(url, requestInit);
+
+    if (!response.ok) {
+      onError && onError(new Error(`HTTP error, status = ${response.status}`));
+      return;
+    }
+
+    const parser = createParser((event) => {
+      console.log(event);
+      if (event.type === 'event') {
+        try {
+          if (event.data !== '[DONE]') {
+            const data = JSON.parse(event.data);
+            console.log(data);
+
+            onMessage && onMessage(data);
+          }
+        } catch {
+          // console.log('createParser JSON.parse error');
+          onError && onError(new Error('Failed to parse SSE event data'));
+        }
+      }
+    });
+
+    const reader = response.body?.getReader();
+    if (reader !== undefined) {
       try {
-        if (event.data !== '[DONE]') {
-          const data = JSON.parse(event.data);
-          console.log(data);
-          
-          onMessage && onMessage(data);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            onEnd && onEnd();
+            break;
+          }
+          const str = new TextDecoder().decode(value);
+          parser.feed(str);
         }
-      } catch {
-        // console.log('createParser JSON.parse error');
-        onError && onError(new Error('Failed to parse SSE event data'));
+      } finally {
+        reader.releaseLock();
       }
+      parser.reset();
     }
-  });
 
-  const reader = response.body?.getReader();
-  if (reader !== undefined) {
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          onEnd && onEnd();
-          break;
-        }
-        const str = new TextDecoder().decode(value);
-        parser.feed(str);
-      }
-    } finally {
-      reader.releaseLock();
-    }
-    parser.reset();
+  } catch (error) {
+    onError && onError(new Error(`Fetch request failed: ${error}`));
   }
 }
 

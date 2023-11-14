@@ -427,24 +427,25 @@ export const getDefaultPrompt = (keyWord: string) => {
         getUnsplashImages = false
         userPrompt = `
       
-                  As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
-      
-                  Example:
-                  
-      
-                  ## Translation
-                  <Translate to {nativeLanguage}>
-                  
-                  ## Grammar
-                  <- Point: Explain in {nativeLanguage}>
-      
-                  ## Examples of related grammar
-                  -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
-                  -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
-      
-                  ---
-                  
-                  Sentence: {selection}`
+            As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
+
+            Example:
+            
+
+            ## Translation
+            <Translate to {nativeLanguage}>
+            
+            ## Grammar
+            <- Point: Explain in {nativeLanguage}>
+
+            ## Examples of related grammar
+            -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
+            -  <{targetLanguage} example sentence> - <Translation in {nativeLanguage}>
+
+            ---
+            
+            Sentence: {selection}
+                  `
 
     }
 

@@ -156,7 +156,7 @@ browser.runtime.onConnect.addListener(port => {
           const openApiEndpoint = result.data?.chatCompletions.url
 
           if (!result.data || openApiEndpoint === undefined) {
-            port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'code': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
+            port.postMessage({ 'type': 'sendGPTData', 'status': 'invalid_api_key', 'content': '🥲 API Key error. Please modify and try again..' })
           } else {
 
             let body = result.data.chatCompletions.body
@@ -189,7 +189,6 @@ browser.runtime.onConnect.addListener(port => {
                 }
 
 
-
               },
               onEnd: () => {
                 // 处理 SSE 连接结束的逻辑
@@ -203,7 +202,7 @@ browser.runtime.onConnect.addListener(port => {
                   // 开启新的请求，中断旧请求
 
                 } else {
-                  const tips = error.message.indexOf('Failed to fetch') >= 0 ? '🥲An error occurred. It might be an **API endpoint error**' + '(' + openApiEndpoint + ')' + '. Please modify and try again.' : '🥲An error occurred.'
+                  const tips = '🥲An error occurred.'
 
                   port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
                 }
@@ -211,10 +210,10 @@ browser.runtime.onConnect.addListener(port => {
               }
             });
 
-
           }
 
-
+        }).catch((error) => {
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Something went wrong, please try again later.' })
         })
         //
 

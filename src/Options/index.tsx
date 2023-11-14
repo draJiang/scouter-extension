@@ -167,9 +167,11 @@ export const Options = () => {
       if (items.apiKeySelection === 'licenseKey') {
         // 显示 licenseKey
         setRadioValue('licenseKey')
-      } else {
+      } else if (items.apiKeySelection === 'myOwnOpenAiKey') {
         // 显示 openApiKey
         setRadioValue('myOwnOpenAiKey')
+      } else {
+        setRadioValue('chatGPTWeb')
       }
 
       await getDefaultDeckName().then((data: any) => {
