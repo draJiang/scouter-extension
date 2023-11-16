@@ -262,7 +262,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
       let openApiEndpoint: string = result.openApiEndpoint
 
-      if (openApiKey.length < 5 && licenseKey.length < 5) {
+      if (openApiKey.length < 5 && licenseKey.length < 5 && apiKeySelection !== 'chatGPTWeb') {
 
         resolve({
           'result': 'failure',
@@ -393,7 +393,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           break
 
         default:
-
+          // chatGPT Web
           // 获取 token
           getChatGPTWebToken().then(token => {
 
@@ -444,8 +444,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
           }).catch(error => {
             // 错误处理
-            console.error('Error fetching token: ', error);
-            reject('Error fetching token: ' + error)
+            reject(error+' Please Ensure that You Are Logged into [ChatGPT](https://chat.openai.com/).')
 
           });
 
@@ -481,6 +480,9 @@ async function getChatGPTWebToken() {
             throw new Error("Couldn't fetch the token");
           }
           const data = await response.json();
+          if ('accessToken' in data !== true) {
+            reject("Couldn't fetch the token");
+          }
 
           const updatedAuthData = {
             token: data.accessToken,

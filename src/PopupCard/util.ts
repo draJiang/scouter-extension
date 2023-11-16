@@ -395,7 +395,7 @@ export const getDefaultPrompt = (keyWord: string) => {
 
     let userPrompt = `
 
-        Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence.
+        Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence, Output in the Following Example Format, Please Keep Language Concise, No Extra Words.
 
         Example：
         
@@ -427,10 +427,9 @@ export const getDefaultPrompt = (keyWord: string) => {
         getUnsplashImages = false
         userPrompt = `
       
-            As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence:
+            As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence, Output in the Following Example Format, Please Keep Language Concise, No Extra Words.
 
             Example:
-            
 
             ## Translation
             <Translate to {nativeLanguage}>

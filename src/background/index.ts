@@ -213,7 +213,8 @@ browser.runtime.onConnect.addListener(port => {
           }
 
         }).catch((error) => {
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': '🥲 Something went wrong, please try again later.' })
+
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': error ? '🥲 ' + error : '🥲 Something went wrong, please try again later.' })
         })
         //
 

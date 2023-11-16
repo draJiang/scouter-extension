@@ -258,7 +258,8 @@ function Message(props: MessageProps) {
                                         margin: 0,
                                         padding: 0,
                                     }} {...props} />
-                                </div>
+                                </div>,
+                                a: ({ node, ...props }) => <a target='__blank' style={{ color: '#F08A24' }} {...props}></a>
                             }}
                             skipHtml={false}
                             children={content['content']} />

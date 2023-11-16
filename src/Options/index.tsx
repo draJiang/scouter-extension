@@ -163,15 +163,17 @@ export const Options = () => {
     // 获取配置信息
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
+      console.log(items);
+      
 
-      if (items.apiKeySelection === 'licenseKey') {
+      if (items.apiKeySelection === 'chatGPTWeb') {
         // 显示 licenseKey
-        setRadioValue('licenseKey')
+        setRadioValue('chatGPTWeb')
       } else if (items.apiKeySelection === 'myOwnOpenAiKey') {
         // 显示 openApiKey
         setRadioValue('myOwnOpenAiKey')
       } else {
-        setRadioValue('chatGPTWeb')
+        setRadioValue('licenseKey')
       }
 
       await getDefaultDeckName().then((data: any) => {
@@ -430,7 +432,8 @@ export const Options = () => {
               <div style={{
                 display: radioValue === 'chatGPTWeb' ? 'block' : 'none'
               }}>
-                chatGPT Web
+                ⚠️This Feature is Unstable, Use With Caution.
+                Please Ensure that You Are Logged into <a target='__blank' href='https://chat.openai.com/'>ChatGPT</a>.
               </div>
 
 
