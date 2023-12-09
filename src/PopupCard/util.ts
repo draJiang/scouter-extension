@@ -340,14 +340,19 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
                 }
             }
 
+            
+
             const cardFrontValue = card.fields[firstKey].value
+            const escapedCardFrontValue = escapeRegExp(cardFrontValue);
             if (cardFrontValue !== keyWord) {
-                newStr = newStr.replace(new RegExp(cardFrontValue, 'gi'), `<mark>${cardFrontValue}</mark>`)
+                newStr = newStr.replace(new RegExp(escapedCardFrontValue, 'gi'), `<mark>${cardFrontValue}</mark>`)
             }
             // }, 10);
 
 
-
+            function escapeRegExp(string: string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+            }
 
 
             // // 创建一个用于包裹'o'的<span>元素
@@ -395,7 +400,7 @@ export const getDefaultPrompt = (keyWord: string) => {
 
     let userPrompt = `
 
-        Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence, Output in the Following Example Format, Please Keep Language Concise, No Extra Words.
+        Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence, Absolutely No Extra Text, Only Provide Information as in the Examples, Keep Language Concise.
 
         Example：
         
@@ -427,7 +432,7 @@ export const getDefaultPrompt = (keyWord: string) => {
         getUnsplashImages = false
         userPrompt = `
       
-            As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence, Output in the Following Example Format, Please Keep Language Concise, No Extra Words.
+            As a language teacher, I will provide an explanation of the grammar knowledge in the given sentence, Absolutely No Extra Text, Only Provide Information as in the Examples, Keep Language Concise.
 
             Example:
 

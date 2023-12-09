@@ -153,15 +153,12 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
 // AI 绘图
 export function generationsImages(prompt: string) {
 
+  console.log('generationsImages:' + prompt);
   return new Promise((resolve, reject) => {
 
     getAIParameter([]).then((result) => {
 
-
-
       const openApiEndpoint = result.data?.imagesGenerations.url
-
-
 
       if (!result.data || openApiEndpoint === undefined) {
 
@@ -186,6 +183,11 @@ export function generationsImages(prompt: string) {
           headers: headers
 
         }).then(async (response) => {
+
+          if(!response.ok){
+            resolve({ 'succeeded': false, 'data': {} })
+          }
+
           response.json().then((data) => {
 
             if (data.status === "notRunning") {
@@ -194,7 +196,6 @@ export function generationsImages(prompt: string) {
 
               const stringList = openApiEndpoint.split('/openai/')
               const url = stringList[0] + '/openai/' + 'operations/images/' + data.id + '?api-version=2023-06-01-preview'
-
 
               const intervalId = setInterval(() => {
                 fetch(url, {
@@ -231,7 +232,8 @@ export function generationsImages(prompt: string) {
           })
         }).catch((error) => {
 
-          // console.log(error);
+          console.log(error);
+          resolve({ 'succeeded': false, 'data': error })
 
         })
 
@@ -391,7 +393,6 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           })
 
           break
-
         default:
           // chatGPT Web
           // 获取 token
@@ -444,7 +445,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
           }).catch(error => {
             // 错误处理
-            reject(error+' Please Ensure that You Are Logged into [ChatGPT](https://chat.openai.com/).')
+            reject(error + ' Please Ensure that You Are Logged into [ChatGPT](https://chat.openai.com/).')
 
           });
 
@@ -783,24 +784,6 @@ export const getBalance = (apiKey: string) => {
 export const getUserInfo = (): Promise<userInfoType> => {
 
   return new Promise((resolve, reject) => {
-    // chrome.storage.sync.get('userId', (result) => {
-    //   if (chrome.runtime.lastError) {
-    //     reject(chrome.runtime.lastError);
-    //   }
-
-    //   if (result.userId) {
-    //     resolve(result.userId);
-    //   } else {
-    //     let uniqueId = uuidv4();
-    //     chrome.storage.sync.set({ userId: uniqueId }, () => {
-    //       if (chrome.runtime.lastError) {
-    //         reject(chrome.runtime.lastError);
-    //       } else {
-    //         resolve(uniqueId);
-    //       }
-    //     });
-    //   }
-    // });
 
     browser.storage.sync.get(['userId', 'newLicenseKey']).then(async (result) => {
 

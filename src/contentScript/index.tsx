@@ -424,34 +424,116 @@ const handleMouseup = (event: any) => {
 }
 
 const getSelection = (isInShadow?: boolean) => {
-
-  let selection = window.getSelection();
+  let selection;
 
   if (isInShadow) {
     selection = shadowRoot.getSelection();
+  } else {
+    selection = window.getSelection();
   }
 
-  if (selection !== null) {
-
+  if (selection !== null && selection.rangeCount > 0) {
     // 当前选中的文字
-    let keyWord = selection.toString().trim()
+    let keyWord = selection.toString().trim();
 
-    // 选中文字所在的段落
-    let sentence = selection.anchorNode?.textContent ?? ''
+    let sentence = ''
+    let parentNode = selection.focusNode.parentNode;
 
-    if (sentence === undefined) {
-      sentence = ''
-    } else {
-      sentence = sentence.length <= keyWord.length ? (selection.anchorNode?.parentNode?.parentNode as HTMLElement)?.innerText ?? '' : sentence
+    // 如果选中的是一个更小的元素（如<em>），我们需要向上寻找
+    while (!isBlockLevel(parentNode.tagName.toLowerCase()) && parentNode.tagName.toLowerCase() !== 'body') {
+      parentNode = parentNode.parentNode;
     }
 
+    let sentences = splitIntoSentences(parentNode);
+
+
+    // // 获取选中范围对象
+    // let range = selection.getRangeAt(0);
+    // let expandedRange = range.cloneRange(); // 复制当前选中的范围对象
+    // // expandRange的范围前后各移动3个字符（如果可以的话）
+    // expandedRange.setStart(range.startContainer, Math.max(range.startOffset - 0, 0));
+    // expandedRange.setEnd(range.endContainer, Math.min(range.endOffset + 4, range.endContainer.textContent.length - 1));
+    // // 获取包括关键词前后字符的字符串
+    // let expandedSelectedText = expandedRange.toString();
+
+
+    let range = selection.getRangeAt(0);
+    let startOffsetShift = 3;
+    let endOffsetShift = 3;
+
+    if (range.startOffset >= 1) {
+      const charBefore = range.startContainer.textContent[range.startOffset - 1];
+      startOffsetShift = /[。.！!]/.test(charBefore) ? 0 : 3;
+    }
+
+    if (range.endOffset < range.endContainer.textContent.length) {
+      const charAfter = range.endContainer.textContent[range.endOffset];
+      endOffsetShift = /[。.！!]/.test(charAfter) ? 0 : 3;
+    }
+
+    let expandedRange = range.cloneRange(); // 复制当前选中的范围对象
+    // expandRange的范围前后各移动3个字符（如果可以的话）
+    expandedRange.setStart(range.startContainer, Math.max(range.startOffset - startOffsetShift, 0));
+    expandedRange.setEnd(range.endContainer, Math.min(range.endOffset + endOffsetShift, range.endContainer.textContent.length - 1));
+    // 获取包括关键词前后字符的字符串
+    let expandedSelectedText = expandedRange.toString();
+
+
+
+
+    // console.log('expandedSelectedText:');
+    // console.log(expandedSelectedText);
+
+    for (let s of sentences) {
+      if (s.includes(expandedSelectedText)) {
+        sentence = s
+        break;
+      }
+    }
+
+    if (sentence === '') {
+      sentence = selection.anchorNode.data
+    }
+
+    // console.log({ 'selection': selection, 'keyWord': keyWord, 'sentence': sentence });
     return { 'selection': selection, 'keyWord': keyWord, 'sentence': sentence }
 
   } else {
+
     return null
+
   }
 
+  // 拆分文本为句子的函数
+  function splitIntoSentences(node: HTMLElement) {
+    let tempDiv = document.createElement("div");
+    tempDiv.innerHTML = node.innerHTML;
+    let plainText = tempDiv.innerText;
+
+    // 对英文和日语的处理
+    let sentences = plainText.split(/[。.！!]/);
+
+    // 删除空句子
+    sentences = sentences.filter((sentence) => sentence.trim() !== "");
+
+    return sentences;
+  }
+
+  function isBlockLevel(tagName: string) {
+    const blockLevelElements = [
+      'address', 'article', 'aside', 'blockquote', 'canvas', 'dd', 'div', 'dl',
+      'dt', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2',
+      'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav', 'noscript',
+      'ol', 'output', 'p', 'pre', 'section', 'table', 'thead', 'tr', 'ul'
+    ];
+
+    return blockLevelElements.includes(tagName.toLowerCase());
+  }
+
+
+
 }
+
 
 const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew: boolean) => {
 

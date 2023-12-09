@@ -29,16 +29,6 @@ try {
   getUserInfo().then((userInfo: userInfoType) => {
 
     userId = userInfo.userId
-    // console.log('userInfo:');
-    // console.log(userInfo);
-
-    // 数据埋点
-    // amplitude.init(process.env.AMPLITUDE_KEY as string, userId, {
-    //   defaultTracking: {
-    //     pageViews: false,
-    //     sessions: false,
-    //   },
-    // });
 
   })
 
@@ -227,132 +217,9 @@ browser.runtime.onConnect.addListener(port => {
 
     if (msg.type === 'getDictionaryData') {
 
-
-      // const url = 'https://chat.openai.com/backend-api/conversation'
-      // const session = getChatGPTSession()
-      // const headers = {
-      //   'Content-Type': 'application/json',
-      //   'Authorization': 'Bearer '
-      // }
-
-      // const messages = msg.messages.map((item: { role: string, content: string }) => {
-      //   return {
-      //     id: uuidv4(),
-      //     role: item.role,
-      //     content: {
-      //       content_type: 'text',
-      //       parts: [item.content],
-      //     },
-      //   }
-      // })
-
-      // const body = {
-      //   action: 'next',
-      //   messages: messages,
-      //   model: 'text-davinci-002-render-sha', // 'text-davinci-002-render-sha'
-      //   parent_message_id: uuidv4(),
-      //   history_and_training_disabled: true,
-      // }
-
-      // const init = {
-      //   method: 'POST',
-      //   headers: headers,
-      //   body: JSON.stringify(body),
-      // }
-
-      // fetchSSE(url, init, {
-      //   onMessage: (data) => {
-      //     // 处理接收到的数据
-      //     console.log(data);
-      //     port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': data.message.content.parts[0] })
-      //   },
-      //   onEnd: () => {
-      //     // 处理 SSE 连接结束的逻辑
-      //     port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': '' })
-
-      //   },
-      //   onError: error => {
-      //     // 处理错误的逻辑
-      //     console.log(error);
-
-      //   }
-      // });
-
-
-      // fetch(url, {
-      //   method: 'POST',
-      //   headers,
-      //   body: JSON.stringify(body),
-      // })
-      //   .then(response => {
-      //     if (!response.ok) {
-      //       throw new Error('Network response was not ok');
-      //     }
-      //     return response.json(); // 返回一个包含响应数据的 JSON 对象
-      //   })
-      //   .then(data => {
-      //     console.log(data)
-      //   }) // 打印响应数据
-      //   .catch(error => console.error('There has been a problem with your fetch operation: ', error));
-
-      // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': '' })
-      // // port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': 'Hello World ', 'chatId': '' })
-
-
       // 获取词典数据
       const result = await getDictionaryData(msg.keyWord)
       port.postMessage(result)
-
-
-      // 定义基础的 URL 和查询参数
-      // let url = new URL('http://dict.youdao.com/jsonapi');
-      // let params = {
-      //   xmlVersion: '5.1',
-      //   le: 'eng',
-      //   q: msg.keyWord
-      // };
-
-      // // 创建一个新的 URL 对象
-      // url = new URL(url);
-
-      // // 使用 URLSearchParams 对象附加查询参数
-      // url.search = new URLSearchParams(params).toString();
-      // const ErrorMsg = '🥲 An Error Occurred with the Dictionary, Please Try Again Later.'
-      // // 使用 fetch API 发送 GET 请求
-      // fetch(url)
-      //   .then(response => {
-      //     if (!response.ok) {
-      //       port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' })
-      //       throw new Error('Network response was not ok');
-      //     }
-      //     return response.json(); // 返回一个包含响应数据的 JSON 对象
-      //   })
-      //   .then(data => {
-      //     console.log(data)
-      //     let msg = ''
-      //     if ('ec' in data) {
-      //       msg = data.ec.word[0].trs[0].tr[0].l.i[0]
-      //     } else if ('fanyi' in data) {
-      //       msg = data.fanyi.tran
-      //     }
-
-      //     if ('ec' in data || 'fanyi' in data) {
-
-      //       // 数据请求失败
-      //       port.postMessage({ 'type': 'sendGPTData', 'status': 'end', 'content': msg, 'chatId': '' })
-
-      //     } else {
-
-      //       port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' })
-
-      //     }
-
-
-
-      //   }) // 打印响应数据
-      //   .catch(error =>
-      //     port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' })
-      //   );
 
     }
 

@@ -953,6 +953,9 @@ export function PopupCard(props: any) {
     let images = ''
     let unsplash_download_location
     let stc = keyWord.length <= 20 ? Sentence : ''
+    // 转移 HTML 标签，按照普通字符串处理
+    stc = stc.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
     // 在语境句子中将关键字突出显示
     stc = stc.replace(new RegExp(keyWord, 'g'), '<span class="keyWord">' + keyWord + '</span>');
 
@@ -1044,7 +1047,7 @@ export function PopupCard(props: any) {
     let audio: [] | [{}], filename
     try {
       audioUrl = thisLang[Lang['target']['id']]['audioURL']
-      filename = keyWord.length >= 10 ? keyWord.substring(0, 10) : keyWord
+      filename = Date.now().toString()
 
       audio = [{
         "url": audioUrl + keyWord,
@@ -1064,7 +1067,6 @@ export function PopupCard(props: any) {
       // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
       ankiBack = container + '<p><a href="' + window.location.href + '">Source</a></p>'
     }
-
 
     let p = {
       "note": {
@@ -1109,7 +1111,6 @@ export function PopupCard(props: any) {
       }
 
     }
-
 
     // 发送消息给 background
     let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
