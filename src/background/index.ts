@@ -192,9 +192,13 @@ browser.runtime.onConnect.addListener(port => {
                   // 开启新的请求，中断旧请求
 
                 } else {
-                  const tips = '🥲An error occurred.'
+                  const tips = '🥲Sorry, an error happened, please retry.'
 
                   port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
+
+                  // 如果是 ChatGPT Web 模式的 401 错误，则更新 token，然后引导用户重试
+                  getChatGPTSession()
+
                 }
 
               }

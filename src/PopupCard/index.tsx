@@ -66,7 +66,7 @@ color: rgb(0 0 0 / 80%);
 position: fixed;
 display: flex;
 flex-direction: column;
-font-size: 13.2px;
+font-size: 14px;
 background-color: #fff;
 z-index: 999;
 overflow: hidden;
@@ -306,9 +306,8 @@ export function PopupCard(props: any) {
     }
 
 
-
     // 保存历史记录，只保留消息记录的第 1 条，如果这条消失是错误提示，则不保存
-    if (messages.length === 1 && messages[0]['content'][0]['status'] === 'done') {
+    if (messages.length === 1 && messages[0]['content'][messages[0]['content'].length - 1]['status'] === 'done') {
 
       (async () => {
 
@@ -328,7 +327,7 @@ export function PopupCard(props: any) {
           'images': messages[0]['images']
         }
 
-        if (keyWord !== '' && Sentence !== '' && messages[0]['content'][0]['content'] !== '' && storage.lastExecutedPrompt.id !== 'dict') {
+        if (keyWord !== '' && Sentence !== '' && messages[0]['content'][messages[0]['content'].length - 1]['content'] !== '' && storage.lastExecutedPrompt.id !== 'dict') {
 
           // console.log(item.history);
 

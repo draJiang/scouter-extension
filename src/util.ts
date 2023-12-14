@@ -184,7 +184,7 @@ export function generationsImages(prompt: string) {
 
         }).then(async (response) => {
 
-          if(!response.ok){
+          if (!response.ok) {
             resolve({ 'succeeded': false, 'data': {} })
           }
 
@@ -461,7 +461,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
 }
 
-async function getChatGPTWebToken() {
+export async function getChatGPTWebToken() {
   return new Promise((resolve, reject) => {
     browser.storage.local.get(['authData']).then(async (result) => {
 
@@ -474,25 +474,35 @@ async function getChatGPTWebToken() {
       } else {
         try {
 
-          const response = await fetch('https://chat.openai.com/api/auth/session');
+          // const response = await fetch('https://chat.openai.com/api/auth/session');
 
-          if (!response.ok) {
-            reject("Couldn't fetch the token");
-            throw new Error("Couldn't fetch the token");
-          }
-          const data = await response.json();
-          if ('accessToken' in data !== true) {
-            reject("Couldn't fetch the token");
-          }
+          // if (!response.ok) {
+          //   reject("Couldn't fetch the token");
+          //   throw new Error("Couldn't fetch the token");
+          // }
+          // const data = await response.json();
+          // if ('accessToken' in data !== true) {
+          //   reject("Couldn't fetch the token");
+          // }
 
-          const updatedAuthData = {
-            token: data.accessToken,
-            expiry: Date.parse(data.expires)
-          }
+          // const updatedAuthData = {
+          //   token: data.accessToken,
+          //   expiry: Date.parse(data.expires)
+          // }
 
-          browser.storage.local.set({ authData: updatedAuthData }).then(() => {
-            resolve(updatedAuthData.token);
-          })
+          // browser.storage.local.set({ authData: updatedAuthData }).then(() => {
+          //   resolve(updatedAuthData.token);
+          // })
+
+
+          getChatGPTSession().then(token => {
+            resolve(token);
+          }).catch(error => {
+            reject(error);
+          });
+
+
+
 
         } catch (error) {
           reject(error);
@@ -649,20 +659,43 @@ export const textToSpeechDownload = (text: string, voice: string) => {
 };
 
 export const getChatGPTSession = async () => {
-  const URL = 'https://chat.openai.com/api/auth/session'
-  try {
-    const response = await fetch(URL);
-    // 可能需要处理除200外的其他状态码：
-    if (!response.ok) {
-      throw new Error(`HTTP error, status = ${response.status}`);
-    }
-    // 假设服务器返回了JSON格式的响应体：
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(`Failed to fetch session: ${error}`);
-    throw error; // 或者返回一个默认的/错误的结果
+  // const URL = 'https://chat.openai.com/api/auth/session'
+  // try {
+  //   const response = await fetch(URL);
+  //   // 可能需要处理除200外的其他状态码：
+  //   if (!response.ok) {
+  //     throw new Error(`HTTP error, status = ${response.status}`);
+  //   }
+  //   // 假设服务器返回了JSON格式的响应体：
+  //   const data = await response.json();
+  //   return data;
+  // } catch (error) {
+  //   console.error(`Failed to fetch session: ${error}`);
+  //   throw error; // 或者返回一个默认的/错误的结果
+  // }
+
+
+  const response = await fetch('https://chat.openai.com/api/auth/session');
+
+  if (!response.ok) {
+    return "Couldn't fetch the token";
+    throw new Error("Couldn't fetch the token");
   }
+  const data = await response.json();
+  if ('accessToken' in data !== true) {
+    return "Couldn't fetch the token"
+  }
+
+  const updatedAuthData = {
+    token: data.accessToken,
+    expiry: Date.parse(data.expires)
+  }
+
+  browser.storage.local.set({ authData: updatedAuthData }).then(() => {
+    return updatedAuthData.token
+  })
+
+
 }
 
 

@@ -466,10 +466,17 @@ const getSelection = (isInShadow?: boolean) => {
       startOffsetShift = /[。.！!]/.test(charBefore) ? 0 : 3;
     }
 
-    if (range.endOffset < range.endContainer.textContent.length) {
+    if (range.endOffset < range.endContainer.textContent.length - 1) {
       const charAfter = range.endContainer.textContent[range.endOffset];
       endOffsetShift = /[。.！!]/.test(charAfter) ? 0 : 3;
     }
+
+    if (range.endOffset === 0) {
+      endOffsetShift = 0
+    }
+
+    console.log(endOffsetShift);
+
 
     let expandedRange = range.cloneRange(); // 复制当前选中的范围对象
     // expandRange的范围前后各移动3个字符（如果可以的话）
