@@ -475,9 +475,6 @@ const getSelection = (isInShadow?: boolean) => {
       endOffsetShift = 0
     }
 
-    console.log(endOffsetShift);
-
-
     let expandedRange = range.cloneRange(); // 复制当前选中的范围对象
     // expandRange的范围前后各移动3个字符（如果可以的话）
     expandedRange.setStart(range.startContainer, Math.max(range.startOffset - startOffsetShift, 0));

@@ -1046,11 +1046,12 @@ export function PopupCard(props: any) {
     let audio: [] | [{}], filename
     try {
       audioUrl = thisLang[Lang['target']['id']]['audioURL']
-      filename = Date.now().toString()
+      // filename = Date.now().toString()
+      filename = ''
 
       audio = [{
         "url": audioUrl + keyWord,
-        "filename": "Scouter_" + filename + ".mp3",
+        "filename": "Scouter" + filename + ".mp3",
         "fields": [
           "Front"
         ]
