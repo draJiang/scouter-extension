@@ -106,10 +106,13 @@ let popupPort: any;
 // 长连接，主要处理 GPT 数据
 browser.runtime.onConnect.addListener(port => {
   // 收到 content script 消息
-  // console.log('连接中------------')
-
+  console.log('连接中------------')
+  console.log(port);
+  
   if (port.name === 'fromPopupCard') {
     popupPort = port
+    console.log("port.name === 'fromPopupCard'");
+
   }
 
   // amplitude.init(process.env.AMPLITUDE_KEY as string);
@@ -230,6 +233,7 @@ browser.runtime.onConnect.addListener(port => {
     if (msg.type === 'UPDATE_POPUP_CARD') {
 
       popupPort.postMessage(msg);
+      // port.postMessage(msg);
 
     }
 
@@ -570,8 +574,6 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
   }
 
 }
-
-
 
 const sendMessageToContent = (runPrompt?: boolean) => {
 

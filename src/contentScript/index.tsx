@@ -334,8 +334,10 @@ const handleMouseup = (event: any) => {
   // console.log(isTextSelected);
   // console.log(donotClosePopupCard);
 
+  const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
+
   // 获取用户在宿主网页上选中的内容
-  const selection = getSelection()
+  const selection = getSelection(isInShadow)
 
   if (selection) {
     isTextSelected = selection.selection.toString().length > 0;
@@ -347,7 +349,7 @@ const handleMouseup = (event: any) => {
     // console.log('isTextSelected && !donotClosePopupCard');
 
 
-    if (MyBox !== event.target && !MyBox?.contains(event.target as Node)) {
+    if (!isInShadow) {
 
       // 在 PopupCard 范围外触发
 
@@ -440,22 +442,11 @@ const getSelection = (isInShadow?: boolean) => {
     let parentNode = selection.focusNode.parentNode;
 
     // 如果选中的是一个更小的元素（如<em>），我们需要向上寻找
-    while (!isBlockLevel(parentNode.tagName.toLowerCase()) && parentNode.tagName.toLowerCase() !== 'body') {
+    while (parentNode.tagName && (!isBlockLevel((parentNode.tagName || undefined).toLowerCase()) && (parentNode.tagName || undefined).toLowerCase() !== 'body')) {
       parentNode = parentNode.parentNode;
     }
 
     let sentences = splitIntoSentences(parentNode);
-
-
-    // // 获取选中范围对象
-    // let range = selection.getRangeAt(0);
-    // let expandedRange = range.cloneRange(); // 复制当前选中的范围对象
-    // // expandRange的范围前后各移动3个字符（如果可以的话）
-    // expandedRange.setStart(range.startContainer, Math.max(range.startOffset - 0, 0));
-    // expandedRange.setEnd(range.endContainer, Math.min(range.endOffset + 4, range.endContainer.textContent.length - 1));
-    // // 获取包括关键词前后字符的字符串
-    // let expandedSelectedText = expandedRange.toString();
-
 
     let range = selection.getRangeAt(0);
     let startOffsetShift = 3;
@@ -463,15 +454,15 @@ const getSelection = (isInShadow?: boolean) => {
 
     if (range.startOffset >= 1) {
       const charBefore = range.startContainer.textContent[range.startOffset - 1];
-      startOffsetShift = /[。.！!]/.test(charBefore) ? 0 : 3;
+      startOffsetShift = /[。.！!?？]/.test(charBefore) ? 0 : 3;
     }
 
     if (range.endOffset < range.endContainer.textContent.length - 1) {
       const charAfter = range.endContainer.textContent[range.endOffset];
-      endOffsetShift = /[。.！!]/.test(charAfter) ? 0 : 3;
+      endOffsetShift = /[。.！!?？]/.test(charAfter) ? 0 : 3;
     }
 
-    if (range.endOffset === 0) {
+    if (range.endOffset === 0 || isInShadow) {
       endOffsetShift = 0
     }
 
@@ -515,7 +506,7 @@ const getSelection = (isInShadow?: boolean) => {
     let plainText = tempDiv.innerText;
 
     // 对英文和日语的处理
-    let sentences = plainText.split(/[。.！!]/);
+    let sentences = plainText.split(/[。.！!?？]/);
 
     // 删除空句子
     sentences = sentences.filter((sentence) => sentence.trim() !== "");

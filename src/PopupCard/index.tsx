@@ -142,10 +142,6 @@ export function PopupCard(props: any) {
   const [form] = Form.useForm();
 
 
-  // 使用长连接
-  let port = browser.runtime.connect({
-    name: 'getGPT'
-  })
 
   const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
 
@@ -156,14 +152,22 @@ export function PopupCard(props: any) {
 
   // const userInfo = useUserInfoContext()
 
+  // let port = browser.runtime.connect({
+  //   name: 'fromPopupCard'
+  // })
+
   // 控制追问菜单
   useEffect(() => {
+    console.log('控制追问菜单');
 
     const port = browser.runtime.connect({
       name: 'fromPopupCard'
     })
+    console.log(port);
 
     port.onMessage.addListener((msg) => {
+
+      console.log(msg);
 
       if (msg.type === "UPDATE_POPUP_CARD") {
         // 显示 Prompt 菜单
@@ -194,6 +198,10 @@ export function PopupCard(props: any) {
 
 
     function handlePopupCardClick() {
+      // 当追问菜单显示时，点击窗口关闭菜单
+      // console.log('handlePopupCardClick');
+      // console.log(showFollowUpDataMenu.show);
+
 
       setTimeout(() => {
 
@@ -217,7 +225,8 @@ export function PopupCard(props: any) {
 
     }
 
-  }, [showFollowUpDataMenu]);
+  },[showFollowUpDataMenu]);
+
 
 
   useEffect(() => {
@@ -726,10 +735,10 @@ export function PopupCard(props: any) {
   // 请求 GPT 数据
   const getKnowledge = async (prompt: Array<{ role: string, content: string }>, keyWord?: string, promptId?: string) => {
 
-    // // 使用长连接
-    // let port = browser.runtime.connect({
-    //   name: 'fromPopupCard'
-    // })
+    // 使用长连接
+    const port = browser.runtime.connect({
+      name: 'getGPT'
+    })
 
     // 记录最近执行的 Prompt，用于重新生成
     lastPromptRef.current = prompt
@@ -740,7 +749,6 @@ export function PopupCard(props: any) {
 
     // 禁用保存到 Anki 按钮
     setAddToAnkiStatus({ 'status': 'standby', 'noteId': 0 })
-
 
     if (thisPromptId === 'dict') {
       setTimeout(() => {
@@ -753,6 +761,13 @@ export function PopupCard(props: any) {
         port.postMessage({ 'type': 'getKnowledge', 'messages': prompt, 'keyWord': thisKeyWord })
       }, 20);
     }
+
+
+    browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+
+      console.log(msg);
+
+    })
 
     // 接收信息
     port.onMessage.addListener((msg: any) => {
