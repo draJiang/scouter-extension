@@ -250,7 +250,7 @@ table th {
 /* 滚动条 */
 ::-webkit-scrollbar-thumb:horizontal { /*水平滚动条的样式*/
   width: 4px;
-  background-color: #CCCCCC;
+  background-color: #C1C1C1;
   -webkit-border-radius: 6px;
 }
 ::-webkit-scrollbar-track-piece {

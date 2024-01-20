@@ -10,9 +10,6 @@ interface MessageProps {
 export function RegenerateButton(props: MessageProps) {
 
     const lastMessage = props.messages[props.messages.length - 1]
-    // console.log('lastMessage:');
-    // console.log(lastMessage);
-
     const lastMessageStatus = lastMessage ? lastMessage.content[lastMessage.content.length - 1].status : 'begin'
 
     return (

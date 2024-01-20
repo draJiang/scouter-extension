@@ -62,9 +62,9 @@ export const lang = {
         },
         'audioURL': 'https://dict.youdao.com/dictvoice?le=nl&type=0&audio='
     },
-    'English': {
+    'United States': {
         'name': 'English',
-        'id': 'English',
+        'id': 'United States',
         'Prompt1': {
             'explanation': 'Use English to explain the meaning and grammatical role of words in sentences'
         },
@@ -76,6 +76,21 @@ export const lang = {
             'validation': 'As a language expert, please check the sentences I provided. If the sentence is incorrect, then point out the error in English and provide the corrected sentence. Sentence:'
         },
         'audioURL': 'https://dict.youdao.com/dictvoice?type=0&audio='
+    },
+    'United Kingdom': {
+        'name': 'English',
+        'id': 'United Kingdom',
+        'Prompt1': {
+            'explanation': 'Use English to explain the meaning and grammatical role of words in sentences'
+        },
+        'Prompt2': {
+            'translate': 'Translate sentences into English',
+            'explanation': 'Explain grammatical knowledge'
+        },
+        'Prompt3': {
+            'validation': 'As a language expert, please check the sentences I provided. If the sentence is incorrect, then point out the error in English and provide the corrected sentence. Sentence:'
+        },
+        'audioURL': 'https://dict.youdao.com/dictvoice?type=1&audio='
     },
     'French': {
         'name': 'Français',
@@ -250,7 +265,8 @@ export const languageCodes = {
     "Chinese Simplified": "zh-CN-XiaoxiaoNeural",
     "Chinese Traditional": "zh-TW-HsiaoChenNeural",
     "Dutch": "nl-NL-ColetteNeural",
-    "English": "en-US-AriaNeural",
+    "United States": "en-US-AriaNeural",
+    "United Kingdom": "en-GB-LibbyNeural",
     "French": "fr-FR-DeniseNeural",
     "German": "de-DE-KatjaNeural",
     "Hindi": "hi-IN-MadhurNeural",
@@ -268,14 +284,11 @@ export const languageCodes = {
 // 获取语言
 export const fetchcurrentLanguage = async () => {
     let r = null
-    await browser.storage.sync.get({ 'currentLanguage': '中文', 'targetLanguage': 'English' }).then((result) => {
+    await browser.storage.sync.get({ 'currentLanguage': 'Chinese Simplified', 'targetLanguage': 'United States' }).then((result) => {
 
-        // console.log('browser.storage.sync.get');
-
-        // r =  { 'current': 'c', 'target': 't' }
-
+        // 默认值
         let c = lang['Chinese Simplified']
-        let t = lang['English']
+        let t = lang['United States']
 
         c = switchLang(result.currentLanguage)
         t = switchLang(result.targetLanguage)
@@ -299,8 +312,10 @@ const switchLang = (str: string) => {
             return lang['Chinese Traditional']
         case 'Dutch':
             return lang['Dutch']
-        case 'English':
-            return lang['English']
+        case 'United States':
+            return lang['United States']
+        case 'United Kingdom':
+            return lang['United Kingdom']
         case 'French':
             return lang['French']
         case 'German':

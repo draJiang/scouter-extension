@@ -7,7 +7,7 @@ export async function getSettings() {
         "openApiEndpoint": 'https://api.openai.com',
         "unsplashApiKey": '',
         "currentLanguage": 'Chinese Simplified',
-        "targetLanguage": 'English',
+        "targetLanguage": 'United States',
         "ankiDeckName": '',
         "licenseKey": '',
         "model": models[0]['id'], "apiKeySelection": 'myOwnOpenAiKey',

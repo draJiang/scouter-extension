@@ -46,7 +46,7 @@ const style = `
 
 export function Selection(props: SelectionProps) {
 
-  const [targetLanguage, setTargetLanguage] = useState('English');
+  const [targetLanguage, setTargetLanguage] = useState('United States');
   const [showFullText, setShowFullText] = useState(true);
   const [playStatus, setPlayStatus] = useState(false);
 

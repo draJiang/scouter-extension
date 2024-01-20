@@ -1060,6 +1060,7 @@ export function PopupCard(props: any) {
     let audioUrl: string = 'http://dict.youdao.com/dictvoice?type=0&audio='
     let audio: [] | [{}], filename
     try {
+      console.log(Lang['target']['id'])
       audioUrl = thisLang[Lang['target']['id']]['audioURL']
       // filename = Date.now().toString()
       filename = ''
