@@ -17,7 +17,7 @@ import { cardStyle, fetchSSE, getChatGPTSession } from '../util';
 
 import { getUserInfo, getBalance, getAIParameter, generationsImages } from '../util'
 
-import { userInfoType, aiParameterType } from '../types'
+import { userInfoType, aiParameterType, AnkiModelType } from '../types'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
@@ -108,7 +108,7 @@ browser.runtime.onConnect.addListener(port => {
   // 收到 content script 消息
   console.log('连接中------------')
   console.log(port);
-  
+
   if (port.name === 'fromPopupCard') {
     popupPort = port
     console.log("port.name === 'fromPopupCard'");
@@ -374,9 +374,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
           // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
 
           // 用于存储 model 相关的数据，返回给 content 将笔记添加到 Anki
-          let modelData: any = []
-
-
+          let modelData: Array<AnkiModelType> = []
 
           let promises = models.map((model) => {
 
@@ -391,13 +389,13 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
                     // 字段少于 2 个时无法添加笔记，引导用户修改
 
                     modelData.push(
-                      { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': null, 'isAnkiSpace': model.isAnkiSpace }
+                      { 'modelName': model.modelName, 'field1': result.result[0], 'field2': null, 'isAnkiSpace': model.isAnkiSpace }
                     )
 
                   } else {
 
                     modelData.push(
-                      { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result[0], 'field2': result.result[1], 'isAnkiSpace': model.isAnkiSpace }
+                      { 'modelName': model.modelName, 'field1': result.result[0], 'field2': result.result[1], 'isAnkiSpace': model.isAnkiSpace }
                     )
 
                   }
@@ -420,7 +418,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
                   if (!result.error) {
 
                     modelData.push(
-                      { 'defaultDeckName': defaultDeckName, 'modelName': model.modelName, 'field1': result.result.flds[0].name, 'field2': result.result.flds[1].name, 'isAnkiSpace': model.isAnkiSpace }
+                      { 'modelName': model.modelName, 'field1': result.result.flds[0].name, 'field2': result.result.flds[1].name, 'isAnkiSpace': model.isAnkiSpace }
                     )
 
                   }
@@ -440,7 +438,7 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
           // 等待所有 Promise 完成
           Promise.all(promises).then(() => {
             console.log(modelData);
-            asyncSendResponse({ type: 'setModel', result: 'success', data: modelData, error: result.error });
+            asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
           }).catch((error) => {
             console.error('Error:', error);
           });

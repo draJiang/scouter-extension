@@ -1,15 +1,17 @@
 import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
-import { Button, ConfigProvider, Dropdown, Divider, Space } from 'antd';
 
-import * as amplitude from '@amplitude/analytics-browser';
+import { Button, ConfigProvider, Dropdown, Divider, Space } from 'antd';
+import type { MenuProps } from 'antd';
+
+import { useUserInfoContext } from '../lib/userInfo'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { DropdownMenuItem } from './DropdownMenuItem'
 
 import { getDefaultPrompt, dictionaryPrompt } from '../PopupCard/util'
-import { PromptType, runPromptType } from '../types'
+import { PromptType, runPromptType, userInfoType, AnkiInfoType } from '../types'
 
 import {
     HamburgerMenuIcon,
@@ -25,18 +27,12 @@ import {
 import { pinPopupCard } from '../contentScript'
 import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
 
-// type PromptType = {
-//     title: string;
-//     getUnsplashImages: boolean;
-//     userPrompt: string;
-//     id: string;
-// };
 
 interface NavProps {
     isOpenMenu: boolean;
     prompts: Array<PromptType>;
     lastExecutedPrompt: PromptType;
-    handleSaveToAnkiBtnClick: () => void;
+    handleSaveToAnkiBtnClick: (deck?: string) => void;
     openCustomPromptForm: (data: { isOpen: boolean, data: PromptType }) => void;
     handleMenuItemClick: (data: PromptType, runPrompt?: runPromptType, imageToRerender?: boolean) => void;
     addToAnkiStatus: { status: string, noteId: number };
@@ -54,6 +50,7 @@ export function Nav(props: NavProps) {
 
     const navElement = useRef<HTMLDivElement>(null);
 
+    const userInfo: { user: userInfoType, anki: AnkiInfoType } | null = useUserInfoContext()
 
     useEffect(() => {
 
@@ -71,6 +68,22 @@ export function Nav(props: NavProps) {
 
 
     }, []);
+
+
+
+    const handleMenuClick: MenuProps['onClick'] = (e) => {
+        props.handleSaveToAnkiBtnClick(e.key)
+    };
+
+    let items: MenuProps['items'] = []
+    if (userInfo?.anki.decks) {
+        items = userInfo?.anki.decks.map((deck) => { return { 'key': deck, 'label': deck } })
+    }
+
+    const menuProps = {
+        items,
+        onClick: handleMenuClick,
+    };
 
     // 点击保存到 Anki 按钮
     const handleSaveToAnkiBtnClick = () => {
@@ -207,8 +220,8 @@ export function Nav(props: NavProps) {
                                     flexDirection: 'column',
                                     width: '180px',
                                     padding: '10px',
-                                    boxShadow: '0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)',
-                                    borderRadius: '6px',
+                                    boxShadow: 'rgba(0, 0, 0, 0.08) 0px 6px 16px 0px, rgba(0, 0, 0, 0.12) 0px 3px 6px -4px, rgba(0, 0, 0, 0.05) 0px 9px 28px 8px',
+                                    borderRadius: '8px',
                                     animationDuration: '400ms',
                                     MozAnimationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                                     willChange: 'transform, opacity'
@@ -275,20 +288,36 @@ export function Nav(props: NavProps) {
                             justifyContent: 'end',
                             alignItems: 'center'
                         }}>
-                        {props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <span style={{
-                            textDecoration: 'underline',
-                            cursor: 'pointer'
-                        }} onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</span></span> :
-                            <Button size="small"
-                                // type='text'
-                                style={{
-                                    fontSize: '13.2px'
-                                }}
-                                icon={<PlusSquareOutlined />}
-                                // loading={props.addToAnkiStatus === 'loading' ? true : false}
-                                disabled={props.addToAnkiStatus.status === 'standby' || props.addToAnkiStatus.status === 'loading' ? true : false}
-                                onClick={handleSaveToAnkiBtnClick}>{props.addToAnkiStatus.status === 'loading' ? 'Adding...' : 'Add to Anki'}</Button>}
 
+                        {/* 添加到 Anki 按钮 */}
+                        <div style={{
+                            marginRight: '10px'
+                        }}>
+                            {
+                                props.addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <span style={{
+                                    textDecoration: 'underline',
+                                    cursor: 'pointer'
+                                }} onClick={editNoteInAnki.bind(event, props.addToAnkiStatus.noteId)}>Anki</span></span> :
+
+                                    <Dropdown.Button size="small"
+                                        overlayStyle={{ width: '50%' }}
+                                        getPopupContainer={() => navElement.current as HTMLDivElement}
+                                        style={{
+                                            fontSize: '13.2px',
+                                            width: 'auto',
+                                        }}
+                                        // icon={<PlusSquareOutlined />}
+                                        disabled={props.addToAnkiStatus.status === 'standby' || props.addToAnkiStatus.status === 'loading' ? true : false}
+
+                                        menu={menuProps} onClick={handleSaveToAnkiBtnClick}
+
+                                    >
+                                        {props.addToAnkiStatus.status === 'loading' ? 'Adding...' : 'Add to Anki'}
+                                    </Dropdown.Button>
+                            }
+                        </div>
+
+                        {/* Pin 按钮 */}
                         <Button size='small'
                             // type='text'
                             style={{

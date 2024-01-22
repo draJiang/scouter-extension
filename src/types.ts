@@ -27,6 +27,21 @@ export type BackgroundToPopup = {
     chatId: string
 }
 
+export type AnkiModelType = {
+    modelName: string,
+    field1: string,
+    field2: string | null,
+    isAnkiSpace: boolean
+}
+
+export type AnkiInfoType = {
+    defaultDeckName: string,
+    decks: Array<string>,
+    models: Array<AnkiModelType>
+}
+
+
+
 // export type ImageType = {
 //     id: string;
 //     created_at: string;

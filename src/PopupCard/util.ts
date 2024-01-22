@@ -449,7 +449,8 @@ export const getDefaultPrompt = (keyWord: string) => {
             ---
             
             Sentence: {selection}
-                  `
+                  
+            `
 
     }
 

@@ -265,6 +265,7 @@ export const languageCodes = {
     "Chinese Simplified": "zh-CN-XiaoxiaoNeural",
     "Chinese Traditional": "zh-TW-HsiaoChenNeural",
     "Dutch": "nl-NL-ColetteNeural",
+    "English": "en-US-AriaNeural",
     "United States": "en-US-AriaNeural",
     "United Kingdom": "en-GB-LibbyNeural",
     "French": "fr-FR-DeniseNeural",
@@ -313,6 +314,8 @@ const switchLang = (str: string) => {
         case 'Dutch':
             return lang['Dutch']
         case 'United States':
+            return lang['United States']
+        case 'English':
             return lang['United States']
         case 'United Kingdom':
             return lang['United Kingdom']

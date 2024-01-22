@@ -24,7 +24,7 @@ import {
 } from '@ant-design/icons';
 
 import { getUserInfo, playTextToSpeech } from '../util'
-import { userInfoType } from '../types'
+import { userInfoType, AnkiInfoType } from '../types'
 
 import { languageCodes } from "../lib/lang"
 
@@ -96,45 +96,79 @@ if (MyBox === null || MyBox === undefined) {
 
 
 let USER_INFO: userInfoType = { userId: 'unknow', verified: false }
-let ANKI_INFO: any
+let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 
 const thisGetUserInfo = async () => {
   // 获取用户信息
   USER_INFO = await getUserInfo()
 
-  // 获取 Anki 牌组信息
-  browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, }).then((result) => {
+  // 获取 Anki decks
+  const decks = await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'deckNames', 'anki_arguments': {} }, })
+  ANKI_INFO.decks = decks.result
 
-    ANKI_INFO = result.data
+  // 获取 Anki models 和默认的 Deck 名称
+  const modelsAndDeck = await browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, })
+  ANKI_INFO.models = modelsAndDeck.data.modelData
+  ANKI_INFO.defaultDeckName = modelsAndDeck.data.defaultDeckName
 
-    // 更新 Anki style
-    try {
 
 
-      for (let i = 0; i < ANKI_INFO.length; i++) {
+  // 更新 Anki style
+  try {
 
-        const p = {
-          "model": {
-            "name": ANKI_INFO[i]['modelName'],
-            "css": cardStyle
-          }
+    for (let i = 0; i < ANKI_INFO.models.length; i++) {
+
+      const p = {
+        "model": {
+          "name": ANKI_INFO.models[i]['modelName'],
+          "css": cardStyle
         }
-
-        // 获取 Anki 牌组信息
-        browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
-
-          // console.log(result);
-
-        })
-
       }
 
+      // 更新 style
+      browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
 
-    } catch (error) {
+      })
 
     }
 
-  })
+
+  } catch (error) {
+
+  }
+
+  // 获取 Anki 牌组信息
+  // browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, }).then((result) => {
+
+  //   ANKI_INFO.models = result.data
+
+  //   // 更新 Anki style
+  //   try {
+
+  //     for (let i = 0; i < ANKI_INFO.models.length; i++) {
+
+  //       const p = {
+  //         "model": {
+  //           "name": ANKI_INFO.models[i]['modelName'],
+  //           "css": cardStyle
+  //         }
+  //       }
+
+  //       // 获取 Anki 牌组信息
+  //       browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
+
+  //         // console.log(result);
+
+  //       })
+
+  //     }
+
+
+  //   } catch (error) {
+
+  //   }
+
+  // })
 
 }
 

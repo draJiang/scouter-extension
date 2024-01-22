@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 
 import { getUserInfo } from '../util'
-import { userInfoType, langType } from '../types'
+import { userInfoType, langType, AnkiInfoType, AnkiModelType } from '../types'
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -143,7 +143,7 @@ export function PopupCard(props: any) {
 
 
 
-  const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
+  const userInfo: { user: userInfoType, anki: AnkiInfoType } | null = useUserInfoContext()
 
   let Lang = useCurrentLanguage()!
   currentLanguage = Lang['current']['name']
@@ -158,16 +158,16 @@ export function PopupCard(props: any) {
 
   // 控制追问菜单
   useEffect(() => {
-    console.log('控制追问菜单');
+    // console.log('控制追问菜单');
 
     const port = browser.runtime.connect({
       name: 'fromPopupCard'
     })
-    console.log(port);
+    // console.log(port);
 
     port.onMessage.addListener((msg) => {
 
-      console.log(msg);
+      // console.log(msg);
 
       if (msg.type === "UPDATE_POPUP_CARD") {
         // 显示 Prompt 菜单
@@ -225,7 +225,7 @@ export function PopupCard(props: any) {
 
     }
 
-  },[showFollowUpDataMenu]);
+  }, [showFollowUpDataMenu]);
 
 
 
@@ -765,7 +765,7 @@ export function PopupCard(props: any) {
 
     browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
-      console.log(msg);
+      // console.log(msg);
 
     })
 
@@ -1139,7 +1139,9 @@ export function PopupCard(props: any) {
   }
 
   // 点击保存到 Anki
-  const handleSaveToAnkiBtnClick = () => {
+  const handleSaveToAnkiBtnClick = (deck?: string) => {
+
+
 
     // 根据是否为完形填空申请不同的卡片模板
     const container = windowElement.current?.getElementsByClassName('messages')[0].innerHTML!
@@ -1153,14 +1155,16 @@ export function PopupCard(props: any) {
 
     setAddToAnkiStatus({ 'status': 'loading', 'noteId': 0 })
 
-    function setAnkiInfo(models: []) {
 
-      let defaultDeckName: string = '', modelName: string = '', field1: string = '', field2: string = ''
+    function setAnkiInfo(ankiInfo: AnkiInfoType) {
 
+
+      const models = ankiInfo.models
+
+      let modelName: string = '', field1: string = '', field2: string = ''
       models.forEach((model: any) => {
 
         if (model.isAnkiSpace === isAnkiSpace) {
-          defaultDeckName = model.defaultDeckName
           modelName = model.modelName
           field1 = model.field1
           field2 = model.field2
@@ -1171,7 +1175,6 @@ export function PopupCard(props: any) {
       });
 
       return {
-        'defaultDeckName': defaultDeckName,
         'modelName': modelName,
         'field1': field1,
         'field2': field2
@@ -1181,10 +1184,12 @@ export function PopupCard(props: any) {
 
     if (userInfo?.anki) {
 
+      const thisDeck = deck ? deck : userInfo?.anki.defaultDeckName
+
       const ankiInfo = setAnkiInfo(userInfo?.anki)
 
       // 添加到 Anki 中
-      addToAnki(ankiInfo.defaultDeckName!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+      addToAnki(thisDeck, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
 
     } else {
 
@@ -1194,9 +1199,9 @@ export function PopupCard(props: any) {
         if (result.result === 'success') {
 
           const ankiInfo = setAnkiInfo(result.data)
-
+          const thisDeck = deck ? deck : userInfo?.anki.defaultDeckName
           // 添加到 Anki 中
-          addToAnki(ankiInfo.defaultDeckName!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+          addToAnki(thisDeck!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
 
 
         } else {
