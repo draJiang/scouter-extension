@@ -29,7 +29,7 @@ import { useCurrentLanguage } from '../lib/locale'
 import { useUserInfoContext } from '../lib/userInfo'
 import { lang } from '../lib/lang';
 
-import { windowInitialization, getDefaultPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
+import { windowInitialization, getInitialPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
 import { PromptType, ChatMessage, ImageType, runPromptType } from "../types"
 
@@ -233,19 +233,19 @@ export function PopupCard(props: any) {
 
 
       // 获取最近一次执行的 Prompt
-      browser.storage.local.get({ "lastExecutedPrompt": '' }).then((item) => {
+      browser.storage.local.get({ "lastExecutedPrompt": '' }).then(async (item) => {
 
 
         if (item.lastExecutedPrompt === '') {
 
           // 执行默认 Prompt、获取 Unsplash 图片
-          const pormpt = getDefaultPrompt(props.data.keyWord)
+          const pormpt = await getInitialPrompt(props.data.keyWord)
           executivePrompt(pormpt)
 
         } else {
           // 执行 Prompt、获取 Unsplash 图片
           if (item.lastExecutedPrompt.id === "Default") {
-            const pormpt = getDefaultPrompt(props.data.keyWord)
+            const pormpt = await getInitialPrompt(props.data.keyWord)
             executivePrompt(pormpt)
           } else {
             executivePrompt(item.lastExecutedPrompt)
@@ -475,7 +475,7 @@ export function PopupCard(props: any) {
       if (data === undefined) {
 
         // 设置最近执行的 Prompt
-        setLastExecutedPrompt(x => { return prompt })
+        setLastExecutedPrompt(prompt)
 
         // 记录最近 1 次使用的 Prompt，用于下次启动窗口时默认执行此 Prompt
         browser.storage.local.set(

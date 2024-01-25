@@ -1,9 +1,17 @@
 import browser from 'webextension-polyfill'
 import { ankiAction } from '../util'
+import { getSettings } from '../Options/util'
 
 import { PromptType } from '../types'
 
 export const dictionaryPrompt: PromptType = {
+    title: 'Dictionary',
+    id: 'dict',
+    getUnsplashImages: true,
+    userPrompt: '',
+}
+
+export const defaultPrompt: PromptType = {
     title: 'Dictionary',
     id: 'dict',
     getUnsplashImages: true,
@@ -384,7 +392,7 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
 export const getDefaultPrompt = (keyWord: string) => {
 
     let getUnsplashImages = true
-
+    
     let userPrompt = `
 
         Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence, Absolutely No Extra Text, Only Provide Information as in the Examples, Keep Language Concise.
@@ -451,3 +459,32 @@ export const getDefaultPrompt = (keyWord: string) => {
 }
 
 
+export const getInitialPrompt = async (keyWord: string) => {
+
+    //判断用户是否设置了 API Key，未设置则默认使用在线词典
+    const isSetKey = await getSettings().then((items) => {
+
+        if (items.apiKeySelection === 'licenseKey' && items.licenseKey.length < 5) {
+
+            return false
+
+        } else if (items.apiKeySelection === 'myOwnOpenAiKey' && items.openApiKey.length < 5) {
+            return false
+        } else {
+            return true
+        }
+
+    })
+
+    if (isSetKey) {
+
+        const defaultPrompt = getDefaultPrompt(keyWord)
+        return defaultPrompt
+
+    } else {
+        // 没有设置 Api Key
+        return dictionaryPrompt
+
+    }
+
+}

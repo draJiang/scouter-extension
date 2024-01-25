@@ -116,7 +116,7 @@ export function PromptList(props: PromptListProps) {
                 }}
             >
 
-                <PromptButton disable={!userInfo?.user.verified} handleMenuItemClick={() => {
+                <PromptButton disable={!userInfo?.user.verified} handleMenuItemClick={async () => {
                     const p = getDefaultPrompt(props.followUpData.keyWord)
                     handleMenuItemClick(p)
                 }}>Default</PromptButton>

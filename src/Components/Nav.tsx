@@ -63,8 +63,11 @@ export function Nav(props: NavProps) {
     }, [props.isOpenMenu]);
 
     useEffect(() => {
+        
+        (async () => {
+            defaultPrompt.current = await getDefaultPrompt(props.keyWord)
+        })()
 
-        defaultPrompt.current = getDefaultPrompt(props.keyWord)
 
 
     }, []);
