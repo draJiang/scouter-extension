@@ -320,65 +320,52 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
         }
     });
 
-    // 处理 Anki 单词高亮
-    const cards = ankiCards
+    // // 处理 Anki 单词高亮
+    // const cards = ankiCards
 
-    if (windowElement && cards) {
+    // if (windowElement && cards) {
 
-        // 遍历每一个卡片
-        cards.forEach((card: any) => {
+    //     // 遍历每一个卡片
+    //     cards.forEach((card: any) => {
 
-            // setTimeout(() => {
-            // console.log(card);
-            const keys = Object.keys(card.fields);
-            let firstKey = keys[0];
-            // 找到卡片正面
-            for (let i = 0; i < keys.length; i++) {
-                if (card.fields[keys[i]].order === 0) {
-                    firstKey = keys[i]
-                    break
-                }
-            }
-
-            
-
-            const cardFrontValue = card.fields[firstKey].value
-            const escapedCardFrontValue = escapeRegExp(cardFrontValue);
-            if (cardFrontValue !== keyWord) {
-                newStr = newStr.replace(new RegExp(escapedCardFrontValue, 'gi'), `<mark>${cardFrontValue}</mark>`)
-            }
-            // }, 10);
+    //         // setTimeout(() => {
+    //         // console.log(card);
+    //         const keys = Object.keys(card.fields);
+    //         let firstKey = keys[0];
+    //         // 找到卡片正面
+    //         for (let i = 0; i < keys.length; i++) {
+    //             if (card.fields[keys[i]].order === 0) {
+    //                 firstKey = keys[i]
+    //                 break
+    //             }
+    //         }
 
 
-            function escapeRegExp(string: string) {
-                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-            }
+
+    //         const cardFrontValue = card.fields[firstKey].value
+    //         const escapedCardFrontValue = escapeRegExp(cardFrontValue);
+    //         if (cardFrontValue !== keyWord) {
+    //             newStr = newStr.replace(new RegExp(escapedCardFrontValue, 'gi'), `<mark>${cardFrontValue}</mark>`)
+    //         }
+    //         // }, 10);
 
 
-            // // 创建一个用于包裹'o'的<span>元素
-            // var spanElement = document.createElement('span');
-            // spanElement.setAttribute('data-cardID', card.id);
-            // spanElement.className = 'hello';
-            // spanElement.style.color = 'red';
-            // spanElement.style.cursor = 'pointer';
-            // spanElement.textContent = cardFrontValue;
+    //         function escapeRegExp(string: string) {
+    //             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    //         }
 
-            // // newStr = newStr.replace(/o/gi, spanElement.outerHTML);
-            // newStr = newStr.replace(new RegExp(cardFrontValue, 'gi'), spanElement.outerHTML);
+    //     });
 
+    //     // 对上述元素添加点击事件
+    //     // let hightlightDom = windowElement.getElementsByClassName('hello')
 
-        });
+    //     // for (let i = 0; i < hightlightDom.length; i++) {
 
-        // 对上述元素添加点击事件
-        // let hightlightDom = windowElement.getElementsByClassName('hello')
+    //     //     hightlightDom[i].removeEventListener('click', handleHightlightClick)
+    //     //     hightlightDom[i].addEventListener('click', handleHightlightClick)
 
-        // for (let i = 0; i < hightlightDom.length; i++) {
-
-        //     hightlightDom[i].removeEventListener('click', handleHightlightClick)
-        //     hightlightDom[i].addEventListener('click', handleHightlightClick)
-
-        // }
-    }
+    //     // }
+    // }
 
     return newStr
 

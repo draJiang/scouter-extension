@@ -149,13 +149,6 @@ export function PopupCard(props: any) {
   currentLanguage = Lang['current']['name']
   targetLanguage = Lang['target']['name']
 
-
-  // const userInfo = useUserInfoContext()
-
-  // let port = browser.runtime.connect({
-  //   name: 'fromPopupCard'
-  // })
-
   // 控制追问菜单
   useEffect(() => {
     // console.log('控制追问菜单');
@@ -482,7 +475,7 @@ export function PopupCard(props: any) {
       if (data === undefined) {
 
         // 设置最近执行的 Prompt
-        setLastExecutedPrompt(prompt)
+        setLastExecutedPrompt(x => { return prompt })
 
         // 记录最近 1 次使用的 Prompt，用于下次启动窗口时默认执行此 Prompt
         browser.storage.local.set(
@@ -763,12 +756,11 @@ export function PopupCard(props: any) {
     }
 
 
-    browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    // browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
-      // console.log(msg);
+    //   // console.log(msg);
 
-    })
-
+    // })
     // 接收信息
     port.onMessage.addListener((msg: any) => {
 
