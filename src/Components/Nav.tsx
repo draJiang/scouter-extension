@@ -27,6 +27,8 @@ import {
 import { pinPopupCard } from '../contentScript'
 import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
 
+import { useCurrentLanguage } from '../lib/locale'
+
 
 interface NavProps {
     isOpenMenu: boolean;
@@ -52,6 +54,10 @@ export function Nav(props: NavProps) {
 
     const userInfo: { user: userInfoType, anki: AnkiInfoType } | null = useUserInfoContext()
 
+    let Lang = useCurrentLanguage()!
+    const currentLanguage = Lang['current']['name']
+
+
     useEffect(() => {
 
         // 当不自动自行 Prompt，自动打开 Prompt 菜单供用户选择
@@ -63,10 +69,8 @@ export function Nav(props: NavProps) {
     }, [props.isOpenMenu]);
 
     useEffect(() => {
-        
-        (async () => {
-            defaultPrompt.current = await getDefaultPrompt(props.keyWord)
-        })()
+
+        defaultPrompt.current = getDefaultPrompt(props.keyWord, currentLanguage)
 
 
 

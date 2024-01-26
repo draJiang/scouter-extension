@@ -239,13 +239,13 @@ export function PopupCard(props: any) {
         if (item.lastExecutedPrompt === '') {
 
           // 执行默认 Prompt、获取 Unsplash 图片
-          const pormpt = await getInitialPrompt(props.data.keyWord)
+          const pormpt = await getInitialPrompt(props.data.keyWord, currentLanguage)
           executivePrompt(pormpt)
 
         } else {
           // 执行 Prompt、获取 Unsplash 图片
           if (item.lastExecutedPrompt.id === "Default") {
-            const pormpt = await getInitialPrompt(props.data.keyWord)
+            const pormpt = await getInitialPrompt(props.data.keyWord, currentLanguage)
             executivePrompt(pormpt)
           } else {
             executivePrompt(item.lastExecutedPrompt)
@@ -1052,7 +1052,6 @@ export function PopupCard(props: any) {
     let audioUrl: string = 'http://dict.youdao.com/dictvoice?type=0&audio='
     let audio: [] | [{}], filename
     try {
-      console.log(Lang['target']['id'])
       audioUrl = thisLang[Lang['target']['id']]['audioURL']
       // filename = Date.now().toString()
       filename = ''

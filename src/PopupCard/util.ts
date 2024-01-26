@@ -389,10 +389,10 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
  * @returns {string} Prompt 字符串
  * @throws {异常类型} 异常描述
  */
-export const getDefaultPrompt = (keyWord: string) => {
+export const getDefaultPrompt = (keyWord: string, currentLanguage: string) => {
 
     let getUnsplashImages = true
-    
+
     let userPrompt = `
 
         Please help me learn as a foreign language teacher. Sentences in examples should not be the same as the given sentence, Absolutely No Extra Text, Only Provide Information as in the Examples, Keep Language Concise.
@@ -420,6 +420,66 @@ export const getDefaultPrompt = (keyWord: string) => {
         Please start teaching:
 
         `
+    switch (currentLanguage) {
+        case '简体中文':
+            userPrompt = `
+            作为一名外语教师，我希望得到你的帮助。你提供的例句不能与我提供的句子相同，严禁添加任何额外的文本，只按照示例中的方式给出信息，确保语言简洁。
+
+            示例：
+            
+            -  含义：<用 {nativeLanguage} 解释含义>
+            -  词性：<用 {nativeLanguage} 表明词性>
+            
+            ## 在句中的含义
+            -  <用 {nativeLanguage} 解释句中的词汇含义>
+            
+            ## 示例句子
+            -  <{targetLanguage} 的示例句子> - <用 {nativeLanguage} 翻译>
+            -  <{targetLanguage} 的示例句子> - <用 {nativeLanguage} 翻译>
+            
+            ## 翻译练习
+            -  <{nativeLanguage} 句子>
+            -  <{nativeLanguage} 句子>
+            
+            ---
+            
+            单词："{selection}"，句子："{sentence}"，你必须用规定的语言进行回复。
+    
+            请开始教学：
+    
+            `
+            break;
+        case '繁體中文':
+            userPrompt = `
+            作為一名外語老師，我希望得到你的幫助。你提供的例句不應與我提供的句子相同，嚴禁添加任何額外的文字，只按照範例中的方式給出資訊，確保語言簡潔。
+
+            範例：
+
+            -  含義：<用 {nativeLanguage} 解釋含義>
+            -  詞性：<用 {nativeLanguage} 表明詞性>
+
+            ## 在句子中的含義
+            -  <用 {nativeLanguage} 解釋句中的詞彙含義>
+
+            ## 範例句子
+            -  <{targetLanguage} 的範例句子> - <用 {nativeLanguage} 翻譯>
+            -  <{targetLanguage} 的範例句子> - <用 {nativeLanguage} 翻譯>
+
+            ## 翻譯練習
+            -  <{nativeLanguage} 句子>
+            -  <{nativeLanguage} 句子>
+
+            ---
+
+            字詞："{selection}"，句子："{sentence}"，你必須用規定的語言進行回覆。
+
+            請開始教學：
+
+            `
+            break;
+        default:
+            break;
+    }
 
     // 关键字长度较长时，按照句子进行处理
     if (keyWord.length > 20) {
@@ -447,6 +507,57 @@ export const getDefaultPrompt = (keyWord: string) => {
                   
             `
 
+        switch (currentLanguage) {
+            case '简体中文':
+                userPrompt = `
+                
+                请你作为一名外语教师对给定句子中的语法知识进行解释，绝对不能有任何额外的文本，只按照示例提供信息，保持语言简洁。
+
+                示例：
+
+                ## 翻译
+                <翻译成{nativeLanguage}>
+
+                ## 语法
+                <- 点：用{nativeLanguage}解释>
+
+                ## 相关语法示例
+                -   <{targetLanguage}的示例句子> - <用{nativeLanguage}翻译>
+                -   <{targetLanguage}的示例句子> - <用{nativeLanguage}翻译>
+
+                ---
+
+                句子：”{selection}“
+
+                `
+                break;
+            case '繁體中文':
+                userPrompt = `
+                請你作為一名外語教師對給定句子中的語法知識進行解釋，絕對不能有任何額外的文本，只按照範例提供資訊，保持語言簡潔。
+
+                範例：
+
+                ## 翻譯
+                <翻譯成{nativeLanguage}>
+
+                ## 語法
+                <- 點：用{nativeLanguage}解釋>
+
+                ## 相關語法範例
+                -   <{targetLanguage}的範例句子> - <用{nativeLanguage}翻譯>
+                -   <{targetLanguage}的範例句子> - <用{nativeLanguage}翻譯>
+
+                ---
+
+                句子："{selection}"
+
+                `
+                break;
+            default:
+                break;
+        }
+
+
     }
 
     const defaultPrompt: PromptType = {
@@ -459,7 +570,7 @@ export const getDefaultPrompt = (keyWord: string) => {
 }
 
 
-export const getInitialPrompt = async (keyWord: string) => {
+export const getInitialPrompt = async (keyWord: string, currentLanguage: string) => {
 
     //判断用户是否设置了 API Key，未设置则默认使用在线词典
     const isSetKey = await getSettings().then((items) => {
@@ -478,7 +589,7 @@ export const getInitialPrompt = async (keyWord: string) => {
 
     if (isSetKey) {
 
-        const defaultPrompt = getDefaultPrompt(keyWord)
+        const defaultPrompt = getDefaultPrompt(keyWord, currentLanguage)
         return defaultPrompt
 
     } else {

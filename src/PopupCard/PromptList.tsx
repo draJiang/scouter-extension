@@ -10,6 +10,8 @@ import { userInfoType, runPromptType } from '../types'
 import { useUserInfoContext } from '../lib/userInfo'
 import { ProTag } from "../Components/ProTag";
 
+import { useCurrentLanguage } from '../lib/locale'
+
 
 let MyButton = styled.button`
 
@@ -60,6 +62,9 @@ export function PromptList(props: PromptListProps) {
 
     const PromptListDOM = useRef<HTMLDivElement>(null);
     const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
+
+    let Lang = useCurrentLanguage()!
+    const currentLanguage = Lang['current']['name']
 
     // const userInfo = useUserInfoContext()
     // console.log('userInfo:');
@@ -115,16 +120,16 @@ export function PromptList(props: PromptListProps) {
                     opacity: !userInfo?.user.verified ? '0.7' : '1',
                 }}
             >
-
+                {/* 默认 Prompt */}
                 <PromptButton disable={!userInfo?.user.verified} handleMenuItemClick={async () => {
-                    const p = getDefaultPrompt(props.followUpData.keyWord)
+                    const p = getDefaultPrompt(props.followUpData.keyWord, currentLanguage)
                     handleMenuItemClick(p)
                 }}>Default</PromptButton>
-
+                {/* 词典 */}
                 <PromptButton disable={!userInfo?.user.verified} handleMenuItemClick={() => {
                     handleMenuItemClick(dictionaryPrompt)
                 }}>{dictionaryPrompt.title}</PromptButton>
-
+                {/* 用户自定义 Prompt */}
                 {props.promptList.map((item) => {
                     // return <button onClick={() => handleMenuItemClick(item)}>{item.title}</button>
                     return <PromptButton key={item.id} disable={!userInfo?.user.verified} handleMenuItemClick={() => handleMenuItemClick(item)}>{item.title}</PromptButton>
