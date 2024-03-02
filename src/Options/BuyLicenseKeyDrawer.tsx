@@ -4,9 +4,6 @@ import { Divider, Button, Tag } from 'antd';
 
 import * as amplitude from '@amplitude/analytics-browser';
 
-import AliPay from '../assets/AliPay.png'
-import WeChatPay from '../assets/WeChatPay.png'
-
 export function BuyLicenseKeyDrawer() {
 
 
@@ -35,7 +32,7 @@ export function BuyLicenseKeyDrawer() {
                     justifyContent: 'center'
                 }}>
                     <div style={{ textAlign: 'center', margin: '10px' }}>
-                        <img style={{ width: '50%' }} src={WeChatPay} />
+                        {/* <img style={{ width: '50%' }} src={WeChatPay} /> */}
                     </div>
                 </div>
                 <div style={{ }}>

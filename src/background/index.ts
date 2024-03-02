@@ -136,14 +136,12 @@ browser.runtime.onConnect.addListener(port => {
       getSettings().then((result) => {
 
         // 请求  GPT 数据
-        // isContinue = true 时才会渲染数据
-        // isContinue = true
 
-        // controller.abort();
+        controller.abort();
         controller = new AbortController();
 
         // let messages = msg.messages
-
+        console.log('getAIParameter:');
         getAIParameter(msg.messages).then((result: aiParameterType) => {
 
           const openApiEndpoint = result.data?.chatCompletions.url
@@ -164,48 +162,66 @@ browser.runtime.onConnect.addListener(port => {
             }
 
             const ApiType = result.apiKeySelection
+            console.log('ApiType:');
+            console.log(ApiType);
+            console.log('body:');
+            console.log(body);
 
-            fetchSSE(openApiEndpoint, init, {
-              onMessage: (data) => {
-                // 处理接收到的数据
+            if (ApiType === 'chatGPTWeb') {
 
-                if (ApiType === 'chatGPTWeb') {
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'done', 'content': '⚠️ ChatGPT Web is temporarily not supported. Please switch to another method.' })
 
-                  if ('is_completion' in data !== true) {
-                    port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.message.content.parts[0] })
-                  }
+            } else {
 
-                } else {
+              fetchSSE(openApiEndpoint, init, {
+                onMessage: (data) => {
+                  // 处理接收到的数据
+
+                  // if (ApiType === 'chatGPTWeb') {
+
+                  //   if ('is_completion' in data !== true) {
+                  //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.message.content.parts[0] })
+                  //   }
+
+                  // } else {
+                  //   if (data.choices[0].finish_reason !== 'stop') {
+                  //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                  //   }
+                  // }
+
                   if (data.choices[0].finish_reason !== 'stop') {
                     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                   }
+
+
+                },
+                onEnd: () => {
+                  // 处理 SSE 连接结束的逻辑
+                  port.postMessage({ 'type': 'sendGPTData', 'status': 'done', 'content': '' })
+
+                },
+                onError: error => {
+                  // 处理错误的逻辑
+                  console.log(error);
+                  if (error.message.indexOf('aborted') >= 0) {
+                    // 开启新的请求，中断旧请求
+
+                  } else {
+                    const tips = '🥲Sorry, an error happened, please retry.'
+
+                    port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
+
+                    // 如果是 ChatGPT Web 模式的 401 错误，则更新 token，然后引导用户重试
+                    getChatGPTSession()
+
+                  }
+
                 }
+              });
+
+            }
 
 
-              },
-              onEnd: () => {
-                // 处理 SSE 连接结束的逻辑
-                port.postMessage({ 'type': 'sendGPTData', 'status': 'done', 'content': '' })
-
-              },
-              onError: error => {
-                // 处理错误的逻辑
-                console.log(error);
-                if (error.message.indexOf('aborted') >= 0) {
-                  // 开启新的请求，中断旧请求
-
-                } else {
-                  const tips = '🥲Sorry, an error happened, please retry.'
-
-                  port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
-
-                  // 如果是 ChatGPT Web 模式的 401 错误，则更新 token，然后引导用户重试
-                  getChatGPTSession()
-
-                }
-
-              }
-            });
 
           }
 

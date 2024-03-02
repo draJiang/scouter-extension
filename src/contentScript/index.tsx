@@ -502,16 +502,16 @@ const getSelection = (isInShadow?: boolean) => {
 
     let expandedRange = range.cloneRange(); // 复制当前选中的范围对象
     // expandRange的范围前后各移动3个字符（如果可以的话）
-    expandedRange.setStart(range.startContainer, Math.max(range.startOffset - startOffsetShift, 0));
-    expandedRange.setEnd(range.endContainer, Math.min(range.endOffset + endOffsetShift, range.endContainer.textContent.length - 1));
+    try {
+      expandedRange.setStart(range.startContainer, Math.max(range.startOffset - startOffsetShift, 0));
+      expandedRange.setEnd(range.endContainer, Math.min(range.endOffset + endOffsetShift, range.endContainer.textContent.length - 1));
+    } catch (error) {
+      console.log(error);
+
+    }
+
     // 获取包括关键词前后字符的字符串
     let expandedSelectedText = expandedRange.toString();
-
-
-
-
-    // console.log('expandedSelectedText:');
-    // console.log(expandedSelectedText);
 
     for (let s of sentences) {
       if (s.includes(expandedSelectedText)) {
