@@ -99,8 +99,18 @@ let USER_INFO: userInfoType = { userId: 'unknow', verified: false }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 
 const thisGetUserInfo = async () => {
-  // 获取用户信息
-  USER_INFO = await getUserInfo()
+
+  try {
+    // 获取用户信息
+    // USER_INFO = await getUserInfo()
+
+    USER_INFO = await browser.runtime.sendMessage({ 'type': 'getUserInfo', 'messages': {}, })
+    
+  } catch (error) {
+    console.log(error);
+
+  }
+
 
   // 获取 Anki decks
   const decks = await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'deckNames', 'anki_arguments': {} }, })

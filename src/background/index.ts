@@ -570,6 +570,18 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   }
 
+  if (request.type === 'getUserInfo') {
+
+    getUserInfo().then((userInfo: userInfoType) => {
+
+      asyncSendResponse(userInfo);
+
+    })
+
+    return true;
+
+  }
+
   if (request.type === 'generationsImages') {
 
     const data = generationsImages(request.data.prompt)

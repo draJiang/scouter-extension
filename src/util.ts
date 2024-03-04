@@ -814,6 +814,53 @@ export const getBalance = (apiKey: string) => {
 
 }
 
+const checkLicenseKey = async (key: string) => {
+
+  console.log('checkLicenseKey');
+
+  let verified = false
+
+  if (!verified) {
+    // 从 Lemonsqueezy 验证 Key
+    const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        license_key: key,
+      })
+    });
+    const data = await response.json(); // 可以使用这个来进行额外的操作
+    verified = data.valid
+  }
+
+  if (!verified) {
+
+    const res = await fetch('https://api.scouter.dabing.one/api/checktLicenseKey', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        key: key,
+      })
+    });
+
+    const data = await res.json();
+    verified = data.verified
+
+    if (!res.ok) {
+      throw new Error(data.message);
+    }
+
+  }
+
+  return verified
+
+
+}
+
 export const getUserInfo = (): Promise<userInfoType> => {
 
   return new Promise((resolve, reject) => {
@@ -827,19 +874,22 @@ export const getUserInfo = (): Promise<userInfoType> => {
       let verified = false
 
       if (result.newLicenseKey) {
-        // 判断用户
-        const url = 'https://6r4atckmdr.us.aircode.run/index'
-        const headers = { 'Authorization': 'Bearer ' + result.newLicenseKey, 'Content-Type': 'application/json', }
+        // // 判断用户
+        // const url = 'https://6r4atckmdr.us.aircode.run/index'
+        // const headers = { 'Authorization': 'Bearer ' + result.newLicenseKey, 'Content-Type': 'application/json', }
 
-        await fetch(url, {
-          headers: headers
-        }).then(async (response) => {
+        // await fetch(url, {
+        //   headers: headers
+        // }).then(async (response) => {
 
-          await response.json().then((data) => {
-            verified = data.verified
-          })
+        //   await response.json().then((data) => {
+        //     verified = data.verified
+        //   })
 
-        })
+        // })
+
+        verified = await checkLicenseKey(result.newLicenseKey)
+
       }
 
       let uniqueId: string
