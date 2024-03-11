@@ -179,3 +179,8 @@ type BodyType2 = {
 export type MessageForGPTWebType = { id: string, role: string, content: { content_type: string, parts: any[] } }[];
 
 export type BodyType = BodyType1 | BodyType2;
+
+export type addToAnkiStatusType = {
+    status: 'standby' | 'normal' | 'success' | 'loading',
+    noteId: number
+}

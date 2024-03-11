@@ -2,8 +2,7 @@ import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 
-import { getUserInfo } from '../util'
-import { userInfoType, langType, AnkiInfoType, AnkiModelType } from '../types'
+import { userInfoType, addToAnkiStatusType, langType, AnkiInfoType, AnkiModelType } from '../types'
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,7 +26,7 @@ import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 import { useCurrentLanguage } from '../lib/locale'
 import { useUserInfoContext } from '../lib/userInfo'
-import { lang } from '../lib/lang';
+
 
 import { windowInitialization, getInitialPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
@@ -109,24 +108,14 @@ export function PopupCard(props: any) {
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);
 
-  // 表示 GPT 生成的文字数据正在加载中
-  // const [isLoading, setIsLoading] = useState(true);
-
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [customPromptFormData, setCustomPromptFormData] = useState<PromptType>({ 'title': '', 'getUnsplashImages': false, 'userPrompt': '', 'id': '' });
 
   // standby,normal,loading,success
-  const [addToAnkiStatus, setAddToAnkiStatus] = useState<{ status: string, noteId: number }>({ 'status': 'normal', 'noteId': 0 });
-
-
-  // const [isAnswerDone, setAnswerDone] = useState(false);
+  const [addToAnkiStatus, setAddToAnkiStatus] = useState<addToAnkiStatusType>({ 'status': 'normal', 'noteId': 0 });
 
   const [followUpData, setFollowUpData] = useState({ keyWord: '', sentence: '' });
   const [showFollowUpDataMenu, setShowFollowUpDataMenu] = useState({ show: false, style: {} })
-
-  const [isApiErro, setIsApiErro] = useState(false);
-
-  // const [isAnswerInputed, setIsAnswerInputed] = useState(false);
 
   // 窗口拖拽逻辑
   const [dragging, setDragging] = useState(false);
@@ -141,8 +130,6 @@ export function PopupCard(props: any) {
 
   const [form] = Form.useForm();
 
-
-
   const userInfo: { user: userInfoType, anki: AnkiInfoType } | null = useUserInfoContext()
 
   let Lang = useCurrentLanguage()!
@@ -156,11 +143,8 @@ export function PopupCard(props: any) {
     const port = browser.runtime.connect({
       name: 'fromPopupCard'
     })
-    // console.log(port);
 
     port.onMessage.addListener((msg) => {
-
-      // console.log(msg);
 
       if (msg.type === "UPDATE_POPUP_CARD") {
         // 显示 Prompt 菜单
@@ -192,10 +176,6 @@ export function PopupCard(props: any) {
 
     function handlePopupCardClick() {
       // 当追问菜单显示时，点击窗口关闭菜单
-      // console.log('handlePopupCardClick');
-      // console.log(showFollowUpDataMenu.show);
-
-
       setTimeout(() => {
 
         if (showFollowUpDataMenu.show) {
@@ -224,17 +204,14 @@ export function PopupCard(props: any) {
 
   useEffect(() => {
 
-
     // 渲染 Prompt 列表
     initializePromptList()
-
 
     if (props.runPrompt || props.runPrompt === undefined) {
 
 
       // 获取最近一次执行的 Prompt
       browser.storage.local.get({ "lastExecutedPrompt": '' }).then(async (item) => {
-
 
         if (item.lastExecutedPrompt === '') {
 
@@ -250,9 +227,6 @@ export function PopupCard(props: any) {
           } else {
             executivePrompt(item.lastExecutedPrompt)
           }
-
-
-
 
         }
 
@@ -897,7 +871,6 @@ export function PopupCard(props: any) {
     // // console.log('PopupCard:handleMouseMove');
     // // console.log(dragging);
 
-
     if (dragging && windowElement.current) {
 
       // Use requestAnimationFrame to throttle the mousemove event handling
@@ -949,289 +922,275 @@ export function PopupCard(props: any) {
     setDragging(false);
   };
 
-  // 添加到 Anki
-  const addToAnki = (deckName: string, modelName: string, front: string, back: string) => {
 
-    const keyWord = props.data.keyWord
-    const Sentence = props.data.Sentence
 
-    let container = ''
-    let images = ''
-    let unsplash_download_location
-    let stc = keyWord.length <= 20 ? Sentence : ''
-    // 转移 HTML 标签，按照普通字符串处理
-    stc = stc.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    // 在语境句子中将关键字突出显示
-    stc = stc.replace(new RegExp(keyWord, 'g'), '<span class="keyWord">' + keyWord + '</span>');
 
-    let ScouterSelection = ''
+  // // 添加到 Anki
+  // const addToAnki = (deckName: string, modelName: string, front: string, back: string) => {
 
+  //   const keyWord = props.data.keyWord
+  //   const Sentence = props.data.Sentence
 
-    if (windowElement.current) {
-      // 选中的文字
-      ScouterSelection = windowElement.current?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
+  //   let container = ''
+  //   let images = ''
+  //   let unsplash_download_location
+  //   let stc = keyWord.length <= 20 ? Sentence : ''
+  //   // 转移 HTML 标签，按照普通字符串处理
+  //   stc = stc.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-      // console.log(windowElement.current);
-      container = windowElement.current.innerHTML
-      container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
+  //   // 在语境句子中将关键字突出显示
+  //   stc = stc.replace(new RegExp(keyWord, 'g'), '<span class="keyWord">' + keyWord + '</span>');
 
-      // 处理 container 的内容
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(container, 'text/html');
-      let elementsToRemove = doc.querySelectorAll('.imageQueue');
-      let imageSource = doc.querySelectorAll('.imageSource');
+  //   let ScouterSelection = ''
 
-      // 创建新的 img 标签
 
+  //   if (windowElement.current) {
+  //     // 选中的文字
+  //     ScouterSelection = windowElement.current?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
 
-      // 设置图片的尺寸、样式
-      if (doc.getElementsByClassName('imageBox').length > 0) {
-        let img = doc.getElementsByClassName('imageBox')[0].getElementsByTagName('img')[0] as HTMLImageElement;
-        img.width = 0
+  //     // console.log(windowElement.current);
+  //     container = windowElement.current.innerHTML
+  //     container = windowElement.current.getElementsByClassName('messages')[0].innerHTML
 
-        const imgUrl = img.src;
-        let newImg = document.createElement("img");
-        newImg.src = imgUrl;
+  //     // 处理 container 的内容
+  //     let parser = new DOMParser();
+  //     let doc = parser.parseFromString(container, 'text/html');
+  //     let elementsToRemove = doc.querySelectorAll('.imageQueue');
+  //     let imageSource = doc.querySelectorAll('.imageSource');
 
-        // 获取要替换的 div
-        let div = doc.getElementsByClassName('imageBox')[0];
-        if (div) {
-          // 使用新的 img 标签替换 div
-          div.parentNode?.replaceChild(newImg, div);
-        }
+  //     // 创建新的 img 标签
 
 
-      } else {
-        // 没有图片
-        const imgs = doc.getElementsByClassName('images')[0]
-        if (imgs) {
-          imgs.parentNode?.removeChild(imgs)
-        }
+  //     // 设置图片的尺寸、样式
+  //     if (doc.getElementsByClassName('imageBox').length > 0) {
+  //       let img = doc.getElementsByClassName('imageBox')[0].getElementsByTagName('img')[0] as HTMLImageElement;
+  //       img.width = 0
 
-      }
-
-      // 删除预加载的图片
-      elementsToRemove.forEach(el => el.parentNode?.removeChild(el));
-
-      // 删除图片来源信息
-      imageSource.forEach(el => el.parentNode?.removeChild(el));
-
-
-      container = doc.body.innerHTML;
-
-      // 处理样式，避免 Anki 内显示异常
-      container = container.replace(/style=/g, '');
-
-
-      if (windowElement.current.getElementsByClassName('imageBox')[0] !== undefined) {
-        images = windowElement.current.getElementsByClassName('imageBox')[0].innerHTML
-        // 获取 unsplashApi 的 download_location
-        unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadlocation')
-      }
+  //       const imgUrl = img.src;
+  //       let newImg = document.createElement("img");
+  //       newImg.src = imgUrl;
 
-      // console.log(images);
-
-      // 处理样式，避免 Anki 内显示异常
-      images = images.replace(/style=/gi, '');
-      images = images.replace(/width/gi, '');
+  //       // 获取要替换的 div
+  //       let div = doc.getElementsByClassName('imageBox')[0];
+  //       if (div) {
+  //         // 使用新的 img 标签替换 div
+  //         div.parentNode?.replaceChild(newImg, div);
+  //       }
 
-    }
 
-    const cardStyle = ``
+  //     } else {
+  //       // 没有图片
+  //       const imgs = doc.getElementsByClassName('images')[0]
+  //       if (imgs) {
+  //         imgs.parentNode?.removeChild(imgs)
+  //       }
 
-    // 请求 background 将数据保存到 Anki
+  //     }
 
-
-    // 单词发音
-    interface LangObject {
-      [key: string]: langType;
-    }
-    const thisLang: LangObject = lang
+  //     // 删除预加载的图片
+  //     elementsToRemove.forEach(el => el.parentNode?.removeChild(el));
 
-    let audioUrl: string = 'http://dict.youdao.com/dictvoice?type=0&audio='
-    let audio: [] | [{}], filename
-    try {
-      audioUrl = thisLang[Lang['target']['id']]['audioURL']
-      // filename = Date.now().toString()
-      filename = ''
-
-      audio = [{
-        "url": audioUrl + keyWord,
-        "filename": "Scouter" + filename + ".mp3",
-        "fields": [
-          "Front"
-        ]
-      }]
-
-    } catch (error) {
-      audio = []
-    }
-
-    // 常规类型
-    let ankiBack = '<p> <blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote></p>' + container
-    if (keyWord.length > 20) {
-      // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
-      ankiBack = container + '<p><a href="' + window.location.href + '">Source</a></p>'
-    }
-
-    let p = {
-      "note": {
-        "deckName": deckName,
-        "modelName": modelName,
-        "fields": {
-          [front]: keyWord,
-          [back]: cardStyle + ankiBack
-        },
-        "audio": audio,
-        "tags": [
-          "Scouter"
-        ]
-      }
-    }
+  //     // 删除图片来源信息
+  //     imageSource.forEach(el => el.parentNode?.removeChild(el));
 
-    // 完形填空类型
-    if (ScouterSelection.indexOf('class="ankiSpace"') >= 0 || container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
 
-      let newFront: string
+  //     container = doc.body.innerHTML;
 
-      newFront = '<p>' + ScouterSelection + '</p>' + '<blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote>' + container
+  //     // 处理样式，避免 Anki 内显示异常
+  //     container = container.replace(/style=/g, '');
 
-      if (keyWord.length > 20) {
-        // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
-        newFront = '<p>' + ScouterSelection + '</p>' + container + '<p> <a href="' + window.location.href + '">Source</a></p>'
-      }
 
-      p = {
-        "note": {
-          "deckName": deckName,
-          "modelName": modelName,
-          "fields": {
-            [front]: newFront,
-            [back]: ''
-          },
-          "audio": [],
-          "tags": [
-            "Scouter"
-          ]
-        }
-      }
+  //     if (windowElement.current.getElementsByClassName('imageBox')[0] !== undefined) {
+  //       images = windowElement.current.getElementsByClassName('imageBox')[0].innerHTML
+  //       // 获取 unsplashApi 的 download_location
+  //       unsplash_download_location = windowElement.current.getElementsByClassName('images')[0].getElementsByTagName('img')[0].parentElement?.getAttribute('data-downloadlocation')
+  //     }
 
-    }
+  //     // console.log(images);
 
-    // 发送消息给 background
-    let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
-    sending.then(handleResponse, handleError);
+  //     // 处理样式，避免 Anki 内显示异常
+  //     images = images.replace(/style=/gi, '');
+  //     images = images.replace(/width/gi, '');
 
-    // 数据埋点
-    // amplitude.track('addToAnki');
-    browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'addToAnki' })
+  //   }
 
-  }
+  //   const cardStyle = ``
 
-  // 点击保存到 Anki
-  const handleSaveToAnkiBtnClick = (deck?: string) => {
+  //   // 请求 background 将数据保存到 Anki
 
 
+  //   // 单词发音
+  //   interface LangObject {
+  //     [key: string]: langType;
+  //   }
+  //   const thisLang: LangObject = lang
+
+  //   let audioUrl: string = 'http://dict.youdao.com/dictvoice?type=0&audio='
+  //   let audio: [] | [{}], filename
+  //   try {
+  //     audioUrl = thisLang[Lang['target']['id']]['audioURL']
+  //     // filename = Date.now().toString()
+  //     filename = ''
+
+  //     audio = [{
+  //       "url": audioUrl + keyWord,
+  //       "filename": "Scouter" + filename + ".mp3",
+  //       "fields": [
+  //         "Front"
+  //       ]
+  //     }]
+
+  //   } catch (error) {
+  //     audio = []
+  //   }
+
+  //   // 常规类型
+  //   let ankiBack = '<p> <blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote></p>' + container
+  //   if (keyWord.length > 20) {
+  //     // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
+  //     ankiBack = container + '<p><a href="' + window.location.href + '">Source</a></p>'
+  //   }
+
+  //   let p = {
+  //     "note": {
+  //       "deckName": deckName,
+  //       "modelName": modelName,
+  //       "fields": {
+  //         [front]: keyWord,
+  //         [back]: cardStyle + ankiBack
+  //       },
+  //       "audio": audio,
+  //       "tags": [
+  //         "Scouter"
+  //       ]
+  //     }
+  //   }
 
-    // 根据是否为完形填空申请不同的卡片模板
-    const container = windowElement.current?.getElementsByClassName('messages')[0].innerHTML!
-    const selectionText = windowElement.current?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
-    let isAnkiSpace = false
-    if (container || selectionText) {
-      if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0 || selectionText.indexOf('class="ankiSpace') >= 0) {
-        isAnkiSpace = true
-      }
-    }
+  //   // 完形填空类型
+  //   if (ScouterSelection.indexOf('class="ankiSpace"') >= 0 || container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
 
-    setAddToAnkiStatus({ 'status': 'loading', 'noteId': 0 })
+  //     let newFront: string
 
+  //     newFront = '<p>' + ScouterSelection + '</p>' + '<blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote>' + container
 
-    function setAnkiInfo(ankiInfo: AnkiInfoType) {
+  //     if (keyWord.length > 20) {
+  //       // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
+  //       newFront = '<p>' + ScouterSelection + '</p>' + container + '<p> <a href="' + window.location.href + '">Source</a></p>'
+  //     }
 
+  //     p = {
+  //       "note": {
+  //         "deckName": deckName,
+  //         "modelName": modelName,
+  //         "fields": {
+  //           [front]: newFront,
+  //           [back]: ''
+  //         },
+  //         "audio": [],
+  //         "tags": [
+  //           "Scouter"
+  //         ]
+  //       }
+  //     }
 
-      const models = ankiInfo.models
+  //   }
 
-      let modelName: string = '', field1: string = '', field2: string = ''
-      models.forEach((model: any) => {
+  //   // 发送消息给 background
+  //   let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
+  //   sending.then(handleResponse, handleError);
 
-        if (model.isAnkiSpace === isAnkiSpace) {
-          modelName = model.modelName
-          field1 = model.field1
-          field2 = model.field2
-        }
+  //   // 数据埋点
+  //   // amplitude.track('addToAnki');
+  //   browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'addToAnki' })
 
+  // }
 
+  // // 点击保存到 Anki
+  // const handleSaveToAnkiBtnClick = (deck?: string) => {
 
-      });
+  //   // 根据是否为完形填空申请不同的卡片模板
+  //   const container = windowElement.current?.getElementsByClassName('messages')[0].innerHTML!
+  //   const selectionText = windowElement.current?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
+  //   let isAnkiSpace = false
+  //   if (container || selectionText) {
+  //     if (container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0 || selectionText.indexOf('class="ankiSpace') >= 0) {
+  //       isAnkiSpace = true
+  //     }
+  //   }
 
-      return {
-        'modelName': modelName,
-        'field1': field1,
-        'field2': field2
-      }
+  //   setAddToAnkiStatus({ 'status': 'loading', 'noteId': 0 })
 
-    }
 
-    if (userInfo?.anki) {
+  //   function setAnkiInfo(ankiInfo: AnkiInfoType) {
 
-      const thisDeck = deck ? deck : userInfo?.anki.defaultDeckName
 
-      const ankiInfo = setAnkiInfo(userInfo?.anki)
+  //     const models = ankiInfo.models
 
-      // 添加到 Anki 中
-      addToAnki(thisDeck, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+  //     let modelName: string = '', field1: string = '', field2: string = ''
+  //     models.forEach((model: any) => {
 
-    } else {
+  //       if (model.isAnkiSpace === isAnkiSpace) {
+  //         modelName = model.modelName
+  //         field1 = model.field1
+  //         field2 = model.field2
+  //       }
 
-      // 获取 Anki 牌组信息
-      browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, }).then((result) => {
 
-        if (result.result === 'success') {
 
-          const ankiInfo = setAnkiInfo(result.data)
-          const thisDeck = deck ? deck : userInfo?.anki.defaultDeckName
-          // 添加到 Anki 中
-          addToAnki(thisDeck!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+  //     });
 
+  //     return {
+  //       'modelName': modelName,
+  //       'field1': field1,
+  //       'field2': field2
+  //     }
 
-        } else {
+  //   }
 
-          // 反馈错误信息
-          alert(result.error.error)
-          setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
+  //   if (userInfo?.anki) {
 
-        }
+  //     const thisDeck = deck ? deck : userInfo?.anki.defaultDeckName
 
+  //     const ankiInfo = setAnkiInfo(userInfo?.anki)
 
+  //     // 添加到 Anki 中
+  //     addToAnki(thisDeck, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
 
-      })
+  //   } else {
 
+  //     // 获取 Anki 牌组信息
+  //     browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, }).then((result) => {
 
-    }
+  //       if (result.result === 'success') {
 
-  }
+  //         const ankiInfo = setAnkiInfo(result.data)
+  //         const thisDeck = deck ? deck : userInfo?.anki.defaultDeckName
+  //         // 添加到 Anki 中
+  //         addToAnki(thisDeck!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
 
-  // 接收 background 的回复
-  function handleResponse(message: any) {
 
-    // console.log(message);
+  //       } else {
 
-    if (message.error === null) {
+  //         // 反馈错误信息
+  //         alert(result.error.error)
+  //         setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
-      setAddToAnkiStatus({ 'status': 'success', 'noteId': message.data })
+  //       }
 
-    } else {
-      alert(message.error)
-      setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
-    }
 
-  }
 
-  function handleError(erro: any) {
-    setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
-    // console.log(erro);
-  }
+  //     })
+
+
+  //   }
+
+  // }
+
+
+
+
+
 
   // GPT 生成消息时，自动定位到消息列表底部，方便用户阅读
   function scrollToBottom(canSroll: boolean = false) {
@@ -1285,7 +1244,8 @@ export function PopupCard(props: any) {
           }}
         >
 
-          <Nav handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick}
+          <Nav
+            // handleSaveToAnkiBtnClick={handleSaveToAnkiBtnClick}
             addToAnkiStatus={addToAnkiStatus}
             onMouseDown={handleMouseDown}
             handleMenuItemClick={executivePrompt}
@@ -1294,6 +1254,8 @@ export function PopupCard(props: any) {
             prompts={prompts}
             lastExecutedPrompt={lastExecutedPrompt}
             keyWord={props.data.keyWord}
+            Sentence={props.data.Sentence}
+            windowElement={windowElement.current}
           />
 
           <div className='container flex-grow flex flex-col overflow-auto'
