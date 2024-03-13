@@ -8,7 +8,6 @@ import { Tooltip } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';
 import { StyleSheetManager } from 'styled-components';
 
-
 import { useUserInfoContext } from '../lib/userInfo'
 
 import { fetchcurrentLanguage } from '../lib/lang';
@@ -31,6 +30,7 @@ import { languageCodes } from "../lib/lang"
 import { cardStyle } from '../util'
 
 import { popupCardStyle } from '../PopupCard/style'
+import { ShortcutButton } from './ShortcutButton'
 
 import LOGO from '../assets/icon128.png'
 
@@ -45,6 +45,9 @@ import styled, { css } from 'styled-components';
 declare var InstallTrigger: any;
 const isFirefox = typeof InstallTrigger !== 'undefined';
 
+// 容器类目
+const CONTAINER_CLASSNAME = 'container'
+const SHORTCUT_BUTTON_CLASSNAME = 'ShortcutButtonContainer'
 
 // 记录当前窗口是否 Pin 住
 let isPin = false
@@ -55,9 +58,9 @@ let donotClosePopupCard = false
 let MyBox: HTMLElement | null = document.getElementById('__jiang-scouter');
 // console.log(MyBox);
 
-// container 承载 UI 组件
+// container 承载主窗口的 UI 组件
 let container = document.createElement('div')
-container.className = 'container'
+container.className = CONTAINER_CLASSNAME
 // 使用 shadow 来隔离样式
 let shadowRoot: any = undefined
 
@@ -67,7 +70,8 @@ if (MyBox === null || MyBox === undefined) {
   MyBox = document.createElement('div')
   MyBox.id = '__jiang-scouter'
   document.getElementsByTagName('html')[0].appendChild(MyBox);
-  MyBox.style.display = 'none' //默认隐藏
+  // MyBox.style.display = 'none' //默认隐藏
+  MyBox.style.display = 'block'
 
   shadowRoot = MyBox?.attachShadow({ mode: 'open' });
 
@@ -94,10 +98,11 @@ if (MyBox === null || MyBox === undefined) {
 
 }
 
-
+// 用户付费状态等信息、用户的 Anki 信息
 let USER_INFO: userInfoType = { userId: 'unknow', verified: false }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 
+// 获取用户信息
 const thisGetUserInfo = async () => {
 
   try {
@@ -105,7 +110,7 @@ const thisGetUserInfo = async () => {
     // USER_INFO = await getUserInfo()
 
     USER_INFO = await browser.runtime.sendMessage({ 'type': 'getUserInfo', 'messages': {}, })
-    
+
   } catch (error) {
     console.log(error);
 
@@ -182,13 +187,11 @@ const thisGetUserInfo = async () => {
 
 }
 
-thisGetUserInfo()
-
 let port = browser.runtime.connect({
   name: 'fromContentScript'
 })
 
-// 接收 background 消息（目前是通过浏览器的右键菜单触发）
+// 接收 background 消息（目前是通过浏览器的右键菜单、快捷键触发）
 browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
   // console.log('content script onMessage:');
@@ -201,10 +204,10 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     if (MyBox !== null && MyBox !== undefined) {
       // 如果已存在容器
 
-      if (MyBox.shadowRoot?.querySelector('.container') === null) {
+      if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
         // 如果不存在 PopupCard
         container = document.createElement('div')
-        container.className = 'container'
+        container.className = CONTAINER_CLASSNAME
         shadowRoot?.appendChild(container)
       }
 
@@ -221,7 +224,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
 
 
-      MyBox.style.display = 'block'
+      // MyBox.style.display = 'block'
 
       // 移除旧内容，避免 2 次渲染混杂在一起
       // container.parentNode?.removeChild(container);
@@ -229,7 +232,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     } else {
       // console.log('不存在 Box 容器');
       container = document.createElement('div')
-      container.className = 'container'
+      container.className = CONTAINER_CLASSNAME
       shadowRoot?.appendChild(container)
     }
 
@@ -242,27 +245,25 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
       showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
     }
 
-    document.addEventListener('selectionchange', handleSelectionchange);
-    document.addEventListener('mouseup', handleMouseup);
 
-    // 监听页面点击事件
-    document.onmousedown = function (event) {
+    // // 监听页面点击事件
+    // document.onmousedown = function (event) {
 
-      if (MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
-        // 如果点击的不是插件窗口及其子元素，则关闭窗口
-        if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
+    //   if (MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
+    //     // 如果点击的不是插件窗口及其子元素，则关闭窗口
+    //     if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
 
-          // 隐藏窗口
-          container.parentNode?.removeChild(container);
+    //       // 隐藏窗口
+    //       container.parentNode?.removeChild(container);
 
-          document.removeEventListener('selectionchange', handleSelectionchange);
-          document.removeEventListener('mouseup', handleMouseup);
+    //       // document.removeEventListener('selectionchange', handleSelectionchange);
+    //       // document.removeEventListener('mouseup', handleMouseup);
 
-          port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+    //       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
-        }
-      }
-    }
+    //     }
+    //   }
+    // }
 
     container.onmousedown = (event) => {
       // 隐藏 setAnkiSpaceButton
@@ -285,6 +286,8 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
 // 显示应用窗口
 async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
+
+  console.log('显示应用窗口');
 
   let lang = await fetchcurrentLanguage()
 
@@ -359,51 +362,71 @@ export const setDonotClosePopupCard = (value: boolean) => {
   donotClosePopupCard = value
 }
 
+
+
+// const handleSelectionchange = () => {
+
+//   let selection = window.getSelection();
+//   if (selection) {
+//     console.log('selection.toString():');
+//     console.log(selection.toString());
+
+//     isTextSelected = selection.toString().length > 0;
+//   }
+// }
+
+
 let isTextSelected = false;
-
-const handleSelectionchange = () => {
-
-  // let selection = window.getSelection();
-  // if (selection) {
-  //   console.log('selection.toString():');
-  //   console.log(selection.toString());
-
-  //   isTextSelected = selection.toString().length > 0;
-  // }
-}
+let lastSelection = {
+  anchorNode: null,
+  anchorOffset: 0,
+  focusNode: null,
+  focusOffset: 0,
+};
 
 const handleMouseup = (event: any) => {
 
-  // console.log('handleMouseup');
-  // console.log(isTextSelected);
-  // console.log(donotClosePopupCard);
 
   const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
 
   // 获取用户在宿主网页上选中的内容
   const selection = getSelection(isInShadow)
 
+
+  // console.log('handleMouseup');
+  // console.log(isTextSelected);
+  // console.log(donotClosePopupCard);
+  // console.log(selection);
+  // console.log(isInShadow);
+
+
   if (selection) {
     isTextSelected = selection.selection.toString().length > 0;
   }
 
-
+  // 有选中文字且未开启 Prompt 设置界面（如果开启 Prompt 设置界面而仍然执行查询任务时，会导致不必要的任务执行）
   if (isTextSelected && !donotClosePopupCard) {
 
-    // console.log('isTextSelected && !donotClosePopupCard');
-
-
     if (!isInShadow) {
-
+      console.log(event);
       // 在 PopupCard 范围外触发
 
-      isTextSelected = false;
+      // isTextSelected = false;
 
       // 停止旧的对话
-      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+      try {
+        port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+      } catch (error) {
+        // 重新链接
+        port = browser.runtime.connect({
+          name: 'fromContentScript'
+        })
+        port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+      }
 
-      // 显示窗口
-      if (selection && selection?.keyWord.length > 0 && selection.selection.anchorNode?.nodeName === '#text') {
+
+      // 显示窗口/更新窗口信息
+      if (selection && selection?.keyWord.length > 0 && isPin && selection.selection.anchorNode?.nodeName === '#text') {
         showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, true)
       }
 
@@ -424,7 +447,7 @@ const handleMouseup = (event: any) => {
       const selectedTextString = selectedText.toString()
       const sentence = ''
 
-      const PopupCardContainer = container.getElementsByClassName('container')[0]
+      const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
       const messagesBox = container.getElementsByClassName('messages')[0]
 
       // console.log(selectedText);
@@ -467,6 +490,107 @@ const handleMouseup = (event: any) => {
     }
 
   }
+
+  if (!isTextSelected) {
+
+    // 没有选中任何文字
+    console.log(event);
+    // 移除快捷按钮
+    console.log('移除快捷按钮')
+    setTimeout(() => {
+      const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
+      if (ShortcutButtonContainer) {
+        ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
+      }
+
+    }, 10);
+
+
+  } else {
+    // 有选中文字
+
+
+    // 显示快捷按钮
+    if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null) {
+      // 记录最近选中的文字
+      const range = selection?.selection.getRangeAt(0);
+      lastSelection = {
+        // 保存各个属性的引用和值
+        anchorNode: range.startContainer,
+        anchorOffset: range.startOffset,
+        focusNode: range.endContainer,
+        focusOffset: range.endOffset,
+      };
+
+      // 如果不存在按钮
+      let ShortcutButtonContainer = document.createElement('div')
+      ShortcutButtonContainer.className = SHORTCUT_BUTTON_CLASSNAME
+      shadowRoot?.appendChild(ShortcutButtonContainer)
+
+      ReactDOM.render(
+
+        <React.StrictMode>
+          <StyleSheetManager target={shadowRoot}>
+            <ShortcutButton
+              position={{
+                x: event.pageX + 10,
+                y: event.pageY + 10
+              }}
+              handleShortcutButtonClick={(runPrompt: boolean) => {
+
+                // event.stopPropagation(); // 阻止事件冒泡
+                console.log('handleShortcutButtonClick');
+                if (selection) {
+
+                  if (MyBox?.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
+                    // 如果不存在 PopupCard
+                    container = document.createElement('div')
+                    container.className = CONTAINER_CLASSNAME
+                    shadowRoot?.appendChild(container)
+                  }
+
+                  const newSelection = window.getSelection();
+                  // 重新选中划词区域
+                  if (lastSelection) {
+
+                    // 创建一个范围对象
+                    const newRange = document.createRange();
+                    const anchorNode = lastSelection.anchorNode;
+                    const focusNode = lastSelection.focusNode;
+
+                    if (anchorNode && focusNode) {
+                      // 使用保存的 selected Range 恢复
+                      newRange.setStart(anchorNode, lastSelection?.anchorOffset);
+                      newRange.setEnd(focusNode, lastSelection?.focusOffset);
+                      // 获取 Selection 对象
+
+                      // 移除所有现有的选择
+                      newSelection!.removeAllRanges();
+                      // 添加新的选区
+                      newSelection!.addRange(range);
+                    }
+
+                  }
+
+                  // 移除快捷按钮
+                  const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
+                  if (ShortcutButtonContainer) {
+                    ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
+                  }
+
+                  // 显示窗口
+                  showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, newSelection, container, shadowRoot, isPin, runPrompt)
+
+                }
+              }} />
+          </StyleSheetManager>
+        </React.StrictMode >,
+        ShortcutButtonContainer
+      );
+
+    }
+  }
+
 }
 
 const getSelection = (isInShadow?: boolean) => {
@@ -684,7 +808,7 @@ function ToolBar(props: ToolBarProps) {
 
     const contextBox = ContextBox.current
     const popupCard = container.querySelector('#LearningEnglish2023')
-    const PopupCardContainer = container.getElementsByClassName('container')[0]
+    const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
     const messagesBox = container.querySelector('.messages')
 
     //设置按钮的位置
@@ -738,7 +862,7 @@ function ToolBar(props: ToolBarProps) {
 
   const handleFollowUpMenuClick = (event: any) => {
 
-    const PopupCardContainer = container.getElementsByClassName('container')[0]
+    const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
     const messagesBox = container.querySelector('.messages')
 
     const sentence = getSelection(true)
@@ -769,8 +893,6 @@ function ToolBar(props: ToolBarProps) {
 
     let left = (selectedTextX - followUpMenuBoxX + selectedTextWidth - 40)
     let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight)
-
-
 
     // X 坐标的最大最小值
     left = Math.max(10, Math.min(maxX, left));
@@ -905,3 +1027,31 @@ function ToolBar(props: ToolBarProps) {
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////
+
+// 获取用户信息
+thisGetUserInfo()
+// 监听页面鼠标抬起事件
+document.addEventListener('mouseup', handleMouseup);
+// 监听页面鼠标按下事件
+document.onmousedown = function (event) {
+  console.log(event);
+  console.log(event.composedPath());
+  const element = event.composedPath()[0]
+  if (element instanceof HTMLElement && !element.classList.contains('ShortcutButton') && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
+    // 如果点击的不是快捷按钮、插件窗口及其子元素，则关闭窗口
+    if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
+
+      // 隐藏窗口
+      console.log('隐藏窗口')
+      container.parentNode?.removeChild(container);
+      // document.removeEventListener('selectionchange', handleSelectionchange);
+      // document.removeEventListener('mouseup', handleMouseup);
+
+      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+
+    }
+  }
+}
+
+// document.addEventListener('selectionchange', handleSelectionchange);

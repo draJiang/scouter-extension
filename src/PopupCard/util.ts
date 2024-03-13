@@ -68,7 +68,7 @@ export const windowInitialization = (data: { isPin: boolean, windowElement: any,
 
         const clampedX = Math.max(minX, Math.min(newX, maxX));
         const clampedY = Math.max(minY, Math.min(newY, maxY));
-        // console.log(props.selection.getRangeAt(0));
+        console.log(data.selection);
 
         data.windowElement.current.style.left = `${clampedX}px`;
         data.windowElement.current.style.top = `${clampedY}px`;
