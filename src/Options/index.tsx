@@ -10,7 +10,7 @@ import { ankiAction, getDefaultDeckName } from '../util'
 import { BuyLicenseKeyDrawer } from './BuyLicenseKeyDrawer'
 import { ProTag } from "../Components/ProTag";
 
-import { theme, Button, Radio, Tooltip, Tabs, Input, Form, Space, Divider, ConfigProvider, Select, Drawer, Tag } from 'antd';
+import { theme, Button, Radio, Tooltip, Switch, Input, Form, Space, Divider, ConfigProvider, Select, Drawer, Tag } from 'antd';
 import type { TabsProps } from 'antd';
 
 import { ThunderboltTwoTone, CheckCircleTwoTone, InfoCircleOutlined } from '@ant-design/icons';
@@ -164,7 +164,7 @@ export const Options = () => {
     getSettings().then(async (items) => {
       // setOpenApiKey(items.openApiKey ?? null);
       console.log(items);
-      
+
 
       if (items.apiKeySelection === 'chatGPTWeb') {
         // 显示 licenseKey
@@ -198,10 +198,9 @@ export const Options = () => {
         licenseKey: items.licenseKey,
         chatGPTWeb: items.chatGPTWeb,
         model: items.model,
-        newLicenseKey: items.newLicenseKey
+        newLicenseKey: items.newLicenseKey,
+        contextMenu: items.contextMenu
       });
-
-      // console.log(items);
 
 
     })
@@ -234,6 +233,7 @@ export const Options = () => {
     //   setIsUseOpenAIKey(true)
     // }
 
+    console.log(values);
 
     // Saves options to chrome.storage.sync.
     let setStorage = await browser.storage.sync.set(
@@ -248,7 +248,8 @@ export const Options = () => {
         chatGPTWeb: values['chatGPTWeb'],
         model: values['model'],
         apiKeySelection: values['apiKeySelection'],
-        newLicenseKey: values['newLicenseKey']
+        newLicenseKey: values['newLicenseKey'],
+        contextMenu: values['contextMenu']
       }
     ).then(item => {
 
@@ -432,8 +433,7 @@ export const Options = () => {
               <div style={{
                 display: radioValue === 'chatGPTWeb' ? 'block' : 'none'
               }}>
-                ⚠️This Feature is Unstable, Use With Caution.
-                Please Ensure that You Are Logged into <a target='__blank' href='https://chat.openai.com/'>ChatGPT</a>.
+                ⚠️Sorry, this feature is temporarily unavailable.
               </div>
 
 
@@ -488,6 +488,20 @@ export const Options = () => {
 
 
                 </Select>
+              </Form.Item>
+
+            </section>
+
+            <section>
+
+              <Form.Item
+                name="contextMenu"
+                valuePropName="checked"
+                label="🚀Context Menu"
+                extra={<p>Display the menu when you select any text</p>}
+              >
+                <Switch />
+
               </Form.Item>
 
             </section>

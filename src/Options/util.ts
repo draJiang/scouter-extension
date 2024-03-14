@@ -11,7 +11,8 @@ export async function getSettings() {
         "ankiDeckName": '',
         "licenseKey": '',
         "model": models[0]['id'], "apiKeySelection": 'myOwnOpenAiKey',
-        "newLicenseKey": ''
+        "newLicenseKey": '',
+        "contextMenu": false
     })
     return items
 }

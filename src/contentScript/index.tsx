@@ -99,7 +99,7 @@ if (MyBox === null || MyBox === undefined) {
 }
 
 // 用户付费状态等信息、用户的 Anki 信息
-let USER_INFO: userInfoType = { userId: 'unknow', verified: false }
+let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 
 // 获取用户信息
@@ -265,19 +265,19 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
     //   }
     // }
 
-    container.onmousedown = (event) => {
-      // 隐藏 setAnkiSpaceButton
-      const contextBox = container.getElementsByClassName('contextBox2')[0]
+    // container.onmousedown = (event) => {
+    //   // 隐藏 setAnkiSpaceButton
+    //   const contextBox = container.getElementsByClassName('contextBox2')[0]
 
-      if (contextBox) {
-        // 点击的不是 setAnkiSpaceButton 时才隐藏
-        if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
-          contextBox.parentNode?.removeChild(contextBox)
-        }
+    //   if (contextBox) {
+    //     // 点击的不是 setAnkiSpaceButton 时才隐藏
+    //     if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
+    //       contextBox.parentNode?.removeChild(contextBox)
+    //     }
 
-      }
+    //   }
 
-    }
+    // }
 
 
   }
@@ -445,21 +445,21 @@ const handleMouseup = (event: any) => {
       }
 
       const selectedTextString = selectedText.toString()
-      const sentence = ''
+      // const sentence = ''
 
       const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
-      const messagesBox = container.getElementsByClassName('messages')[0]
+      // const messagesBox = container.getElementsByClassName('messages')[0]
 
       // console.log(selectedText);
       // console.log(messagesBox?.contains(selectedText.baseNode.parentNode as Node));
 
-      let isInMessages = false
-      if (selectedText.baseNode) {
-        if (messagesBox === selectedText.baseNode.parentNode || messagesBox?.contains(selectedText.baseNode.parentNode as Node)) {
-          //在 messages 容器内操作，则显示操作按钮
-          isInMessages = true
-        }
-      }
+      // let isInMessages = false
+      // if (selectedText.baseNode) {
+      //   if (messagesBox === selectedText.baseNode.parentNode || messagesBox?.contains(selectedText.baseNode.parentNode as Node)) {
+      //     //在 messages 容器内操作，则显示操作按钮
+      //     isInMessages = true
+      //   }
+      // }
 
 
 
@@ -478,8 +478,6 @@ const handleMouseup = (event: any) => {
             <StyleSheetManager target={shadowRoot}>
               <ToolBar selectedText={selectedText.getRangeAt(0).getBoundingClientRect()} selectedTextString={selectedTextString} range={range} />
             </StyleSheetManager></UserInfoContext.Provider >, contextBox2);
-
-
       }
 
 
@@ -511,7 +509,7 @@ const handleMouseup = (event: any) => {
 
 
     // 显示快捷按钮
-    if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null) {
+    if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null && USER_INFO.contextMenu && !isInShadow) {
       // 记录最近选中的文字
       const range = selection?.selection.getRangeAt(0);
       lastSelection = {
@@ -539,7 +537,6 @@ const handleMouseup = (event: any) => {
               handleShortcutButtonClick={(runPrompt: boolean) => {
 
                 // event.stopPropagation(); // 阻止事件冒泡
-                console.log('handleShortcutButtonClick');
                 if (selection) {
 
                   if (MyBox?.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
@@ -1052,6 +1049,26 @@ document.onmousedown = function (event) {
 
     }
   }
+
+  const contextBox = container.getElementsByClassName('contextBox2')[0]
+  // 点击插件窗口且不是 ToolBar
+  const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
+  const isInToolBar = contextBox === event.composedPath()[0] || contextBox?.contains(event.composedPath()[0] as Node)
+  if (isInShadow && !isInToolBar) {
+    // 隐藏 ToolBar
+
+    if (contextBox) {
+      // 点击的不是 setAnkiSpaceButton 时才隐藏
+      if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
+        contextBox.parentNode?.removeChild(contextBox)
+      }
+
+    }
+  }
+
+
 }
 
+
 // document.addEventListener('selectionchange', handleSelectionchange);
+

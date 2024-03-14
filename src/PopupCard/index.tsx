@@ -204,7 +204,7 @@ export function PopupCard(props: any) {
 
   useEffect(() => {
     console.log(props.data);
-    
+
     // 渲染 Prompt 列表
     initializePromptList()
 
@@ -1235,6 +1235,7 @@ export function PopupCard(props: any) {
           left: 10,
           top: 10,
         }}
+
       >
 
         <ConfigProvider

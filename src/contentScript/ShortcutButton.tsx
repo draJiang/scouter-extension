@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import styled, { css } from 'styled-components';
-import { RocketIcon, SquareIcon } from '@radix-ui/react-icons'
+import { PaperPlaneIcon, OpenInNewWindowIcon } from '@radix-ui/react-icons'
 import Logo from '../Components/Logo'
 
 interface ShortcutButtonProps {
@@ -20,7 +20,7 @@ const ScouterButton = styled.button`
     flex-direction: row;
     align-items: center;
 
-    padding: 4px;
+    padding: 4px 8px;
 
     &:hover {
         background-color: #F6F6F6;
@@ -71,7 +71,7 @@ export function ShortcutButton(props: ShortcutButtonProps) {
 
             // 如果超出右侧边界，向左调整
             if (left + buttonWidth > window.innerWidth) {
-                left = window.innerWidth - buttonWidth;
+                left = window.innerWidth - buttonWidth - 10;
             }
 
             // // 如果超出底部边界，向上调整
@@ -102,8 +102,8 @@ export function ShortcutButton(props: ShortcutButtonProps) {
             top={position.y}
         >
 
-            <div style={{
-                padding: '6px',
+            {/* <div style={{
+                padding: '6px 8px',
                 borderRight: '1px solid rgba(5, 5, 5, .06)',
                 height: '40px',
                 display: 'flex',
@@ -113,7 +113,7 @@ export function ShortcutButton(props: ShortcutButtonProps) {
                     width: '18px',
                     height: '18px',
                 }} />
-            </div>
+            </div> */}
 
             <div style={{
                 padding: '6px',
@@ -123,18 +123,18 @@ export function ShortcutButton(props: ShortcutButtonProps) {
             }}>
                 <ScouterButton
                     style={{
-                        marginRight: '4px'
+                        // marginRight: '4px'
                     }}
                     className="ShortcutButton"
                     onClick={() => props.handleShortcutButtonClick(true)}
                 >
-                    <RocketIcon style={{ marginRight: '4px' }} />Run
+                    <PaperPlaneIcon style={{ marginRight: '4px' }} />Run
                 </ScouterButton>
                 <ScouterButton
                     className="ShortcutButton"
                     onClick={() => props.handleShortcutButtonClick(false)}
                 >
-                    <SquareIcon style={{ marginRight: '4px' }} /> Open
+                    <OpenInNewWindowIcon style={{ marginRight: '4px' }} /> Open
                 </ScouterButton>
             </div>
 

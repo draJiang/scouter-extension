@@ -865,7 +865,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
   return new Promise((resolve, reject) => {
 
-    browser.storage.sync.get(['userId', 'newLicenseKey']).then(async (result) => {
+    browser.storage.sync.get(['userId', 'newLicenseKey', 'contextMenu']).then(async (result) => {
 
       if (browser.runtime.lastError) {
         reject(chrome.runtime.lastError);
@@ -910,7 +910,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
       }
 
 
-      resolve({ 'userId': uniqueId!, 'verified': verified })
+      resolve({ 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu })
 
     })
 

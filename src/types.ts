@@ -124,7 +124,8 @@ export type ImageType = {
 
 export type userInfoType = {
     userId: string,
-    verified: boolean
+    verified: boolean,
+    contextMenu: boolean
 };
 
 export type langType = {
