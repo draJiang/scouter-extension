@@ -79,16 +79,6 @@ export function ShortcutButton(props: ShortcutButtonProps) {
             //     top = window.innerHeight - buttonHeight;
             // }
 
-
-            // console.log(props.position.x)
-            // console.log(props.position.y)   
-            // console.log('===')
-            // console.log(buttonWidth);
-            // console.log(buttonHeight);
-            // console.log('===')
-            // console.log(window.innerWidth);
-            // console.log(window.innerHeight);
-
         }
 
         setPosition({ x: left, y: top })

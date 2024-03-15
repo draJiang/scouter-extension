@@ -431,7 +431,8 @@ export const Options = () => {
 
               {/* chatGPTWeb */}
               <div style={{
-                display: radioValue === 'chatGPTWeb' ? 'block' : 'none'
+                display: radioValue === 'chatGPTWeb' ? 'block' : 'none',
+                color:'#F08A24'
               }}>
                 ⚠️Sorry, this feature is temporarily unavailable.
               </div>

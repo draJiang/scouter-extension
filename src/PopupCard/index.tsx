@@ -203,8 +203,6 @@ export function PopupCard(props: any) {
 
 
   useEffect(() => {
-    console.log(props.data);
-
     // 渲染 Prompt 列表
     initializePromptList()
 

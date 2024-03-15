@@ -287,8 +287,6 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 // 显示应用窗口
 async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
 
-  console.log('显示应用窗口');
-
   let lang = await fetchcurrentLanguage()
 
   ReactDOM.render(
@@ -408,7 +406,6 @@ const handleMouseup = (event: any) => {
   if (isTextSelected && !donotClosePopupCard) {
 
     if (!isInShadow) {
-      console.log(event);
       // 在 PopupCard 范围外触发
 
       // isTextSelected = false;
@@ -492,9 +489,7 @@ const handleMouseup = (event: any) => {
   if (!isTextSelected) {
 
     // 没有选中任何文字
-    console.log(event);
     // 移除快捷按钮
-    console.log('移除快捷按钮')
     setTimeout(() => {
       const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
       if (ShortcutButtonContainer) {
@@ -509,7 +504,7 @@ const handleMouseup = (event: any) => {
 
 
     // 显示快捷按钮
-    if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null && USER_INFO.contextMenu && !isInShadow) {
+    if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null && USER_INFO.contextMenu && !isInShadow && !isPin) {
       // 记录最近选中的文字
       const range = selection?.selection.getRangeAt(0);
       lastSelection = {
@@ -1032,15 +1027,13 @@ thisGetUserInfo()
 document.addEventListener('mouseup', handleMouseup);
 // 监听页面鼠标按下事件
 document.onmousedown = function (event) {
-  console.log(event);
-  console.log(event.composedPath());
   const element = event.composedPath()[0]
   if (element instanceof HTMLElement && !element.classList.contains('ShortcutButton') && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
     // 如果点击的不是快捷按钮、插件窗口及其子元素，则关闭窗口
     if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
 
       // 隐藏窗口
-      console.log('隐藏窗口')
+      // console.log('隐藏窗口')
       container.parentNode?.removeChild(container);
       // document.removeEventListener('selectionchange', handleSelectionchange);
       // document.removeEventListener('mouseup', handleMouseup);
