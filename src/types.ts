@@ -161,12 +161,12 @@ export type MessageForGPTType =
 type BodyType1 = {
     model: string;
     messages: MessageForGPTType[];
-    temperature: number;
-    max_tokens: number;
-    top_p: number;
-    frequency_penalty: number;
-    presence_penalty: number;
-    stream: boolean;
+    temperature?: number;
+    max_tokens?: number;
+    top_p?: number;
+    frequency_penalty?: number;
+    presence_penalty?: number;
+    stream?: boolean;
 }
 
 type BodyType2 = {

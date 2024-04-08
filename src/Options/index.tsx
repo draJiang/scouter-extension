@@ -172,6 +172,9 @@ export const Options = () => {
       } else if (items.apiKeySelection === 'myOwnOpenAiKey') {
         // 显示 openApiKey
         setRadioValue('myOwnOpenAiKey')
+      } else if (items.apiKeySelection === 'ollama') {
+        // 显示 ollama
+        setRadioValue('ollama')
       } else {
         setRadioValue('licenseKey')
       }
@@ -199,7 +202,9 @@ export const Options = () => {
         chatGPTWeb: items.chatGPTWeb,
         model: items.model,
         newLicenseKey: items.newLicenseKey,
-        contextMenu: items.contextMenu
+        contextMenu: items.contextMenu,
+        ollamaApiEndpoint: items.ollamaApiEndpoint,
+        ollamaModel: items.ollamaModel
       });
 
 
@@ -249,7 +254,9 @@ export const Options = () => {
         model: values['model'],
         apiKeySelection: values['apiKeySelection'],
         newLicenseKey: values['newLicenseKey'],
-        contextMenu: values['contextMenu']
+        contextMenu: values['contextMenu'],
+        ollamaModel: values['ollamaModel'],
+        ollamaApiEndpoint: values['ollamaApiEndpoint']
       }
     ).then(item => {
 
@@ -366,9 +373,10 @@ export const Options = () => {
                 name="apiKeySelection"
                 label="🔋In use"
               >
-                <Radio.Group onChange={onRadioChange} value={radioValue} style={{ marginBottom: 0, display: 'flex' }}>
+                <Radio.Group onChange={onRadioChange} value={radioValue} size="small" style={{ marginBottom: 0, display: 'flex' }}>
 
                   <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI</Radio.Button>
+                  <Radio.Button value="ollama" style={{ flex: '1', textAlign: 'center' }}>Ollama</Radio.Button>
                   <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>OpenRouter</Radio.Button>
                   <Radio.Button value="chatGPTWeb" style={{ flex: '1', textAlign: 'center' }}>ChatGPT</Radio.Button>
 
@@ -379,13 +387,6 @@ export const Options = () => {
               <div style={{
                 display: radioValue === 'myOwnOpenAiKey' ? 'block' : 'none'
               }}>
-                <Form.Item
-                  name="openApiKey"
-                  label="🔑Your Open API Key"
-                >
-                  <Input placeholder="We will not use your Key for any other purposes." type="password" />
-                </Form.Item>
-
 
                 <Form.Item
                   name="openApiEndpoint"
@@ -397,6 +398,39 @@ export const Options = () => {
                   }
                 >
                   <Input placeholder="https://api.openai.com" type="url" />
+                </Form.Item>
+
+                <Form.Item
+                  name="openApiKey"
+                  label="🔑Your Open API Key"
+                >
+                  <Input placeholder="We will not use your Key for any other purposes." type="password" />
+                </Form.Item>
+
+              </div>
+
+              {/* Ollama */}
+              <div style={{
+                display: radioValue === 'ollama' ? 'block' : 'none'
+              }}>
+                <Form.Item
+                  name="ollamaApiEndpoint"
+                  label="🔗API Endpoint"
+                >
+                  <Input placeholder="http://localhost:11434" type="url" />
+                </Form.Item>
+
+
+                <Form.Item
+                  name="ollamaModel"
+                  label="🤖Model"
+                  extra={
+                    <p style={{
+                      color: '#666'
+                    }}> <a target='__blank' href='https://jiangzilong.notion.site/How-to-use-Ollama-f8ff0d71198945b883e71e08f09cc9f5?pvs=4'>Learn More↗️</a></p>
+                  }
+                >
+                  <Input placeholder="llama2" type="text" />
                 </Form.Item>
               </div>
 
@@ -432,7 +466,7 @@ export const Options = () => {
               {/* chatGPTWeb */}
               <div style={{
                 display: radioValue === 'chatGPTWeb' ? 'block' : 'none',
-                color:'#F08A24'
+                color: '#F08A24'
               }}>
                 ⚠️Sorry, this feature is temporarily unavailable.
               </div>

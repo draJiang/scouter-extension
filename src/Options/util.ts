@@ -10,9 +10,12 @@ export async function getSettings() {
         "targetLanguage": 'United States',
         "ankiDeckName": '',
         "licenseKey": '',
-        "model": models[0]['id'], "apiKeySelection": 'myOwnOpenAiKey',
+        "model": models[0]['id'],
+        "apiKeySelection": 'myOwnOpenAiKey',
         "newLicenseKey": '',
-        "contextMenu": false
+        "contextMenu": false,
+        "ollamaModel": 'llama2',
+        "ollamaApiEndpoint": 'http://localhost:11434'
     })
     return items
 }

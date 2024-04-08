@@ -264,7 +264,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
       let openApiEndpoint: string = result.openApiEndpoint
 
-      if (openApiKey.length < 5 && licenseKey.length < 5 && apiKeySelection !== 'chatGPTWeb') {
+      if (openApiKey.length < 5 && licenseKey.length < 5 && apiKeySelection !== 'chatGPTWeb' && apiKeySelection !== 'ollama') {
 
         resolve({
           'result': 'failure',
@@ -325,6 +325,46 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           })
 
           break;
+        case 'ollama':
+          headers = { 'Content-Type': 'application/json', }
+          openApiEndpoint = result.ollamaApiEndpoint
+          // 去除端点末尾的 \ 符号
+          if (openApiEndpoint.slice(-1) === "/") {
+            openApiEndpoint = openApiEndpoint.slice(0, -1);
+          }
+
+          imgOpenApiEndpoint = ''
+          openApiEndpoint += '/api/chat'
+
+          body = {
+            "model": result.ollamaModel,
+            "messages": messages,
+            // "temperature": 0.7,
+            // "max_tokens": 420,
+            // "top_p": 1,
+            // "frequency_penalty": 0,
+            // "presence_penalty": 2,
+            // "stream": true
+          }
+
+          resolve({
+            'result': 'success',
+            'apiKeySelection': apiKeySelection,
+            'data': {
+              'chatCompletions': {
+                'url': openApiEndpoint,
+                'headers': headers,
+                'body': body
+              },
+              'imagesGenerations': {
+                'url': imgOpenApiEndpoint,
+                'headers': headers,
+              }
+            }
+
+          })
+
+          break;
         case 'myOwnOpenAiKey':
           // 使用用户自己的 Key
 
@@ -346,6 +386,48 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
               "presence_penalty": 2,
               "stream": true
             }
+
+          } else if (openApiEndpoint.indexOf('api.pawan.krd') > -1) {
+
+            // pawan
+            headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
+
+            // 去除端点末尾的 \ 符号
+            if (openApiEndpoint.slice(-1) === "/") {
+              openApiEndpoint = openApiEndpoint.slice(0, -1);
+            }
+
+            imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
+            openApiEndpoint += '/v1/chat/completions'
+
+
+            body = {
+              "model": "pai-001",
+              "messages": messages,
+              "temperature": 0.7,
+              "max_tokens": 420,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 2,
+              "stream": true
+            }
+
+            resolve({
+              'result': 'success',
+              'apiKeySelection': apiKeySelection,
+              'data': {
+                'chatCompletions': {
+                  'url': openApiEndpoint,
+                  'headers': headers,
+                  'body': body
+                },
+                'imagesGenerations': {
+                  'url': imgOpenApiEndpoint,
+                  'headers': headers,
+                }
+              }
+
+            })
 
           } else {
 
@@ -705,12 +787,10 @@ type SSEDataOptions = {
   onError?(error: Error): void;
 };
 
-export const fetchSSE = async (url: string, requestInit: RequestInit, options: SSEDataOptions) => {
+export const fetchSSE = async (url: string, requestInit: RequestInit, options: SSEDataOptions, apiType?: string) => {
   const { onMessage, onEnd, onError } = options;
 
   try {
-
-
 
     const response = await fetch(url, requestInit);
 
@@ -746,7 +826,29 @@ export const fetchSSE = async (url: string, requestInit: RequestInit, options: S
             break;
           }
           const str = new TextDecoder().decode(value);
-          parser.feed(str);
+
+          if (apiType === 'ollama') {
+            let contents = ''
+            const jsonStrings = str.trim().split('\n');
+            jsonStrings.forEach(jsonStr => {
+              try {
+                // 解析每个 JSON 字符串成为一个对象
+                const jsonObject = JSON.parse(jsonStr);
+                if (jsonObject.message && jsonObject.message.content) {
+                  contents += jsonObject.message.content;
+                }
+              } catch (error) {
+                console.error("Parsing error:", error);
+                // 处理解析错误，例如打印错误日志
+              }
+            });
+
+            onMessage && onMessage(contents);
+          } else {
+            parser.feed(str);
+          }
+
+
         }
       } finally {
         reader.releaseLock();

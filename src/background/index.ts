@@ -188,11 +188,13 @@ browser.runtime.onConnect.addListener(port => {
                   //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                   //   }
                   // }
-
-                  if (data.choices[0].finish_reason !== 'stop') {
-                    port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                  if (ApiType === 'ollama') {
+                    port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data })
+                  } else {
+                    if (data.choices[0].finish_reason !== 'stop') {
+                      port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                    }
                   }
-
 
                 },
                 onEnd: () => {
@@ -217,7 +219,7 @@ browser.runtime.onConnect.addListener(port => {
                   }
 
                 }
-              });
+              }, ApiType);
 
             }
 

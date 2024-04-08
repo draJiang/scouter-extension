@@ -502,6 +502,8 @@ const handleMouseup = (event: any) => {
   } else {
     // 有选中文字
 
+    // console.log(selection);
+
 
     // 显示快捷按钮
     if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null && USER_INFO.contextMenu && !isInShadow && !isPin) {
