@@ -390,6 +390,30 @@ const handleMouseup = (event: any) => {
   // 获取用户在宿主网页上选中的内容
   const selection = getSelection(isInShadow)
 
+  console.log(selection);
+
+  const range = selection?.selection.getRangeAt(0);
+  // lastSelection = {
+  //   // 保存各个属性的引用和值
+  //   anchorNode: range.startContainer,
+  //   anchorOffset: range.startOffset,
+  //   focusNode: range.endContainer,
+  //   focusOffset: range.endOffset,
+  // };
+
+  lastSelection = {
+    // 保存各个属性的引用和值
+    anchorNode: selection?.selection.anchorNode,
+    anchorOffset: selection?.selection.anchorOffset,
+    focusNode: selection?.selection.focusNode,
+    focusOffset: selection?.selection.focusOffset,
+  };
+
+  console.log(lastSelection)
+
+  console.log('=====');
+
+
 
   // console.log('handleMouseup');
   // console.log(isTextSelected);
@@ -502,20 +526,11 @@ const handleMouseup = (event: any) => {
   } else {
     // 有选中文字
 
-    // console.log(selection);
-
-
     // 显示快捷按钮
     if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null && USER_INFO.contextMenu && !isInShadow && !isPin) {
       // 记录最近选中的文字
-      const range = selection?.selection.getRangeAt(0);
-      lastSelection = {
-        // 保存各个属性的引用和值
-        anchorNode: range.startContainer,
-        anchorOffset: range.startOffset,
-        focusNode: range.endContainer,
-        focusOffset: range.endOffset,
-      };
+
+
 
       // 如果不存在按钮
       let ShortcutButtonContainer = document.createElement('div')
@@ -543,14 +558,21 @@ const handleMouseup = (event: any) => {
                     shadowRoot?.appendChild(container)
                   }
 
-                  const newSelection = window.getSelection();
+                  // const newSelection = window.getSelection();
+                  const selection = getSelection(isInShadow)
+                  const newSelection = selection?.selection
+
                   // 重新选中划词区域
                   if (lastSelection) {
+
+                    console.log('===============');
 
                     // 创建一个范围对象
                     const newRange = document.createRange();
                     const anchorNode = lastSelection.anchorNode;
                     const focusNode = lastSelection.focusNode;
+
+                    console.log(lastSelection)
 
                     if (anchorNode && focusNode) {
                       // 使用保存的 selected Range 恢复
@@ -573,7 +595,7 @@ const handleMouseup = (event: any) => {
                   }
 
                   // 显示窗口
-                  showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, newSelection, container, shadowRoot, isPin, runPrompt)
+                  showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection!.sentence }, newSelection, container, shadowRoot, isPin, runPrompt)
 
                 }
               }} />

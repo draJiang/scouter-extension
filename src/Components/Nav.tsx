@@ -77,10 +77,11 @@ export function Nav(props: NavProps) {
     useEffect(() => {
 
         defaultPrompt.current = getDefaultPrompt(props.keyWord, currentLanguage)
+        
         // 设置添加到 Anki 的操作状态
         setAddToAnkiStatus(props.addToAnkiStatus)
 
-    }, []);
+    }, [props.addToAnkiStatus]);
 
 
 
@@ -607,10 +608,14 @@ export function Nav(props: NavProps) {
                             marginRight: '10px'
                         }}>
                             {
-                                addToAnkiStatus.status == 'success' ? <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <span style={{
-                                    textDecoration: 'underline',
-                                    cursor: 'pointer'
-                                }} onClick={editNoteInAnki.bind(event, addToAnkiStatus.noteId)}>Anki</span></span> :
+                                addToAnkiStatus.status === 'success' ?
+
+                                    <span>< CheckCircleTwoTone twoToneColor="#52c41a" /> Added to <span style={{
+                                        textDecoration: 'underline',
+                                        cursor: 'pointer'
+                                    }} onClick={editNoteInAnki.bind(event, addToAnkiStatus.noteId)}>Anki</span></span>
+
+                                    :
 
                                     <Dropdown.Button size="small"
                                         overlayStyle={{ width: '50%' }}

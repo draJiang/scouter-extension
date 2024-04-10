@@ -205,6 +205,9 @@ export function PopupCard(props: any) {
   useEffect(() => {
     // 渲染 Prompt 列表
     initializePromptList()
+    
+    // 重复添加到 Anki 按钮的状态
+    // setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
     if (props.runPrompt || props.runPrompt === undefined) {
 
