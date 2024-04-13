@@ -242,7 +242,7 @@ export function PopupCard(props: any) {
       // 不执行任何 Prompt，由用户自行选择
 
       executivePrompt({ 'title': 'Default', 'getUnsplashImages': true, 'userPrompt': `Word:"{{keyWord}}", sentence: "{{sentence}}"`, 'id': 'Default' }, 'no')
-      setIsOpenMenu(true)
+      // setIsOpenMenu(true)
 
 
     }

@@ -77,7 +77,7 @@ export function Nav(props: NavProps) {
     useEffect(() => {
 
         defaultPrompt.current = getDefaultPrompt(props.keyWord, currentLanguage)
-        
+
         // 设置添加到 Anki 的操作状态
         setAddToAnkiStatus(props.addToAnkiStatus)
 
@@ -507,7 +507,9 @@ export function Nav(props: NavProps) {
                             onOpenChange={onMenuOpenChange}
                         >
 
-                            <DropdownMenu.Trigger asChild>
+                            <DropdownMenu.Trigger asChild
+                                onMouseEnter={() => setIsOpenPromptMenu(true)}
+                            >
                                 <button className="IconButton" aria-label="Customise options" style={{
                                     display: 'flex',
                                     alignItems: 'center'
@@ -539,7 +541,9 @@ export function Nav(props: NavProps) {
                                     animationDuration: '400ms',
                                     MozAnimationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                                     willChange: 'transform, opacity'
-                                }}>
+                                }}
+                                    onMouseLeave={() => setIsOpenPromptMenu(false)}
+                                >
 
 
                                     {/* 默认 Prompt */}
