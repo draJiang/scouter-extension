@@ -20,7 +20,9 @@ export const popupCardStyle = `
   background-color: #fff;
   border: 1px solid rgba(5, 5, 5, .06);
   border-radius: 4px;
-  box-shadow: 0px 8px 28px rgba(0,0,0,.16);
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
+  0 3px 6px -4px rgba(0, 0, 0, 0.12),
+  0 9px 28px 8px rgba(0, 0, 0, 0.05);
   z-index:9;
 
 }

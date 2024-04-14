@@ -4,37 +4,32 @@ import React, { useEffect, useRef, useState, createContext, useContext } from "r
 import ReactDOM from "react-dom";
 
 import { PopupCard } from "../PopupCard"
-import { Tooltip } from 'antd';
 import { StyleProvider } from '@ant-design/cssinjs';
 import { StyleSheetManager } from 'styled-components';
 
-import { useUserInfoContext } from '../lib/userInfo'
+
 
 import { fetchcurrentLanguage } from '../lib/lang';
 import { CurrentLanguageContext } from '../lib/locale'
-import { useCurrentLanguage } from '../lib/locale'
+
 
 import { UserInfoContext } from '../lib/userInfo'
-import { LetterCaseLowercaseIcon } from '@radix-ui/react-icons';
+import { ToolBar } from './ToolBar';
 
 // import { Button, message } from 'antd';
-import {
-  CustomerServiceOutlined
-} from '@ant-design/icons';
 
-import { getUserInfo, playTextToSpeech } from '../util'
 import { userInfoType, AnkiInfoType } from '../types'
 
-import { languageCodes } from "../lib/lang"
+
 
 import { cardStyle } from '../util'
 
 import { popupCardStyle } from '../PopupCard/style'
 import { ShortcutButton } from './ShortcutButton'
 
-import LOGO from '../assets/icon128.png'
 
-import styled, { css } from 'styled-components';
+
+
 
 // import './assets/tailwind.css';
 
@@ -46,7 +41,7 @@ declare var InstallTrigger: any;
 const isFirefox = typeof InstallTrigger !== 'undefined';
 
 // 容器类目
-const CONTAINER_CLASSNAME = 'container'
+export const CONTAINER_CLASSNAME = 'container'
 const SHORTCUT_BUTTON_CLASSNAME = 'ShortcutButtonContainer'
 
 // 记录当前窗口是否 Pin 住
@@ -382,10 +377,15 @@ let lastSelection = {
   focusOffset: 0,
 };
 
-const handleMouseup = (event: any) => {
+const handleMouseup = async (event: any) => {
 
-
+  // 是否在窗口中触发
   const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
+  // 是否在快捷按钮上触发
+  const path = event.composedPath();
+  const isClickedInsideShortcutButton = path.some((element: EventTarget & Element) => {
+    return element.classList && element.classList.contains('ShortcutButton');
+  });
 
   // 获取用户在宿主网页上选中的内容
   const selection = getSelection(isInShadow)
@@ -393,13 +393,6 @@ const handleMouseup = (event: any) => {
   console.log(selection);
 
   const range = selection?.selection.getRangeAt(0);
-  // lastSelection = {
-  //   // 保存各个属性的引用和值
-  //   anchorNode: range.startContainer,
-  //   anchorOffset: range.startOffset,
-  //   focusNode: range.endContainer,
-  //   focusOffset: range.endOffset,
-  // };
 
   lastSelection = {
     // 保存各个属性的引用和值
@@ -409,19 +402,6 @@ const handleMouseup = (event: any) => {
     focusOffset: selection?.selection.focusOffset,
   };
 
-  console.log(lastSelection)
-
-  console.log('=====');
-
-
-
-  // console.log('handleMouseup');
-  // console.log(isTextSelected);
-  // console.log(donotClosePopupCard);
-  // console.log(selection);
-  // console.log(isInShadow);
-
-
   if (selection) {
     isTextSelected = selection.selection.toString().length > 0;
   }
@@ -429,7 +409,7 @@ const handleMouseup = (event: any) => {
   // 有选中文字且未开启 Prompt 设置界面（如果开启 Prompt 设置界面而仍然执行查询任务时，会导致不必要的任务执行）
   if (isTextSelected && !donotClosePopupCard) {
 
-    if (!isInShadow) {
+    if (!isInShadow || isClickedInsideShortcutButton) {
       // 在 PopupCard 范围外触发
 
       // isTextSelected = false;
@@ -459,13 +439,13 @@ const handleMouseup = (event: any) => {
 
       // 显示完形填空操作按钮
 
-      if (isFirefox) {
-        selectedText = window.getSelection()
-      } else {
-        selectedText = shadowRoot.getSelection()
-      }
+      // if (isFirefox) {
+      //   selectedText = window.getSelection()
+      // } else {
+      //   selectedText = shadowRoot.getSelection()
+      // }
 
-      const selectedTextString = selectedText.toString()
+      const selectedTextString = selection!.keyWord.toString()
       // const sentence = ''
 
       const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
@@ -484,7 +464,7 @@ const handleMouseup = (event: any) => {
 
 
 
-      if (PopupCardContainer && selectedText.type === 'Range' && !container.querySelector('.contextBox2')) {
+      if (PopupCardContainer && selection?.selection.type === 'Range' && !container.querySelector('.contextBox2')) {
 
         let contextBox2 = document.createElement('div');
         contextBox2.className = 'contextBox2'
@@ -492,13 +472,20 @@ const handleMouseup = (event: any) => {
 
         PopupCardContainer.appendChild(contextBox2)
 
-        let range = selectedText.getRangeAt(0);
-
+        let range = selection?.selection.getRangeAt(0);
+        // console.log(selection);
+        let lang = await fetchcurrentLanguage()
         ReactDOM.render(
-          <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
-            <StyleSheetManager target={shadowRoot}>
-              <ToolBar selectedText={selectedText.getRangeAt(0).getBoundingClientRect()} selectedTextString={selectedTextString} range={range} />
-            </StyleSheetManager></UserInfoContext.Provider >, contextBox2);
+          <CurrentLanguageContext.Provider value={lang}>
+            <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
+              <StyleSheetManager target={shadowRoot}>
+                <ToolBar
+                  selectedText={selection?.selection.getRangeAt(0).getBoundingClientRect()}
+                  selectedTextString={selectedTextString}
+                  selectedSentence={selection?.sentence}
+                  range={range} />
+              </StyleSheetManager></UserInfoContext.Provider>
+          </CurrentLanguageContext.Provider>, contextBox2);
       }
 
 
@@ -565,14 +552,14 @@ const handleMouseup = (event: any) => {
                   // 重新选中划词区域
                   if (lastSelection) {
 
-                    console.log('===============');
+                    // console.log('===============');
 
                     // 创建一个范围对象
                     const newRange = document.createRange();
                     const anchorNode = lastSelection.anchorNode;
                     const focusNode = lastSelection.focusNode;
 
-                    console.log(lastSelection)
+                    // console.log(lastSelection)
 
                     if (anchorNode && focusNode) {
                       // 使用保存的 selected Range 恢复
@@ -609,7 +596,7 @@ const handleMouseup = (event: any) => {
 
 }
 
-const getSelection = (isInShadow?: boolean) => {
+export const getSelection = (isInShadow?: boolean) => {
   let selection;
 
   if (isInShadow) {
@@ -714,333 +701,9 @@ const getSelection = (isInShadow?: boolean) => {
 }
 
 
-const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew: boolean) => {
 
 
-  let span = document.createElement('span');
-  const ankiSpace = container.getElementsByClassName('ankiSpace')
 
-  // 获取当前最大的 index
-  let maxIndex = 0
-  for (let i = 0; i < ankiSpace.length; i++) {
-    const thisIndex = Number(ankiSpace[i].getAttribute('data-index'))
-    if (thisIndex > maxIndex) {
-      maxIndex = thisIndex
-    }
-  }
-
-  let number = maxIndex === 0 ? 1 : maxIndex
-
-  if (isAddNew) {
-    number = maxIndex + 1
-  }
-
-  span.textContent = '{{c' + number + '::' + selectedText + '}}';
-  span.className = 'ankiSpace'
-  span.setAttribute('data-index', number.toString())
-
-  span.onclick = function () {
-
-    // 恢复为默认样式
-    // span.innerText
-    if (span.textContent) {
-
-      // let oldText = span.textContent
-      // oldText = oldText.replace('{{c1::', '')
-      // oldText = oldText.replace('}}', '')
-
-      var textNode = document.createTextNode(selectedText);
-      span.parentNode?.replaceChild(textNode, span);
-    }
-
-  };
-
-  range?.deleteContents();
-  range?.insertNode(span);
-
-}
-
-interface ToolBarProps {
-  selectedText: any;
-  range: any;
-  selectedTextString: string;
-}
-
-
-const StyledButton = styled.button<{ $disable?: boolean }>`
-    
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: default;
-    padding: 2px;
-    
-
-    &:hover {
-      background-color: rgba(0,0,59,0.051);
-      border-radius: 2px;
-    }
-
-    ${props => props.$disable && css`
-      opacity: 0.5;
-      cursor: help;
-    `}
-
-    // ${props => !props.$disable && css`
-    //   cursor: default;
-    // `}
-
-
-`;
-
-const IconButton = styled.button`
-    
-    width: 16px;
-    height: 16px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: default;
-
-    &:hover {
-      opacity: 0.8;
-    }
-`;
-
-function ToolBar(props: ToolBarProps) {
-
-  const [showMenu, setShowMenu] = useState(true)
-  const ContextBox = useRef<HTMLDivElement>(null);
-
-  const userInfo: { user: userInfoType, anki: any } | null = useUserInfoContext()
-
-  // let portFromMenu: any
-
-  useEffect(() => {
-
-    const contextBox = ContextBox.current
-    const popupCard = container.querySelector('#LearningEnglish2023')
-    const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
-    const messagesBox = container.querySelector('.messages')
-
-    //设置按钮的位置
-    const selectedTextX = props.selectedText.x
-    const selectedTextY = props.selectedText.y
-
-    const selectedTextWidth = props.selectedText.width
-    const selectedTextHeight = props.selectedText.height
-
-    const buttonX = contextBox?.getBoundingClientRect().x || 0
-    const buttonY = contextBox?.getBoundingClientRect().y || 0
-
-
-    // 最大 X 值
-    const maxX = (popupCard?.getBoundingClientRect().width || 0) - contextBox!.getBoundingClientRect().width - 20
-
-    const messageBoxHeight = messagesBox?.getBoundingClientRect().height!
-    const containerBoxHeight = PopupCardContainer?.getBoundingClientRect().height!
-    const height = messageBoxHeight > containerBoxHeight ? messageBoxHeight + 60 : containerBoxHeight
-
-    const minY = 0 - height
-
-    let left = selectedTextX - buttonX + selectedTextWidth - 60
-    // left = left > maxX ? maxX : left
-    left = Math.max(10, Math.min(maxX, left));
-
-    let top = selectedTextY - buttonY - 40
-    // top = top < minY ? minY : top
-    top = Math.max(minY, Math.min(60, top));
-
-
-
-    // contextBox2!.style.position = 'relative'
-    // contextBox!.style.position = 'absolute'
-
-    contextBox!.style.left = left.toString() + 'px'
-    contextBox!.style.top = top.toString() + 'px'
-
-    setShowMenu(true)
-
-  }, [])
-
-
-  const handleSetAnkiSpaceButtonClick = (event: any, isAddNew: boolean) => {
-    setAnkiSpace(props.range, props.selectedTextString, event, isAddNew)
-
-
-    // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
-    setShowMenu(false)
-  }
-
-  const handleFollowUpMenuClick = (event: any) => {
-
-    const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
-    const messagesBox = container.querySelector('.messages')
-
-    const sentence = getSelection(true)
-
-    const selectedTextX = props.selectedText.x
-    const selectedTextY = props.selectedText.y
-
-    const selectedTextWidth = props.selectedText.width
-    const selectedTextHeight = props.selectedText.height
-
-    const followUpMenuBoxX = messagesBox?.getBoundingClientRect().x || 0
-    const followUpMenuBoxY = (messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)
-    const followUpMenuBoxWidth = 140
-    // const followUpMenuBoxHeight = followUpMenuBox?.getBoundingClientRect().height || 0
-
-    const maxX = (PopupCardContainer?.getBoundingClientRect().width || 0) - followUpMenuBoxWidth - 10
-    // console.log(maxX);
-    // console.log((messagesBox?.getBoundingClientRect().height || 0));
-    // console.log(messagesBox?.getBoundingClientRect());
-    // console.log(container.getElementsByClassName('followUpMenu')[0].getBoundingClientRect())
-    const maxY = ((PopupCardContainer?.getBoundingClientRect().y || 0) + (PopupCardContainer?.getBoundingClientRect().height || 0)) - ((messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)) - 230
-
-    const messageBoxHeight = messagesBox?.getBoundingClientRect().height!
-    const containerBoxHeight = PopupCardContainer?.getBoundingClientRect().height!
-    const height = messageBoxHeight > containerBoxHeight ? messageBoxHeight + 180 : containerBoxHeight
-
-    const minY = 0 - height + 130
-
-    let left = (selectedTextX - followUpMenuBoxX + selectedTextWidth - 40)
-    let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight)
-
-    // X 坐标的最大最小值
-    left = Math.max(10, Math.min(maxX, left));
-
-    // Y 坐标的最大值
-    top = Math.max(minY, Math.min(maxY, top));
-
-    setShowMenu(false)
-
-    // 取消文字选中，避免意外弹出菜单栏
-    window.getSelection()?.removeAllRanges();
-
-
-    try {
-
-      browser.runtime.sendMessage({
-        type: 'UPDATE_POPUP_CARD', payload: {
-          style: {
-            left: left,
-            top: top,
-          }, followUpData: { keyWord: props.selectedTextString, sentence: sentence?.sentence }
-        }
-      });
-
-    } catch (error) {
-
-      // console.log(error);
-
-    }
-
-
-
-
-
-  }
-
-  return (
-    <>
-
-      {showMenu && <div ref={ContextBox}
-        className='contextBox' style={{
-          position: 'absolute'
-        }}>
-        <div style={{
-          display: "flex",
-          flexDirection: "row",
-          marginRight: "8px",
-          borderRight: "1px solid rgba(5, 5, 5, .12)",
-          paddingRight: "18px"
-        }}>
-
-          <Tooltip placement="bottom"
-            title={'Cloze deletion(same card)'}
-            arrow={false}
-          >
-            <StyledButton style={{ marginRight: '10px' }} onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>
-              [...]
-            </StyledButton>
-          </Tooltip>
-
-          <Tooltip placement="bottom"
-            title={'Cloze deletion(new card)'}
-            arrow={false}
-          >
-            <StyledButton onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>
-              [...]+
-            </StyledButton>
-          </Tooltip>
-
-        </div>
-
-        <div>
-
-          <Tooltip placement="bottom"
-            title={'Pronunciation(⚡Pro)'}
-            arrow={false}
-          >
-            <StyledButton $disable={userInfo?.user.verified ? false : true} style={{
-              fontSize: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: '10px'
-            }}
-
-              onClick={async () => {
-
-                let lang = await fetchcurrentLanguage()
-                if (userInfo?.user.verified) {
-                  if (lang) {
-
-                    const targetLanguage = lang['target']['id']
-                    playTextToSpeech(props.selectedTextString, languageCodes[targetLanguage as keyof typeof languageCodes], targetLanguage)
-                    setShowMenu(false)
-
-                  }
-                } else {
-                  // alert(' You are not Pro')
-                }
-
-
-
-              }}
-            >
-              <CustomerServiceOutlined />
-            </StyledButton>
-          </Tooltip>
-
-        </div>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <Tooltip placement="bottom"
-            title={'Invoke Prompt(⚡Pro)'}
-            arrow={false}
-          >
-            <IconButton
-              className='lookUpButton' style={{
-                backgroundImage: `url(${LOGO})`,
-              }}
-              onClick={handleFollowUpMenuClick}
-            ></IconButton>
-          </Tooltip>
-        </div>
-      </div >
-      }
-    </>
-
-  )
-}
 
 
 /////////////////////////////////////////////////////////////////////////////////////

@@ -152,7 +152,7 @@ export function Selection(props: SelectionProps) {
       <style>{style}</style>
       <div id="ScouterSelection" className=''
         style={{
-          marginTop: '18px',
+          marginTop: '14px',
           lineHeight: '1.5'
         }}
       >
