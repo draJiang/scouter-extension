@@ -86,7 +86,6 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
       return response.json(); // 返回一个包含响应数据的 JSON 对象
     })
     .then(data => {
-      console.log(data)
       let msg = '';
 
       switch (targetLanguage) {
@@ -153,7 +152,6 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
 // AI 绘图
 export function generationsImages(prompt: string) {
 
-  console.log('generationsImages:' + prompt);
   return new Promise((resolve, reject) => {
 
     getAIParameter([]).then((result) => {
@@ -800,17 +798,15 @@ export const fetchSSE = async (url: string, requestInit: RequestInit, options: S
     }
 
     const parser = createParser((event) => {
-      console.log(event);
+      
       if (event.type === 'event') {
         try {
           if (event.data !== '[DONE]') {
             const data = JSON.parse(event.data);
-            console.log(data);
 
             onMessage && onMessage(data);
           }
         } catch {
-          // console.log('createParser JSON.parse error');
           onError && onError(new Error('Failed to parse SSE event data'));
         }
       }

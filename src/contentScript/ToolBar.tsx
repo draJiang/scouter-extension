@@ -30,6 +30,7 @@ interface ToolBarProps {
   range: any;
   selectedTextString: string;
   selectedSentence: string;
+  executedPromptHistoryInToolBar: PromptType[]
 }
 
 
@@ -99,6 +100,16 @@ export function ToolBar(props: ToolBarProps) {
 
   useEffect(() => {
 
+    (async () => {
+      let promptList = await browser.storage.sync.get({ "promptList": [] }).then((item) => {
+        return item.promptList
+      })
+      promptList.unshift(dictionaryPrompt)
+      promptList.unshift(defaultPrompt)
+      setPrompts(promptList)
+
+    })()
+
     if (container) {
 
       const contextBox = ContextBox.current
@@ -117,12 +128,13 @@ export function ToolBar(props: ToolBarProps) {
 
       const buttonX = contextBox?.getBoundingClientRect().x || 0
       const buttonY = contextBox?.getBoundingClientRect().y || 0
+      const buttonWidth = contextBox?.getBoundingClientRect().width || 0
 
       // 选中文字相对窗口的偏移
       const offsetTop = popupCard!.getBoundingClientRect().y - selectedTextY > -70 ? 30 : 0
 
       // 最大 X 值
-      const maxX = (popupCard?.getBoundingClientRect().width || 0) - contextBox!.getBoundingClientRect().width - 110
+      const maxX = (popupCard?.getBoundingClientRect().width || 0) - buttonWidth - 10
 
       const messageBoxHeight = scouterContentBox?.getBoundingClientRect().height!
       const containerBoxHeight = PopupCardContainer?.getBoundingClientRect().height!
@@ -149,24 +161,6 @@ export function ToolBar(props: ToolBarProps) {
       setShowMenu(true)
     }
 
-    // 默认 Prompt
-
-
-
-    (async () => {
-      let promptList = await browser.storage.sync.get({ "promptList": [] }).then((item) => {
-        return item.promptList
-      })
-      promptList.unshift(dictionaryPrompt)
-      promptList.unshift(defaultPrompt)
-      setPrompts(promptList)
-
-      const result = await browser.storage.local.get({ "executedPromptHistoryInToolBar": [dictionaryPrompt] })
-      setExecutedPromptHistoryInToolBar(result.executedPromptHistoryInToolBar)
-
-    })()
-
-
   }, [])
 
 
@@ -174,75 +168,6 @@ export function ToolBar(props: ToolBarProps) {
     setAnkiSpace(props.range, props.selectedTextString, event, isAddNew)
     // ContextBox.current!.parentNode?.removeChild(ContextBox.current!)
     setShowMenu(false)
-  }
-
-  const handleFollowUpMenuClick = (event: any) => {
-
-    const PopupCardContainer = container?.getElementsByClassName(CONTAINER_CLASSNAME)[0]
-    const messagesBox = container?.querySelector('.messages')
-
-    const sentence = getSelection(true)
-
-    const selectedTextX = props.selectedText.x
-    const selectedTextY = props.selectedText.y
-
-    const selectedTextWidth = props.selectedText.width
-    const selectedTextHeight = props.selectedText.height
-
-    const followUpMenuBoxX = messagesBox?.getBoundingClientRect().x || 0
-    const followUpMenuBoxY = (messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)
-    const followUpMenuBoxWidth = 140
-    // const followUpMenuBoxHeight = followUpMenuBox?.getBoundingClientRect().height || 0
-
-    const maxX = (PopupCardContainer?.getBoundingClientRect().width || 0) - followUpMenuBoxWidth - 10
-    // console.log(maxX);
-    // console.log((messagesBox?.getBoundingClientRect().height || 0));
-    // console.log(messagesBox?.getBoundingClientRect());
-    // console.log(container.getElementsByClassName('followUpMenu')[0].getBoundingClientRect())
-    const maxY = ((PopupCardContainer?.getBoundingClientRect().y || 0) + (PopupCardContainer?.getBoundingClientRect().height || 0)) - ((messagesBox?.getBoundingClientRect().y || 0) + (messagesBox?.getBoundingClientRect().height || 0)) - 230
-
-    const messageBoxHeight = messagesBox?.getBoundingClientRect().height!
-    const containerBoxHeight = PopupCardContainer?.getBoundingClientRect().height!
-    const height = messageBoxHeight > containerBoxHeight ? messageBoxHeight + 180 : containerBoxHeight
-
-    const minY = 0 - height + 130
-
-    let left = (selectedTextX - followUpMenuBoxX + selectedTextWidth - 40)
-    let top = (selectedTextY - followUpMenuBoxY - selectedTextHeight)
-
-    // X 坐标的最大最小值
-    left = Math.max(10, Math.min(maxX, left));
-
-    // Y 坐标的最大值
-    top = Math.max(minY, Math.min(maxY, top));
-
-    setShowMenu(false)
-
-    // 取消文字选中，避免意外弹出菜单栏
-    window.getSelection()?.removeAllRanges();
-
-
-    try {
-
-      browser.runtime.sendMessage({
-        type: 'UPDATE_POPUP_CARD', payload: {
-          style: {
-            left: left,
-            top: top,
-          }, followUpData: { keyWord: props.selectedTextString, sentence: sentence?.sentence }
-        }
-      });
-
-    } catch (error) {
-
-      // console.log(error);
-
-    }
-
-
-
-
-
   }
 
   const setAnkiSpace = (range: Range, selectedText: string, event: Event, isAddNew: boolean) => {
@@ -434,17 +359,19 @@ export function ToolBar(props: ToolBarProps) {
               >
                 <Dropdown.Button
                   size="small"
-                  overlayStyle={{ width: '66%' }}
+                  overlayStyle={{
+                    maxWidth: '180px',
+                  }}
                   getPopupContainer={() => ContextBox.current as HTMLDivElement}
                   disabled={!userInfo?.user.verified}
                   menu={menuProps} onClick={() => {
-                    executivePrompt(executedPromptHistoryInToolBar[0])
+                    executivePrompt(props.executedPromptHistoryInToolBar[0])
                   }}
                 >
-                  {executedPromptHistoryInToolBar.length > 0 && (
-                    executedPromptHistoryInToolBar[0].title.length > 10 ?
-                      executedPromptHistoryInToolBar[0].title.substring(0, 10) + '...' :
-                      executedPromptHistoryInToolBar[0].title)}
+                  {props.executedPromptHistoryInToolBar.length > 0 && (
+                    props.executedPromptHistoryInToolBar[0].title.length > 10 ?
+                      props.executedPromptHistoryInToolBar[0].title.substring(0, 10) + '...' :
+                      props.executedPromptHistoryInToolBar[0].title)}
                 </Dropdown.Button>
               </div>
             </Tooltip>

@@ -11,7 +11,7 @@ import { createApi } from 'unsplash-js';
 
 import { getSettings } from '../Options/util'
 
-import { models } from '../Options/models'
+// import { models } from '../options/models'
 
 import { cardStyle, fetchSSE, getChatGPTSession } from '../util';
 
@@ -51,6 +51,13 @@ browser.runtime.onInstalled.addListener(function () {
 
 // 卸载插件后引导填写卸载原因，帮助产品优化
 browser.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSdobGQN3O0Ck4fVrgfvRZMme3de-2OaEp1pFtibZkU0koc37w/viewform?usp=sf_link");
+
+// 点击右上角插件按钮
+browser.action.onClicked.addListener(function (tab) {
+  console.log('点击插件按钮');
+  browser.runtime.openOptionsPage(); // 打开扩展的Options页面
+});
+
 
 
 // 创建右键菜单

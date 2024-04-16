@@ -11,7 +11,8 @@ body {
 }
 
 #MyOptions {
-    width: 380px;
+    width: 600px;
+    max-width: 680px;
 }
 
 #MyOptions h2 {

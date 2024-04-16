@@ -2,10 +2,10 @@
     "manifest_version": 3,
     "name": "Scouter",
     "description": "Bridging the gap between theory and practice.",
-    "version": "0.20.40",
+    "version": "0.21.00",
     "action": {
-        "default_icon": "icon48.png",
-        "default_popup": "popup.html"
+        "default_icon": "icon48.png"
+
     },
     "commands": {
         "RunLastPrompt": {
@@ -32,6 +32,7 @@
             "js/vendor.js"
         ]
     }],
+    "options_page": "options.html",
     "background": {
         "service_worker": "js/background.js"
     },

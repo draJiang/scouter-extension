@@ -7,7 +7,7 @@ import { PopupCard } from "../PopupCard"
 import { StyleProvider } from '@ant-design/cssinjs';
 import { StyleSheetManager } from 'styled-components';
 
-
+import { dictionaryPrompt } from '../PopupCard/util'
 
 import { fetchcurrentLanguage } from '../lib/lang';
 import { CurrentLanguageContext } from '../lib/locale'
@@ -96,6 +96,7 @@ if (MyBox === null || MyBox === undefined) {
 // 用户付费状态等信息、用户的 Anki 信息
 let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
+let executedPromptHistoryInToolBar = [dictionaryPrompt]
 
 // 获取用户信息
 const thisGetUserInfo = async () => {
@@ -110,6 +111,10 @@ const thisGetUserInfo = async () => {
     console.log(error);
 
   }
+
+  // 在上下文菜单中最近执行的 Prompt
+  const result = await browser.storage.local.get({ "executedPromptHistoryInToolBar": [dictionaryPrompt] })
+  executedPromptHistoryInToolBar = result.executedPromptHistoryInToolBar
 
 
   // 获取 Anki decks
@@ -147,40 +152,8 @@ const thisGetUserInfo = async () => {
 
   }
 
-  // 获取 Anki 牌组信息
-  // browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, }).then((result) => {
-
-  //   ANKI_INFO.models = result.data
-
-  //   // 更新 Anki style
-  //   try {
-
-  //     for (let i = 0; i < ANKI_INFO.models.length; i++) {
-
-  //       const p = {
-  //         "model": {
-  //           "name": ANKI_INFO.models[i]['modelName'],
-  //           "css": cardStyle
-  //         }
-  //       }
-
-  //       // 获取 Anki 牌组信息
-  //       browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
-
-  //         // console.log(result);
-
-  //       })
-
-  //     }
-
-
-  //   } catch (error) {
-
-  //   }
-
-  // })
-
 }
+
 
 let port = browser.runtime.connect({
   name: 'fromContentScript'
@@ -307,45 +280,6 @@ async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: a
 
 }
 
-// interface PopupCardContextProps {
-//   data: any;
-//   selection: any;
-//   runPrompt: boolean;
-// }
-
-// function PopupCardContext(props: PopupCardContextProps) {
-
-//   const [userInfo, setUserInfo] = useState<userInfoType | null>(null);
-//   const [lang, setLang] = useState<any>(null);
-
-
-//   useEffect(() => {
-//     async function fetchUserInfo() {
-//       const info = await getUserInfo();
-//       const lang = await fetchcurrentLanguage()
-//       setLang(lang)
-//       setUserInfo(info);
-
-//     }
-
-//     fetchUserInfo();
-//   }, []);  // 跑一次，不依赖任何外部变量
-
-
-//   return (
-//     <CurrentLanguageContext.Provider value={lang}>
-//       <UserInfoContext.Provider value={USER_INFO}>
-//         <StyleProvider container={shadowRoot}>
-//           <StyleSheetManager target={shadowRoot}>
-//             <PopupCard data={props.data} selection={props.selection} runPrompt={props.runPrompt} isPin={isPin} />
-//           </StyleSheetManager>
-//         </StyleProvider>
-//       </UserInfoContext.Provider>
-//     </CurrentLanguageContext.Provider>
-//   )
-
-// }
-
 
 export const pinPopupCard = (value: boolean) => {
   isPin = value
@@ -355,18 +289,6 @@ export const setDonotClosePopupCard = (value: boolean) => {
   donotClosePopupCard = value
 }
 
-
-
-// const handleSelectionchange = () => {
-
-//   let selection = window.getSelection();
-//   if (selection) {
-//     console.log('selection.toString():');
-//     console.log(selection.toString());
-
-//     isTextSelected = selection.toString().length > 0;
-//   }
-// }
 
 
 let isTextSelected = false;
@@ -389,8 +311,6 @@ const handleMouseup = async (event: any) => {
 
   // 获取用户在宿主网页上选中的内容
   const selection = getSelection(isInShadow)
-
-  console.log(selection);
 
   const range = selection?.selection.getRangeAt(0);
 
@@ -475,6 +395,7 @@ const handleMouseup = async (event: any) => {
         let range = selection?.selection.getRangeAt(0);
         // console.log(selection);
         let lang = await fetchcurrentLanguage()
+
         ReactDOM.render(
           <CurrentLanguageContext.Provider value={lang}>
             <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
@@ -483,6 +404,7 @@ const handleMouseup = async (event: any) => {
                   selectedText={selection?.selection.getRangeAt(0).getBoundingClientRect()}
                   selectedTextString={selectedTextString}
                   selectedSentence={selection?.sentence}
+                  executedPromptHistoryInToolBar={executedPromptHistoryInToolBar}
                   range={range} />
               </StyleSheetManager></UserInfoContext.Provider>
           </CurrentLanguageContext.Provider>, contextBox2);

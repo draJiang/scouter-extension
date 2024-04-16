@@ -264,7 +264,7 @@ table th {
 }
 ::-webkit-scrollbar-thumb:vertical { /*垂直滚动条的样式*/
   height: 50px;
-  background-color: #999;
+  background-color: rgba(0,0,0,.25);
   -webkit-border-radius: 4px;
   outline: 2px solid #fff;
   outline-offset: -2px;

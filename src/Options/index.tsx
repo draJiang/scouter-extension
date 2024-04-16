@@ -10,6 +10,7 @@ import { ankiAction, getDefaultDeckName } from '../util'
 import { BuyLicenseKeyDrawer } from './BuyLicenseKeyDrawer'
 import { ProTag } from "../Components/ProTag";
 
+import { StyleProvider } from '@ant-design/cssinjs';
 import { theme, Button, Radio, Tooltip, Switch, Input, Form, Space, Divider, ConfigProvider, Select, Drawer, Tag } from 'antd';
 import type { TabsProps } from 'antd';
 
@@ -19,14 +20,13 @@ import { getSettings } from './util'
 
 import "./index.css"
 
-import { getBalance, getUserInfo } from '../util'
+import { getUserInfo } from '../util'
 
 import { lang } from "../lib/lang"
 
 import { models } from "./models"
 
 import type { RadioChangeEvent } from 'antd';
-import { Timeout } from 'microsoft-cognitiveservices-speech-sdk/distrib/lib/src/common/Timeout';
 
 import { userInfoType } from '../types'
 
@@ -299,7 +299,10 @@ export const Options = () => {
   }
 
   return (
-    <>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center'
+    }}>
       <div id="MyOptions"
         ref={divElement}
       >
@@ -449,10 +452,11 @@ export const Options = () => {
                 <Form.Item
                   name="model"
                   label="🤖Model"
+                  initialValue={models[0]['name']}
                 >
                   <Select
                     placeholder=""
-                    defaultValue={models[0]['name']}
+                    // defaultValue={models[0]['name']}
                   >
 
                     {models.map((item) => <Option key={item.id} value={item.id}>{item.name}</Option>)}
@@ -619,13 +623,15 @@ export const Options = () => {
 
         </ConfigProvider>
       </div >
-    </>
+    </div>
   );
 };
 
-// ReactDOM.render(
-//   <React.StrictMode>
-//     <Options />
-//   </React.StrictMode>,
-//   document.getElementById("root")
-// );
+ReactDOM.render(
+  <React.StrictMode>
+    <StyleProvider>
+      <Options />
+    </StyleProvider>
+  </React.StrictMode>,
+  document.getElementById("root")
+);
