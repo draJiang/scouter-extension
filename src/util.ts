@@ -600,7 +600,7 @@ export async function getChatGPTWebToken() {
 
 
 // 获取 Anki 的 Deck 名称，添加到卡片会存放到这里
-export function getDefaultDeckName() {
+export function getDefaultDeckName(): Promise<{ defaultDeckName: string }> {
   return new Promise((resolve, reject) => {
 
     let defaultDeckName = ''
@@ -798,7 +798,7 @@ export const fetchSSE = async (url: string, requestInit: RequestInit, options: S
     }
 
     const parser = createParser((event) => {
-      
+
       if (event.type === 'event') {
         try {
           if (event.data !== '[DONE]') {

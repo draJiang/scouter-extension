@@ -5,7 +5,6 @@
     "version": "0.21.00",
     "action": {
         "default_icon": "icon48.png"
-
     },
     "commands": {
         "RunLastPrompt": {

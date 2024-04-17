@@ -5,6 +5,11 @@ export type PromptType = {
     id: string;
 };
 
+export type FormPropsType = {
+    settings: Record<string, any> | undefined;
+    saveOptions: (values: any) => Promise<void>;
+};
+
 export type runPromptType = 'yes' | 'no' | 'regenerate' | undefined
 
 export type ChatMessage = {

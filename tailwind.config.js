@@ -1,18 +1,8 @@
-module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {
-      colors: {
-        orange: {
-          100: 'FFF9F7',
-          900: '#F08A24'
-        }
-      },
-    },
+    extend: {},
   },
   plugins: [],
-  variants: {},
-  corePlugins: {
-    preflight: true,
-  },
 };

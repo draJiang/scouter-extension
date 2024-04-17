@@ -6,22 +6,35 @@
 body {
     /* font-family: 'OPPOSans-R'; */
     margin: 0;
-    padding: 20px;
+    /* padding: 20px; */
     border-radius: 4px;
+    /* background-color: rgb(255 247 237); */
+}
+
+#root,
+body {
+    height: 100%;
 }
 
 #MyOptions {
-    width: 600px;
-    max-width: 680px;
+    width: 100%;
+    max-width: 1130px;
+    padding: 40px;
 }
 
 #MyOptions h2 {
     margin-top: 0;
+    font-size: large;
 }
 
-#MyOptions img {
+
+/* #MyOptions img {
     width: 68%;
     border-radius: 4px;
+} */
+
+#MyOptions form {
+    /* max-width: 600px; */
 }
 
 section {
