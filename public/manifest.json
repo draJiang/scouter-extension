@@ -4,7 +4,8 @@
     "description": "Bridging the gap between theory and practice.",
     "version": "0.21.00",
     "action": {
-        "default_icon": "icon48.png"
+        "default_icon": "icon48.png",
+        "default_popup": "popup.html"
     },
     "commands": {
         "RunLastPrompt": {

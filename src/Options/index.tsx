@@ -17,7 +17,7 @@ import type { TabsProps } from 'antd';
 import { ThunderboltTwoTone, CheckCircleTwoTone, InfoCircleOutlined } from '@ant-design/icons';
 import { getUserInfo } from '../util'
 
-import { getSettings } from './util'
+import { getSettings, saveOptions } from './util'
 
 import { UserInfoContext } from '../lib/userInfo'
 
@@ -68,15 +68,15 @@ export const Options = () => {
   const tabItems = [
     {
       name: 'General',
-      content: <General settings={settings} saveOptions={saveOptions} />
+      content: <General settings={settings} saveOptions={thisSaveOptions} />
     },
     {
       name: 'AI',
-      content: <AI settings={settings} saveOptions={saveOptions} />
+      content: <AI settings={settings} saveOptions={thisSaveOptions} />
     },
     {
       name: '👑Pro',
-      content: <Pro settings={settings} saveOptions={saveOptions} />
+      content: <Pro settings={settings} saveOptions={thisSaveOptions} />
     }
   ]
 
@@ -140,22 +140,17 @@ export const Options = () => {
 
   }, []);
 
-  async function saveOptions(values: any) {
+  async function thisSaveOptions(values: any) {
+
+    //保存设置
+    saveOptions(values)
+    
+
     // 获取键值对
     const entries = Object.entries(values);
 
     // 遍历键值对
     for (const [key, value] of entries) {
-      console.log(`Key: ${key}, Value: ${value}`);
-
-
-
-      await browser.storage.sync.set(
-        {
-          [key]: value,
-        }
-      )
-
       if (key === 'newLicenseKey') {
 
         // 更新订阅状态

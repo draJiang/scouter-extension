@@ -1,12 +1,12 @@
 import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef } from "react";
-import { playTextToSpeech, textToSpeechDownload } from '../util'
+import { playTextToSpeech, textToSpeechDownload } from '../../util'
 
 import { Button } from 'antd';
 
-import { useCurrentLanguage } from '../lib/locale'
-import { languageCodes } from "../lib/lang"
+import { useCurrentLanguage } from '../../lib/locale'
+import { languageCodes } from "../../lib/lang"
 
 import {
   CustomerServiceOutlined

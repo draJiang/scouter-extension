@@ -1,8 +1,8 @@
 import browser from 'webextension-polyfill'
-import { ankiAction } from '../util'
-import { getSettings } from '../Options/util'
+import { ankiAction } from '../../util'
+import { getSettings } from '../../Options/util'
 
-import { PromptType } from '../types'
+import { PromptType } from '../../types'
 
 export const dictionaryPrompt: PromptType = {
     title: 'Dictionary',

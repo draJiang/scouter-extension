@@ -80,7 +80,7 @@ const General: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
 
             // onFinish={}
             onValuesChange={handleFormChange}
-            layout='vertical'
+            // layout='vertical'
             form={form}
 
         >

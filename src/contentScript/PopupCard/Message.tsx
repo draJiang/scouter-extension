@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef } from "react";
-import { ChatMessage } from "../types"
+import { ChatMessage } from "../../types"
 import styled from 'styled-components';
 import { Button, Skeleton } from 'antd';
 
@@ -15,13 +15,12 @@ import rehypeParse from 'rehype-parse'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 
-import settingGuide from '../assets/settingGuide.png'
 
-import { Images } from "../Components/Images"
+import { Images } from "../../Components/Images"
 
 import { getUnsplashImages } from './util'
 
-import { ImageType } from "../types"
+import { ImageType } from "../../types"
 
 
 interface MessageProps {
@@ -266,7 +265,7 @@ function Message(props: MessageProps) {
 
                         {/* API 错误的引导图 */}
                         {content['status'] === 'invalid_api_key' && <div className=''>
-                            <img src={settingGuide} style={{
+                            <img src="images/settingGuide.png" style={{
                                 borderRadius: '4px'
                             }} /></div>}
 

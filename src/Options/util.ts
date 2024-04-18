@@ -19,3 +19,22 @@ export async function getSettings() {
     })
     return items
 }
+
+export async function saveOptions(values: any) {
+    // 获取键值对
+    const entries = Object.entries(values);
+
+    // 遍历键值对
+    for (const [key, value] of entries) {
+
+        console.log(`Key: ${key}, Value: ${value}`);
+
+        await browser.storage.sync.set(
+            {
+                [key]: value,
+            }
+        )
+
+    }
+
+}

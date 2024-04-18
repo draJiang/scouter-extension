@@ -1,16 +1,16 @@
 import React, { useEffect, useState, useRef, ReactNode } from "react";
 
-import { PromptType } from '../types'
+import { PromptType } from '../../types'
 import { getDefaultPrompt, dictionaryPrompt } from './util'
 
 import styled from 'styled-components';
 
-import { userInfoType, runPromptType } from '../types'
+import { userInfoType, runPromptType } from '../../types'
 
-import { useUserInfoContext } from '../lib/userInfo'
-import { ProTag } from "../Components/ProTag";
+import { useUserInfoContext } from '../../lib/userInfo'
+import { ProTag } from "../../Components/ProTag";
 
-import { useCurrentLanguage } from '../lib/locale'
+import { useCurrentLanguage } from '../../lib/locale'
 
 
 let MyButton = styled.button`

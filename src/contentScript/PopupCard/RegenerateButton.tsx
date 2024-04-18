@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import React, { useEffect, useState, useRef } from "react";
-import { ChatMessage } from "../types"
+import { ChatMessage } from "../../types"
 
 interface MessageProps {
     messages: Array<ChatMessage>;

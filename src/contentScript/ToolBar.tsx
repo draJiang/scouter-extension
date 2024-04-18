@@ -13,7 +13,7 @@ import { CONTAINER_CLASSNAME, getSelection } from './index'
 import { fetchcurrentLanguage } from '../lib/lang';
 import { languageCodes } from "../lib/lang"
 import { playTextToSpeech } from '../util'
-import { getDefaultPrompt, dictionaryPrompt } from '../PopupCard/util'
+import { getDefaultPrompt, dictionaryPrompt } from './PopupCard/util'
 
 import { PromptType } from "../types"
 

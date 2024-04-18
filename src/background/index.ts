@@ -55,7 +55,7 @@ browser.runtime.setUninstallURL("https://docs.google.com/forms/d/e/1FAIpQLSdobGQ
 // 点击右上角插件按钮
 browser.action.onClicked.addListener(function (tab) {
   console.log('点击插件按钮');
-  browser.runtime.openOptionsPage(); // 打开扩展的Options页面
+  // browser.runtime.openOptionsPage(); // 打开扩展的Options页面
 });
 
 

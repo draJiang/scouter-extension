@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, ReactNode } from "react";
-import { dictionaryPrompt } from '../PopupCard/util'
+import { dictionaryPrompt } from '../contentScript/PopupCard/util'
 import { Button } from 'antd';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 

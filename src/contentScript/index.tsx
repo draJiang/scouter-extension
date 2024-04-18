@@ -3,11 +3,11 @@ import browser from 'webextension-polyfill'
 import React, { useEffect, useRef, useState, createContext, useContext } from "react";
 import ReactDOM from "react-dom";
 
-import { PopupCard } from "../PopupCard"
+import { PopupCard } from "./PopupCard"
 import { StyleProvider } from '@ant-design/cssinjs';
 import { StyleSheetManager } from 'styled-components';
 
-import { dictionaryPrompt } from '../PopupCard/util'
+import { dictionaryPrompt } from './PopupCard/util'
 
 import { fetchcurrentLanguage } from '../lib/lang';
 import { CurrentLanguageContext } from '../lib/locale'
@@ -24,7 +24,7 @@ import { userInfoType, AnkiInfoType } from '../types'
 
 import { cardStyle } from '../util'
 
-import { popupCardStyle } from '../PopupCard/style'
+import { popupCardStyle } from './PopupCard/style'
 import { ShortcutButton } from './ShortcutButton'
 
 

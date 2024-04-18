@@ -2,19 +2,19 @@ import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 
-import { userInfoType, addToAnkiStatusType, langType, AnkiInfoType, AnkiModelType } from '../types'
+import { userInfoType, addToAnkiStatusType, langType, AnkiInfoType, AnkiModelType } from '../../types'
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { setDonotClosePopupCard } from '../contentScript'
+import { setDonotClosePopupCard } from '..'
 
-import { Nav } from "../Components/Nav"
-import { CustomPromptForm } from "../Components/CustomPromptForm"
+import { Nav } from "../../Components/Nav"
+import { CustomPromptForm } from "../../Components/CustomPromptForm"
 
-import { Images } from "../Components/Images"
+import { Images } from "../../Components/Images"
 import { MessagesList } from "./Message"
 import { PromptList } from "./PromptList"
-import Notice from '../Components/Notice';
+import Notice from '../../Components/Notice';
 import { RegenerateButton } from "./RegenerateButton"
 import { UserMessageInput } from "./UserMessageInput"
 import { Selection } from "./Selection"
@@ -24,13 +24,13 @@ import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Drawer
 import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 
-import { useCurrentLanguage } from '../lib/locale'
-import { useUserInfoContext } from '../lib/userInfo'
+import { useCurrentLanguage } from '../../lib/locale'
+import { useUserInfoContext } from '../../lib/userInfo'
 
 
 import { windowInitialization, getInitialPrompt, getUnsplashImages, handleHightlight, handlePromptVariables, getAnkiCards } from './util'
 
-import { PromptType, ChatMessage, ImageType, runPromptType } from "../types"
+import { PromptType, ChatMessage, ImageType, runPromptType } from "../../types"
 
 import styled, { css } from 'styled-components';
 

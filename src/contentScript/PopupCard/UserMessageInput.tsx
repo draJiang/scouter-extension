@@ -4,7 +4,7 @@ import { Button, Form, Input } from 'antd';
 import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 import { useSpring, animated } from 'react-spring';
-import { ChatMessage } from "../types"
+import { ChatMessage } from "../../types"
 
 const { TextArea } = Input;
 

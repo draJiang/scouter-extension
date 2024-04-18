@@ -12,7 +12,7 @@ import { useUserInfoContext } from '../lib/userInfo'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { DropdownMenuItem } from './DropdownMenuItem'
 
-import { getDefaultPrompt, dictionaryPrompt } from '../PopupCard/util'
+import { getDefaultPrompt, dictionaryPrompt } from '../contentScript/PopupCard/util'
 import { PromptType, addToAnkiStatusType, langType, runPromptType, userInfoType, AnkiInfoType } from '../types'
 
 import {
