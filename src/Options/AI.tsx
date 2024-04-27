@@ -51,7 +51,8 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
         <Form
             onValuesChange={handleFormChange}
             form={form}
-            layout='vertical'
+            labelCol={{ span: 4 }}
+            layout="horizontal"
         >
             <Form.Item
                 name="apiKeySelection"
@@ -148,10 +149,13 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
             </div>
 
             {/* chatGPTWeb */}
-            <div style={{
-                display: radioValue === 'chatGPTWeb' ? 'block' : 'none',
-                color: '#F08A24'
-            }}>
+            <div
+                className=" text-center"
+                style={{
+                    display: radioValue === 'chatGPTWeb' ? 'block' : 'none',
+                    color: '#F08A24'
+                }}
+            >
                 ⚠️Sorry, this feature is temporarily unavailable.
             </div>
 

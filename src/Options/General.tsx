@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Switch, Form, Select } from 'antd';
+import { Switch, Form, Select, Button } from 'antd';
 
 import { ankiAction, getDefaultDeckName } from '../util'
 import { FormPropsType } from '../types'
@@ -80,8 +80,9 @@ const General: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
 
             // onFinish={}
             onValuesChange={handleFormChange}
-            // layout='vertical'
             form={form}
+            labelCol={{ span: 4 }}
+            layout="horizontal"
 
         >
 
@@ -152,6 +153,22 @@ const General: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                 >
                     <Switch />
 
+                </Form.Item>
+
+            </section>
+
+            <section>
+
+                <Form.Item
+                    name="ShortcutKeys"
+                    label="⌨️Shortcut Keys"
+                // extra={
+                //     <div>
+                //         <p>Display the menu when you select any text</p>
+                //     </div>
+                // }
+                >
+                    <Button onClick={() => { window.open('https://jiangzilong.notion.site/keyboard-shortcut-94a604055ef148a3b7c835e6436543f0?pvs=4') }}>Learn More</Button>
                 </Form.Item>
 
             </section>
