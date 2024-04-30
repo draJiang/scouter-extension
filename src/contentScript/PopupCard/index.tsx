@@ -160,7 +160,7 @@ export function PopupCard(props: any) {
       port.onMessage.removeListener(handleMessage);
     };
 
-  });
+  }, []);
 
 
 

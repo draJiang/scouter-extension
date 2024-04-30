@@ -26,13 +26,9 @@ import { cardStyle } from '../util'
 
 import { popupCardStyle } from './PopupCard/style'
 import { ShortcutButton } from './ShortcutButton'
-
-
-
-
+import { YouTubeButton } from './YouTubeButton'
 
 // import './assets/tailwind.css';
-
 
 // 页面载入后会注入次脚本，或 background 可能会在一些情况下注入此脚本
 // console.log('before browser.runtime.onMessage.addListener');
@@ -166,94 +162,81 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   // console.log(msg);
   if (msg.type === 'open-scouter') {
 
-
-    // 处理窗口
-
-    if (MyBox !== null && MyBox !== undefined) {
-      // 如果已存在容器
-
-      if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
-        // 如果不存在 PopupCard
-        container = document.createElement('div')
-        container.className = CONTAINER_CLASSNAME
-        shadowRoot?.appendChild(container)
-      }
-
-      // 停止旧的对话
-      try {
-        port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
-      } catch (error) {
-        // 重新链接
-        port = browser.runtime.connect({
-          name: 'fromContentScript'
-        })
-        port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
-      }
-
-
-
-      // MyBox.style.display = 'block'
-
-      // 移除旧内容，避免 2 次渲染混杂在一起
-      // container.parentNode?.removeChild(container);
-
-    } else {
-      // console.log('不存在 Box 容器');
-      container = document.createElement('div')
-      container.className = CONTAINER_CLASSNAME
-      shadowRoot?.appendChild(container)
-    }
-
-    // const selection = window.getSelection();
-
-    const selection = getSelection()
-
-    // 显示窗口
-    if (selection && selection.keyWord !== '') {
-      showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
-    }
-
-
-    // // 监听页面点击事件
-    // document.onmousedown = function (event) {
-
-    //   if (MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
-    //     // 如果点击的不是插件窗口及其子元素，则关闭窗口
-    //     if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
-
-    //       // 隐藏窗口
-    //       container.parentNode?.removeChild(container);
-
-    //       // document.removeEventListener('selectionchange', handleSelectionchange);
-    //       // document.removeEventListener('mouseup', handleMouseup);
-
-    //       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
-
-    //     }
-    //   }
-    // }
-
-    // container.onmousedown = (event) => {
-    //   // 隐藏 setAnkiSpaceButton
-    //   const contextBox = container.getElementsByClassName('contextBox2')[0]
-
-    //   if (contextBox) {
-    //     // 点击的不是 setAnkiSpaceButton 时才隐藏
-    //     if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
-    //       contextBox.parentNode?.removeChild(contextBox)
-    //     }
-
-    //   }
-
-    // }
+    openScouter(msg)
 
 
   }
 
 });
 
+export const openScouter = (msg?: any, isYoutube?: boolean, youtubeData?: { text: string, image: string }) => {
+  // 处理窗口
+  if (msg === undefined) {
+    msg = {
+      runPrompt: false
+    }
+  }
+
+  if (isYoutube === undefined) {
+    isYoutube = false
+  }
+
+  if (MyBox !== null && MyBox !== undefined) {
+    // 如果已存在容器
+
+    if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
+      // 如果不存在 PopupCard
+      container = document.createElement('div')
+      container.className = CONTAINER_CLASSNAME
+      shadowRoot?.appendChild(container)
+    }
+
+    // 停止旧的对话
+    try {
+      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+    } catch (error) {
+      // 重新链接
+      port = browser.runtime.connect({
+        name: 'fromContentScript'
+      })
+      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+    }
+
+
+
+    // MyBox.style.display = 'block'
+
+    // 移除旧内容，避免 2 次渲染混杂在一起
+    // container.parentNode?.removeChild(container);
+
+  } else {
+    // console.log('不存在 Box 容器');
+    container = document.createElement('div')
+    container.className = CONTAINER_CLASSNAME
+    shadowRoot?.appendChild(container)
+  }
+
+  // const selection = window.getSelection();
+
+  const selection = getSelection()
+
+  // 显示窗口
+  if (isYoutube && youtubeData) {
+    showPopupCard({ 'keyWord': youtubeData.text, 'Sentence': youtubeData.text }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
+  } else {
+
+    if (selection && selection.keyWord !== '') {
+      showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
+    }
+
+  }
+
+
+
+}
+
 // 显示应用窗口
-async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
+async function showPopupCard(data: { keyWord: string, Sentence: string }, selection: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
 
   let lang = await fetchcurrentLanguage()
 
@@ -265,7 +248,7 @@ async function showPopupCard(data: { keyWord: string, Sentence: string }, msg: a
         <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
           <StyleProvider container={shadowRoot}>
             <StyleSheetManager target={shadowRoot}>
-              <PopupCard data={data} selection={msg} runPrompt={runPrompt} isPin={isPin} />
+              <PopupCard data={data} selection={selection} runPrompt={runPrompt} isPin={isPin} />
             </StyleSheetManager>
           </StyleProvider>
         </UserInfoContext.Provider>
@@ -289,8 +272,6 @@ export const setDonotClosePopupCard = (value: boolean) => {
   donotClosePopupCard = value
 }
 
-
-
 let isTextSelected = false;
 let lastSelection = {
   anchorNode: null,
@@ -299,15 +280,22 @@ let lastSelection = {
   focusOffset: 0,
 };
 
+const checkIsClickedInsideShortcutButton = (event: any): boolean => {
+  const path = event.composedPath();
+  const isClickedInsideShortcutButton = path.some((element: EventTarget & Element) => {
+    return element.classList && (element.classList.contains('ShortcutButton') || element.id === '__ScouterYouTubeButtonContainer');
+  });
+
+  return isClickedInsideShortcutButton
+}
+
 const handleMouseup = async (event: any) => {
 
   // 是否在窗口中触发
   const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
   // 是否在快捷按钮上触发
   const path = event.composedPath();
-  const isClickedInsideShortcutButton = path.some((element: EventTarget & Element) => {
-    return element.classList && element.classList.contains('ShortcutButton');
-  });
+  const isClickedInsideShortcutButton = checkIsClickedInsideShortcutButton(event)
 
   // 获取用户在宿主网页上选中的内容
   const selection = getSelection(isInShadow)
@@ -630,6 +618,13 @@ export const getSelection = (isInShadow?: boolean) => {
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+
+
+
+
+
+
+
 // 获取用户信息
 thisGetUserInfo()
 // 监听页面鼠标抬起事件
@@ -637,7 +632,8 @@ document.addEventListener('mouseup', handleMouseup);
 // 监听页面鼠标按下事件
 document.onmousedown = function (event) {
   const element = event.composedPath()[0]
-  if (element instanceof HTMLElement && !element.classList.contains('ShortcutButton') && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
+  const isClickedInsideShortcutButton = checkIsClickedInsideShortcutButton(event)
+  if (element instanceof HTMLElement && !isClickedInsideShortcutButton && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
     // 如果点击的不是快捷按钮、插件窗口及其子元素，则关闭窗口
     if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
 
@@ -671,6 +667,37 @@ document.onmousedown = function (event) {
 
 }
 
+// 如果是 YouTube 则显示操作按钮
+if (window.location.hostname === "www.youtube.com") {
+  const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
 
-// document.addEventListener('selectionchange', handleSelectionchange);
+  if (ytpChromeControls) {
 
+    const YouTubeButtonContainerDiv = document.createElement('div')
+    YouTubeButtonContainerDiv.id = '__ScouterYouTubeButtonContainer'
+    ytpChromeControls.appendChild(YouTubeButtonContainerDiv);
+    const thisShadowRoot = YouTubeButtonContainerDiv?.attachShadow({ mode: 'open' });
+
+
+    // if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
+    //   // 如果不存在 PopupCard
+    //   container = document.createElement('div')
+    //   container.className = CONTAINER_CLASSNAME
+    //   shadowRoot?.appendChild(container)
+    // }
+
+    ReactDOM.render(
+      <React.StrictMode>
+        <StyleSheetManager target={thisShadowRoot}>
+          <YouTubeButton
+            container={container}
+            shadowRoot={shadowRoot}
+          />
+        </StyleSheetManager>
+      </React.StrictMode >,
+      thisShadowRoot
+    );
+
+  }
+
+}

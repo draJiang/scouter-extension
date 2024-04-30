@@ -390,17 +390,24 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             // pawan
             headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
 
+            // 去除 v1 符号
+            openApiEndpoint = openApiEndpoint.replace('v1', '')
+
             // 去除端点末尾的 \ 符号
             if (openApiEndpoint.slice(-1) === "/") {
               openApiEndpoint = openApiEndpoint.slice(0, -1);
             }
 
+            let model = 'pai-001'
+            if (openApiEndpoint.indexOf('gpt-3.5-unfiltered') > -1) {
+              model = 'gpt-3.5-unfiltered'
+            }
+
             imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
             openApiEndpoint += '/v1/chat/completions'
 
-
             body = {
-              "model": "pai-001",
+              "model": model,
               "messages": messages,
               "temperature": 0.7,
               "max_tokens": 420,
