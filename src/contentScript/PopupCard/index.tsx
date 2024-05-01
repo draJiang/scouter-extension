@@ -67,7 +67,7 @@ display: flex;
 flex-direction: column;
 font-size: 14px;
 background-color: #fff;
-z-index: 999;
+z-index: 9999;
 overflow: hidden;
 box-shadow: 0px 8px 28px rgba(0,0,0,.16);
 border-radius: 6px;
@@ -88,7 +88,18 @@ h2 {
 `;
 
 
-export function PopupCard(props: any) {
+export function PopupCard(props:
+  {
+    data: { keyWord: string, Sentence: string },
+    selection: any,
+    options: {
+      isPin?: boolean,
+      runPrompt?: boolean,
+      isYoutube?: boolean,
+      youtubeData?: { keyWord: string, sencence: string, image: string }
+    }
+  }
+) {
 
 
   const [messages, setMessages] = useState<Array<ChatMessage>>([{
@@ -171,7 +182,7 @@ export function PopupCard(props: any) {
     // 重复添加到 Anki 按钮的状态
     // setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
-    if (props.runPrompt || props.runPrompt === undefined) {
+    if (props.options.runPrompt || props.options.runPrompt === undefined) {
 
 
       // 获取最近一次执行的 Prompt
@@ -211,7 +222,14 @@ export function PopupCard(props: any) {
 
 
     // 设置窗口的默认位置、添加滚动事件，让消息列表自动滚动到底部
-    windowInitialization({ 'isPin': props.isPin, 'windowElement': windowElement, 'selection': props.selection, 'messagesList': messagesList })
+    windowInitialization(
+      {
+        'isPin': props.options.isPin || false,
+        'windowElement': windowElement,
+        'selection': props.selection,
+        'messagesList': messagesList
+      }, props.options.isYoutube
+    )
 
 
   }, [props.data.keyWord]);
@@ -523,29 +541,30 @@ export function PopupCard(props: any) {
 
           if (keyWord.length <= 20 && prompt.getUnsplashImages && needToRerenderImage) {
             // 获取图片数据
-            getUnsplashImages(keyWord).then((imgs: any) => {
-              // setImages(imgs)
+            handleImages(keyWord)
+            // getUnsplashImages(keyWord).then((imgs: any) => {
+            //   // setImages(imgs)
 
-              // 保存图片数据
-              setMessages(prevMessages => {
+            //   // 保存图片数据
+            //   setMessages(prevMessages => {
 
-                const lastMessage = prevMessages[prevMessages.length - 1];
+            //     const lastMessage = prevMessages[prevMessages.length - 1];
 
-                if (prevMessages.length === 0) {
-                  return []
-                }
+            //     if (prevMessages.length === 0) {
+            //       return []
+            //     }
 
-                const updatedLastMessage = {
-                  ...lastMessage,
-                  needToShowImg: true,
-                  images: imgs
-                };
+            //     const updatedLastMessage = {
+            //       ...lastMessage,
+            //       needToShowImg: true,
+            //       images: imgs
+            //     };
 
-                return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+            //     return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
-              })
+            //   })
 
-            })
+            // })
 
           }
 
@@ -553,29 +572,31 @@ export function PopupCard(props: any) {
 
           if (prompt.getUnsplashImages && needToRerenderImage) {
             // 获取图片数据
-            getUnsplashImages(keyWord).then((imgs: any) => {
-              // setImages(imgs)
+            handleImages(keyWord)
 
-              // 保存图片数据
-              setMessages(prevMessages => {
+            // getUnsplashImages(keyWord).then((imgs: any) => {
+            //   // setImages(imgs)
 
-                const lastMessage = prevMessages[prevMessages.length - 1];
+            //   // 保存图片数据
+            //   setMessages(prevMessages => {
 
-                if (prevMessages.length === 0) {
-                  return []
-                }
+            //     const lastMessage = prevMessages[prevMessages.length - 1];
 
-                const updatedLastMessage = {
-                  ...lastMessage,
-                  needToShowImg: true,
-                  images: imgs
-                };
+            //     if (prevMessages.length === 0) {
+            //       return []
+            //     }
 
-                return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+            //     const updatedLastMessage = {
+            //       ...lastMessage,
+            //       needToShowImg: true,
+            //       images: imgs
+            //     };
 
-              })
+            //     return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
-            })
+            //   })
+
+            // })
 
           }
 
@@ -761,6 +782,59 @@ export function PopupCard(props: any) {
 
   };
 
+  // 渲染图片
+  const handleImages = (keyWord: string) => {
+
+    getUnsplashImages(keyWord).then((imgs: any) => {
+      // setImages(imgs)
+
+      let newImages = imgs
+
+      if (props.options.isYoutube && props.options.youtubeData) {
+
+        const youtubeImage: ImageType = {
+          type: 'youtube',
+          id: 'youtube',
+          urls: {
+            small: props.options.youtubeData.image,
+          },
+          links: {
+            download_location: '',
+          },
+          description: '',
+          user: {
+            username: 'Youtube',
+            name: 'Youtube',
+          }
+        }
+
+        newImages.unshift(youtubeImage)
+
+      }
+
+      // 保存图片数据
+      setMessages(prevMessages => {
+
+        const lastMessage = prevMessages[prevMessages.length - 1];
+
+        if (prevMessages.length === 0) {
+          return []
+        }
+
+        const updatedLastMessage = {
+          ...lastMessage,
+          needToShowImg: true,
+          images: newImages
+        };
+
+        return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
+
+      })
+
+    })
+
+  }
+
   // 用户发送消息
   const handleSendMessage = (values: string) => {
 
@@ -887,7 +961,7 @@ export function PopupCard(props: any) {
   };
 
   // GPT 生成消息时，自动定位到消息列表底部，方便用户阅读
-  function scrollToBottom(canSroll: boolean = false) {
+  const scrollToBottom = (canSroll: boolean = false) => {
 
     if (windowElement.current !== null) {
       const container = windowElement.current.querySelectorAll('.container')[0]

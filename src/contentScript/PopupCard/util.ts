@@ -36,17 +36,29 @@ export const getClipboard = () => {
 
 }
 
-export const windowInitialization = (data: { isPin: boolean, windowElement: any, selection: any, messagesList: any }) => {
+export const windowInitialization = (
+    data: {
+        isPin: boolean,
+        windowElement: any,
+        selection: any,
+        messagesList: any
+    }, isYoutube: boolean | undefined) => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    const elementWidth = data.windowElement.current.clientWidth;
+    const elementHeight = data.windowElement.current.clientHeight;
 
     // 设置窗口的默认位置
+    if (isYoutube) {
+        data.windowElement.current.style.left = `${windowWidth - elementWidth - 10}px`;
+        data.windowElement.current.style.top = "10px";
+
+        return
+    }
+
+
     if (data.windowElement.current && !data.isPin && data.selection.type !== "None") {
-
-        // Check the boundaries
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-
-        const elementWidth = data.windowElement.current.clientWidth;
-        const elementHeight = data.windowElement.current.clientHeight;
 
         const minX = 0;
         const minY = 0;
@@ -64,16 +76,11 @@ export const windowInitialization = (data: { isPin: boolean, windowElement: any,
             console.log(error);
         }
 
-
-
         const clampedX = Math.max(minX, Math.min(newX, maxX));
         const clampedY = Math.max(minY, Math.min(newY, maxY));
 
         data.windowElement.current.style.left = `${clampedX}px`;
         data.windowElement.current.style.top = `${clampedY}px`;
-    } else {
-        data.windowElement.current.style.left = "10px";
-        data.windowElement.current.style.top = "10px";
     }
 
     // // 添加滚动事件，让消息列表自动滚动到底部

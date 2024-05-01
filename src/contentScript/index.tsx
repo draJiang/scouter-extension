@@ -20,8 +20,6 @@ import { ToolBar } from './ToolBar';
 
 import { userInfoType, AnkiInfoType } from '../types'
 
-
-
 import { cardStyle } from '../util'
 
 import { popupCardStyle } from './PopupCard/style'
@@ -169,7 +167,7 @@ browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
 
 });
 
-export const openScouter = (msg?: any, isYoutube?: boolean, youtubeData?: { text: string, image: string }) => {
+export const openScouter = (msg?: any, isYoutube?: boolean, youtubeData?: { keyWord: string, sencence: string, image: string }) => {
   // 处理窗口
   if (msg === undefined) {
     msg = {
@@ -177,9 +175,6 @@ export const openScouter = (msg?: any, isYoutube?: boolean, youtubeData?: { text
     }
   }
 
-  if (isYoutube === undefined) {
-    isYoutube = false
-  }
 
   if (MyBox !== null && MyBox !== undefined) {
     // 如果已存在容器
@@ -222,11 +217,33 @@ export const openScouter = (msg?: any, isYoutube?: boolean, youtubeData?: { text
 
   // 显示窗口
   if (isYoutube && youtubeData) {
-    showPopupCard({ 'keyWord': youtubeData.text, 'Sentence': youtubeData.text }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
+    showPopupCard(
+      { 'keyWord': youtubeData.keyWord, 'Sentence': youtubeData.sencence },
+      window.getSelection(), container, shadowRoot,
+      {
+        isPin: isPin,
+        runPrompt: msg.runPrompt,
+        isYoutube: isYoutube,
+        youtubeData
+      },
+
+    )
   } else {
 
     if (selection && selection.keyWord !== '') {
-      showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, msg.runPrompt)
+      showPopupCard({
+        'keyWord': selection?.keyWord,
+        'Sentence': selection.sentence
+      },
+        window.getSelection(),
+        container,
+        shadowRoot,
+        {
+          isPin: isPin,
+          runPrompt: msg.runPrompt,
+          isYoutube: false
+        }
+      )
     }
 
   }
@@ -236,9 +253,29 @@ export const openScouter = (msg?: any, isYoutube?: boolean, youtubeData?: { text
 }
 
 // 显示应用窗口
-async function showPopupCard(data: { keyWord: string, Sentence: string }, selection: any, MyBox: any, shadowRoot: any, isPin: boolean, runPrompt: boolean) {
+async function showPopupCard(
+  data: { keyWord: string, Sentence: string },
+  selection: any,
+  MyBox: any,
+  shadowRoot: any,
+  options: {
+    isPin: boolean,
+    runPrompt: boolean,
+    isYoutube: boolean,
+    youtubeData?: { keyWord: string, sencence: string, image: string }
+  }
+
+) {
 
   let lang = await fetchcurrentLanguage()
+  let thisOptions = options
+  if (options === undefined) {
+    thisOptions = {
+      isPin: false,
+      runPrompt: true,
+      isYoutube: false,
+    }
+  }
 
   ReactDOM.render(
 
@@ -248,7 +285,11 @@ async function showPopupCard(data: { keyWord: string, Sentence: string }, select
         <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
           <StyleProvider container={shadowRoot}>
             <StyleSheetManager target={shadowRoot}>
-              <PopupCard data={data} selection={selection} runPrompt={runPrompt} isPin={isPin} />
+              <PopupCard
+                data={data}
+                selection={selection}
+                options={thisOptions}
+              />
             </StyleSheetManager>
           </StyleProvider>
         </UserInfoContext.Provider>
@@ -336,7 +377,21 @@ const handleMouseup = async (event: any) => {
 
       // 显示窗口/更新窗口信息
       if (selection && selection?.keyWord.length > 0 && isPin && selection.selection.anchorNode?.nodeName === '#text') {
-        showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection.sentence }, window.getSelection(), container, shadowRoot, isPin, true)
+        showPopupCard(
+          {
+            'keyWord': selection?.keyWord,
+            'Sentence': selection.sentence
+          },
+          window.getSelection(),
+          container,
+          shadowRoot,
+          {
+            isPin: isPin,
+            runPrompt: true,
+            isYoutube: false
+          }
+
+        )
       }
 
     } else {
@@ -346,29 +401,10 @@ const handleMouseup = async (event: any) => {
       let selectedText
 
       // 显示完形填空操作按钮
-
-      // if (isFirefox) {
-      //   selectedText = window.getSelection()
-      // } else {
-      //   selectedText = shadowRoot.getSelection()
-      // }
-
       const selectedTextString = selection!.keyWord.toString()
       // const sentence = ''
 
       const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
-      // const messagesBox = container.getElementsByClassName('messages')[0]
-
-      // console.log(selectedText);
-      // console.log(messagesBox?.contains(selectedText.baseNode.parentNode as Node));
-
-      // let isInMessages = false
-      // if (selectedText.baseNode) {
-      //   if (messagesBox === selectedText.baseNode.parentNode || messagesBox?.contains(selectedText.baseNode.parentNode as Node)) {
-      //     //在 messages 容器内操作，则显示操作按钮
-      //     isInMessages = true
-      //   }
-      // }
 
 
 
@@ -492,7 +528,13 @@ const handleMouseup = async (event: any) => {
                   }
 
                   // 显示窗口
-                  showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection!.sentence }, newSelection, container, shadowRoot, isPin, runPrompt)
+                  showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection!.sentence }, newSelection, container, shadowRoot,
+                    {
+                      isPin: isPin,
+                      runPrompt: runPrompt,
+                      isYoutube: false
+                    }
+                  )
 
                 }
               }} />
@@ -667,37 +709,63 @@ document.onmousedown = function (event) {
 
 }
 
-// 如果是 YouTube 则显示操作按钮
-if (window.location.hostname === "www.youtube.com") {
-  const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
+window.onload = () => {
 
-  if (ytpChromeControls) {
+  // 如果是 YouTube 则显示操作按钮
+  setTimeout(() => {
 
-    const YouTubeButtonContainerDiv = document.createElement('div')
-    YouTubeButtonContainerDiv.id = '__ScouterYouTubeButtonContainer'
-    ytpChromeControls.appendChild(YouTubeButtonContainerDiv);
-    const thisShadowRoot = YouTubeButtonContainerDiv?.attachShadow({ mode: 'open' });
+    if (window.location.hostname === "www.youtube.com") {
+      const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
 
+      if (ytpChromeControls) {
 
-    // if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
-    //   // 如果不存在 PopupCard
-    //   container = document.createElement('div')
-    //   container.className = CONTAINER_CLASSNAME
-    //   shadowRoot?.appendChild(container)
-    // }
+        const YouTubeButtonContainerDiv = document.createElement('div')
+        YouTubeButtonContainerDiv.id = '__ScouterYouTubeButtonContainer'
+        YouTubeButtonContainerDiv.style.display = 'flex'
+        YouTubeButtonContainerDiv.style.alignItems = 'center'
+        YouTubeButtonContainerDiv.style.width = '48px'
 
-    ReactDOM.render(
-      <React.StrictMode>
-        <StyleSheetManager target={thisShadowRoot}>
-          <YouTubeButton
-            container={container}
-            shadowRoot={shadowRoot}
-          />
-        </StyleSheetManager>
-      </React.StrictMode >,
-      thisShadowRoot
-    );
+        ytpChromeControls.insertBefore(YouTubeButtonContainerDiv, ytpChromeControls.lastChild);
+        const thisShadowRoot = YouTubeButtonContainerDiv?.attachShadow({ mode: 'open' });
 
-  }
+        // if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
+        //   // 如果不存在 PopupCard
+        //   container = document.createElement('div')
+        //   container.className = CONTAINER_CLASSNAME
+        //   shadowRoot?.appendChild(container)
+        // }
+
+        ReactDOM.render(
+          <React.StrictMode>
+            <StyleSheetManager target={thisShadowRoot}>
+              <YouTubeButton
+                container={container}
+                shadowRoot={shadowRoot}
+              />
+            </StyleSheetManager>
+          </React.StrictMode >,
+          thisShadowRoot
+        );
+
+        const style = document.createElement('style');
+        style.textContent = `
+
+          .scouterCaptionButton {
+              opacity: 0.9;
+          }
+
+          .scouterCaptionButton:hover {
+              opacity: 1;
+          }
+
+        `;
+        thisShadowRoot.appendChild(style);
+
+      }
+
+    }
+
+  }, 10);
+
 
 }

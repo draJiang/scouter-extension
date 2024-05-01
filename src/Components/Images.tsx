@@ -12,8 +12,6 @@ import { useUserInfoContext } from '../lib/userInfo'
 
 import { useSpring, animated } from 'react-spring';
 
-import { generationsImages } from '../util'
-
 
 interface ImagesProps {
     images: Array<ImageType>;
@@ -456,9 +454,9 @@ export function Images(props: ImagesProps) {
                                         textShadow: '2px 2px 5px rgba(0, 0, 0, 0.3)'
                                     }}
                                 >
-                                    {props.images[imageIndex].type === 'ai' ?
+                                    {props.images[imageIndex].type === 'ai' || props.images[imageIndex].type === 'youtube' ?
                                         <>
-                                            Photo by AI
+                                            Photo by {props.images[imageIndex].user.name}
                                         </>
                                         :
                                         <>
