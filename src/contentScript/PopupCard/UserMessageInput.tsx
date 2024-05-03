@@ -10,7 +10,7 @@ const { TextArea } = Input;
 
 interface MessageProps {
     messages: Array<ChatMessage>;
-    handleSendMessage: (values: string) => void;
+    handleSendMessage: (values: string, getFeedback: boolean) => void;
 }
 
 export function UserMessageInput(props: MessageProps) {
@@ -26,22 +26,46 @@ export function UserMessageInput(props: MessageProps) {
         // 阻止事件冒泡
         // console.log('handleKeyDown');
 
+        console.log(event);
+
         event.stopPropagation()
 
         if (event.keyCode === 13 && !event.shiftKey) {
 
-            const contents = props.messages[props.messages.length - 1]['content']
-            // console.log(props.messages);
+            if (props.messages.length > 0) {
 
-            // 敲击回车键
-            if (props.messages.length === 0 ||
-                (contents[contents.length - 1]['status'] !== 'begin' &&
-                    contents[contents.length - 1]['status'] !== 'process') && isAnswerInputed) {
-                // 非加载状态、GPT 消息发送完毕时用户可发送消息
-                handleSendMessage({ 'msg': event.target.value })
+                const contents = props.messages[props.messages.length - 1]['content']
+                const lastContentStatus = contents[contents.length - 1]['status']
+                // console.log(props.messages);
+
+                if (props.messages.length === 0 ||
+                    (lastContentStatus !== 'begin' && lastContentStatus !== 'process') && isAnswerInputed) {
+
+                    // 非加载状态、GPT 消息发送完毕时用户可发送消息
+                    if (event.metaKey) {
+                        // 发送消息，但不需要 AI 反馈
+                        handleSendMessage({ 'msg': event.target.value }, false)
+                    } else {
+                        // 发送消息，需要 AI 反馈
+                        handleSendMessage({ 'msg': event.target.value })
+                    }
+                } else {
+                    event.preventDefault();
+                }
+
             } else {
-                event.preventDefault();
+
+                if (event.metaKey) {
+                    // 发送消息，但不需要 AI 反馈
+                    handleSendMessage({ 'msg': event.target.value }, false)
+                } else {
+                    // 发送消息，需要 AI 反馈
+                    handleSendMessage({ 'msg': event.target.value })
+                }
+                
             }
+
+
 
         }
     }
@@ -56,13 +80,13 @@ export function UserMessageInput(props: MessageProps) {
         }
     }
 
-    const handleSendMessage = (values: any) => {
+    const handleSendMessage = (values: any, getFeedback: boolean = true) => {
         // 清空文本框
         form.resetFields();
         // 禁用发送按钮
         setIsAnswerInputed(false)
         // 执行发消息事件
-        props.handleSendMessage(values.msg)
+        props.handleSendMessage(values.msg, getFeedback)
     }
 
     // const AnimatedButton = animated(Button);

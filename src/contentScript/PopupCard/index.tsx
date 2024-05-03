@@ -836,7 +836,7 @@ export function PopupCard(props:
   }
 
   // 用户发送消息
-  const handleSendMessage = (values: string) => {
+  const handleSendMessage = (values: string, getFeedback: boolean = true) => {
 
     // console.log(values);
     let prompt = values
@@ -868,22 +868,25 @@ export function PopupCard(props:
 
     });
 
-    // 在消息历史中插入新 GPT 消息
-    setMessages(prevMessages => [...prevMessages, {
-      content: [{
-        chatId: uuidv4(),
-        content: '',
-        status: 'begin',
-      }],
-      role: 'assistant',
-      prompt: '',
-      showImagesBox: false,
-      images: []
-    }])
+    // 是否需要获取 AI 的反馈
+    if (getFeedback) {
+      // 在消息历史中插入新 GPT 消息
+      setMessages(prevMessages => [...prevMessages, {
+        content: [{
+          chatId: uuidv4(),
+          content: '',
+          status: 'begin',
+        }],
+        role: 'assistant',
+        prompt: '',
+        showImagesBox: false,
+        images: []
+      }])
 
-    const msgHistory = messages.slice(-5).map((item) => { return { 'role': item.role, 'content': item.content[item.content.length - 1]['content'] } })
+      const msgHistory = messages.slice(-5).map((item) => { return { 'role': item.role, 'content': item.content[item.content.length - 1]['content'] } })
 
-    getKnowledge([...msgHistory, { "role": "user", "content": values }])
+      getKnowledge([...msgHistory, { "role": "user", "content": values }])
+    }
 
     // amplitude.track('handleSendMessage');
     browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'handleSendMessage' })
@@ -1043,7 +1046,7 @@ export function PopupCard(props:
 
               {/* 当只有 1 条消息且是在线词典触发的则不显示「重新生成」按钮 */}
               {messages.length > 0 &&
-                (messages[messages.length - 1].prompt === '' ? ''
+                (messages[messages.length - 1].prompt === '' || messages[messages.length - 1].role === 'user' ? ''
                   :
                   <RegenerateButton messages={messages} handleRegenerateButtonClick={handleRegenerateButtonClick} />)}
 

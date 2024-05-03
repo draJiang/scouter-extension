@@ -24,7 +24,7 @@ import { cardStyle } from '../util'
 
 import { popupCardStyle } from './PopupCard/style'
 import { ShortcutButton } from './ShortcutButton'
-import { YouTubeButton } from './YouTubeButton'
+import { YouTubeButton } from './youtube/YouTubeButton'
 
 // import './assets/tailwind.css';
 
