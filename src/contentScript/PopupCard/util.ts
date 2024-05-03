@@ -50,7 +50,7 @@ export const windowInitialization = (
     const elementHeight = data.windowElement.current.clientHeight;
 
     // 设置窗口的默认位置
-    if (isYoutube) {
+    if (isYoutube && !data.isPin) {
         data.windowElement.current.style.left = `${windowWidth - elementWidth - 10}px`;
         data.windowElement.current.style.top = "10px";
 
