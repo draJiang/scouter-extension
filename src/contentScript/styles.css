@@ -9,3 +9,7 @@
 .captionP:hover {
     opacity: 1;
 }
+
+.checkbox:hover {
+    font-weight: bold;
+}

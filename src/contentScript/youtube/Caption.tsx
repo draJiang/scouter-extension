@@ -5,12 +5,15 @@ import { CaptionLine } from './CaptionLine'
 import { openScouter } from '../index'
 import { OpenInNewWindowIcon } from '@radix-ui/react-icons'
 
+import { useDebouncedCallback } from 'use-debounce';
+
 export function Caption() {
 
     const [captionText, setCaptionText] = useState<string[]>([]);
     const [lang, setLang] = useState<string>('en');
     const [showButton, setShowButton] = useState(false)
     const clickedCaption = useRef<boolean>(false)
+    const [fontSize, setFontSize] = useState('20px')
 
     useEffect(() => {
 
@@ -55,15 +58,50 @@ export function Caption() {
             observer.observe(targetNode, config);
         }
 
+        // 设置字幕
         setCaptions()
+
+        // 初始字幕尺寸
+        handleResize()
+
+        // 在 window 对象上添加 resize 事件监听器
+        window.addEventListener('resize', handleResize);
 
         // 断开观察
         return () => {
             observer.disconnect();
+            window.removeEventListener('resize', handleResize);
         }
 
 
     }, [])
+
+    const handleResize = useDebouncedCallback(() => {
+        const v = document.querySelector('video')
+        if (!v) {
+            return
+        }
+        const w = v.clientWidth
+
+        let newFontSize = '20px';
+
+        if (w >= 1200) {
+            newFontSize = '28px'
+        }
+        if (w > 900 && w < 1200) {
+            newFontSize = '24px'
+        }
+        if (w > 640 && w <= 900) {
+            newFontSize = '20px'
+        }
+        if (w <= 640) {
+            newFontSize = '16px'
+        }
+
+        if (newFontSize !== fontSize) {
+            setFontSize(newFontSize)
+        }
+    }, 500)
 
     const handleCaptionClick = (word: string, captionText: string) => {
 
@@ -125,7 +163,10 @@ export function Caption() {
             }}
         >
             {captionText.map((item, index) => (
-                <CaptionLine key={index}>
+                <CaptionLine
+                    key={index}
+                    fontSize={fontSize}
+                >
                     {item.split(' ').map((word, wordIndex) => (
                         <span
                             className='captionWord'

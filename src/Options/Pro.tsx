@@ -59,22 +59,6 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                     name="newLicenseKey"
                     // label={<> <ProTag /></>}
                     style={{}}
-                    extra={
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            // justifyContent: 'end'
-                        }}>
-
-                            {/* Unlock more features
-
-                            <Button style={{
-                                paddingLeft: '2px',
-                                paddingRight: '0',
-                            }} type='link' onClick={() => { window.open('https://jiang.lemonsqueezy.com/checkout/buy/e31f8c18-7bf2-4f6b-85c2-508fb500ce84') }} >Get License⚡</Button> */}
-
-                        </div>
-                    }
                 >
                     <Input style={{ paddingLeft: '5px' }} prefix={<span style={{ marginRight: '4px' }}> <ProTag /></span>} suffix={userInfo?.user.verified! && <CheckCircleTwoTone twoToneColor="#52c41a" />} placeholder="License Key" type="password" />
                 </Form.Item>
@@ -115,6 +99,11 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                                 <li className="flex items-center space-x-3">
                                     {/* <!-- Icon --> */}
                                     <svg className="flex-shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                                    <span>Learning in YouTube</span>
+                                </li>
+                                <li className="flex items-center space-x-3">
+                                    {/* <!-- Icon --> */}
+                                    <svg className="flex-shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
                                     <span>Search images</span>
                                 </li>
                                 <li className="flex items-center space-x-3">
@@ -149,6 +138,11 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                                     {/* <!-- Icon --> */}
                                     <svg className="flex-shrink-0 w-5 h-5 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                                     <span>Add to Anki</span>
+                                </li>
+                                <li className="flex items-center space-x-3">
+                                    {/* <!-- Icon --> */}
+                                    <svg className="flex-shrink-0 w-5 h-5 text-green-500 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                    <span>Learning in YouTube</span>
                                 </li>
                                 <li className="flex items-center space-x-3">
                                     {/* <!-- Icon --> */}

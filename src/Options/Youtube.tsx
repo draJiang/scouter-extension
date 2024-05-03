@@ -44,11 +44,11 @@ const Youtube: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                 <Form.Item
                     name="showYoutubeButton"
                     valuePropName="checked"
-                    label="📺 Youtube Button"
+                    label="📺 YouTube shortcut"
                     extra={
                         <div>
-                            <p>Display the menu when you select any text</p>
-                            <img className=" w-full max-w-lg" src="images/contextMenu.png" />
+                            {/* <p style={{ marginBottom: '10px' }}>Display YouTube shortcut</p> */}
+                            <img className=" w-full py-2 max-w-2xl" src="images/youtube.png" />
                         </div>}
                 >
                     <Switch />

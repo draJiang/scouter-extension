@@ -166,6 +166,17 @@ export function YouTubeButton(props: YouTubeButtonProps) {
 
     }
 
+    const handleHideHideShortcut = () => {
+        // 移除元素
+        const element = document.getElementById('__ScouterYouTubeButtonContainer');
+        if (element) {
+            element.remove();
+        }
+
+        // 记录
+        browser.storage.sync.set({ "showYoutubeButton": false })
+    }
+
     return (
         <div>
             <div>
@@ -184,7 +195,7 @@ export function YouTubeButton(props: YouTubeButtonProps) {
             {showMenu &&
                 <div style={{
                     position: 'relative',
-                    top: '-98px',
+                    bottom: '120px',
                     left: '-100px',
                     width: '0px',
                     height: '0px',
@@ -192,12 +203,16 @@ export function YouTubeButton(props: YouTubeButtonProps) {
                 }}>
 
                     <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
                         backgroundColor: 'rgba(8, 8, 8, 0.75)',
-                        padding: '20px',
-                        width: '120px',
+                        padding: '10px 20px',
+                        width: '140px',
                         borderRadius: '12px'
                     }}>
-                        <CheckBox lable="开启字幕" checked={isShowCaptions} handleCheckBoxChange={showCaptions} />
+                        <CheckBox lable="Display subtitles" checked={isShowCaptions} handleCheckBoxChange={showCaptions} />
+                        <CheckBox lable="Hide This Shortcut" checked={false} handleCheckBoxChange={handleHideHideShortcut} />
                     </div>
 
                 </div>
