@@ -9,6 +9,7 @@ import General from './General';
 import AI from './AI';
 import Pro from './Pro';
 import Nav from './Nav'
+import Youtube from './Youtube'
 
 import { StyleProvider } from '@ant-design/cssinjs';
 import { Tabs, ConfigProvider, Layout } from 'antd';
@@ -73,6 +74,10 @@ export const Options = () => {
     {
       name: 'AI',
       content: <AI settings={settings} saveOptions={thisSaveOptions} />
+    },
+    {
+      name: 'YouTube',
+      content: <Youtube settings={settings} saveOptions={thisSaveOptions} />
     },
     {
       name: '👑Pro',
@@ -144,7 +149,7 @@ export const Options = () => {
 
     //保存设置
     saveOptions(values)
-    
+
 
     // 获取键值对
     const entries = Object.entries(values);

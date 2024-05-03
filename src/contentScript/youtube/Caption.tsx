@@ -94,7 +94,7 @@ export function Caption() {
         display: 'flex',
         position: 'absolute',
         right: '0',
-        bottom: '10px'
+        bottom: '8px'
     }
 
 

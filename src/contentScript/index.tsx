@@ -91,6 +91,7 @@ if (MyBox === null || MyBox === undefined) {
 let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 let executedPromptHistoryInToolBar = [dictionaryPrompt]
+let showYoutubeButton = false
 
 // 获取用户信息
 const thisGetUserInfo = async () => {
@@ -109,6 +110,8 @@ const thisGetUserInfo = async () => {
   // 在上下文菜单中最近执行的 Prompt
   const result = await browser.storage.local.get({ "executedPromptHistoryInToolBar": [dictionaryPrompt] })
   executedPromptHistoryInToolBar = result.executedPromptHistoryInToolBar
+  const syncResult = await browser.storage.sync.get({ "showYoutubeButton": false })
+  showYoutubeButton = syncResult.showYoutubeButton
 
 
   // 获取 Anki decks
@@ -706,7 +709,6 @@ document.onmousedown = function (event) {
     }
   }
 
-
 }
 
 window.onload = () => {
@@ -714,7 +716,7 @@ window.onload = () => {
   // 如果是 YouTube 则显示操作按钮
   setTimeout(() => {
 
-    if (window.location.hostname === "www.youtube.com") {
+    if (window.location.hostname === "www.youtube.com" && showYoutubeButton) {
       const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
 
       if (ytpChromeControls) {
