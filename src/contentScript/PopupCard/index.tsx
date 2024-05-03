@@ -388,7 +388,7 @@ export function PopupCard(props:
       let showImagesBox = true
       if (prompt.id === 'dict' || prompt.id === 'Default') {
 
-        // 特殊的方法
+        // 关键字过长时不显示图片
         if (keyWord.length < 20) {
           showImagesBox = true
         } else {
@@ -639,7 +639,7 @@ export function PopupCard(props:
     })
 
     // 获取最近执行的 Prompt，再次执行
-    getKnowledge(lastPromptRef.current!, props.data.keyWord, lastExecutedPrompt.id)
+    getKnowledge(lastPromptRef.current!, props.data.keyWord)
 
   }
 
