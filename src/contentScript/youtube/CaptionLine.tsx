@@ -11,7 +11,7 @@ export const CaptionLine: React.FC<CaptionPProps> = ({ children, fontSize }) => 
         // fontSize: '2.2rem',
         width: 'fit-content',
         margin: '0 auto',
-        padding: '4px',
+        // padding: '4px',
         display: 'flex',
         flexFlow: 'wrap',
         justifyContent: 'center',

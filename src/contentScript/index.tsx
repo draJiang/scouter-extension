@@ -743,6 +743,7 @@ window.onload = () => {
               <YouTubeButton
                 container={container}
                 shadowRoot={shadowRoot}
+                userInfo={USER_INFO}
               />
             </StyleSheetManager>
           </React.StrictMode >,

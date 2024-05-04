@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 export function CheckBox(props: {
     lable: string,
     checked?: boolean,
+    disable?: boolean,
     handleCheckBoxChange: (checked: boolean) => void
 }) {
 
@@ -26,6 +27,8 @@ export function CheckBox(props: {
                 alignItems: 'center',
                 cursor: 'pointer',
                 padding: '4px',
+                opacity: props.disable ? '0.5' : '1.0',
+                pointerEvents: props.disable ? 'none' : 'auto'
             }}
             onClick={() => {
                 setChecked(!checked)

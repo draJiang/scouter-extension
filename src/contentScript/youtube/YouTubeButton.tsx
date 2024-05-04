@@ -7,12 +7,13 @@ import Logo from '../../Components/Logo'
 import { Caption } from './Caption'
 import { CheckBox } from './CheckBox'
 
-
+import { userInfoType } from '../../types'
 
 interface YouTubeButtonProps {
 
     container: HTMLDivElement;
     shadowRoot: ShadowRoot;
+    userInfo: userInfoType;
 }
 
 export function YouTubeButton(props: YouTubeButtonProps) {
@@ -27,8 +28,13 @@ export function YouTubeButton(props: YouTubeButtonProps) {
             setIsShowCaptions(result.showCaptions)
 
             waitForElement(".ytp-caption-window-container", (element: Element) => {
-                console.log("元素已加载：", element);
-                showCaptions(result.showCaptions)
+                
+                if (props.userInfo.verified && result.showCaptions) {
+                    showCaptions(true)
+                } else {
+                    showCaptions(false)
+                }
+
             });
 
         })
@@ -208,11 +214,22 @@ export function YouTubeButton(props: YouTubeButtonProps) {
                         gap: '10px',
                         backgroundColor: 'rgba(8, 8, 8, 0.75)',
                         padding: '10px 20px',
-                        width: '140px',
+                        width: 'max-content',
                         borderRadius: '12px'
                     }}>
-                        <CheckBox lable="Display subtitles" checked={isShowCaptions} handleCheckBoxChange={showCaptions} />
-                        <CheckBox lable="Hide This Shortcut" checked={false} handleCheckBoxChange={handleHideHideShortcut} />
+                        <div style={{ display: 'flex' }}>
+                            <CheckBox
+                                lable="Display subtitles"
+                                disable={!props.userInfo.verified}
+                                checked={isShowCaptions && props.userInfo.verified}
+                                handleCheckBoxChange={showCaptions} />
+                            <a style={{ color: '#F08A24', lineHeight: 'normal', marginLeft: '4px' }} target='_blank' href='https://jiangzilong.notion.site/Learning-in-YouTube-YouTube-1d61fd50815a42a5af394db4a695c712?pvs=4'>
+                                ⚡Pro
+                            </a>
+                        </div>
+                        <div>
+                            <CheckBox lable="Hide This Shortcut" checked={false} handleCheckBoxChange={handleHideHideShortcut} />
+                        </div>
                     </div>
 
                 </div>

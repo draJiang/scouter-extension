@@ -80,7 +80,7 @@ export const Options = () => {
       content: <Youtube settings={settings} saveOptions={thisSaveOptions} />
     },
     {
-      name: '👑Pro',
+      name: '⚡Pro',
       content: <Pro settings={settings} saveOptions={thisSaveOptions} />
     }
   ]
