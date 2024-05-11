@@ -430,6 +430,11 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           } else if (openApiEndpoint.indexOf('api.pawan.krd') > -1) {
 
             // pawan
+            let model = 'pai-001'
+            const regex = /\/\/[^\/]+\/([^\/]+)\//;
+            const match = openApiEndpoint.match(regex);
+            if(match){model = match[1]}
+
             headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
 
             // 去除 v1 符号
@@ -438,11 +443,6 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             // 去除端点末尾的 \ 符号
             if (openApiEndpoint.slice(-1) === "/") {
               openApiEndpoint = openApiEndpoint.slice(0, -1);
-            }
-
-            let model = 'pai-001'
-            if (openApiEndpoint.indexOf('gpt-3.5-unfiltered') > -1) {
-              model = 'gpt-3.5-unfiltered'
             }
 
             imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
@@ -591,9 +591,9 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 }
 
 export async function getChatGPTWebToken() {
-  
+
   console.log('getChatGPTWebToken');
-  
+
   return new Promise((resolve, reject) => {
     browser.storage.local.get(['authData']).then(async (result) => {
 
