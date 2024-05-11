@@ -130,7 +130,8 @@ export type ImageType = {
 export type userInfoType = {
     userId: string,
     verified: boolean,
-    contextMenu: boolean
+    contextMenu: boolean,
+    showYoutubeButton: boolean
 };
 
 export type langType = {

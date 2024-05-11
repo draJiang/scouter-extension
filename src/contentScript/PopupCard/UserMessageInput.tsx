@@ -26,8 +26,6 @@ export function UserMessageInput(props: MessageProps) {
         // 阻止事件冒泡
         // console.log('handleKeyDown');
 
-        console.log(event);
-
         event.stopPropagation()
 
         if (event.keyCode === 13 && !event.shiftKey) {
@@ -62,7 +60,7 @@ export function UserMessageInput(props: MessageProps) {
                     // 发送消息，需要 AI 反馈
                     handleSendMessage({ 'msg': event.target.value })
                 }
-                
+
             }
 
 

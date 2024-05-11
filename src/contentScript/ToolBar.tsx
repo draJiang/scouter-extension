@@ -3,6 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Tooltip } from 'antd';
 import styled, { css } from 'styled-components';
 
+// import * as Tooltip from '@radix-ui/react-tooltip';
+
+
 import { ConfigProvider, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 
@@ -18,6 +21,7 @@ import { getDefaultPrompt, dictionaryPrompt } from './PopupCard/util'
 import { PromptType } from "../types"
 
 import { useCurrentLanguage } from '../lib/locale'
+import './styles.css'
 
 import {
   CustomerServiceOutlined
@@ -276,7 +280,10 @@ export function ToolBar(props: ToolBarProps) {
 
             <Tooltip placement="bottom"
               title={'Cloze deletion(same card)'}
+              zIndex={99999}
+              // getPopupContainer={() => container as HTMLElement}
               arrow={false}
+              destroyTooltipOnHide={true}
             >
               <StyledButton style={{ marginRight: '10px' }} onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>
                 [...]
@@ -285,12 +292,31 @@ export function ToolBar(props: ToolBarProps) {
 
             <Tooltip placement="bottom"
               title={'Cloze deletion(new card)'}
+              zIndex={99999}
               arrow={false}
+              destroyTooltipOnHide={true}
             >
               <StyledButton onClick={() => handleSetAnkiSpaceButtonClick(event, true)}>
                 [...]+
               </StyledButton>
             </Tooltip>
+
+
+            {/* <Tooltip.Provider>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <StyledButton style={{ marginRight: '10px' }} onClick={() => handleSetAnkiSpaceButtonClick(event, false)}>
+                    [...]
+                  </StyledButton>
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content className="TooltipContent" style={{ zIndex: '99999' }} sideOffset={5}>
+                    Add to library
+                    <Tooltip.Arrow className="TooltipArrow" />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
+            </Tooltip.Provider> */}
 
           </div>
 
@@ -298,7 +324,9 @@ export function ToolBar(props: ToolBarProps) {
 
             <Tooltip placement="bottom"
               title={'Pronunciation(⚡Pro)'}
+              zIndex={99999}
               arrow={false}
+              destroyTooltipOnHide={true}
             >
               <StyledButton $disable={userInfo?.user.verified ? false : true} style={{
                 fontSize: '16px',
@@ -341,7 +369,9 @@ export function ToolBar(props: ToolBarProps) {
           >
             <Tooltip placement="bottom"
               title={'Prompt(⚡Pro)'}
+              zIndex={99999}
               arrow={false}
+              destroyTooltipOnHide={true}
               open={showPromptsMenu}
             >
 
@@ -360,7 +390,7 @@ export function ToolBar(props: ToolBarProps) {
                 <Dropdown.Button
                   size="small"
                   overlayStyle={{
-                    maxWidth: '180px',
+                    maxWidth: '200px',
                   }}
                   getPopupContainer={() => ContextBox.current as HTMLDivElement}
                   disabled={!userInfo?.user.verified}
@@ -375,6 +405,8 @@ export function ToolBar(props: ToolBarProps) {
                 </Dropdown.Button>
               </div>
             </Tooltip>
+
+
           </div>
         </div >
         }

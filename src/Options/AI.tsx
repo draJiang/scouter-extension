@@ -60,13 +60,25 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
             >
                 <Radio.Group onChange={onRadioChange} value={radioValue} size="small" style={{ marginBottom: 0, display: 'flex' }}>
 
+                    <Radio.Button value="scouterFreeAI" style={{ flex: '1', textAlign: 'center' }}>Scouter</Radio.Button>
                     <Radio.Button value="myOwnOpenAiKey" style={{ flex: '1', textAlign: 'center' }}>OpenAI</Radio.Button>
                     <Radio.Button value="ollama" style={{ flex: '1', textAlign: 'center' }}>Ollama</Radio.Button>
                     <Radio.Button value="licenseKey" style={{ flex: '1', textAlign: 'center' }}>OpenRouter</Radio.Button>
-                    <Radio.Button value="chatGPTWeb" style={{ flex: '1', textAlign: 'center' }}>ChatGPT</Radio.Button>
+                    {/* <Radio.Button value="chatGPTWeb" style={{ flex: '1', textAlign: 'center' }}>ChatGPT</Radio.Button> */}
 
                 </Radio.Group>
             </Form.Item>
+
+            {/* Scouter */}
+            <div
+                className="text-center"
+                style={{
+                    display: radioValue === 'scouterFreeAI' ? 'block' : 'none'
+                }}>
+
+                This is a free AI.
+
+            </div>
 
             {/* myOwnOpenAiKey */}
             <div style={{

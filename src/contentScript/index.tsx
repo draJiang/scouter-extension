@@ -88,19 +88,18 @@ if (MyBox === null || MyBox === undefined) {
 }
 
 // 用户付费状态等信息、用户的 Anki 信息
-let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false }
+let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false, showYoutubeButton: true }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 let executedPromptHistoryInToolBar = [dictionaryPrompt]
-let showYoutubeButton = false
+let showYoutubeButton = true
 
 // 获取用户信息
 const thisGetUserInfo = async () => {
 
   try {
     // 获取用户信息
-    // USER_INFO = await getUserInfo()
-
     USER_INFO = await browser.runtime.sendMessage({ 'type': 'getUserInfo', 'messages': {}, })
+    showYoutubeButton = USER_INFO.showYoutubeButton
 
   } catch (error) {
     console.log(error);
@@ -110,8 +109,7 @@ const thisGetUserInfo = async () => {
   // 在上下文菜单中最近执行的 Prompt
   const result = await browser.storage.local.get({ "executedPromptHistoryInToolBar": [dictionaryPrompt] })
   executedPromptHistoryInToolBar = result.executedPromptHistoryInToolBar
-  const syncResult = await browser.storage.sync.get({ "showYoutubeButton": false })
-  showYoutubeButton = syncResult.showYoutubeButton
+  
 
 
   // 获取 Anki decks

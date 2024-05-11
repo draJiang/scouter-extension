@@ -282,8 +282,50 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
       let imgOpenApiEndpoint = ''
 
       switch (apiKeySelection) {
+        case 'scouterFreeAI':
+          // scouter 提供的免费 AI
+          openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
+          imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
+          openApiKey = licenseKey
+          headers = {
+            'Authorization': 'Bearer ' + process.env.FREE_AI_KEY,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://notes.dabing.one/', // To identify your app
+            'X-Title': 'ScouterFreeAI'
+          }
+          body = {
+            "model": 'meta-llama/llama-3-8b-instruct:free',
+            "messages": messages,
+            "temperature": 0.7,
+            "max_tokens": 420,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 2,
+            "stream": true
+          }
+
+
+          resolve({
+            'result': 'success',
+            'apiKeySelection': apiKeySelection,
+            'data': {
+              'chatCompletions': {
+                'url': openApiEndpoint,
+                'headers': headers,
+                'body': body
+              },
+              'imagesGenerations': {
+                'url': imgOpenApiEndpoint,
+                'headers': headers,
+              }
+            }
+
+          })
+
+
+          break;
         case 'licenseKey':
-          // 使用许可证
+          // openrouter
           openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
           imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
           openApiKey = licenseKey
@@ -549,6 +591,9 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 }
 
 export async function getChatGPTWebToken() {
+  
+  console.log('getChatGPTWebToken');
+  
   return new Promise((resolve, reject) => {
     browser.storage.local.get(['authData']).then(async (result) => {
 
@@ -970,7 +1015,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
   return new Promise((resolve, reject) => {
 
-    browser.storage.sync.get(['userId', 'newLicenseKey', 'contextMenu']).then(async (result) => {
+    getSettings().then(async (result) => {
 
       if (browser.runtime.lastError) {
         reject(chrome.runtime.lastError);
@@ -997,9 +1042,9 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       }
 
+      // 获取用户 ID
       let uniqueId: string
 
-      // 获取用户 ID
       if (result.userId) {
         uniqueId = result.userId;
       } else {
@@ -1014,8 +1059,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       }
 
-
-      resolve({ 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu })
+      resolve({ 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu, 'showYoutubeButton': result.showYoutubeButton })
 
     })
 

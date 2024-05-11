@@ -144,7 +144,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
 
                     rules={[{ required: true, message: 'Please input your title' }]}
                 >
-                    <Input maxLength={40} onKeyDown={handleKeyDown} placeholder="How to name the Prompt" type="text" />
+                    <Input maxLength={12} onKeyDown={handleKeyDown} placeholder="How to name the Prompt" type="text" />
                 </Form.Item>
 
                 <Form.Item

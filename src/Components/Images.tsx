@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import browser from 'webextension-polyfill'
 import { Button, Image, Input, Empty, Tag, Tooltip } from 'antd';
-import { LoadingOutlined, ThunderboltOutlined, RightOutlined, LeftOutlined, CloseOutlined, CheckOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
-
+import { LoadingOutlined, ThunderboltOutlined, RightOutlined, LeftOutlined, CloseOutlined, EyeInvisibleOutlined, EyeOutlined, FormOutlined, SearchOutlined } from "@ant-design/icons";
+import styled, { css } from 'styled-components';
 import { InputRef } from 'antd/lib/input';
 import { ProTag } from "./ProTag";
 
@@ -12,6 +12,15 @@ import { useUserInfoContext } from '../lib/userInfo'
 
 import { useSpring, animated } from 'react-spring';
 
+
+const IconButton = styled(Button)`
+      
+      opacity: 0.6;
+  
+      &:hover {
+        opacity: 1;
+      }
+  `;
 
 interface ImagesProps {
     images: Array<ImageType>;
@@ -25,6 +34,7 @@ export function Images(props: ImagesProps) {
     // const [images, setImages] = useState<Array<ImageType>>([]);
     const [imageIndex, setImageIndex] = useState(0);
     const [showControl, setShowControl] = useState(false)
+    const [showImages, setShowImages] = useState(true)
     const [changeImage, setChangeImageStatus] = useState(false)
 
     const [imagesLoading, setImagesLoading] = useState(true)
@@ -200,284 +210,320 @@ export function Images(props: ImagesProps) {
     });
 
     return (
-        <div className="images"
-            ref={imageBoxElement}
-            style={{
-                position: 'relative',
-                lineHeight: '0',
-                marginTop: '18px'
-            }}
-        >
-            <div>
-
-                <div onMouseEnter={handleImagesBoxHover} onMouseLeave={handleImagesBoxHover}>
-
-                    {imagesLoading &&
-
-                        <div
-                            style={{
-                                position: 'absolute',
-                                color: '#ffffff',
-                                backgroundColor: 'rgb(0, 0, 0,0.5)',
-                                width: '100%',
-                                height: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                zIndex: '9'
-                            }}
-                        >
-                            <animated.div style={animationStyle}><LoadingOutlined /></animated.div>
-                        </div>}
-
-                    {/* 图片 */}
-                    {props.images.length > 0 ?
-                        <>
-                            <div className="imageBox">
-                                <Image
-                                    data-downloadlocation={props.images[imageIndex].links.download_location}
-                                    src={props.images[imageIndex].urls.small}
-                                    alt={props.images[imageIndex]['description']}
-                                    height={240}
-                                    width={'100%'}
-                                    preview={false}
-                                    placeholder />
-                            </div>
+        <>
 
 
-                            <div className="imageQueue"
-                                style={{
-                                    display: 'none'
-                                }}>
-                                {props.images.map(img => <img key={img.id}
-                                    src={img.urls.small}></img>)}
+            <div className="images"
+                ref={imageBoxElement}
+                style={{
+                    position: 'relative',
+                    lineHeight: '0',
+                    marginTop: '18px'
+                }}
+            >
 
-                            </div>
-                        </>
+                {showImages ?
 
-                        :
+                    <div>
 
-                        <div
-                            style={{
-                                height: '240px',
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                flexDirection: 'row',
-                                border: '1px solid rgba(5, 5, 5, .06)',
-                                borderRadius: '2px'
-                            }}
-                        >
-                            <Empty style={{ margin: '0 auto' }} description='No related pictures found' image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                        <div onMouseEnter={handleImagesBoxHover} onMouseLeave={handleImagesBoxHover}>
 
-                        </div>
+                            {imagesLoading &&
 
-                    }
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        color: '#ffffff',
+                                        backgroundColor: 'rgb(0, 0, 0,0.5)',
+                                        width: '100%',
+                                        height: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        zIndex: '9'
+                                    }}
+                                >
+                                    <animated.div style={animationStyle}><LoadingOutlined /></animated.div>
+                                </div>}
 
-                    {/* 图片控制控件 */}
-                    {showControl && !imagesLoading &&
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                width: '100%',
-                                height: '100%',
-                                left: 0,
-                                display: 'flex',
-                                borderRadius: '0 2px',
-                                // justifyContent: 'space-around',
-                                flexDirection: 'column',
-                            }}
-                        >
-
-                            {/* 图片控制 */}
-                            <div
-                                style={{
-                                    padding: '8px',
-                                    // margin: '0px 18px',
-                                    background: 'linear-gradient(360deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 27.6%, rgba(0, 0, 0, 0.2) 54.69%, rgba(0, 0, 0, 0.35) 100%)'
-                                }}
-                            >
-
-
-                                {changeImage ?
-                                    // 显示图片搜索控件
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            padding: '2px 0'
-                                        }}
-                                    >
-                                        <div style={{ flex: '1', marginRight: '20px' }}>
-                                            <Input style={{
-                                                backgroundColor: userInfo?.user.verified === false ? 'rgba(255, 255, 255, 0.9)' : '',
-                                                width: '100%',
-                                                paddingRight: '2px'
-                                            }}
-                                                suffix={<ProTag />}
-                                                disabled={!userInfo?.user.verified}
-                                                placeholder="Search images"
-                                                onKeyDown={handleSearchInput}
-                                                onCompositionStart={handleCompositionStart}
-                                                onCompositionEnd={handleCompositionEnd}
-                                                size="small" ref={inputElement} onPressEnter={handleSearchBtnClick} />
-                                        </div>
-
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center'
-                                        }}>
-
-                                            <Tooltip placement="bottom"
-                                                title={'Search Images(⏎)'}
-                                                arrow={false}
-                                                getPopupContainer={() => imageBoxElement.current || document.body}
-                                            >
-                                                <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<SearchOutlined />} />
-                                            </Tooltip>
-
-                                            <Tooltip placement="bottom"
-                                                title={'Generate Images with AI'}
-                                                arrow={false}
-                                                getPopupContainer={() => imageBoxElement.current || document.body}
-                                            >
-                                                <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleGenerationsImages} icon={<ThunderboltOutlined />} />
-                                            </Tooltip>
-                                            <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
-
-                                        </div>
-
-
+                            {/* 图片 */}
+                            {props.images.length > 0 ?
+                                <>
+                                    <div className="imageBox">
+                                        <Image
+                                            data-downloadlocation={props.images[imageIndex].links.download_location}
+                                            src={props.images[imageIndex].urls.small}
+                                            alt={props.images[imageIndex]['description']}
+                                            height={240}
+                                            width={'100%'}
+                                            preview={false}
+                                            placeholder />
                                     </div>
 
-                                    :
 
-                                    <div>
+                                    <div className="imageQueue"
+                                        style={{
+                                            display: 'none'
+                                        }}>
+                                        {props.images.map(img => <img key={img.id}
+                                            src={img.urls.small}></img>)}
 
-                                        {/* 显示图片导航控件 */}
+                                    </div>
+                                </>
 
-                                        <div
-                                            style={{
-                                                display: 'flex',
-                                                flexGrow: 'inherit',
-                                                alignItems: 'center'
-                                            }}
-                                        >
+                                :
 
-                                            {/* Left Box */}
+                                <div
+                                    style={{
+                                        height: '240px',
+                                        width: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        flexDirection: 'row',
+                                        border: '1px solid rgba(5, 5, 5, .06)',
+                                        borderRadius: '2px'
+                                    }}
+                                >
+                                    <Empty style={{ margin: '0 auto' }} description='No related pictures found' image={Empty.PRESENTED_IMAGE_SIMPLE} />
 
-                                            {props.images.length > 0 &&
+                                </div>
+
+                            }
+
+                            {/* 图片控制控件 */}
+                            {showControl && !imagesLoading &&
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        width: '100%',
+                                        height: '100%',
+                                        left: 0,
+                                        display: 'flex',
+                                        borderRadius: '0 2px',
+                                        // justifyContent: 'space-around',
+                                        flexDirection: 'column',
+                                    }}
+                                >
+
+                                    {/* 图片控制 */}
+                                    <div
+                                        style={{
+                                            padding: '8px',
+                                            // margin: '0px 18px',
+                                            background: 'linear-gradient(360deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 27.6%, rgba(0, 0, 0, 0.2) 54.69%, rgba(0, 0, 0, 0.35) 100%)'
+                                        }}
+                                    >
+
+
+                                        {changeImage ?
+                                            // 显示图片搜索控件
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    padding: '2px 0'
+                                                }}
+                                            >
+                                                <div style={{ flex: '1', marginRight: '20px' }}>
+                                                    <Input style={{
+                                                        backgroundColor: userInfo?.user.verified === false ? 'rgba(255, 255, 255, 0.9)' : '',
+                                                        width: '100%',
+                                                        paddingRight: '2px'
+                                                    }}
+                                                        suffix={<ProTag />}
+                                                        disabled={!userInfo?.user.verified}
+                                                        placeholder="Search images"
+                                                        onKeyDown={handleSearchInput}
+                                                        onCompositionStart={handleCompositionStart}
+                                                        onCompositionEnd={handleCompositionEnd}
+                                                        size="small" ref={inputElement} onPressEnter={handleSearchBtnClick} />
+                                                </div>
+
+                                                <div style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center'
+                                                }}>
+
+                                                    <Tooltip placement="bottom"
+                                                        title={'Search Images(⏎)'}
+                                                        arrow={false}
+                                                        getPopupContainer={() => imageBoxElement.current || document.body}
+                                                    >
+                                                        <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleSearchBtnClick} icon={<SearchOutlined />} />
+                                                    </Tooltip>
+
+                                                    <Tooltip placement="bottom"
+                                                        title={'Generate Images with AI'}
+                                                        arrow={false}
+                                                        getPopupContainer={() => imageBoxElement.current || document.body}
+                                                    >
+                                                        <Button disabled={!userInfo?.user.verified} type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px', opacity: !userInfo?.user.verified ? '0.7' : '1' }} onClick={handleGenerationsImages} icon={<ThunderboltOutlined />} />
+                                                    </Tooltip>
+                                                    <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setChangeImageStatus(false)} icon={<CloseOutlined />} />
+
+                                                </div>
+
+
+                                            </div>
+
+                                            :
+
+                                            <div>
+
+                                                {/* 显示图片导航控件 */}
 
                                                 <div
                                                     style={{
                                                         display: 'flex',
+                                                        flexGrow: 'inherit',
                                                         alignItems: 'center'
                                                     }}
                                                 >
 
-                                                    <Button
-                                                        style={{
-                                                            color: '#fff',
-                                                            lineHeight: '100%',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                        type="text" size="small" icon={<LeftOutlined />} onClick={() => handleChangeImagesClick(-1)} />
+                                                    {/* Left Box */}
 
+                                                    {props.images.length > 0 &&
+
+                                                        <div
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center'
+                                                            }}
+                                                        >
+
+                                                            <Button
+                                                                style={{
+                                                                    color: '#fff',
+                                                                    lineHeight: '100%',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center'
+                                                                }}
+                                                                type="text" size="small" icon={<LeftOutlined />} onClick={() => handleChangeImagesClick(-1)} />
+
+                                                            <div
+                                                                style={{
+                                                                    width: '40px',
+                                                                    textAlign: 'center',
+                                                                    color: '#fff',
+                                                                    fontWeight: '500',
+                                                                    padding: '0 4px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center'
+                                                                }}
+                                                            >{imageIndex + 1 + '/' + props.images.length}
+                                                            </div>
+
+                                                            <Button
+                                                                style={{
+                                                                    color: '#fff',
+                                                                    lineHeight: '100%',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center'
+                                                                }}
+                                                                type="text" size="small" icon={<RightOutlined />} onClick={() => handleChangeImagesClick(1)} />
+
+                                                        </div>
+
+                                                    }
+
+                                                    {/* Right Box */}
                                                     <div
                                                         style={{
-                                                            width: '40px',
-                                                            textAlign: 'center',
-                                                            color: '#fff',
-                                                            fontWeight: '500',
-                                                            padding: '0 4px',
                                                             display: 'flex',
+                                                            flexDirection: 'row-reverse',
+                                                            flex: '1',
                                                             alignItems: 'center',
-                                                            justifyContent: 'center'
+                                                            gap: '8px'
                                                         }}
-                                                    >{imageIndex + 1 + '/' + props.images.length}
-                                                    </div>
 
-                                                    <Button
-                                                        style={{
-                                                            color: '#fff',
-                                                            lineHeight: '100%',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}
-                                                        type="text" size="small" icon={<RightOutlined />} onClick={() => handleChangeImagesClick(1)} />
+                                                    >
+                                                        <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowImages(false)} icon={<EyeInvisibleOutlined />} />
+                                                        <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => handleEditImagesClick()} icon={<FormOutlined />} />
+
+
+                                                    </div>
 
                                                 </div>
 
+                                            </div>
+                                        }
+                                    </div>
+
+
+                                    {/* 图片来源信息 */}
+                                    {props.images.length > 0 &&
+
+                                        <div
+                                            className="imageSource"
+
+                                            style={{
+                                                flex: '1',
+                                                display: 'flex',
+                                                alignItems: 'flex-end',
+                                                fontSize: '0.90em',
+                                                color: 'rgba(255, 255, 255, 0.8)',
+                                                padding: '8px',
+                                                marginTop: '4px',
+                                                lineHeight: 'normal',
+                                                textShadow: '2px 2px 5px rgba(0, 0, 0, 0.3)'
+                                            }}
+                                        >
+                                            {props.images[imageIndex].type === 'ai' || props.images[imageIndex].type === 'youtube' ?
+                                                <>
+                                                    Photo by {props.images[imageIndex].user.name}
+                                                </>
+                                                :
+                                                <>
+                                                    Photo by <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href={"https://unsplash.com/@" + props.images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{props.images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
+                                                </>
                                             }
 
-                                            {/* Right Box */}
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row-reverse',
-                                                    flex: '1',
-                                                }}
 
-                                            >
-
-                                                <Button type="text" size="small" style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => handleEditImagesClick()} icon={<FormOutlined />} />
-
-                                            </div>
-
+                                            {/* By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash */}
                                         </div>
-
-                                    </div>
-                                }
-                            </div>
-
-
-                            {/* 图片来源信息 */}
-                            {props.images.length > 0 &&
-
-                                <div
-                                    className="imageSource"
-
-                                    style={{
-                                        flex: '1',
-                                        display: 'flex',
-                                        alignItems: 'flex-end',
-                                        fontSize: '0.90em',
-                                        color: 'rgba(255, 255, 255, 0.8)',
-                                        padding: '8px',
-                                        marginTop: '4px',
-                                        lineHeight: 'normal',
-                                        textShadow: '2px 2px 5px rgba(0, 0, 0, 0.3)'
-                                    }}
-                                >
-                                    {props.images[imageIndex].type === 'ai' || props.images[imageIndex].type === 'youtube' ?
-                                        <>
-                                            Photo by {props.images[imageIndex].user.name}
-                                        </>
-                                        :
-                                        <>
-                                            Photo by <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href={"https://unsplash.com/@" + props.images[imageIndex].user.username + "?utm_source=Scouter&utm_medium=referral"}>{props.images[imageIndex].user.name}</a> on <a style={{ textDecoration: 'underline', padding: '0 2px' }} target='_blank' href="https://unsplash.com/?utm_source=Scouter&utm_medium=referral">Unsplash</a>
-                                        </>
                                     }
 
-
-                                    {/* By <a style={{ textDecoration: 'underline' }} target='_blank' href={images[imageIndex].user.links.html}>{images[imageIndex].user.name}</a>  on Unsplash */}
                                 </div>
                             }
 
                         </div>
-                    }
 
-                </div>
+                    </div>
 
-            </div>
+                    :
+
+                    <div style={{
+
+                        padding: '4px 6px',
+                        border: '1px dashed rgba(5, 5, 5, 0.1)',
+                        borderRadius: '2px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'end'
+
+                    }}>
+                        <IconButton
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                            type="text" size="small"
+                            // style={{ color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            onClick={() => setShowImages(true)} icon={<EyeOutlined />} />
+                    </div >
+                }
 
 
-        </div >
+            </div >
+
+
+        </>
     )
 
 }

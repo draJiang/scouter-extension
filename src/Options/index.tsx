@@ -55,7 +55,7 @@ export const Options = () => {
   //   setUserInfo: Dispatch<SetStateAction<userInfoType>>;
   // }
 
-  const defaultUserInfo = { userId: '', verified: false, contextMenu: false }
+  const defaultUserInfo = { userId: '', verified: false, contextMenu: false, showYoutubeButton: true }
   // const UserContext = createContext<UserContextType>({ userInfo: defaultUserInfo, setUserInfo: () => { } });
   const [userInfo, setUserInfo] = useState<userInfoType>(defaultUserInfo);
 

@@ -42,7 +42,6 @@ export function YouTubeButton(props: YouTubeButtonProps) {
         // 监听页面点击后关闭设置菜单
         const closeMenu = (event: any) => {
 
-            console.log(event);
             if (event.target.id !== '__ScouterYouTubeButtonContainer') {
                 setShowMenu(false)
             }
@@ -224,7 +223,7 @@ export function YouTubeButton(props: YouTubeButtonProps) {
                                 checked={isShowCaptions && props.userInfo.verified}
                                 handleCheckBoxChange={showCaptions} />
                             <a style={{ color: '#F08A24', lineHeight: 'normal', marginLeft: '4px' }} target='_blank' href='https://jiangzilong.notion.site/Learning-in-YouTube-YouTube-1d61fd50815a42a5af394db4a695c712?pvs=4'>
-                                ⚡Pro
+                                (⚡Pro)
                             </a>
                         </div>
                         <div>

@@ -6,10 +6,12 @@ export const getCaption = (): { captions: string[], lang: string } | null => {
 
     // 字幕信息
     const captionNodes = document.querySelectorAll('.caption-visual-line');
+    const captionsArray = Array.from(captionNodes); // 转换 NodeList 为真正的数组
+    const lastFourCaptions = captionsArray.slice(-4); // 获取数组中最后四个元素
 
-    if (captionNodes) {
+    if (lastFourCaptions) {
 
-        const captionTextList = Array.from(captionNodes).map(item => item.textContent || '');
+        const captionTextList = Array.from(lastFourCaptions).map(item => item.textContent || '');
         return {
             captions: captionTextList,
             lang: langValue

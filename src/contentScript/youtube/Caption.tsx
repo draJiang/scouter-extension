@@ -31,7 +31,10 @@ export function Caption() {
         const callback = function (mutationsList: MutationRecord[], _observer: MutationObserver) {
             for (const mutation of mutationsList) {
 
-                if ((mutation.target as HTMLElement).className === 'ytp-caption-window-container') {
+                console.log(mutation);
+
+                const target = (mutation.target as HTMLElement)
+                if (target.className === 'ytp-caption-window-container' || target.classList.contains('caption-window')) {
                     setCaptions()
                 }
 
@@ -48,9 +51,10 @@ export function Caption() {
 
         // 设置观察的配置选项
         const config = {
-            attributes: true, // 观察属性变动
-            childList: true, // 观察子节点的变动，如添加或者删除
-            subtree: true   // 观察后代节点
+            attributes: true,           // 观察属性变动
+            childList: true,            // 观察子节点的变动，如添加或者删除
+            subtree: true,              // 观察后代节点
+            characterData: true,        // 监视节点文本内容的变化 
         };
 
         if (targetNode) {
@@ -106,10 +110,10 @@ export function Caption() {
     const handleCaptionClick = (word: string, captionText: string) => {
 
         const image = captureVideoScreenshot()
-
+        const thisWord = word.trim()
         openScouter({
             runPrompt: true
-        }, true, { keyWord: word, sencence: captionText, image: image || '' })
+        }, true, { keyWord: thisWord, sencence: captionText, image: image || '' })
 
     }
 
@@ -172,7 +176,7 @@ export function Caption() {
                             className='captionWord'
                             key={wordIndex}
                             onClick={() => handleCaptionClick(word, item)}>
-                            {word}
+                            {word.trim()}
                         </span>
                     ))}
                 </CaptionLine>
