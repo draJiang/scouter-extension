@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { getCaption, captureVideoScreenshot } from './util'
 import { CaptionLine } from './CaptionLine'
 import { openScouter } from '../index'
-import { OpenInNewWindowIcon } from '@radix-ui/react-icons'
+import { OpenInNewWindowIcon, MoveIcon } from '@radix-ui/react-icons'
 
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -14,6 +14,9 @@ export function Caption() {
     const [showButton, setShowButton] = useState(false)
     const clickedCaption = useRef<boolean>(false)
     const [fontSize, setFontSize] = useState('20px')
+    // 拖拽逻辑
+    const [dragging, setDragging] = useState(false);
+    const captionElement = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
 
@@ -31,7 +34,7 @@ export function Caption() {
         const callback = function (mutationsList: MutationRecord[], _observer: MutationObserver) {
             for (const mutation of mutationsList) {
 
-                console.log(mutation);
+                // console.log(mutation);
 
                 const target = (mutation.target as HTMLElement)
                 if (target.className === 'ytp-caption-window-container' || target.classList.contains('caption-window')) {
@@ -46,8 +49,6 @@ export function Caption() {
 
         // 选择要观察变动的节点
         const targetNode = document.querySelector('.html5-video-player');
-        console.log('targetNode');
-        console.log(targetNode);
 
         // 设置观察的配置选项
         const config = {
@@ -135,18 +136,105 @@ export function Caption() {
         color: 'white',
         display: 'flex',
         position: 'absolute',
-        right: '0',
-        bottom: '8px'
+
     }
 
+
+    const handleMouseDown = (event: any) => {
+        // console.log('PopupCard:handleMouseDown');
+        setDragging(true);
+
+        if (captionElement.current) {
+            const rect = captionElement.current.getBoundingClientRect();
+            const offsetX = event.clientX - rect.left;
+            const offsetY = event.clientY - rect.top;
+            captionElement.current.dataset.offsetX = String(offsetX);
+            captionElement.current.dataset.offsetY = String(offsetY);
+            console.log(event.clientY);
+            console.log(rect.top);
+            console.log('---');
+
+
+
+        }
+
+        // 
+
+    }
+
+    const handleMouseMove = (event: any) => {
+        // // console.log('PopupCard:handleMouseMove');
+        // // console.log(dragging);
+
+        if (dragging && captionElement.current) {
+
+            const elementHeight = captionElement.current.clientHeight;
+
+            const video: HTMLElement | null = document.querySelector('#player')
+            const videoHight = video?.clientHeight
+            const videoY = video?.offsetTop
+
+            // Use requestAnimationFrame to throttle the mousemove event handling
+            // 鼠标相对窗口左上角的偏移
+            const offsetX = parseFloat(captionElement.current.dataset.offsetX || '');
+            const offsetY = parseFloat(captionElement.current.dataset.offsetY || '');
+
+            // const newX = event.clientX - offsetX
+            const newY = (videoHight! + videoY!) - (event.clientY - offsetY + elementHeight)
+            // const newY = event.clientY - offsetY
+            // console.log(newY);
+            // console.log(videoHight! + videoY!);
+
+
+            // Check the boundaries
+            // const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            // const elementWidth = captionElement.current.clientWidth;
+
+
+            // const minX = - elementWidth / 2;
+            const minY = 60;
+            // const maxX = windowWidth - elementWidth + elementWidth / 2;
+            const maxY = videoHight! - elementHeight - 4;
+
+            // const clampedX = Math.max(minX, Math.min(newX, maxX));
+            const clampedBottom = Math.max(minY, Math.min(newY, maxY));
+
+            // Only update the position if it's within the boundaries
+            // newX >= minX && newX <= maxX && newY >= minY && newY <= maxY
+            if (true) {
+                // captionElement.current.style.left = `${clampedX}px`;
+                captionElement.current.style.bottom = `${clampedBottom}px`;
+                // captionElement.current.style.top = `${clampedBottom}px`;
+
+            } else {
+
+            }
+
+        }
+
+
+    };
+
+    const handleMouseUp = () => {
+        // // console.log('PopupCard:handleMouseUp');
+        setDragging(false);
+    };
 
 
     return (
         <div
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+
+            ref={captionElement}
             style={{
                 position: 'absolute',
                 bottom: '60px',
                 zIndex: '50',
+                cursor: 'move'
             }}
             onClick={() => clickedCaption.current = true}
             onMouseEnter={() => {
@@ -166,6 +254,7 @@ export function Caption() {
                 }
             }}
         >
+
             {captionText.map((item, index) => (
                 <CaptionLine
                     key={index}
@@ -183,7 +272,11 @@ export function Caption() {
             ))}
 
             {showButton &&
-                <button style={buttonStyle} onClick={handleOpenWindow}><OpenInNewWindowIcon /></button>
+                <button style={{
+                    ...buttonStyle,
+                    right: '0',
+                    bottom: '8px'
+                }} onClick={handleOpenWindow}><OpenInNewWindowIcon /></button>
             }
 
         </div>
