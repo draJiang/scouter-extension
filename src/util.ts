@@ -262,20 +262,9 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
       let openApiEndpoint: string = result.openApiEndpoint
 
-      if (openApiKey.length < 5 && licenseKey.length < 5 && apiKeySelection !== 'chatGPTWeb' && apiKeySelection !== 'ollama') {
-
-        resolve({
-          'result': 'failure',
-          'apiKeySelection': apiKeySelection,
-          'data': null
-        })
-
-      }
-
       if (openApiEndpoint.length < 5) {
         openApiEndpoint = defaultOpenApiEndpoint
       }
-
 
       let headers = {}
       let body: BodyType
@@ -326,6 +315,15 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           break;
         case 'licenseKey':
           // openrouter
+
+          if (openApiKey.length < 5) {
+            resolve({
+              'result': 'failure',
+              'apiKeySelection': apiKeySelection,
+              'data': null
+            })
+          }
+
           openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
           imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
           openApiKey = licenseKey
@@ -408,6 +406,14 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
         case 'myOwnOpenAiKey':
           // 使用用户自己的 Key
 
+          if (licenseKey.length < 5) {
+            resolve({
+              'result': 'failure',
+              'apiKeySelection': apiKeySelection,
+              'data': null
+            })
+          }
+
           if (openApiEndpoint.indexOf('azure.com') > -1) {
 
             // Azure
@@ -433,7 +439,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             let model = 'pai-001'
             const regex = /\/\/[^\/]+\/([^\/]+)\//;
             const match = openApiEndpoint.match(regex);
-            if(match){model = match[1]}
+            if (match) { model = match[1] }
 
             headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
 

@@ -182,6 +182,7 @@ browser.runtime.onConnect.addListener(port => {
 
               fetchSSE(openApiEndpoint, init, {
                 onMessage: (data) => {
+
                   // 处理接收到的数据
 
                   // if (ApiType === 'chatGPTWeb') {
@@ -195,12 +196,20 @@ browser.runtime.onConnect.addListener(port => {
                   //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                   //   }
                   // }
+
+                  const finish_reason = data.choices[0].finish_reason
                   if (ApiType === 'ollama') {
                     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data })
                   } else {
-                    if (data.choices[0].finish_reason !== 'stop') {
+
+                    if (finish_reason !== 'stop') {
                       port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                     }
+
+                    if (ApiType === 'scouterFreeAI' && finish_reason === 'error') {
+                      port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': `🥲error: ${data.choices[0].error.message}` })
+                    }
+
                   }
 
                 },

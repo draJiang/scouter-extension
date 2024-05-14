@@ -7,6 +7,9 @@ import { OpenInNewWindowIcon, MoveIcon } from '@radix-ui/react-icons'
 
 import { useDebouncedCallback } from 'use-debounce';
 
+// import { Analyzer } from "@tomsd/morphoanalyzer";
+
+
 export function Caption() {
 
     const [captionText, setCaptionText] = useState<string[]>([]);
@@ -109,6 +112,8 @@ export function Caption() {
     }, 500)
 
     const handleCaptionClick = (word: string, captionText: string) => {
+        
+        clickedCaption.current = true
 
         const image = captureVideoScreenshot()
         const thisWord = word.trim()
@@ -119,6 +124,9 @@ export function Caption() {
     }
 
     const handleOpenWindow = () => {
+
+        clickedCaption.current = true
+
         const text = captionText.join(' ')
         const image = captureVideoScreenshot()
 
@@ -150,11 +158,6 @@ export function Caption() {
             const offsetY = event.clientY - rect.top;
             captionElement.current.dataset.offsetX = String(offsetX);
             captionElement.current.dataset.offsetY = String(offsetY);
-            console.log(event.clientY);
-            console.log(rect.top);
-            console.log('---');
-
-
 
         }
 
@@ -196,7 +199,7 @@ export function Caption() {
             // const minX = - elementWidth / 2;
             const minY = 60;
             // const maxX = windowWidth - elementWidth + elementWidth / 2;
-            const maxY = videoHight! - elementHeight - 4;
+            const maxY = videoHight! - elementHeight - 10;
 
             // const clampedX = Math.max(minX, Math.min(newX, maxX));
             const clampedBottom = Math.max(minY, Math.min(newY, maxY));
@@ -220,6 +223,7 @@ export function Caption() {
     const handleMouseUp = () => {
         // // console.log('PopupCard:handleMouseUp');
         setDragging(false);
+        // Analyzer.analyze("これは、テストです。").then(console.log);
     };
 
 
@@ -236,7 +240,7 @@ export function Caption() {
                 zIndex: '50',
                 cursor: 'move'
             }}
-            onClick={() => clickedCaption.current = true}
+            
             onMouseEnter={() => {
                 const videoElement = document.querySelector('video');
                 if (videoElement) { videoElement.pause() }
