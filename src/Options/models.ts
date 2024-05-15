@@ -64,3 +64,22 @@ export const models = [
         'id': 'meta-llama/llama-2-13b-chat'
     }
 ]
+
+export const freeModels = [
+    {
+        'name': 'Google: Gemma 7B (free)',
+        'id': 'google/gemma-7b-it:free'
+    },
+    {
+        'name': 'Meta: Llama 3 8B Instruct (free)',
+        'id': 'meta-llama/llama-3-8b-instruct:free'
+    },
+    {
+        'name': 'OpenChat 3.5 (free)',
+        'id': 'openchat/openchat-7b:free'
+    },
+    {
+        'name': 'Mistral 7B Instruct (free)',
+        'id': 'mistralai/mistral-7b-instruct:free'
+    },
+]

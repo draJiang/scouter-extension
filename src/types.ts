@@ -17,13 +17,13 @@ export type ChatMessage = {
     content: Array<{
         chatId: string,
         content: string,
-        status: 'begin' | 'loading' | 'process' | 'done' | 'invalid_api_key',
+        status: 'begin' | 'loading' | 'process' | 'done' | 'invalid_api_key' | 'error',
     }>,
     // loading: boolean,ty
     prompt: string,
     showImagesBox: boolean,
     images: Array<ImageType>
-};
+} | [];
 
 export type BackgroundToPopup = {
     type: string,

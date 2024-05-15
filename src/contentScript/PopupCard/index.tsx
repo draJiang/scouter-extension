@@ -755,6 +755,10 @@ export function PopupCard(props:
               prompt: prompt[0]['content']
             };
 
+            console.log('updatedLastMessage:');
+            console.log(updatedLastMessage);
+
+
             return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 
 
@@ -769,7 +773,7 @@ export function PopupCard(props:
 
 
         // 请求 GPT 数据成功且数据流结束传输
-        if (msg.status === 'done' || msg.status === 'erro') {
+        if (msg.status === 'done' || msg.status === 'error') {
 
           setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
 
@@ -995,6 +999,11 @@ export function PopupCard(props:
 
   }
 
+  // 清空消息
+  const handleClearMessages = () => {
+    setMessages([])
+  }
+
   return (
     <>
 
@@ -1022,12 +1031,14 @@ export function PopupCard(props:
             onMouseDown={handleMouseDown}
             handleMenuItemClick={executivePrompt}
             openCustomPromptForm={openCustomPromptForm}
+            handleClearMessages={handleClearMessages}
             isOpenMenu={isOpenMenu}
             prompts={prompts}
             lastExecutedPrompt={lastExecutedPrompt}
             keyWord={props.data.keyWord}
             Sentence={props.data.Sentence}
             windowElement={windowElement.current}
+
           />
 
           <div className='container flex-grow flex flex-col overflow-auto'
@@ -1044,7 +1055,7 @@ export function PopupCard(props:
 
               <MessagesList messages={messages} />
 
-              {/* 当只有 1 条消息且是在线词典触发的则不显示「重新生成」按钮 */}
+              {/* 是在线词典触发的则不显示「重新生成」按钮 */}
               {messages.length > 0 &&
                 (messages[messages.length - 1].prompt === '' || messages[messages.length - 1].role === 'user' ? ''
                   :

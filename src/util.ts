@@ -259,6 +259,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
       const currentLanguage = result.currentLanguage
       const targetLanguage = result.targetLanguage
       const model = result.model
+      const freeModel = result.freeModel
 
       let openApiEndpoint: string = result.openApiEndpoint
 
@@ -283,7 +284,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             'X-Title': 'ScouterFreeAI'
           }
           body = {
-            "model": 'meta-llama/llama-3-8b-instruct:free',
+            "model": freeModel,
             "messages": messages,
             "temperature": 0.7,
             "max_tokens": 420,
@@ -311,10 +312,12 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
           })
 
-
           break;
+
         case 'licenseKey':
           // openrouter
+
+          openApiKey = licenseKey
 
           if (openApiKey.length < 5) {
             resolve({
@@ -326,7 +329,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
           openApiEndpoint = 'https://openrouter.ai/api/v1/chat/completions'
           imgOpenApiEndpoint = 'https://openrouter.ai/api/v1/images/generations'
-          openApiKey = licenseKey
+
           headers = {
             'Authorization': 'Bearer ' + openApiKey,
             'Content-Type': 'application/json',
@@ -363,6 +366,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           })
 
           break;
+
         case 'ollama':
           headers = { 'Content-Type': 'application/json', }
           openApiEndpoint = result.ollamaApiEndpoint
@@ -406,7 +410,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
         case 'myOwnOpenAiKey':
           // 使用用户自己的 Key
 
-          if (licenseKey.length < 5) {
+          if (openApiKey.length < 5) {
             resolve({
               'result': 'failure',
               'apiKeySelection': apiKeySelection,
@@ -528,6 +532,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           })
 
           break
+
         default:
           // chatGPT Web
           // 获取 token

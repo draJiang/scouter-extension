@@ -27,7 +27,7 @@ import {
 
 
 import { pinPopupCard } from '../contentScript'
-import { PushpinOutlined, PushpinFilled, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
+import { PushpinOutlined, PushpinFilled, ClearOutlined, PlusSquareOutlined, CheckCircleTwoTone, DownOutlined } from '@ant-design/icons';
 
 import { useCurrentLanguage } from '../lib/locale'
 
@@ -39,6 +39,7 @@ interface NavProps {
     // handleSaveToAnkiBtnClick: (deck?: string) => void;
     openCustomPromptForm: (data: { isOpen: boolean, data: PromptType }) => void;
     handleMenuItemClick: (data: PromptType, runPrompt?: runPromptType, imageToRerender?: boolean) => void;
+    handleClearMessages: () => void;
     addToAnkiStatus: addToAnkiStatusType;
     onMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
     keyWord: string;
@@ -396,14 +397,6 @@ export function Nav(props: NavProps) {
 
     }
 
-
-
-
-
-
-
-
-
     // 点击 Pin 按钮
     const handlePinBtnClick = () => {
 
@@ -465,6 +458,10 @@ export function Nav(props: NavProps) {
         // event.stopPropagation()
         setIsOpenPromptMenu(open)
 
+    }
+
+    const handleClearMessages = () => {
+        props.handleClearMessages()
     }
 
 
@@ -603,13 +600,14 @@ export function Nav(props: NavProps) {
                             flex: 1,
                             textAlign: 'right',
                             display: 'flex',
+                            gap: '10px',
                             justifyContent: 'end',
                             alignItems: 'center'
                         }}>
 
                         {/* 添加到 Anki 按钮 */}
                         <div style={{
-                            marginRight: '10px'
+                            // marginRight: '10px'
                         }}>
                             {
                                 addToAnkiStatus.status === 'success' ?
@@ -639,6 +637,15 @@ export function Nav(props: NavProps) {
                             }
                         </div>
 
+                        {/* 清空聊天记录 */}
+                        <Button size='small'
+                            disabled={addToAnkiStatus.status === 'standby' || addToAnkiStatus.status === 'loading' ? true : false}
+                            style={{
+                                borderColor: isPin ? '#F08A24' : '',
+                                fontSize: '13.2px'
+                            }}
+                            icon={<ClearOutlined />} onClick={handleClearMessages} />
+
                         {/* Pin 按钮 */}
                         <Button size='small'
                             // type='text'
@@ -647,6 +654,10 @@ export function Nav(props: NavProps) {
                                 fontSize: '13.2px'
                             }}
                             icon={isPin ? <PushpinFilled className='isPin' /> : <PushpinOutlined />} onClick={handlePinBtnClick} />
+
+
+
+
                     </div>
 
                 </div>

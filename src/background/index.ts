@@ -206,7 +206,7 @@ browser.runtime.onConnect.addListener(port => {
                       port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                     }
 
-                    if (ApiType === 'scouterFreeAI' && finish_reason === 'error') {
+                    if ((ApiType === 'scouterFreeAI' || ApiType === 'licenseKey') && finish_reason === 'error') {
                       port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': `🥲error: ${data.choices[0].error.message}` })
                     }
 
@@ -227,7 +227,7 @@ browser.runtime.onConnect.addListener(port => {
                   } else {
                     const tips = '🥲Sorry, an error happened, please retry.'
 
-                    port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': tips + '(' + error.message + ')', 'code': error.message })
+                    port.postMessage({ 'type': 'sendGPTData', 'status': 'error', 'content': tips + '(' + error.message + ')', 'code': error.message })
 
                     // 如果是 ChatGPT Web 模式的 401 错误，则更新 token，然后引导用户重试
                     getChatGPTSession()
@@ -245,7 +245,7 @@ browser.runtime.onConnect.addListener(port => {
 
         }).catch((error) => {
 
-          port.postMessage({ 'type': 'sendGPTData', 'status': 'erro', 'content': error ? '🥲 ' + error : '🥲 Something went wrong, please try again later.' })
+          port.postMessage({ 'type': 'sendGPTData', 'status': 'error', 'content': error ? '🥲 ' + error : '🥲 Something went wrong, please try again later.' })
         })
         //
 

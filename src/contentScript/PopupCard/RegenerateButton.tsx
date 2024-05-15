@@ -14,7 +14,7 @@ export function RegenerateButton(props: MessageProps) {
 
     return (
         <div>
-            {props.messages.length >= 1 && (lastMessageStatus === 'invalid_api_key' || lastMessageStatus === 'done') &&
+            {props.messages.length >= 1 && (lastMessageStatus === 'invalid_api_key' || lastMessageStatus === 'done' || lastMessageStatus === 'error') &&
                 <div>
                     <Button style={{
                         position: 'absolute',

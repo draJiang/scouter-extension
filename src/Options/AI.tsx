@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Switch, Input, Radio, Form, Select } from 'antd';
 import type { RadioChangeEvent } from 'antd';
 import { FormPropsType } from '../types'
-import { models } from "./models"
+import { models, freeModels } from "./models"
 
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -29,6 +29,7 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                 licenseKey: settings.licenseKey,
                 chatGPTWeb: settings.chatGPTWeb,
                 model: settings.model,
+                freeModel: settings.freeModel,
                 newLicenseKey: settings.newLicenseKey,
                 ollamaApiEndpoint: settings.ollamaApiEndpoint,
                 ollamaModel: settings.ollamaModel
@@ -40,7 +41,8 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
     }, [settings])
 
     const handleFormChange = useDebouncedCallback((term: string) => {
-
+        console.log(term);
+        
         saveOptions(term)
 
     }, 300)
@@ -71,10 +73,25 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
 
             {/* Scouter */}
             <div
-                className="text-center"
+                // className="text-center"
                 style={{
                     display: radioValue === 'scouterFreeAI' ? 'block' : 'none'
                 }}>
+
+                <Form.Item
+                    name="freeModel"
+                    label="🤖Model"
+                    initialValue={freeModels[0]['name']}
+                >
+                    <Select
+                        placeholder=""
+                    >
+
+                        {freeModels.map((item) => <Option key={item.id} value={item.id}>{item.name}</Option>)}
+
+                    </Select>
+
+                </Form.Item>
 
                 This is a free AI.
 
