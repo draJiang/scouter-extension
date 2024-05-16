@@ -755,9 +755,6 @@ export function PopupCard(props:
               prompt: prompt[0]['content']
             };
 
-            console.log('updatedLastMessage:');
-            console.log(updatedLastMessage);
-
 
             return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
 

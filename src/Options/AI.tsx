@@ -93,8 +93,6 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
 
                 </Form.Item>
 
-                This is a free AI.
-
             </div>
 
             {/* myOwnOpenAiKey */}

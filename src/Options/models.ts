@@ -1,4 +1,4 @@
-export const models = [
+export const freeModels = [
     {
         'name': 'Google: Gemma 7B (free)',
         'id': 'google/gemma-7b-it:free'
@@ -15,6 +15,10 @@ export const models = [
         'name': 'Mistral 7B Instruct (free)',
         'id': 'mistralai/mistral-7b-instruct:free'
     },
+]
+
+export const models = [
+    ...freeModels,
     {
         'name': 'gpt-3.5-turbo',
         'id': 'openai/gpt-3.5-turbo'
@@ -22,6 +26,10 @@ export const models = [
     {
         'name': 'gpt-3.5-turbo-16k',
         'id': 'openai/gpt-3.5-turbo-16k'
+    },
+    {
+        'name': 'OpenAI: GPT-4o',
+        'id': 'openai/gpt-4o'
     },
     {
         'name': 'gpt-4',
@@ -63,23 +71,4 @@ export const models = [
         'name': 'Llama v2 13B Chat (beta)',
         'id': 'meta-llama/llama-2-13b-chat'
     }
-]
-
-export const freeModels = [
-    {
-        'name': 'Google: Gemma 7B (free)',
-        'id': 'google/gemma-7b-it:free'
-    },
-    {
-        'name': 'Meta: Llama 3 8B Instruct (free)',
-        'id': 'meta-llama/llama-3-8b-instruct:free'
-    },
-    {
-        'name': 'OpenChat 3.5 (free)',
-        'id': 'openchat/openchat-7b:free'
-    },
-    {
-        'name': 'Mistral 7B Instruct (free)',
-        'id': 'mistralai/mistral-7b-instruct:free'
-    },
 ]

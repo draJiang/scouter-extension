@@ -280,7 +280,7 @@ export function ToolBar(props: ToolBarProps) {
 
             <Tooltip placement="bottom"
               title={'Cloze deletion(same card)'}
-              zIndex={99999}
+              zIndex={999999}
               // getPopupContainer={() => container as HTMLElement}
               arrow={false}
               destroyTooltipOnHide={true}

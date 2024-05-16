@@ -641,7 +641,6 @@ export function Nav(props: NavProps) {
                         <Button size='small'
                             disabled={addToAnkiStatus.status === 'standby' || addToAnkiStatus.status === 'loading' ? true : false}
                             style={{
-                                borderColor: isPin ? '#F08A24' : '',
                                 fontSize: '13.2px'
                             }}
                             icon={<ClearOutlined />} onClick={handleClearMessages} />

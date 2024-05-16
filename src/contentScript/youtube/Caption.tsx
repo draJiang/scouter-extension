@@ -112,7 +112,7 @@ export function Caption() {
     }, 500)
 
     const handleCaptionClick = (word: string, captionText: string) => {
-        
+
         clickedCaption.current = true
 
         const image = captureVideoScreenshot()
@@ -240,12 +240,25 @@ export function Caption() {
                 zIndex: '50',
                 cursor: 'move'
             }}
-            
+
             onMouseEnter={() => {
                 const videoElement = document.querySelector('video');
-                if (videoElement) { videoElement.pause() }
+
                 setShowButton(true)
-                clickedCaption.current = false
+
+                if (videoElement) {
+                    
+
+                    if (videoElement?.paused) {
+                        // 当前是暂停状态
+                        clickedCaption.current = true
+                    } else {
+                        // 当前是播放状态
+                        videoElement.pause()
+                        clickedCaption.current = false
+                    }
+                }
+
             }}
             onMouseLeave={() => {
                 setShowButton(false)

@@ -23,7 +23,7 @@ export type ChatMessage = {
     prompt: string,
     showImagesBox: boolean,
     images: Array<ImageType>
-} | [];
+};
 
 export type BackgroundToPopup = {
     type: string,
