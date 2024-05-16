@@ -173,9 +173,15 @@ export function Caption() {
 
             const elementHeight = captionElement.current.clientHeight;
 
+            const videoBox: HTMLElement | null = document.querySelector('#movie_player')
+            const isFullscreen = videoBox?.classList.contains('ytp-fullscreen')
+
             const video: HTMLElement | null = document.querySelector('#player')
-            const videoHight = video?.clientHeight
-            const videoY = video?.offsetTop
+            let videoHight = video?.clientHeight || document.querySelector('video')?.clientHeight
+            let videoY = video?.offsetTop || (document.querySelector('#full-bleed-container') as HTMLElement)?.offsetTop
+            if (isFullscreen) {
+                videoHight = videoBox?.clientHeight
+            }
 
             // Use requestAnimationFrame to throttle the mousemove event handling
             // 鼠标相对窗口左上角的偏移
@@ -247,7 +253,7 @@ export function Caption() {
                 setShowButton(true)
 
                 if (videoElement) {
-                    
+
 
                     if (videoElement?.paused) {
                         // 当前是暂停状态
@@ -262,7 +268,7 @@ export function Caption() {
             }}
             onMouseLeave={() => {
                 setShowButton(false)
-
+                setDragging(false);
                 // 如果鼠标移出字幕前未点击字幕中的元素
                 if (!clickedCaption.current) {
                     // 继续播放视频
