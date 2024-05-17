@@ -229,7 +229,6 @@ export function Caption() {
     const handleMouseUp = () => {
         // // console.log('PopupCard:handleMouseUp');
         setDragging(false);
-        // Analyzer.analyze("これは、テストです。").then(console.log);
     };
 
 

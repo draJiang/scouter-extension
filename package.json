@@ -30,6 +30,7 @@
         "@react-spring/web": "^9.7.3",
         "@tomsd/morphoanalyzer": "^2.4.0",
         "antd": "^5.3.2",
+        "canvas-confetti": "^1.9.3",
         "chatgpt": "^5.2.5",
         "clipboardy": "^3.0.0",
         "dotenv-webpack": "^8.0.1",
@@ -58,6 +59,7 @@
         "uuid": "^9.0.0"
     },
     "devDependencies": {
+        "@types/canvas-confetti": "^1.6.4",
         "@types/chrome": "0.0.158",
         "@types/google.analytics": "^0.0.42",
         "@types/jest": "^27.0.2",

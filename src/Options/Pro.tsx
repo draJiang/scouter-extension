@@ -9,6 +9,8 @@ import { useUserInfoContext } from '../lib/userInfo'
 
 import { useDebouncedCallback } from 'use-debounce';
 
+import confetti from 'canvas-confetti';
+
 const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
 
     // const [verified, setVerified] = useState<boolean | null>(false);
@@ -29,11 +31,19 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
 
     }, [settings])
 
-    // useEffect(() => {
 
-    //     setVerified(userInfo?.user.verified!)
 
-    // }, [userInfo])
+    useEffect(() => {
+
+        if (userInfo?.user.verified) {
+            confetti({
+                particleCount: 140,
+                spread: 170,
+                origin: { y: 0.4 }
+            });
+        }
+
+    }, [userInfo?.user.verified])
 
     const handleFormChange = useDebouncedCallback((term: string) => {
 

@@ -107,13 +107,14 @@ export const Options = () => {
 
 
   useEffect(() => {
+    
+    (async () => {
 
-    // chrome.storage.sync.remove('ankiDeckName', function () {
-    //   console.log('历史记录已删除');
-    // });
+      // 获取配置信息
+      const items = await getSettings()
+      setSettings(items)
 
-    thisGetUserStatus().then((userInfo: userInfoType) => {
-
+      const userInfo: userInfoType = await thisGetUserStatus()
       setUserInfo(userInfo)
       const userId = userInfo.userId
 
@@ -127,21 +128,7 @@ export const Options = () => {
 
       amplitude.track('openOptions');
 
-    })
-
-
-    let defaultDeckName = ''
-
-
-
-    // 获取配置信息
-    getSettings().then(async (items) => {
-      // setOpenApiKey(items.openApiKey ?? null);
-      console.log(items);
-      setSettings(items)
-
-    })
-
+    })()
 
   }, []);
 
