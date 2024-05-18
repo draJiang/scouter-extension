@@ -20,7 +20,8 @@ import { ToolBar } from './ToolBar';
 
 import { userInfoType, AnkiInfoType } from '../types'
 
-import { cardStyle } from '../util'
+
+import { thisGetUserInfo, setAnkiInfo } from './util'
 
 import { popupCardStyle } from './PopupCard/style'
 import { ShortcutButton } from './ShortcutButton'
@@ -87,86 +88,16 @@ if (MyBox === null || MyBox === undefined) {
 
 }
 
+// 与 background 链接
+let port = browser.runtime.connect({
+  name: 'fromContentScript'
+})
+
 // 用户付费状态等信息、用户的 Anki 信息
 let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false, showYoutubeButton: true }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 let executedPromptHistoryInToolBar = [dictionaryPrompt]
 let showYoutubeButton = true
-
-// 获取用户信息
-const thisGetUserInfo = async () => {
-
-  try {
-    // 获取用户信息
-    USER_INFO = await browser.runtime.sendMessage({ 'type': 'getUserInfo', 'messages': {}, })
-    showYoutubeButton = USER_INFO.showYoutubeButton
-
-  } catch (error) {
-    console.log(error);
-
-  }
-
-  // 在上下文菜单中最近执行的 Prompt
-  const result = await browser.storage.local.get({ "executedPromptHistoryInToolBar": [dictionaryPrompt] })
-  executedPromptHistoryInToolBar = result.executedPromptHistoryInToolBar
-  
-
-
-  // 获取 Anki decks
-  const decks = await browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'deckNames', 'anki_arguments': {} }, })
-  ANKI_INFO.decks = decks.result
-
-  // 获取 Anki models 和默认的 Deck 名称
-  const modelsAndDeck = await browser.runtime.sendMessage({ 'type': 'setModel', 'messages': {}, })
-  ANKI_INFO.models = modelsAndDeck.data.modelData
-  ANKI_INFO.defaultDeckName = modelsAndDeck.data.defaultDeckName
-
-
-
-  // 更新 Anki style
-  try {
-
-    for (let i = 0; i < ANKI_INFO.models.length; i++) {
-
-      const p = {
-        "model": {
-          "name": ANKI_INFO.models[i]['modelName'],
-          "css": cardStyle
-        }
-      }
-
-      // 更新 style
-      browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
-
-      })
-
-    }
-
-
-  } catch (error) {
-
-  }
-
-}
-
-
-let port = browser.runtime.connect({
-  name: 'fromContentScript'
-})
-
-// 接收 background 消息（目前是通过浏览器的右键菜单、快捷键触发）
-browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-
-  // console.log('content script onMessage:');
-  // console.log(msg);
-  if (msg.type === 'open-scouter') {
-
-    openScouter(msg)
-
-
-  }
-
-});
 
 export const openScouter = (msg?: any, isYoutube?: boolean, youtubeData?: { keyWord: string, sencence: string, image: string }) => {
   // 处理窗口
@@ -561,6 +492,9 @@ export const getSelection = (isInShadow?: boolean) => {
   if (selection !== null && selection.rangeCount > 0) {
     // 当前选中的文字
     let keyWord = selection.toString().trim();
+    if (!keyWord) {
+      return null
+    }
 
     let sentence = ''
     let parentNode = selection.focusNode.parentNode;
@@ -654,7 +588,86 @@ export const getSelection = (isInShadow?: boolean) => {
 }
 
 
+const setYoutubeButton = () => {
+  // 如果是 YouTube 则显示操作按钮
 
+  if (window.location.hostname === "www.youtube.com" && showYoutubeButton) {
+    const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
+    console.log(ytpChromeControls);
+
+    if (ytpChromeControls) {
+
+      const YouTubeButtonContainerDiv = document.createElement('div')
+      YouTubeButtonContainerDiv.id = '__ScouterYouTubeButtonContainer'
+      YouTubeButtonContainerDiv.style.display = 'flex'
+      YouTubeButtonContainerDiv.style.alignItems = 'center'
+      YouTubeButtonContainerDiv.style.width = '48px'
+
+      ytpChromeControls.insertBefore(YouTubeButtonContainerDiv, ytpChromeControls.lastChild);
+      const thisShadowRoot = YouTubeButtonContainerDiv?.attachShadow({ mode: 'open' });
+
+      // if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
+      //   // 如果不存在 PopupCard
+      //   container = document.createElement('div')
+      //   container.className = CONTAINER_CLASSNAME
+      //   shadowRoot?.appendChild(container)
+      // }
+      console.log('USER_INFO:');
+      console.log(USER_INFO);
+
+
+      ReactDOM.render(
+        <React.StrictMode>
+          <StyleSheetManager target={thisShadowRoot}>
+            <YouTubeButton
+              container={container}
+              shadowRoot={shadowRoot}
+              userInfo={USER_INFO}
+            />
+          </StyleSheetManager>
+        </React.StrictMode >,
+        thisShadowRoot
+      );
+
+      const style = document.createElement('style');
+      style.textContent = `
+  
+            .scouterCaptionButton {
+                opacity: 0.9;
+            }
+  
+            .scouterCaptionButton:hover {
+                opacity: 1;
+            }
+  
+          `;
+      thisShadowRoot.appendChild(style);
+
+    }
+
+  }
+}
+
+async function initialize() {
+
+  // 获取用户信息
+  const userInfo = await thisGetUserInfo();
+  USER_INFO = userInfo?.userInfo
+  executedPromptHistoryInToolBar = userInfo?.executedPromptHistoryInToolBar
+  showYoutubeButton = userInfo?.showYoutubeButton
+
+  // 接收 background 消息（目前是通过浏览器的右键菜单、快捷键触发）
+  browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    if (msg.type === 'open-scouter') {
+      openScouter(msg)
+    }
+  });
+
+  // 处理 Youtube 逻辑
+  setYoutubeButton()
+  // 获取 Anki 信息
+  ANKI_INFO = await setAnkiInfo()
+}
 
 
 
@@ -664,12 +677,8 @@ export const getSelection = (isInShadow?: boolean) => {
 
 
 
+initialize()
 
-
-
-
-// 获取用户信息
-thisGetUserInfo()
 // 监听页面鼠标抬起事件
 document.addEventListener('mouseup', handleMouseup);
 // 监听页面鼠标按下事件
@@ -709,64 +718,4 @@ document.onmousedown = function (event) {
 
 }
 
-window.onload = () => {
 
-  // 如果是 YouTube 则显示操作按钮
-  setTimeout(() => {
-
-    if (window.location.hostname === "www.youtube.com" && showYoutubeButton) {
-      const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
-
-      if (ytpChromeControls) {
-
-        const YouTubeButtonContainerDiv = document.createElement('div')
-        YouTubeButtonContainerDiv.id = '__ScouterYouTubeButtonContainer'
-        YouTubeButtonContainerDiv.style.display = 'flex'
-        YouTubeButtonContainerDiv.style.alignItems = 'center'
-        YouTubeButtonContainerDiv.style.width = '48px'
-
-        ytpChromeControls.insertBefore(YouTubeButtonContainerDiv, ytpChromeControls.lastChild);
-        const thisShadowRoot = YouTubeButtonContainerDiv?.attachShadow({ mode: 'open' });
-
-        // if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
-        //   // 如果不存在 PopupCard
-        //   container = document.createElement('div')
-        //   container.className = CONTAINER_CLASSNAME
-        //   shadowRoot?.appendChild(container)
-        // }
-
-        ReactDOM.render(
-          <React.StrictMode>
-            <StyleSheetManager target={thisShadowRoot}>
-              <YouTubeButton
-                container={container}
-                shadowRoot={shadowRoot}
-                userInfo={USER_INFO}
-              />
-            </StyleSheetManager>
-          </React.StrictMode >,
-          thisShadowRoot
-        );
-
-        const style = document.createElement('style');
-        style.textContent = `
-
-          .scouterCaptionButton {
-              opacity: 0.9;
-          }
-
-          .scouterCaptionButton:hover {
-              opacity: 1;
-          }
-
-        `;
-        thisShadowRoot.appendChild(style);
-
-      }
-
-    }
-
-  }, 10);
-
-
-}

@@ -54,6 +54,7 @@
         "remark-breaks": "^3.0.2",
         "remark-gfm": "^3.0.1",
         "styled-components": "^5.3.0",
+        "tiny-segmenter": "^0.2.0",
         "unsplash-js": "^7.0.15",
         "use-debounce": "^10.0.0",
         "uuid": "^9.0.0"
@@ -69,6 +70,7 @@
         "@types/react-dom": "^17.0.0",
         "@types/styled-components": "^5.1.26",
         "@types/tailwindcss": "^3.1.0",
+        "@types/tiny-segmenter": "^0.2.0",
         "@types/uuid": "^9.0.2",
         "@types/webextension-polyfill": "^0.10.0",
         "autoprefixer": "^10.4.19",

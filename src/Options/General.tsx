@@ -35,19 +35,21 @@ const General: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
 
         const loadData = async () => {
 
-            const data = await getDefaultDeckName()
-            const defaultDeckName = data.defaultDeckName
-
-            console.log(settings);
             if (settings) {
                 // 更新 默认值
                 form.setFieldsValue({
                     currentLanguage: settings.currentLanguage,
                     targetLanguage: settings.targetLanguage,
-                    ankiDeckName: defaultDeckName,
                     contextMenu: settings.contextMenu,
                 });
             }
+
+            const data = await getDefaultDeckName()
+            const defaultDeckName = data.defaultDeckName
+
+            form.setFieldsValue({
+                ankiDeckName: defaultDeckName
+            });
         }
 
         loadData()

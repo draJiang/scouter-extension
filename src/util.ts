@@ -76,7 +76,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
 
   url.search = new URLSearchParams(params).toString();
   const ErrorMsg = '🥲 Sorry, No Results Found for this Word.';
-  const ErrorResult = { 'type': 'sendGPTData', 'status': 'erro', 'content': ErrorMsg, 'chatId': '' };
+  const ErrorResult = { 'type': 'sendGPTData', 'status': 'error', 'content': ErrorMsg, 'chatId': '' };
 
   return fetch(url)
     .then(response => {
@@ -116,15 +116,21 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
         case 'Japanese':
           if ('jc' in data) {
             msg = keyWord + ' /' + data.jc.word[0]["return-phrase"].l.i + '/' + '\n' + data.jc.word[0].trs[0].tr[0].l.i[0];
+            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
           } else if ('fanyi' in data) {
+            msg = data.fanyi.tran;
+            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+          } else if ('jaTransPjm' in data) {
             msg = data.jaTransPjm.fanyi.tran;
+            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
           }
-
-          if ('jc' in data || 'fanyi' in data) {
+          else if ('newjc' in data) {
+            msg = data.newjc.word.sense[0].phrList[0].jmsy;
             return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
           } else {
             return ErrorResult;
           }
+
           break;
 
         default:
@@ -146,7 +152,10 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
 
 
     })
-    .catch(error => ErrorResult);
+    .catch(error => {
+      console.log(error);
+      return ErrorResult
+    });
 }
 
 // AI 绘图
@@ -977,26 +986,29 @@ export const getBalance = (apiKey: string) => {
 
 const checkLicenseKey = async (key: string) => {
 
-  console.log('checkLicenseKey');
+  console.log('checkLicenseKey from lemonsqueezy:');
 
   let verified = false
 
-  if (!verified) {
-    // 从 Lemonsqueezy 验证 Key
-    const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        license_key: key,
-      })
-    });
-    const data = await response.json(); // 可以使用这个来进行额外的操作
-    verified = data.valid
-  }
+  // 从 Lemonsqueezy 验证 Key
+  const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      license_key: key,
+    })
+  });
+  const data = await response.json(); // 可以使用这个来进行额外的操作
+  verified = data.valid
+
+  console.log(verified);
+
 
   if (!verified) {
+
+    console.log('checkLicenseKey from dabing:');
 
     const res = await fetch('https://api.scouter.dabing.one/api/checktLicenseKey', {
       method: 'POST',
@@ -1017,16 +1029,19 @@ const checkLicenseKey = async (key: string) => {
 
   }
 
+  console.log(verified);
   return verified
 
 
 }
 
 export const getUserInfo = (): Promise<userInfoType> => {
+  console.log('getUserInfo');
 
   return new Promise((resolve, reject) => {
 
     getSettings().then(async (result) => {
+
 
       if (browser.runtime.lastError) {
         reject(chrome.runtime.lastError);
@@ -1035,21 +1050,12 @@ export const getUserInfo = (): Promise<userInfoType> => {
       let verified = false
 
       if (result.newLicenseKey) {
-        // // 判断用户
-        // const url = 'https://6r4atckmdr.us.aircode.run/index'
-        // const headers = { 'Authorization': 'Bearer ' + result.newLicenseKey, 'Content-Type': 'application/json', }
-
-        // await fetch(url, {
-        //   headers: headers
-        // }).then(async (response) => {
-
-        //   await response.json().then((data) => {
-        //     verified = data.verified
-        //   })
-
-        // })
+        console.log('result.newLicenseKey:');
+        console.log(true);
 
         verified = await checkLicenseKey(result.newLicenseKey)
+        console.log('getUserInfo result:');
+        console.log(verified);
 
       }
 
@@ -1070,7 +1076,11 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       }
 
-      resolve({ 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu, 'showYoutubeButton': result.showYoutubeButton })
+      const response = { 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu, 'showYoutubeButton': result.showYoutubeButton }
+      console.log('response:');
+      console.log(response);
+
+      resolve(response)
 
     })
 

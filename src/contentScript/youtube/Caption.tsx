@@ -6,8 +6,8 @@ import { openScouter } from '../index'
 import { OpenInNewWindowIcon, MoveIcon } from '@radix-ui/react-icons'
 
 import { useDebouncedCallback } from 'use-debounce';
+import TinySegmenter from 'tiny-segmenter';
 
-// import { Analyzer } from "@tomsd/morphoanalyzer";
 
 
 export function Caption() {
@@ -21,7 +21,12 @@ export function Caption() {
     const [dragging, setDragging] = useState(false);
     const captionElement = useRef<HTMLDivElement>(null);
 
+    const segmenterRef = useRef<TinySegmenter | null>(null);
+
     useEffect(() => {
+        if (!segmenterRef.current) {
+            segmenterRef.current = new TinySegmenter();
+        }
 
         const setCaptions = () => {
             const captionInfo = getCaption()
@@ -282,14 +287,31 @@ export function Caption() {
                     key={index}
                     fontSize={fontSize}
                 >
-                    {item.split(' ').map((word, wordIndex) => (
-                        <span
-                            className='captionWord'
-                            key={wordIndex}
-                            onClick={() => handleCaptionClick(word, item)}>
-                            {word.trim()}
-                        </span>
-                    ))}
+
+                    {lang === 'ja' ?
+                        segmenterRef.current!.segment(item).map((word, wordIndex) => (
+                            <span
+                                className='captionWord'
+                                key={wordIndex}
+                                onClick={() => handleCaptionClick(word, item)}>
+                                {word.trim()}
+                            </span>
+                        ))
+                        
+                        :
+
+                        item.split(' ').map((word, wordIndex) => (
+                            <span
+                                className='captionWord'
+                                key={wordIndex}
+                                onClick={() => handleCaptionClick(word, item)}>
+                                {word.trim()}
+                            </span>
+                        ))
+
+
+                    }
+
                 </CaptionLine>
             ))}
 
