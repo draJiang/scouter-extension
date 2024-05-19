@@ -7,18 +7,11 @@ import { cardStyle } from '../util'
 export const thisGetUserInfo = async () => {
 
     try {
-        console.log('get USER_INFO========');
 
         // 获取用户信息
         const USER_INFO = await browser.runtime.sendMessage({ 'type': 'getUserInfo', 'messages': {}, })
         const showYoutubeButton = USER_INFO.showYoutubeButton
-        console.log('showYoutubeButton:');
-        console.log(showYoutubeButton);
-        console.log('USER_INFO:');
-        console.log(USER_INFO);
-
-        console.log('get USER_INFO======== end');
-
+        
         // 在上下文菜单中最近执行的 Prompt
         const result = await browser.storage.local.get({ "executedPromptHistoryInToolBar": [dictionaryPrompt] })
         const executedPromptHistoryInToolBar = result.executedPromptHistoryInToolBar

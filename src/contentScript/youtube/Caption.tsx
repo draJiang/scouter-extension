@@ -8,7 +8,7 @@ import { OpenInNewWindowIcon, MoveIcon } from '@radix-ui/react-icons'
 import { useDebouncedCallback } from 'use-debounce';
 import TinySegmenter from 'tiny-segmenter';
 
-
+import { fetchcurrentLanguage } from '../../lib/lang';
 
 export function Caption() {
 
@@ -24,6 +24,12 @@ export function Caption() {
     const segmenterRef = useRef<TinySegmenter | null>(null);
 
     useEffect(() => {
+        (async () => {
+            let lang: any = await fetchcurrentLanguage()
+            if (lang) { setLang(lang.target.id) }
+        })()
+
+
         if (!segmenterRef.current) {
             segmenterRef.current = new TinySegmenter();
         }
@@ -32,7 +38,7 @@ export function Caption() {
             const captionInfo = getCaption()
             if (captionInfo && captionInfo?.captions !== captionText) {
                 setCaptionText(captionInfo?.captions)
-                setLang(captionInfo.lang)
+
             } else {
                 setCaptionText([])
             }
@@ -284,11 +290,14 @@ export function Caption() {
 
             {captionText.map((item, index) => (
                 <CaptionLine
+                    style={{
+                        gap: lang === 'Japanese' ? '' : '0.8rem'
+                    }}
                     key={index}
                     fontSize={fontSize}
                 >
 
-                    {lang === 'ja' ?
+                    {lang === 'Japanese' ?
                         segmenterRef.current!.segment(item).map((word, wordIndex) => (
                             <span
                                 className='captionWord'
@@ -297,7 +306,7 @@ export function Caption() {
                                 {word.trim()}
                             </span>
                         ))
-                        
+
                         :
 
                         item.split(' ').map((word, wordIndex) => (

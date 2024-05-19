@@ -30,8 +30,7 @@
         "js": [
             "js/content_script.js",
             "js/vendor.js"
-        ],
-        "run_at": "document_end"
+        ]
     }],
     "options_page": "options.html",
     "background": {

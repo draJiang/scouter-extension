@@ -1,8 +1,8 @@
+
 export const getCaption = (): { captions: string[], lang: string } | null => {
 
     // 字幕的语言
-    const windowElement = document.querySelector('.caption-window');
-    const langValue = windowElement?.getAttribute('lang') || 'en';
+    const langValue =  'en';
 
     // 字幕信息
     const captionNodes = document.querySelectorAll('.caption-visual-line');

@@ -330,40 +330,42 @@ const handleMouseup = async (event: any) => {
 
       // 在 PopupCard 范围内触发
 
-      let selectedText
+      if (selection) {
 
-      // 显示完形填空操作按钮
-      const selectedTextString = selection!.keyWord.toString()
-      // const sentence = ''
+        // 显示完形填空操作按钮
+        const selectedTextString = selection.keyWord.toString()
+        // const sentence = ''
 
-      const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
+        const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
 
 
 
-      if (PopupCardContainer && selection?.selection.type === 'Range' && !container.querySelector('.contextBox2')) {
+        if (PopupCardContainer && selection?.selection.type === 'Range' && !container.querySelector('.contextBox2')) {
 
-        let contextBox2 = document.createElement('div');
-        contextBox2.className = 'contextBox2'
-        contextBox2.style.position = 'relative'
+          let contextBox2 = document.createElement('div');
+          contextBox2.className = 'contextBox2'
+          contextBox2.style.position = 'relative'
 
-        PopupCardContainer.appendChild(contextBox2)
+          PopupCardContainer.appendChild(contextBox2)
 
-        let range = selection?.selection.getRangeAt(0);
-        // console.log(selection);
-        let lang = await fetchcurrentLanguage()
+          let range = selection?.selection.getRangeAt(0);
+          // console.log(selection);
+          let lang = await fetchcurrentLanguage()
 
-        ReactDOM.render(
-          <CurrentLanguageContext.Provider value={lang}>
-            <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
-              <StyleSheetManager target={shadowRoot}>
-                <ToolBar
-                  selectedText={selection?.selection.getRangeAt(0).getBoundingClientRect()}
-                  selectedTextString={selectedTextString}
-                  selectedSentence={selection?.sentence}
-                  executedPromptHistoryInToolBar={executedPromptHistoryInToolBar}
-                  range={range} />
-              </StyleSheetManager></UserInfoContext.Provider>
-          </CurrentLanguageContext.Provider>, contextBox2);
+          ReactDOM.render(
+            <CurrentLanguageContext.Provider value={lang}>
+              <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
+                <StyleSheetManager target={shadowRoot}>
+                  <ToolBar
+                    selectedText={selection?.selection.getRangeAt(0).getBoundingClientRect()}
+                    selectedTextString={selectedTextString}
+                    selectedSentence={selection?.sentence}
+                    executedPromptHistoryInToolBar={executedPromptHistoryInToolBar}
+                    range={range} />
+                </StyleSheetManager></UserInfoContext.Provider>
+            </CurrentLanguageContext.Provider>, contextBox2);
+        }
+
       }
 
 
@@ -375,7 +377,7 @@ const handleMouseup = async (event: any) => {
 
   }
 
-  if (!isTextSelected) {
+  if (!isTextSelected || !selection) {
 
     // 没有选中任何文字
     // 移除快捷按钮
@@ -531,7 +533,6 @@ export const getSelection = (isInShadow?: boolean) => {
       expandedRange.setEnd(range.endContainer, Math.min(range.endOffset + endOffsetShift, range.endContainer.textContent.length - 1));
     } catch (error) {
       console.log(error);
-
     }
 
     // 获取包括关键词前后字符的字符串
@@ -593,7 +594,7 @@ const setYoutubeButton = () => {
 
   if (window.location.hostname === "www.youtube.com" && showYoutubeButton) {
     const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
-    console.log(ytpChromeControls);
+    // console.log(ytpChromeControls);
 
     if (ytpChromeControls) {
 
@@ -606,14 +607,8 @@ const setYoutubeButton = () => {
       ytpChromeControls.insertBefore(YouTubeButtonContainerDiv, ytpChromeControls.lastChild);
       const thisShadowRoot = YouTubeButtonContainerDiv?.attachShadow({ mode: 'open' });
 
-      // if (MyBox.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
-      //   // 如果不存在 PopupCard
-      //   container = document.createElement('div')
-      //   container.className = CONTAINER_CLASSNAME
-      //   shadowRoot?.appendChild(container)
-      // }
-      console.log('USER_INFO:');
-      console.log(USER_INFO);
+      // console.log('USER_INFO:');
+      // console.log(USER_INFO);
 
 
       ReactDOM.render(
@@ -667,6 +662,8 @@ async function initialize() {
   setYoutubeButton()
   // 获取 Anki 信息
   ANKI_INFO = await setAnkiInfo()
+
+
 }
 
 
@@ -677,6 +674,7 @@ async function initialize() {
 
 
 
+// 初始化用户信息
 initialize()
 
 // 监听页面鼠标抬起事件
