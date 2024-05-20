@@ -36,8 +36,10 @@ export function Caption() {
 
         const setCaptions = () => {
             const captionInfo = getCaption()
-            if (captionInfo && captionInfo?.captions !== captionText) {
-                setCaptionText(captionInfo?.captions)
+            if (captionInfo && captionInfo.captions !== captionText) {
+                // const captionTextLength = captionText.length
+                // if (captionTextLength > 0) { newCaptionText.unshift(captionText[captionTextLength - 1]) }
+                setCaptionText(captionInfo.captions)
 
             } else {
                 setCaptionText([])
@@ -51,7 +53,9 @@ export function Caption() {
                 // console.log(mutation);
 
                 const target = (mutation.target as HTMLElement)
-                if (target.className === 'ytp-caption-window-container' || target.classList.contains('caption-window')) {
+                
+                if (target.classList.contains('caption-window')) {
+                    
                     setCaptions()
                 }
 

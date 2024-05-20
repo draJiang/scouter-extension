@@ -212,7 +212,7 @@ export function Nav(props: NavProps) {
         }
         const thisLang: LangObject = lang
 
-        let audioUrl: string = 'http://dict.youdao.com/dictvoice?type=0&audio='
+        let audioUrl: string = 'https://dict.youdao.com/dictvoice?type=0&audio='
         let audio: [] | [{}], filename
         try {
             audioUrl = thisLang[Lang['target']['id']]['audioURL']

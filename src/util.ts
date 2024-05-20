@@ -67,7 +67,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
   const targetLanguage = Settings.targetLanguage
 
   // 获取词典数据
-  let url = new URL('http://dict.youdao.com/jsonapi');
+  let url = new URL('https://dict.youdao.com/jsonapi');
   let params = {
     xmlVersion: '5.1',
     le: ISO6391.getCode(targetLanguage),

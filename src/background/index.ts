@@ -196,20 +196,21 @@ browser.runtime.onConnect.addListener(port => {
                   //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                   //   }
                   // }
+                  if (data.choices.length > 0) {
+                    const finish_reason = data.choices[0].finish_reason
+                    if (ApiType === 'ollama') {
+                      port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data })
+                    } else {
 
-                  const finish_reason = data.choices[0].finish_reason
-                  if (ApiType === 'ollama') {
-                    port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data })
-                  } else {
+                      if (finish_reason !== 'stop') {
+                        port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                      }
 
-                    if (finish_reason !== 'stop') {
-                      port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                      if ((ApiType === 'scouterFreeAI' || ApiType === 'licenseKey') && finish_reason === 'error') {
+                        port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': `🥲error: ${data.choices[0].error.message}` })
+                      }
+
                     }
-
-                    if ((ApiType === 'scouterFreeAI' || ApiType === 'licenseKey') && finish_reason === 'error') {
-                      port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': `🥲error: ${data.choices[0].error.message}` })
-                    }
-
                   }
 
                 },

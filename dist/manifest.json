@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Scouter",
+    "name": "Scouter - Language Learning",
     "description": "Bridging the gap between theory and practice.",
-    "version": "0.23.70",
+    "version": "0.23.80",
     "action": {
         "default_icon": "icon48.png",
         "default_popup": "popup.html"
