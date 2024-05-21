@@ -93,6 +93,22 @@ browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
 })
 
+// 监听 tab 变化
+browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  if (changeInfo.url) {
+    
+    if (changeInfo.url.indexOf('youtube.com')) {
+
+      browser.tabs.sendMessage(tabId, {
+        type: 'tabOnUpdated', data: {
+          locateInYouTube: true
+        }
+      })
+
+    }
+  }
+});
+
 // 监听快捷键
 browser.commands.onCommand.addListener(function (command) {
 

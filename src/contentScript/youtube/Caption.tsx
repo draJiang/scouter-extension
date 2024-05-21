@@ -22,6 +22,7 @@ export function Caption() {
     const captionElement = useRef<HTMLDivElement>(null);
 
     const segmenterRef = useRef<TinySegmenter | null>(null);
+    const lastCaptionsRef = useRef<string[]>([])
 
     useEffect(() => {
         (async () => {
@@ -36,14 +37,37 @@ export function Caption() {
 
         const setCaptions = () => {
             const captionInfo = getCaption()
-            if (captionInfo && captionInfo.captions !== captionText) {
-                // const captionTextLength = captionText.length
-                // if (captionTextLength > 0) { newCaptionText.unshift(captionText[captionTextLength - 1]) }
-                setCaptionText(captionInfo.captions)
+            // if (captionInfo && captionInfo.captions.length > 0 && JSON.stringify(captionInfo.captions) !== JSON.stringify(lastCaptionsRef.current)) {
+            //     console.log(lastCaptionsRef.current);
+            //     console.log(captionInfo.captions);
+            //     console.log('======');
 
+            //     const lastCaptionsRefLength = lastCaptionsRef.current.length
+            //     if (lastCaptionsRefLength > 0) {
+            //         const newCpations = [lastCaptionsRef.current[lastCaptionsRefLength - 1], ...captionInfo.captions]
+            //         setCaptionText(newCpations)
+            //     } else {
+            //         setCaptionText(captionInfo.captions)
+            //     }
+            //     if (captionInfo.captions.length > 0) {
+            //         // 记录字幕历史信息
+            //         lastCaptionsRef.current = captionInfo.captions
+            //     }
+
+
+            // }
+
+            // if (!captionInfo) { setCaptionText([]) }
+            
+
+            if (captionInfo) {
+                setCaptionText(captionInfo.captions)
             } else {
                 setCaptionText([])
             }
+
+
+
         }
 
         // 定义当观察到变动时的回调函数
@@ -53,9 +77,9 @@ export function Caption() {
                 // console.log(mutation);
 
                 const target = (mutation.target as HTMLElement)
-                
+
                 if (target.classList.contains('caption-window')) {
-                    
+
                     setCaptions()
                 }
 

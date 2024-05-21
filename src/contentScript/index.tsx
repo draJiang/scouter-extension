@@ -591,10 +591,11 @@ export const getSelection = (isInShadow?: boolean) => {
 
 const setYoutubeButton = () => {
   // 如果是 YouTube 则显示操作按钮
-
-  if (window.location.hostname === "www.youtube.com" && showYoutubeButton) {
+  const scouterYouTubeButtonContainer = document.querySelector('#__ScouterYouTubeButtonContainer');
+  
+  if (window.location.hostname === "www.youtube.com" && showYoutubeButton && !scouterYouTubeButtonContainer) {
     const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
-    // console.log(ytpChromeControls);
+    console.log(ytpChromeControls);
 
     if (ytpChromeControls) {
 
@@ -656,10 +657,15 @@ async function initialize() {
     if (msg.type === 'open-scouter') {
       openScouter(msg)
     }
+
+    if (msg.type === 'tabOnUpdated') {
+      if (msg.data.locateInYouTube) { setYoutubeButton() }
+    }
   });
 
   // 处理 Youtube 逻辑
   setYoutubeButton()
+
   // 获取 Anki 信息
   ANKI_INFO = await setAnkiInfo()
 
