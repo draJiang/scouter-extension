@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { getCaption, captureVideoScreenshot } from './util'
 import { CaptionLine } from './CaptionLine'
 import { openScouter } from '../index'
-import { OpenInNewWindowIcon, MoveIcon } from '@radix-ui/react-icons'
+import { OpenInNewWindowIcon, MoveIcon,DragHandleDots2Icon } from '@radix-ui/react-icons'
 
 import { useDebouncedCallback } from 'use-debounce';
 import TinySegmenter from 'tiny-segmenter';
@@ -58,7 +58,7 @@ export function Caption() {
             // }
 
             // if (!captionInfo) { setCaptionText([]) }
-            
+
 
             if (captionInfo) {
                 setCaptionText(captionInfo.captions)
@@ -182,8 +182,8 @@ export function Caption() {
         cursor: 'pointer',
         color: 'white',
         display: 'flex',
+        alignItems:'center',
         position: 'absolute',
-
     }
 
 
@@ -273,16 +273,17 @@ export function Caption() {
 
     return (
         <div
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
+            // onMouseDown={handleMouseDown}
+            // onMouseUp={handleMouseUp}
+            // onMouseMove={handleMouseMove}
 
             ref={captionElement}
             style={{
                 position: 'absolute',
                 bottom: '60px',
                 zIndex: '50',
-                cursor: 'move'
+                display:'flex',
+                alignItems:'center'
             }}
 
             onMouseEnter={() => {
@@ -316,47 +317,65 @@ export function Caption() {
             }}
         >
 
-            {captionText.map((item, index) => (
-                <CaptionLine
-                    style={{
-                        gap: lang === 'Japanese' ? '' : '0.8rem'
-                    }}
-                    key={index}
-                    fontSize={fontSize}
-                >
+            {showButton &&
+                <button style={{
+                    ...buttonStyle,
+                    cursor: 'move',
+                    width:'30px',
+                    height:'40px',
+                }}
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onMouseMove={handleMouseMove}
 
-                    {lang === 'Japanese' ?
-                        segmenterRef.current!.segment(item).map((word, wordIndex) => (
-                            <span
-                                className='captionWord'
-                                key={wordIndex}
-                                onClick={() => handleCaptionClick(word, item)}>
-                                {word.trim()}
-                            </span>
-                        ))
+                ><DragHandleDots2Icon /></button>
+            }
 
-                        :
+            <div style={{
+                display:'flex',
+                flexDirection:'column'
+            }}>
+                {captionText.map((item, index) => (
+                    <CaptionLine
+                        style={{
+                            gap: lang === 'Japanese' ? '' : '0.8rem'
+                        }}
+                        key={index}
+                        fontSize={fontSize}
+                    >
 
-                        item.split(' ').map((word, wordIndex) => (
-                            <span
-                                className='captionWord'
-                                key={wordIndex}
-                                onClick={() => handleCaptionClick(word, item)}>
-                                {word.trim()}
-                            </span>
-                        ))
+                        {lang === 'Japanese' ?
+                            segmenterRef.current!.segment(item).map((word, wordIndex) => (
+                                <span
+                                    className='captionWord'
+                                    key={wordIndex}
+                                    onClick={() => handleCaptionClick(word, item)}>
+                                    {word.trim()}
+                                </span>
+                            ))
+
+                            :
+
+                            item.split(' ').map((word, wordIndex) => (
+                                <span
+                                    className='captionWord'
+                                    key={wordIndex}
+                                    onClick={() => handleCaptionClick(word, item)}>
+                                    {word.trim()}
+                                </span>
+                            ))
 
 
-                    }
+                        }
 
-                </CaptionLine>
-            ))}
+                    </CaptionLine>
+                ))}
+            </div>
 
             {showButton &&
                 <button style={{
                     ...buttonStyle,
-                    right: '0',
-                    bottom: '8px'
+                    right:'0'
                 }} onClick={handleOpenWindow}><OpenInNewWindowIcon /></button>
             }
 

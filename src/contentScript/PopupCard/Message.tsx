@@ -295,6 +295,8 @@ export function MessagesList(props: MessagesListProps) {
 
     return (
         <div
+            // contentEditable
+            // onInput={(e) => console.log(e)}
             className='messages'
             style={{
                 lineHeight: '2',
