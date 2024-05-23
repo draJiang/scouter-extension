@@ -83,11 +83,13 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                     <div className="flex flex-row justify-center">
                         {/* <!-- Pricing Card --> */}
                         <div className="flex flex-col p-6 mx-4 min-w-72 max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow  xl:p-8 ">
-                            <h3 className="mb-4 text-2xl font-semibold">Starter</h3>
-                            {/* <p className="font-light text-gray-500 sm:text-lg ">Best option for personal use & for your next project.</p> */}
-                            <div className="flex justify-center items-baseline my-8">
-                                <span className="mr-2 text-5xl font-extrabold">$0</span>
-                                {/* <span className="text-gray-500 ">/month</span> */}
+                            <div className="flex flex-col gap-3 mb-8">
+                                <h3 className="text-2xl font-semibold">Starter</h3>
+                                <p className="font-light text-gray-500 sm:text-lg ">/</p>
+                                <div className="flex justify-center items-baseline">
+                                    <span className="mr-2 text-5xl font-extrabold">$0</span>
+                                    {/* <span className="text-gray-500 ">/month</span> */}
+                                </div>
                             </div>
                             {/* <!-- List --> */}
                             <ul role="list" className="mb-8 space-y-4 text-left">
@@ -126,11 +128,13 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                         </div>
                         {/* <!-- Pricing Card --> */}
                         <div className="flex flex-col p-6 mx-4 min-w-72 max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow  xl:p-8 ">
-                            <h3 className="mb-4 text-2xl font-semibold">Pro</h3>
-                            {/* <p className="font-light text-gray-500 sm:text-lg ">Relevant for multiple users, extended & premium support.</p> */}
-                            <div className="flex justify-center items-baseline my-8">
-                                <span className="mr-2 text-5xl font-extrabold">$5</span>
-                                {/* <span className="text-gray-500 ">/month</span> */}
+                            <div className="flex flex-col gap-3 mb-8">
+                                <h3 className="text-2xl font-semibold">Pro</h3>
+                                <p className="font-light text-gray-500 sm:text-lg ">One-time</p>
+                                <div className="flex justify-center items-baseline">
+                                    <span className="mr-2 text-5xl font-extrabold">$5</span>
+                                    {/* <span className="text-gray-500 ">/One-time</span> */}
+                                </div>
                             </div>
                             {/* <!-- List --> */}
                             <ul role="list" className="mb-8 space-y-4 text-left">
