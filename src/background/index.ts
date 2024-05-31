@@ -43,9 +43,9 @@ let controller = new AbortController();
 
 
 // 用户安装或者升级插件或者手动重新载入插件时会触发此事件
-browser.runtime.onInstalled.addListener(function () {
+browser.runtime.onInstalled.addListener(function (details) {
 
-  // amplitude.track("install")
+  if (details.reason === 'install') { browser.tabs.create({ url: "welcome.html" }); }
 
 });
 
@@ -90,13 +90,12 @@ browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
   sendMessageToContent(runPrompt)
 
-
 })
 
 // 监听 tab 变化
 browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   if (changeInfo.url) {
-    
+
     if (changeInfo.url.indexOf('youtube.com')) {
 
       browser.tabs.sendMessage(tabId, {

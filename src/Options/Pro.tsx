@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
-import { Input, Button, Form } from 'antd';
+import { Input, Button, Form, Modal } from 'antd';
 import { CheckCircleTwoTone } from '@ant-design/icons';
 import { FormPropsType, userInfoType, AnkiInfoType } from '../types'
 import { ProTag } from "../Components/ProTag";
@@ -18,6 +18,7 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
     const [form] = Form.useForm();
 
     const userInfo: { user: userInfoType, anki: AnkiInfoType } | null = useUserInfoContext()
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
 
@@ -50,6 +51,14 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
         saveOptions(term)
 
     }, 300)
+
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleOk = () => {
+        setIsModalOpen(false);
+    };
 
 
 
@@ -173,6 +182,16 @@ const Pro: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                                 </li>
                             </ul>
                             <a href="#" onClick={() => { window.open('https://jiang.lemonsqueezy.com/checkout/buy/e31f8c18-7bf2-4f6b-85c2-508fb500ce84') }} className="text-white hover:text-white bg-orange-400 hover:bg-orange-500 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center ">Get started</a>
+                            <>
+                                <a href="#" onClick={showModal} className=" mt-2 hover:text-orange-500 text-orange-400  focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center ">微信支付</a>
+                                <Modal title="WeChatPay" open={isModalOpen} onCancel={handleOk} footer={null} maskClosable={true} >
+                                    <div className="flex flex-col justify-center items-center gap-3">
+                                        <p>请在付款时备注你的邮箱，激活码将发送至邮箱中</p>
+                                        <img width={240} src="images/WeChatPay.png" />
+                                        <p>我们会尽快发送激活码，若未收到可联系 <a className="text-orange-400" href="mailto:jzlong666@gmail.com?subject=请发送 Scouter 激活码">jzlong666@gmail.com</a></p>
+                                    </div>
+                                </Modal>
+                            </>
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,7 @@ export type PromptType = {
 export type FormPropsType = {
     settings: Record<string, any> | undefined;
     saveOptions: (values: any) => Promise<void>;
+    style?: { layout: 'horizontal' | 'vertical' | 'inline'; }
 };
 
 export type runPromptType = 'yes' | 'no' | 'regenerate' | undefined

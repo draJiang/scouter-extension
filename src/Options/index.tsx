@@ -177,13 +177,7 @@ export const Options = () => {
                 colorLink: "#F08A24",
                 colorLinkHover: "#ffc478",
                 colorLinkActive: "#c96914"
-                // colorText: "#F08A24"
               },
-              // components: {
-              //   Button: {
-              //     colorPrimary: '#F08A24',
-              //   },
-              // },
             }}
           >
 

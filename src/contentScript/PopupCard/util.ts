@@ -326,63 +326,21 @@ export const handleHightlight = (str: string, keyWord: string, ankiCards: Array<
     }
 
     let newStr = str
-
-    // 处理 keyword 高亮
-    newStr = newStr.replace(new RegExp(`(^|[^*])(${keyWord})([^*]|$)`, 'gi'), function (match, p1, p2, p3) {
-        // 如果关键词前后没有*，则添加**，否则保留原样
-        if (p1 !== '*' && p3 !== '*') {
-            return p1 + '**' + p2 + '**' + p3;
-        } else {
-            return match;  // 不进行替换
-        }
-    });
-
-    // // 处理 Anki 单词高亮
-    // const cards = ankiCards
-
-    // if (windowElement && cards) {
-
-    //     // 遍历每一个卡片
-    //     cards.forEach((card: any) => {
-
-    //         // setTimeout(() => {
-    //         // console.log(card);
-    //         const keys = Object.keys(card.fields);
-    //         let firstKey = keys[0];
-    //         // 找到卡片正面
-    //         for (let i = 0; i < keys.length; i++) {
-    //             if (card.fields[keys[i]].order === 0) {
-    //                 firstKey = keys[i]
-    //                 break
-    //             }
-    //         }
+    try {
+        // 处理 keyword 高亮
+        newStr = newStr.replace(new RegExp(`(^|[^*])(${keyWord})([^*]|$)`, 'gi'), function (match, p1, p2, p3) {
+            // 如果关键词前后没有*，则添加**，否则保留原样
+            if (p1 !== '*' && p3 !== '*') {
+                return p1 + '**' + p2 + '**' + p3;
+            } else {
+                return match;  // 不进行替换
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
 
 
-
-    //         const cardFrontValue = card.fields[firstKey].value
-    //         const escapedCardFrontValue = escapeRegExp(cardFrontValue);
-    //         if (cardFrontValue !== keyWord) {
-    //             newStr = newStr.replace(new RegExp(escapedCardFrontValue, 'gi'), `<mark>${cardFrontValue}</mark>`)
-    //         }
-    //         // }, 10);
-
-
-    //         function escapeRegExp(string: string) {
-    //             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-    //         }
-
-    //     });
-
-    //     // 对上述元素添加点击事件
-    //     // let hightlightDom = windowElement.getElementsByClassName('hello')
-
-    //     // for (let i = 0; i < hightlightDom.length; i++) {
-
-    //     //     hightlightDom[i].removeEventListener('click', handleHightlightClick)
-    //     //     hightlightDom[i].addEventListener('click', handleHightlightClick)
-
-    //     // }
-    // }
 
     return newStr
 

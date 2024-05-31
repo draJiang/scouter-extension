@@ -55,11 +55,12 @@ border:1px solid rgba(5, 5, 5, .06)
 export function ShortcutButton(props: ShortcutButtonProps) {
 
     // // 设置初始坐标为 (0, 0)
-    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [position, setPosition] = useState({ x: - 100, y: -100 });
 
     const buttonRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+
         //设置按钮位置
         let left = props.position.x
         let top = props.position.y
@@ -90,6 +91,8 @@ export function ShortcutButton(props: ShortcutButtonProps) {
             ref={buttonRef}
             left={position.x}
             top={position.y}
+            onMouseDown={(event: any) => event.stopPropagation()}
+            onMouseUp={(event: any) => event.stopPropagation()}
         >
 
             {/* <div style={{
@@ -105,7 +108,7 @@ export function ShortcutButton(props: ShortcutButtonProps) {
                 }} />
             </div> */}
 
-            <div style={{
+            < div style={{
                 padding: '6px',
                 display: 'flex',
                 flexDirection: 'row',
@@ -116,19 +119,25 @@ export function ShortcutButton(props: ShortcutButtonProps) {
                         // marginRight: '4px'
                     }}
                     className="ShortcutButton"
-                    onClick={() => props.handleShortcutButtonClick(true)}
+                    onClick={(event: any) => {
+                        props.handleShortcutButtonClick(true)
+                        event.stopPropagation()
+                    }}
                 >
                     <PaperPlaneIcon style={{ marginRight: '4px' }} />Run
                 </ScouterButton>
                 <ScouterButton
                     className="ShortcutButton"
-                    onClick={() => props.handleShortcutButtonClick(false)}
+                    onClick={(event: any) => {
+                        props.handleShortcutButtonClick(false)
+                        event.stopPropagation()
+                    }}
                 >
                     <OpenInNewWindowIcon style={{ marginRight: '4px' }} /> Open
                 </ScouterButton>
-            </div>
+            </div >
 
-        </ScouterButtonBox>
+        </ScouterButtonBox >
     )
 
 }

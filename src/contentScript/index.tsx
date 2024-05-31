@@ -245,13 +245,8 @@ export const setDonotClosePopupCard = (value: boolean) => {
   donotClosePopupCard = value
 }
 
-let isTextSelected = false;
-let lastSelection = {
-  anchorNode: null,
-  anchorOffset: 0,
-  focusNode: null,
-  focusOffset: 0,
-};
+
+let lastSelection: any = null
 
 const checkIsClickedInsideShortcutButton = (event: any): boolean => {
   const path = event.composedPath();
@@ -263,37 +258,78 @@ const checkIsClickedInsideShortcutButton = (event: any): boolean => {
 }
 
 const handleMouseup = async (event: any) => {
-
+  console.log('handleMouseup=====');
   // 是否在窗口中触发
   const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
   // 是否在快捷按钮上触发
-  const path = event.composedPath();
   const isClickedInsideShortcutButton = checkIsClickedInsideShortcutButton(event)
-
   // 获取用户在宿主网页上选中的内容
   const selection = getSelection(isInShadow)
-
-  const range = selection?.selection.getRangeAt(0);
-
-  lastSelection = {
-    // 保存各个属性的引用和值
-    anchorNode: selection?.selection.anchorNode,
-    anchorOffset: selection?.selection.anchorOffset,
-    focusNode: selection?.selection.focusNode,
-    focusOffset: selection?.selection.focusOffset,
-  };
-
+  let isTextSelected = false;
   if (selection) {
     isTextSelected = selection.selection.toString().length > 0;
   }
 
-  // 有选中文字且未开启 Prompt 设置界面（如果开启 Prompt 设置界面而仍然执行查询任务时，会导致不必要的任务执行）
-  if (isTextSelected && !donotClosePopupCard) {
+  // 点击对象在 shadow 内
+  if (isInShadow) {
 
-    if (!isInShadow || isClickedInsideShortcutButton) {
-      // 在 PopupCard 范围外触发
+    // 点击的不是快捷按钮
+    if (!isClickedInsideShortcutButton && selection && isTextSelected) {
 
-      // isTextSelected = false;
+      // 显示完形填空操作按钮
+      const selectedTextString = selection.keyWord.toString()
+
+      const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
+
+      if (PopupCardContainer && selection?.selection.type === 'Range' && !container.querySelector('.contextBox2')) {
+
+        let contextBox2 = document.createElement('div');
+        contextBox2.className = 'contextBox2'
+        contextBox2.style.position = 'relative'
+
+        PopupCardContainer.appendChild(contextBox2)
+
+        let range = selection?.selection.getRangeAt(0);
+        // console.log(selection);
+        let lang = await fetchcurrentLanguage()
+
+        ReactDOM.render(
+          <CurrentLanguageContext.Provider value={lang}>
+            <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
+              <StyleSheetManager target={shadowRoot}>
+                <ToolBar
+                  selectedText={selection?.selection.getRangeAt(0).getBoundingClientRect()}
+                  selectedTextString={selectedTextString}
+                  selectedSentence={selection?.sentence}
+                  executedPromptHistoryInToolBar={executedPromptHistoryInToolBar}
+                  range={range} />
+              </StyleSheetManager></UserInfoContext.Provider>
+          </CurrentLanguageContext.Provider>, contextBox2);
+      }
+    }
+
+    if (!isTextSelected) {
+      // 隐藏 ToolBar
+      const contextBox = container.getElementsByClassName('contextBox2')[0]
+      // 点击插件窗口且不是 ToolBar
+      const isInToolBar = contextBox === event.composedPath()[0] || contextBox?.contains(event.composedPath()[0] as Node)
+      if (isInShadow && !isInToolBar) {
+
+        if (contextBox) {
+          // 点击的不是 setAnkiSpaceButton 时才隐藏
+          if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
+            contextBox.parentNode?.removeChild(contextBox)
+          }
+
+        }
+      }
+    }
+
+  } else {
+    // 点击对象在 shadow 外
+
+    // Pin 住窗口下快速查词
+    if (selection && isTextSelected && !donotClosePopupCard && isPin && selection.selection.anchorNode?.nodeName === '#text') {
 
       // 停止旧的对话
       try {
@@ -306,179 +342,357 @@ const handleMouseup = async (event: any) => {
         port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
       }
 
-
-      // 显示窗口/更新窗口信息
-      if (selection && selection?.keyWord.length > 0 && isPin && selection.selection.anchorNode?.nodeName === '#text') {
-        showPopupCard(
-          {
-            'keyWord': selection?.keyWord,
-            'Sentence': selection.sentence
-          },
-          window.getSelection(),
-          container,
-          shadowRoot,
-          {
-            isPin: isPin,
-            runPrompt: true,
-            isYoutube: false
-          }
-
-        )
-      }
-
-    } else {
-
-      // 在 PopupCard 范围内触发
-
-      if (selection) {
-
-        // 显示完形填空操作按钮
-        const selectedTextString = selection.keyWord.toString()
-        // const sentence = ''
-
-        const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
-
-
-
-        if (PopupCardContainer && selection?.selection.type === 'Range' && !container.querySelector('.contextBox2')) {
-
-          let contextBox2 = document.createElement('div');
-          contextBox2.className = 'contextBox2'
-          contextBox2.style.position = 'relative'
-
-          PopupCardContainer.appendChild(contextBox2)
-
-          let range = selection?.selection.getRangeAt(0);
-          // console.log(selection);
-          let lang = await fetchcurrentLanguage()
-
-          ReactDOM.render(
-            <CurrentLanguageContext.Provider value={lang}>
-              <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
-                <StyleSheetManager target={shadowRoot}>
-                  <ToolBar
-                    selectedText={selection?.selection.getRangeAt(0).getBoundingClientRect()}
-                    selectedTextString={selectedTextString}
-                    selectedSentence={selection?.sentence}
-                    executedPromptHistoryInToolBar={executedPromptHistoryInToolBar}
-                    range={range} />
-                </StyleSheetManager></UserInfoContext.Provider>
-            </CurrentLanguageContext.Provider>, contextBox2);
+      showPopupCard(
+        {
+          'keyWord': selection?.keyWord,
+          'Sentence': selection.sentence
+        },
+        window.getSelection(),
+        container,
+        shadowRoot,
+        {
+          isPin: isPin,
+          runPrompt: true,
+          isYoutube: false
         }
 
+      )
+    }
+
+    if (isTextSelected && !isClickedInsideShortcutButton && USER_INFO.contextMenu && !isInShadow && !isPin) {
+
+      // 如果不存在按钮
+      if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null) {
+        let ShortcutButtonContainer = document.createElement('div')
+        ShortcutButtonContainer.className = SHORTCUT_BUTTON_CLASSNAME
+        shadowRoot?.appendChild(ShortcutButtonContainer)
+
+        ReactDOM.render(
+
+          <React.StrictMode>
+            <StyleSheetManager target={shadowRoot}>
+              <ShortcutButton
+                position={{
+                  x: event.pageX + 10,
+                  y: event.pageY + 10
+                  // x: 10,
+                  // y: 10
+                }}
+                handleShortcutButtonClick={(runPrompt: boolean) => {
+                  console.log('handleShortcutButtonClick=====');
+                  console.log(lastSelection);
+
+                  // event.stopPropagation(); // 阻止事件冒泡
+                  if (lastSelection) {
+
+                    if (MyBox?.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
+                      // 如果不存在 PopupCard
+                      container = document.createElement('div')
+                      container.className = CONTAINER_CLASSNAME
+                      shadowRoot?.appendChild(container)
+                    }
+
+                    // const selection = getSelection(isInShadow)
+
+                    // 重新选中划词区域
+                    // if (lastSelection) {
+
+                    //   // console.log('===============');
+
+                    //   // 创建一个范围对象
+                    //   const newRange = document.createRange();
+                    //   const anchorNode = lastSelection.anchorNode;
+                    //   const focusNode = lastSelection.focusNode;
+
+                    //   // console.log(lastSelection)
+
+                    //   if (anchorNode && focusNode) {
+                    //     // 使用保存的 selected Range 恢复
+                    //     newRange.setStart(anchorNode, lastSelection?.anchorOffset);
+                    //     newRange.setEnd(focusNode, lastSelection?.focusOffset);
+                    //     // 获取 Selection 对象
+
+                    //     // 移除所有现有的选择
+                    //     newSelection!.removeAllRanges();
+                    //     // 添加新的选区
+
+                    //     newSelection!.addRange(range);
+                    //   }
+
+                    // }
+
+                    // 移除快捷按钮
+                    const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
+                    if (ShortcutButtonContainer) {
+                      ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
+                    }
+
+                    // 显示窗口
+                    showPopupCard({ 'keyWord': lastSelection?.keyWord, 'Sentence': lastSelection!.sentence }, lastSelection.selection, container, shadowRoot,
+                      {
+                        isPin: isPin,
+                        runPrompt: runPrompt,
+                        isYoutube: false
+                      }
+                    )
+
+                  }
+                }} />
+            </StyleSheetManager>
+          </React.StrictMode >,
+          ShortcutButtonContainer
+        );
       }
 
 
+    } else {
+      // console.log('移除快捷按钮');
+      // console.log(isTextSelected);
+      // console.log(MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null);
 
-      // 
-
-
-    }
-
-  }
-
-  if (!isTextSelected || !selection) {
-
-    // 没有选中任何文字
-    // 移除快捷按钮
-    setTimeout(() => {
+      // 移除快捷按钮
       const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
       if (ShortcutButtonContainer) {
         ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
       }
 
-    }, 10);
+      // 隐藏窗口
+      const element = event.composedPath()[0]
+      if (element instanceof HTMLElement && !isClickedInsideShortcutButton && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
+        // 如果点击的不是快捷按钮、插件窗口及其子元素，则关闭窗口
+        if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
 
+          container.parentNode?.removeChild(container);
+          port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
-  } else {
-    // 有选中文字
-
-    // 显示快捷按钮
-    if (MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null && USER_INFO.contextMenu && !isInShadow && !isPin) {
-      // 记录最近选中的文字
-
-
-
-      // 如果不存在按钮
-      let ShortcutButtonContainer = document.createElement('div')
-      ShortcutButtonContainer.className = SHORTCUT_BUTTON_CLASSNAME
-      shadowRoot?.appendChild(ShortcutButtonContainer)
-
-      ReactDOM.render(
-
-        <React.StrictMode>
-          <StyleSheetManager target={shadowRoot}>
-            <ShortcutButton
-              position={{
-                x: event.pageX + 10,
-                y: event.pageY + 10
-              }}
-              handleShortcutButtonClick={(runPrompt: boolean) => {
-
-                // event.stopPropagation(); // 阻止事件冒泡
-                if (selection) {
-
-                  if (MyBox?.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
-                    // 如果不存在 PopupCard
-                    container = document.createElement('div')
-                    container.className = CONTAINER_CLASSNAME
-                    shadowRoot?.appendChild(container)
-                  }
-
-                  // const newSelection = window.getSelection();
-                  const selection = getSelection(isInShadow)
-                  const newSelection = selection?.selection
-
-                  // 重新选中划词区域
-                  if (lastSelection) {
-
-                    // console.log('===============');
-
-                    // 创建一个范围对象
-                    const newRange = document.createRange();
-                    const anchorNode = lastSelection.anchorNode;
-                    const focusNode = lastSelection.focusNode;
-
-                    // console.log(lastSelection)
-
-                    if (anchorNode && focusNode) {
-                      // 使用保存的 selected Range 恢复
-                      newRange.setStart(anchorNode, lastSelection?.anchorOffset);
-                      newRange.setEnd(focusNode, lastSelection?.focusOffset);
-                      // 获取 Selection 对象
-
-                      // 移除所有现有的选择
-                      newSelection!.removeAllRanges();
-                      // 添加新的选区
-                      newSelection!.addRange(range);
-                    }
-
-                  }
-
-                  // 移除快捷按钮
-                  const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
-                  if (ShortcutButtonContainer) {
-                    ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
-                  }
-
-                  // 显示窗口
-                  showPopupCard({ 'keyWord': selection?.keyWord, 'Sentence': selection!.sentence }, newSelection, container, shadowRoot,
-                    {
-                      isPin: isPin,
-                      runPrompt: runPrompt,
-                      isYoutube: false
-                    }
-                  )
-
-                }
-              }} />
-          </StyleSheetManager>
-        </React.StrictMode >,
-        ShortcutButtonContainer
-      );
+        }
+      }
 
     }
+
   }
+
+  // // 有选中文字且未开启 Prompt 设置界面（如果开启 Prompt 设置界面而仍然执行查询任务时，会导致不必要的任务执行）
+  // if (isTextSelected && !donotClosePopupCard) {
+
+  //   // 在 PopupCard 范围外触发
+  //   if (!isInShadow || isClickedInsideShortcutButton) {
+
+  //     // 停止旧的对话
+  //     try {
+  //       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+  //     } catch (error) {
+  //       // 重新链接
+  //       port = browser.runtime.connect({
+  //         name: 'fromContentScript'
+  //       })
+  //       port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+  //     }
+
+
+  //     // 显示窗口/更新窗口信息
+  //     if (selection && selection?.keyWord.length > 0 && isPin && selection.selection.anchorNode?.nodeName === '#text') {
+  //       showPopupCard(
+  //         {
+  //           'keyWord': selection?.keyWord,
+  //           'Sentence': selection.sentence
+  //         },
+  //         window.getSelection(),
+  //         container,
+  //         shadowRoot,
+  //         {
+  //           isPin: isPin,
+  //           runPrompt: true,
+  //           isYoutube: false
+  //         }
+
+  //       )
+  //     }
+
+  //   } else {
+
+  //     // 在 PopupCard 范围内触发
+
+  //     if (selection) {
+
+  //       // 显示完形填空操作按钮
+  //       const selectedTextString = selection.keyWord.toString()
+  //       // const sentence = ''
+
+  //       const PopupCardContainer = container.getElementsByClassName(CONTAINER_CLASSNAME)[0]
+
+
+
+  //       if (PopupCardContainer && selection?.selection.type === 'Range' && !container.querySelector('.contextBox2')) {
+
+  //         let contextBox2 = document.createElement('div');
+  //         contextBox2.className = 'contextBox2'
+  //         contextBox2.style.position = 'relative'
+
+  //         PopupCardContainer.appendChild(contextBox2)
+
+  //         let range = selection?.selection.getRangeAt(0);
+  //         // console.log(selection);
+  //         let lang = await fetchcurrentLanguage()
+
+  //         ReactDOM.render(
+  //           <CurrentLanguageContext.Provider value={lang}>
+  //             <UserInfoContext.Provider value={{ user: USER_INFO, anki: ANKI_INFO }}>
+  //               <StyleSheetManager target={shadowRoot}>
+  //                 <ToolBar
+  //                   selectedText={selection?.selection.getRangeAt(0).getBoundingClientRect()}
+  //                   selectedTextString={selectedTextString}
+  //                   selectedSentence={selection?.sentence}
+  //                   executedPromptHistoryInToolBar={executedPromptHistoryInToolBar}
+  //                   range={range} />
+  //               </StyleSheetManager></UserInfoContext.Provider>
+  //           </CurrentLanguageContext.Provider>, contextBox2);
+  //       } else {
+
+  //       }
+
+  //     } else {
+  //       // 隐藏 ToolBar
+  //       const contextBox = container.getElementsByClassName('contextBox2')[0]
+  //       // 点击插件窗口且不是 ToolBar
+  //       const isInToolBar = contextBox === event.composedPath()[0] || contextBox?.contains(event.composedPath()[0] as Node)
+  //       if (isInShadow && !isInToolBar) {
+
+  //         if (contextBox) {
+  //           // 点击的不是 setAnkiSpaceButton 时才隐藏
+  //           if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
+  //             contextBox.parentNode?.removeChild(contextBox)
+  //           }
+
+  //         }
+  //       }
+  //     }
+
+
+
+  //     // 
+
+
+  //   }
+
+  // }
+
+
+  // // 显示快捷按钮
+  // if (isTextSelected && !isClickedInsideShortcutButton && MyBox?.shadowRoot?.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME) === null && USER_INFO.contextMenu && !isInShadow && !isPin) {
+  //   // 记录最近选中的文字
+
+  //   // 如果不存在按钮
+  //   let ShortcutButtonContainer = document.createElement('div')
+  //   ShortcutButtonContainer.className = SHORTCUT_BUTTON_CLASSNAME
+  //   shadowRoot?.appendChild(ShortcutButtonContainer)
+
+  //   // console.log('显示快捷按钮');
+  //   // console.log(selection);
+
+  //   ReactDOM.render(
+
+  //     <React.StrictMode>
+  //       <StyleSheetManager target={shadowRoot}>
+  //         <ShortcutButton
+  //           position={{
+  //             x: event.pageX + 10,
+  //             y: event.pageY + 10
+  //             // x: 10,
+  //             // y: 10
+  //           }}
+  //           handleShortcutButtonClick={(runPrompt: boolean) => {
+  //             console.log('handleShortcutButtonClick=====');
+  //             console.log(lastSelection);
+
+  //             // event.stopPropagation(); // 阻止事件冒泡
+  //             if (lastSelection) {
+
+  //               if (MyBox?.shadowRoot?.querySelector('.' + CONTAINER_CLASSNAME) === null) {
+  //                 // 如果不存在 PopupCard
+  //                 container = document.createElement('div')
+  //                 container.className = CONTAINER_CLASSNAME
+  //                 shadowRoot?.appendChild(container)
+  //               }
+
+  //               // const selection = getSelection(isInShadow)
+
+  //               // 重新选中划词区域
+  //               // if (lastSelection) {
+
+  //               //   // console.log('===============');
+
+  //               //   // 创建一个范围对象
+  //               //   const newRange = document.createRange();
+  //               //   const anchorNode = lastSelection.anchorNode;
+  //               //   const focusNode = lastSelection.focusNode;
+
+  //               //   // console.log(lastSelection)
+
+  //               //   if (anchorNode && focusNode) {
+  //               //     // 使用保存的 selected Range 恢复
+  //               //     newRange.setStart(anchorNode, lastSelection?.anchorOffset);
+  //               //     newRange.setEnd(focusNode, lastSelection?.focusOffset);
+  //               //     // 获取 Selection 对象
+
+  //               //     // 移除所有现有的选择
+  //               //     newSelection!.removeAllRanges();
+  //               //     // 添加新的选区
+
+  //               //     newSelection!.addRange(range);
+  //               //   }
+
+  //               // }
+
+  //               // 移除快捷按钮
+  //               const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
+  //               if (ShortcutButtonContainer) {
+  //                 ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
+  //               }
+
+  //               // 显示窗口
+  //               showPopupCard({ 'keyWord': lastSelection?.keyWord, 'Sentence': lastSelection!.sentence }, lastSelection.selection, container, shadowRoot,
+  //                 {
+  //                   isPin: isPin,
+  //                   runPrompt: runPrompt,
+  //                   isYoutube: false
+  //                 }
+  //               )
+
+  //             }
+  //           }} />
+  //       </StyleSheetManager>
+  //     </React.StrictMode >,
+  //     ShortcutButtonContainer
+  //   );
+
+  // }
+
+  // setTimeout(() => {
+  //   if (!isClickedInsideShortcutButton && !isTextSelected) {
+  //     // console.log('移除快捷按钮');
+
+  //     // 移除快捷按钮
+  //     const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
+  //     if (ShortcutButtonContainer) {
+  //       ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
+  //     }
+
+  //   }
+  // }, 10);
+
+  // // 隐藏窗口
+  // const element = event.composedPath()[0]
+  // if (element instanceof HTMLElement && !isClickedInsideShortcutButton && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
+  //   // 如果点击的不是快捷按钮、插件窗口及其子元素，则关闭窗口
+  //   if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
+
+  //     container.parentNode?.removeChild(container);
+  //     port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+
+  //   }
+  // }
+
 
 }
 
@@ -584,15 +798,13 @@ export const getSelection = (isInShadow?: boolean) => {
     return blockLevelElements.includes(tagName.toLowerCase());
   }
 
-
-
 }
 
 
 const setYoutubeButton = () => {
   // 如果是 YouTube 则显示操作按钮
   const scouterYouTubeButtonContainer = document.querySelector('#__ScouterYouTubeButtonContainer');
-  
+
   if (window.location.hostname === "www.youtube.com" && showYoutubeButton && !scouterYouTubeButtonContainer) {
     const ytpChromeControls: HTMLElement | null = document.querySelector('.ytp-chrome-controls');
     console.log(ytpChromeControls);
@@ -683,43 +895,78 @@ async function initialize() {
 // 初始化用户信息
 initialize()
 
+// shadowRoot.addEventListener('click', function (event: any) {
+//   event.stopPropagation();
+// }, true);
+
+// shadowRoot.addEventListener('mousedown', function (event: any) {
+//   event.stopPropagation();
+// }, true);
+
 // 监听页面鼠标抬起事件
 document.addEventListener('mouseup', handleMouseup);
 // 监听页面鼠标按下事件
 document.onmousedown = function (event) {
-  const element = event.composedPath()[0]
-  const isClickedInsideShortcutButton = checkIsClickedInsideShortcutButton(event)
-  if (element instanceof HTMLElement && !isClickedInsideShortcutButton && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
-    // 如果点击的不是快捷按钮、插件窗口及其子元素，则关闭窗口
-    if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
+  // console.log('onmousedown=====');
 
-      // 隐藏窗口
-      // console.log('隐藏窗口')
-      container.parentNode?.removeChild(container);
-      // document.removeEventListener('selectionchange', handleSelectionchange);
-      // document.removeEventListener('mouseup', handleMouseup);
+  // const element = event.composedPath()[0]
+  // const isClickedInsideShortcutButton = checkIsClickedInsideShortcutButton(event)
+  // if (element instanceof HTMLElement && !isClickedInsideShortcutButton && MyBox !== undefined && MyBox !== null && !isPin && !donotClosePopupCard) {
+  //   // 如果点击的不是快捷按钮、插件窗口及其子元素，则关闭窗口
+  //   if (MyBox !== event.target && !MyBox.contains(event.target as Node)) {
 
-      port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
+  //     // 隐藏窗口
+  //     container.parentNode?.removeChild(container);
+  //     port.postMessage({ 'type': 'StopTheConversation', 'messages': '' })
 
-    }
-  }
+  //   }
+  // }
 
-  const contextBox = container.getElementsByClassName('contextBox2')[0]
-  // 点击插件窗口且不是 ToolBar
-  const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
-  const isInToolBar = contextBox === event.composedPath()[0] || contextBox?.contains(event.composedPath()[0] as Node)
-  if (isInShadow && !isInToolBar) {
-    // 隐藏 ToolBar
+  // const contextBox = container.getElementsByClassName('contextBox2')[0]
+  // // 点击插件窗口且不是 ToolBar
+  // const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
+  // const isInToolBar = contextBox === event.composedPath()[0] || contextBox?.contains(event.composedPath()[0] as Node)
+  // if (isInShadow && !isInToolBar) {
+  //   // 隐藏 ToolBar
 
-    if (contextBox) {
-      // 点击的不是 setAnkiSpaceButton 时才隐藏
-      if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
-        contextBox.parentNode?.removeChild(contextBox)
-      }
+  //   if (contextBox) {
+  //     // 点击的不是 setAnkiSpaceButton 时才隐藏
+  //     if (contextBox !== event.target && !contextBox.contains(event.target as Node)) {
+  //       contextBox.parentNode?.removeChild(contextBox)
+  //     }
 
-    }
-  }
+  //   }
+  // }
 
 }
+// 选中的文字改变时
+document.onselectionchange = function (event: any) {
+  // console.log('onselectionchange=====');
+  const selection = getSelection()
+
+  // 是否选中文字
+  const isTextSelected = selection?.selection.toString().length > 0
+  // 是否在窗口中触发
+
+  // 没有选中任何文字
+  if (!isTextSelected || !selection) {
+    console.log('移除快捷按钮');
+
+    // 移除快捷按钮
+    setTimeout(() => {
+      const ShortcutButtonContainer = shadowRoot.querySelector('.' + SHORTCUT_BUTTON_CLASSNAME);
+      if (ShortcutButtonContainer) {
+        ShortcutButtonContainer.parentNode?.removeChild(ShortcutButtonContainer);
+      }
+
+    }, 10);
 
 
+  } else {
+    // 有选中文字
+
+    lastSelection = selection
+
+
+  }
+}
