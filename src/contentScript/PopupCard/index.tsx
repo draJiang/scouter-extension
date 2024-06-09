@@ -636,7 +636,7 @@ export function PopupCard(props:
   // 请求 GPT 数据
   const getKnowledge = async (prompt: Array<{ role: string, content: string }>, keyWord?: string, promptId?: string) => {
 
-    // const newPrompt = [{ "role": "user", "content": props.data.keyWord }, ...prompt]
+    const newPrompt = [{ "role": "user", "content": props.data.keyWord }, ...prompt]
 
     // 使用长连接
     const port = browser.runtime.connect({
@@ -656,12 +656,12 @@ export function PopupCard(props:
     if (thisPromptId === 'dict') {
       setTimeout(() => {
         // 使用 postMs 发送信息
-        port.postMessage({ 'type': 'getDictionaryData', 'messages': prompt, 'keyWord': thisKeyWord })
+        port.postMessage({ 'type': 'getDictionaryData', 'messages': newPrompt, 'keyWord': thisKeyWord })
       }, 20);
     } else {
       setTimeout(() => {
         // 使用 postMs 发送信息
-        port.postMessage({ 'type': 'getKnowledge', 'messages': prompt, 'keyWord': thisKeyWord })
+        port.postMessage({ 'type': 'getKnowledge', 'messages': newPrompt, 'keyWord': thisKeyWord })
       }, 20);
     }
 
