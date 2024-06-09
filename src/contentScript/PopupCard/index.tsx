@@ -174,7 +174,6 @@ export function PopupCard(props:
   }, []);
 
 
-
   useEffect(() => {
     // 渲染 Prompt 列表
     initializePromptList()
@@ -535,37 +534,12 @@ export function PopupCard(props:
         // 获取语言知识
         getKnowledge(newPrompt, keyWord, prompt.id)
 
-
         // 请求图片
         if (prompt.id == 'Default' || prompt.id == 'dict') {
 
           if (keyWord.length <= 20 && prompt.getUnsplashImages && needToRerenderImage) {
             // 获取图片数据
             handleImages(keyWord)
-            // getUnsplashImages(keyWord).then((imgs: any) => {
-            //   // setImages(imgs)
-
-            //   // 保存图片数据
-            //   setMessages(prevMessages => {
-
-            //     const lastMessage = prevMessages[prevMessages.length - 1];
-
-            //     if (prevMessages.length === 0) {
-            //       return []
-            //     }
-
-            //     const updatedLastMessage = {
-            //       ...lastMessage,
-            //       needToShowImg: true,
-            //       images: imgs
-            //     };
-
-            //     return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
-
-            //   })
-
-            // })
-
           }
 
         } else {
@@ -573,31 +547,6 @@ export function PopupCard(props:
           if (prompt.getUnsplashImages && needToRerenderImage) {
             // 获取图片数据
             handleImages(keyWord)
-
-            // getUnsplashImages(keyWord).then((imgs: any) => {
-            //   // setImages(imgs)
-
-            //   // 保存图片数据
-            //   setMessages(prevMessages => {
-
-            //     const lastMessage = prevMessages[prevMessages.length - 1];
-
-            //     if (prevMessages.length === 0) {
-            //       return []
-            //     }
-
-            //     const updatedLastMessage = {
-            //       ...lastMessage,
-            //       needToShowImg: true,
-            //       images: imgs
-            //     };
-
-            //     return [...prevMessages.slice(0, prevMessages.length - 1), updatedLastMessage];
-
-            //   })
-
-            // })
-
           }
 
         }
@@ -687,6 +636,8 @@ export function PopupCard(props:
   // 请求 GPT 数据
   const getKnowledge = async (prompt: Array<{ role: string, content: string }>, keyWord?: string, promptId?: string) => {
 
+    // const newPrompt = [{ "role": "user", "content": props.data.keyWord }, ...prompt]
+
     // 使用长连接
     const port = browser.runtime.connect({
       name: 'getGPT'
@@ -715,11 +666,6 @@ export function PopupCard(props:
     }
 
 
-    // browser.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
-
-    //   // console.log(msg);
-
-    // })
     // 接收信息
     port.onMessage.addListener((msg: any) => {
 
@@ -885,8 +831,17 @@ export function PopupCard(props:
       }])
 
       const msgHistory = messages.slice(-5).map((item) => { return { 'role': item.role, 'content': item.content[item.content.length - 1]['content'] } })
+      // console.log('msgHistory');
+      // console.log(msgHistory);
+      // if (msgHistory.length === 0) {
+      //   getKnowledge([{ "role": "user", "content": props.data.keyWord }, { "role": "user", "content": values }])
+      // } else {
+      //   getKnowledge([...msgHistory, { "role": "user", "content": values }])
+      // }
 
       getKnowledge([...msgHistory, { "role": "user", "content": values }])
+
+
     }
 
     // amplitude.track('handleSendMessage');
@@ -947,11 +902,6 @@ export function PopupCard(props:
 
       } else {
         // 元素到达边界
-        // const rect = windowElement.current.getBoundingClientRect();
-        // const offsetX = event.clientX - rect.left;
-        // const offsetY = event.clientY - rect.top;
-        // windowElement.current.dataset.offsetX = String(offsetX);
-        // windowElement.current.dataset.offsetY = String(offsetY);
       }
 
     }

@@ -157,8 +157,11 @@ export function Selection(props: SelectionProps) {
         }}
       >
 
-        {showFullText ? <><span>{props.text}</span>{props.text.length > 140 && <a className='moreButton' onClick={handleToggleShowFunText}>Less</a>}</>
-          : <><span>{props.text.substring(0, 140) + '...'}</span><a className='moreButton' onClick={handleToggleShowFunText}>More</a></>}
+        {showFullText ?
+          <><span>{props.text}</span>{props.text.length > 140 && <a className='moreButton' onClick={handleToggleShowFunText}>Less</a>}</>
+          :
+          <><span>{props.text.substring(0, 140) + '...'}</span><a className='moreButton' onClick={handleToggleShowFunText}>More</a></>
+        }
 
         <Button style={{
           display: 'inline-block',
@@ -166,6 +169,7 @@ export function Selection(props: SelectionProps) {
           bottom: '2px'
         }}
           size="small" type="text" icon={<CustomerServiceOutlined />} onClick={speaker} />
+
       </div>
     </>
   );

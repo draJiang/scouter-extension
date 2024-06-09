@@ -246,7 +246,7 @@ browser.runtime.onConnect.addListener(port => {
                     port.postMessage({ 'type': 'sendGPTData', 'status': 'error', 'content': tips + '(' + error.message + ')', 'code': error.message })
 
                     // 如果是 ChatGPT Web 模式的 401 错误，则更新 token，然后引导用户重试
-                    getChatGPTSession()
+                    // getChatGPTSession()
 
                   }
 

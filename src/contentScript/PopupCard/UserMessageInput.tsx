@@ -138,7 +138,7 @@ export function UserMessageInput(props: MessageProps) {
                         <Button
                             type="text"
                             htmlType="submit"
-                            disabled={props.messages.length > 0 ? lastStatus === 'begin' || lastStatus === 'process' || !isAnswerInputed : false}
+                            disabled={props.messages.length > 0 ? lastStatus === 'begin' || lastStatus === 'process' || !isAnswerInputed : !isAnswerInputed}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',

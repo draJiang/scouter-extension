@@ -950,7 +950,7 @@ document.onselectionchange = function (event: any) {
 
   // 没有选中任何文字
   if (!isTextSelected || !selection) {
-    console.log('移除快捷按钮');
+    // console.log('移除快捷按钮');
 
     // 移除快捷按钮
     setTimeout(() => {
