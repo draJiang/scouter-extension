@@ -17,7 +17,7 @@ import { cardStyle, fetchSSE, getChatGPTSession } from '../util';
 
 import { getUserInfo, getBalance, getAIParameter, generationsImages } from '../util'
 
-import { userInfoType, aiParameterType, AnkiModelType } from '../types'
+import { userInfoType, aiParameterType, AnkiModelType,ImageType } from '../types'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
@@ -211,22 +211,26 @@ browser.runtime.onConnect.addListener(port => {
                   //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                   //   }
                   // }
-                  if (data.choices.length > 0) {
-                    const finish_reason = data.choices[0].finish_reason
-                    if (ApiType === 'ollama') {
-                      port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data })
-                    } else {
-
-                      if (finish_reason !== 'stop') {
-                        port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
-                      }
-
-                      if ((ApiType === 'scouterFreeAI' || ApiType === 'licenseKey') && finish_reason === 'error') {
-                        port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': `🥲error: ${data.choices[0].error.message}` })
-                      }
-
+                  console.log('fetchSSE data:');
+                  console.log(data);
+                  
+                  if (ApiType === 'ollama') {
+                    port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data })
+                  } else{
+                    if (data.choices.length > 0) {
+                      const finish_reason = data.choices[0].finish_reason
+                      
+  
+                        if (finish_reason !== 'stop') {
+                          port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
+                        }
+  
+                        if ((ApiType === 'scouterFreeAI' || ApiType === 'licenseKey') && finish_reason === 'error') {
+                          port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': `🥲error: ${data.choices[0].error.message}` })
+                        }
                     }
                   }
+                  
 
                 },
                 onEnd: () => {
@@ -378,130 +382,153 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
         defaultDeckName = 'Default'
       }
 
-      // 获取用户的所有 model 名称
+      // 获取用户保存的 fields
+      const settings = await getSettings()
+      const ankiFields = settings.ankiFields
+      const ankiNoteName = settings.ankiNoteName
+      const fields = ankiFields.find((item: any) => item.note === ankiNoteName)
 
-      try {
+      if (ankiFields.length > 0 && ankiNoteName) {
+        // 有自定义的 fields
+        const modelData: Array<AnkiModelType> = [
+          { 'modelName': ankiNoteName, 'fields': fields, 'isAnkiSpace': false }
+        ]
+        console.log('modelData:');
+        console.log(modelData);
+        asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
 
-        const modelNames: any = await ankiAction('modelNames', 6)
+      } else {
+        // 没有自定义的 fields，使用默认的
 
-        console.log('modelNames:');
-        console.log(modelNames);
+        try {
 
-        if (!modelNames.error) {
+          // 获取用户的所有 model 名称
+          const modelNames: any = await ankiAction('modelNames', 6)
 
-          const models = [
-            {
-              'modelName': 'Scouter',
-              'cardTemplates': [
-                {
-                  'name': 'Card1',
-                  'Front': '{{Front}}',
-                  'Back': `{{Front}}
-                  <hr id=answer>
-                  {{Back}}`
+          console.log('modelNames:');
+          console.log(modelNames);
 
-                }
-              ],
-              'inOrderFields': ["Front", "Back"],
-              'isAnkiSpace': false
+          if (!modelNames.error) {
 
-            },
-            {
-              'modelName': 'Scouter Cloze Text',
-              'cardTemplates': [
-                {
-                  'name': 'Card2',
-                  'Front': '{{cloze:Text}}',
-                  'Back': `{{cloze:Text}}
-                            <br>{{More}}`
-                }
-              ],
-              'inOrderFields': ["Text", "More"],
-              'isAnkiSpace': true
-            }
-          ]
-
-          // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
-
-          // 用于存储 model 相关的数据，返回给 content 将笔记添加到 Anki
-          let modelData: Array<AnkiModelType> = []
-
-          let promises = models.map((model) => {
-
-            return new Promise<void>((resolve, reject) => {
-
-              if (modelNames.result.includes(model.modelName)) {
-
-                // 如果有 Scouter Model 则获取 Model 的字段
-                ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
-
-                  if (result.result.length < 2) {
-                    // 字段少于 2 个时无法添加笔记，引导用户修改
-
-                    modelData.push(
-                      { 'modelName': model.modelName, 'field1': result.result[0], 'field2': null, 'isAnkiSpace': model.isAnkiSpace }
-                    )
-
-                  } else {
-
-                    modelData.push(
-                      { 'modelName': model.modelName, 'field1': result.result[0], 'field2': result.result[1], 'isAnkiSpace': model.isAnkiSpace }
-                    )
+            const models = [
+              {
+                'modelName': 'Scouter',
+                'cardTemplates': [
+                  {
+                    'name': 'Card1',
+                    'Front': '{{Front}}',
+                    'Back': `{{Front}}
+                    <hr id=answer>
+                    {{Back}}`
 
                   }
+                ],
+                'inOrderFields': ["Front", "Back"],
+                'isAnkiSpace': false
 
-                  resolve(); // Resolve the Promise
-
-                })
-
-              } else {
-                // 如果没有 Scouter 默认的 Model，则创建
-
-                ankiAction('createModel', 6, {
-                  'modelName': model.modelName,
-                  'inOrderFields': model.inOrderFields,
-                  'cardTemplates': model.cardTemplates,
-                  'isCloze': model.isAnkiSpace,
-                  'css': cardStyle
-                }).then((result: any) => {
-
-                  if (!result.error) {
-
-                    modelData.push(
-                      { 'modelName': model.modelName, 'field1': result.result.flds[0].name, 'field2': result.result.flds[1].name, 'isAnkiSpace': model.isAnkiSpace }
-                    )
-
+              },
+              {
+                'modelName': 'Scouter Cloze Text',
+                'cardTemplates': [
+                  {
+                    'name': 'Card2',
+                    'Front': '{{cloze:Text}}',
+                    'Back': `{{cloze:Text}}
+                              <br>{{More}}`
                   }
-
-                  resolve(); // Resolve the Promise
-                })
-
+                ],
+                'inOrderFields': ["Text", "More"],
+                'isAnkiSpace': true
               }
+            ]
+
+            // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
+
+            // 用于存储 model 相关的数据，返回给 content 将笔记添加到 Anki
+            let modelData: Array<AnkiModelType> = []
+
+            let promises = models.map((model) => {
+
+              return new Promise<void>((resolve, reject) => {
+
+                if (modelNames.result.includes(model.modelName)) {
+
+                  // 如果有 Scouter Model 则获取 Model 的字段
+                  ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
+                    const modelFieldNames = result.result
+                    if (modelFieldNames.length < 2) {
+                      // 字段少于 2 个时无法添加笔记，引导用户修改
+
+                      modelData.push(
+                        { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
+                      )
+
+                    } else {
+
+                      modelData.push(
+                        { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
+                      )
+
+                    }
+
+                    resolve(); // Resolve the Promise
+
+                  })
+
+                } else {
+                  // 如果没有 Scouter 默认的 Model，则创建
+
+                  ankiAction('createModel', 6, {
+                    'modelName': model.modelName,
+                    'inOrderFields': model.inOrderFields,
+                    'cardTemplates': model.cardTemplates,
+                    'isCloze': model.isAnkiSpace,
+                    'css': cardStyle
+                  }).then((result: any) => {
+
+                    if (!result.error) {
+
+                      // Scouter 默认的 model 则不处理 fields
+                      const fields = {}
+
+                      modelData.push(
+                        { 'modelName': model.modelName, 'fields': fields, 'isAnkiSpace': model.isAnkiSpace }
+                      )
+
+                    }
+
+                    resolve(); // Resolve the Promise
+                  })
+
+                }
+
+
+              })
+
 
 
             })
 
+            // 等待所有 Promise 完成
+            Promise.all(promises).then(() => {
+              console.log(modelData);
+              asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
+            }).catch((error) => {
+              console.error('Error:', error);
+            });
 
 
-          })
 
-          // 等待所有 Promise 完成
-          Promise.all(promises).then(() => {
-            console.log(modelData);
-            asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
-          }).catch((error) => {
-            console.error('Error:', error);
-          });
+          }
 
+        } catch (error) {
 
+          asyncSendResponse({ type: 'setModel', result: 'failure', error: error });
 
         }
-
-      } catch (error) {
-
-        asyncSendResponse({ type: 'setModel', result: 'failure', error: error });
-
       }
+
+
 
 
 
@@ -601,6 +628,62 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
     })
 
+
+  }
+
+  if (request.type === 'handlePasteImage') {
+
+    const convertBlobToBase64 = (blob: Blob) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    };
+
+    (async()=>{
+      try {
+        // 检查浏览器是否支持 clipboard API
+        if (navigator.clipboard && navigator.clipboard.read) {
+          const items = await navigator.clipboard.read();
+          console.log(items);
+  
+          for (const item of items) {
+            // 检查 item 是否是图片
+            if (item.types.includes("image/png")) {
+              const blob = await item.getType("image/png");
+              const url = await convertBlobToBase64(blob);
+              console.log(url);
+              const imageObj: ImageType = {
+                type: "Clipboard",
+                id: "clipboard",
+                urls: {
+                  small: url as string,
+                },
+                links: {
+                  download_location: "",
+                },
+                description: "",
+                user: {
+                  username: "Clipboard",
+                  name: "Clipboard",
+                },
+              };
+              // setImages((oldList) => {
+              //   return [imageObj, ...oldList];
+              // });
+              console.log(url);
+            }
+          }
+        } else {
+          console.log("Clipboard API is not supported in this browser.");
+        }
+      } catch (error) {
+        console.error("Error reading clipboard contents: ", error);
+      }
+    })()
+    
 
   }
 

@@ -11,7 +11,7 @@ export const thisGetUserInfo = async () => {
         // 获取用户信息
         const USER_INFO = await browser.runtime.sendMessage({ 'type': 'getUserInfo', 'messages': {}, })
         const showYoutubeButton = USER_INFO.showYoutubeButton
-        
+
         // 在上下文菜单中最近执行的 Prompt
         const result = await browser.storage.local.get({ "executedPromptHistoryInToolBar": [dictionaryPrompt] })
         const executedPromptHistoryInToolBar = result.executedPromptHistoryInToolBar
@@ -50,20 +50,24 @@ export const setAnkiInfo = async () => {
 
         for (let i = 0; i < ANKI_INFO.models.length; i++) {
 
-            const p = {
-                "model": {
-                    "name": ANKI_INFO.models[i]['modelName'],
-                    "css": cardStyle
+
+            if (ANKI_INFO.models[i]['modelName'].indexOf('Scouter') > -1) {
+                // Scouter 默认的 Note 自动设置 Style
+                const p = {
+                    "model": {
+                        "name": ANKI_INFO.models[i]['modelName'],
+                        "css": cardStyle
+                    }
                 }
+
+                // 更新 style
+                browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
+
+
+                })
             }
 
-            // 更新 style
-            browser.runtime.sendMessage({ 'type': 'ankiAction', 'messages': { 'anki_action_type': 'updateModelStyling', 'anki_arguments': p }, }).then((result) => {
-
-            })
-
         }
-
 
     } catch (error) {
 

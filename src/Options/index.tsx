@@ -4,12 +4,13 @@ import React, { useEffect, useState, useRef, createContext, Dispatch, SetStateAc
 import ReactDOM from "react-dom";
 
 import * as amplitude from '@amplitude/analytics-browser';
-
-import General from './General';
-import AI from './AI';
-import Pro from './Pro';
 import Nav from './Nav'
-import Youtube from './Youtube'
+
+import General from './section/General';
+import AI from './section/AI';
+import Pro from './section/Pro';
+import Anki from './section/Anki';
+import Youtube from './section/Youtube'
 
 import { StyleProvider } from '@ant-design/cssinjs';
 import { Tabs, ConfigProvider, Layout } from 'antd';
@@ -55,7 +56,7 @@ export const Options = () => {
   //   setUserInfo: Dispatch<SetStateAction<userInfoType>>;
   // }
 
-  const defaultUserInfo = { userId: '', verified: false, contextMenu: false, showYoutubeButton: true }
+  const defaultUserInfo = { userId: '', verified: false, contextMenu: false, showYoutubeButton: true, contentEditable: false }
   // const UserContext = createContext<UserContextType>({ userInfo: defaultUserInfo, setUserInfo: () => { } });
   const [userInfo, setUserInfo] = useState<userInfoType>(defaultUserInfo);
 
@@ -70,6 +71,10 @@ export const Options = () => {
     {
       name: 'General',
       content: <General settings={settings} saveOptions={thisSaveOptions} />
+    },
+    {
+      name: 'Anki',
+      content: <Anki settings={settings} saveOptions={thisSaveOptions} />
     },
     {
       name: 'AI',
@@ -107,7 +112,7 @@ export const Options = () => {
 
 
   useEffect(() => {
-    
+
     (async () => {
 
       // 获取配置信息
@@ -151,6 +156,10 @@ export const Options = () => {
 
       }
     }
+
+    // 更新
+    const items = await getSettings()
+    setSettings(items)
 
   }
 

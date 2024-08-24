@@ -7,6 +7,8 @@ import { Button } from 'antd';
 
 import { useCurrentLanguage } from '../../lib/locale'
 import { languageCodes } from "../../lib/lang"
+import { useUserInfoContext } from '../../lib/userInfo'
+import { userInfoType, AnkiInfoType } from '../../types'
 
 import {
   CustomerServiceOutlined
@@ -49,6 +51,8 @@ export function Selection(props: SelectionProps) {
   const [targetLanguage, setTargetLanguage] = useState('United States');
   const [showFullText, setShowFullText] = useState(true);
   const [playStatus, setPlayStatus] = useState(false);
+
+  const userInfo: { user: userInfoType, anki: AnkiInfoType } | null = useUserInfoContext()
 
   const lastSpeakTime = useRef<number>(Math.floor(Date.now()))
 
@@ -151,6 +155,7 @@ export function Selection(props: SelectionProps) {
     <>
       <style>{style}</style>
       <div id="ScouterSelection" className=''
+        contentEditable={userInfo?.user.contentEditable && userInfo.user.verified}
         style={{
           margin: '14px 0',
           lineHeight: '1.5'

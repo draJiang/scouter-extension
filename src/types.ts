@@ -35,8 +35,7 @@ export type BackgroundToPopup = {
 
 export type AnkiModelType = {
     modelName: string,
-    field1: string,
-    field2: string | null,
+    fields: any,
     isAnkiSpace: boolean
 }
 
@@ -132,7 +131,8 @@ export type userInfoType = {
     userId: string,
     verified: boolean,
     contextMenu: boolean,
-    showYoutubeButton: boolean
+    showYoutubeButton: boolean,
+    contentEditable: boolean
 };
 
 export type langType = {

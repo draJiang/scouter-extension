@@ -15,6 +15,8 @@ import { DropdownMenuItem } from './DropdownMenuItem'
 import { getDefaultPrompt, dictionaryPrompt } from '../contentScript/PopupCard/util'
 import { PromptType, addToAnkiStatusType, langType, runPromptType, userInfoType, AnkiInfoType } from '../types'
 
+import { handleAnkiDynamicVariable } from '../util'
+
 import {
     HamburgerMenuIcon,
     DotFilledIcon,
@@ -112,28 +114,27 @@ export function Nav(props: NavProps) {
 
 
     // 添加到 Anki
-    const addToAnki = (deckName: string, modelName: string, front: string, back: string) => {
+    const addToAnki = (deckName: string, modelName: string, fields: any) => {
 
         const keyWord = props.keyWord
         const Sentence = props.Sentence
         const windowElement = props.windowElement
-
-        let container = ''
-        let images = ''
+        let ScouterSelection = ''                                       // 选中的内容
+        let container = ''                                              // 正文
+        let images = ''                                                 // 图片
         let unsplash_download_location
-        let stc = keyWord.length <= 20 ? Sentence : ''
+        let stc = Sentence                                              // 选中内容所在的完整句子
+        let audio: [] | { url: string, filename: string, fields: string[] }[]                                            // 发音
+        const source = `<a href="${window.location.href}">source</a>`   // 网址链接
+
         // 转移 HTML 标签，按照普通字符串处理
         stc = stc.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         // 在语境句子中将关键字突出显示
         stc = stc.replace(new RegExp(keyWord, 'g'), '<span class="keyWord">' + keyWord + '</span>');
 
-        let ScouterSelection = ''
-
-
         if (windowElement) {
-            // 选中的文字
-            ScouterSelection = windowElement?.querySelector('#ScouterSelection')?.getElementsByTagName('span')[0].innerHTML!
+
 
             // console.log(windowElement);
             container = windowElement.innerHTML
@@ -145,8 +146,22 @@ export function Nav(props: NavProps) {
             let elementsToRemove = doc.querySelectorAll('.imageQueue');
             let imageSource = doc.querySelectorAll('.imageSource');
 
-            // 创建新的 img 标签
+            let ScouterSelectionDoc = parser.parseFromString(windowElement.querySelector('#ScouterSelection')!.innerHTML, 'text/html');
 
+            // 选中的文字
+            const moreButton = ScouterSelectionDoc.querySelector('.moreButton')
+            const playButton = ScouterSelectionDoc.querySelector('button')
+            if (moreButton) {
+                // 移除「More」按钮
+                moreButton.parentNode?.removeChild(moreButton)
+            }
+            if (playButton) {
+                // 移除「播放发音」按钮
+                playButton.parentNode?.removeChild(playButton)
+            }
+            ScouterSelection = ScouterSelectionDoc.body.innerHTML!
+
+            // 创建新的 img 标签
 
             // 设置图片的尺寸、样式
             if (doc.getElementsByClassName('imageBox').length > 0) {
@@ -180,7 +195,11 @@ export function Nav(props: NavProps) {
             // 删除图片来源信息
             imageSource.forEach(el => el.parentNode?.removeChild(el));
 
-
+            // 删除正文的图片，图片单独处理
+            const imagesElements = doc.querySelectorAll('.images');
+            imagesElements.forEach(element => {
+                element.parentNode?.removeChild(element);
+            });
             container = doc.body.innerHTML;
 
             // 处理样式，避免 Anki 内显示异常
@@ -201,19 +220,15 @@ export function Nav(props: NavProps) {
 
         }
 
-        const cardStyle = ``
 
-        // 请求 background 将数据保存到 Anki
-
-
-        // 单词发音
+        // 单词发音 ==================
         interface LangObject {
             [key: string]: langType;
         }
         const thisLang: LangObject = lang
 
         let audioUrl: string = 'https://dict.youdao.com/dictvoice?type=0&audio='
-        let audio: [] | [{}], filename
+        let filename
         try {
             audioUrl = thisLang[Lang['target']['id']]['audioURL']
             // filename = Date.now().toString()
@@ -231,60 +246,104 @@ export function Nav(props: NavProps) {
             audio = []
         }
 
-        // 常规类型
-        let ankiBack = '<p> <blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote></p>' + container
-        if (keyWord.length > 20) {
-            // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
-            ankiBack = container + '<p><a href="' + window.location.href + '">Source</a></p>'
-        }
+        // 处理 AddToAnki 的 API 参数 ==================
 
-        let p = {
-            "note": {
-                "deckName": deckName,
-                "modelName": modelName,
-                "fields": {
-                    [front]: keyWord,
-                    [back]: cardStyle + ankiBack
-                },
-                "audio": audio,
-                "tags": [
-                    "Scouter"
-                ]
+        // Scouter 默认的 model
+        if (modelName === "Scouter" || modelName === "Scouter Cloze Text") {
+
+            // 完形填空类型
+            if (ScouterSelection.indexOf('class="ankiSpace"') >= 0 || container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
+
+                let newFront: string
+
+                newFront = '<p>' + ScouterSelection + '</p>' + '<blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote>' + container
+
+                if (keyWord.length > 20) {
+                    // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
+                    newFront = '<p>' + ScouterSelection + '</p>' + container + '<p> <a href="' + window.location.href + '">Source</a></p>'
+                }
+
+                let p = {
+                    "note": {
+                        "deckName": deckName,
+                        "modelName": "Scouter Cloze Text",
+                        "fields": {
+                            Text: newFront,
+                            More: ''
+                        },
+                        "audio": [],
+                        "tags": [
+                            "Scouter"
+                        ]
+                    }
+                }
+
+                // 发送消息给 background
+                let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
+                sending.then(handleResponse, handleError);
+
+            } else {
+
+                let ankiBack = '<p> <blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote></p>' + images + container
+                if (keyWord.length > 20) {
+                    // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
+                    ankiBack = images + container + '<p><a href="' + window.location.href + '">Source</a></p>'
+                }
+
+                let p = {
+                    "note": {
+                        "deckName": deckName,
+                        "modelName": "Scouter",
+                        "fields": {
+                            Front: keyWord,
+                            Back: ankiBack
+                        },
+                        "audio": audio,
+                        "tags": [
+                            "Scouter"
+                        ]
+                    }
+                }
+
+                // 发送消息给 background
+                let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
+                sending.then(handleResponse, handleError);
             }
-        }
 
-        // 完形填空类型
-        if (ScouterSelection.indexOf('class="ankiSpace"') >= 0 || container.indexOf('class="ankiSpace"') >= 0 || container.indexOf('{{c') >= 0) {
 
-            let newFront: string
 
-            newFront = '<p>' + ScouterSelection + '</p>' + '<blockquote>' + stc + ' —— <a href="' + window.location.href + '">Source</a></blockquote>' + container
+        } else {
+            // 用户自定义的 model
 
-            if (keyWord.length > 20) {
-                // 如果选中的符号长度大于 20（说明是句子）则不显示上下文句子，然后将来源链接放到尾部
-                newFront = '<p>' + ScouterSelection + '</p>' + container + '<p> <a href="' + window.location.href + '">Source</a></p>'
+            // 处理动态变量
+            const nf = handleAnkiDynamicVariable(fields, {
+                Selection: ScouterSelection, Sentence: stc, Content: container, Audio: audio, Image: images, Source: source
+            })
+
+            const audioFields = nf.audioFields
+            let newAudio = audio
+            if (audioFields.length > 0 && newAudio[0]) {
+                newAudio[0].fields = audioFields
+            } else {
+                newAudio = []
             }
 
-            p = {
+            let p = {
                 "note": {
                     "deckName": deckName,
                     "modelName": modelName,
-                    "fields": {
-                        [front]: newFront,
-                        [back]: ''
-                    },
-                    "audio": [],
+                    "fields": nf.fields,
+                    "audio": newAudio,
                     "tags": [
                         "Scouter"
                     ]
                 }
             }
 
+            // 发送消息给 background
+            let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
+            sending.then(handleResponse, handleError);
         }
-
-        // 发送消息给 background
-        let sending = browser.runtime.sendMessage({ 'type': 'addNote', 'messages': { 'anki_arguments': p, 'anki_action_type': 'addNote', 'unsplash_download_location': unsplash_download_location }, })
-        sending.then(handleResponse, handleError);
 
         // 接收 background 的回复
         function handleResponse(message: any) {
@@ -294,6 +353,9 @@ export function Nav(props: NavProps) {
             if (message.error === null) {
 
                 setAddToAnkiStatus({ 'status': 'success', 'noteId': message.data })
+                setTimeout(() => {
+                    setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
+                }, 5000);
 
             } else {
                 alert(message.error)
@@ -307,9 +369,7 @@ export function Nav(props: NavProps) {
             // console.log(erro);
         }
 
-
         // 数据埋点
-        // amplitude.track('addToAnki');
         browser.runtime.sendMessage({ 'type': 'amplitudeTrack', 'name': 'addToAnki' })
 
     }
@@ -337,23 +397,23 @@ export function Nav(props: NavProps) {
 
             const models = ankiInfo.models
 
-            let modelName: string = '', field1: string = '', field2: string = ''
+            let modelName: string = models[0].modelName, fields: any = models[0].fields;
             models.forEach((model: any) => {
 
                 if (model.isAnkiSpace === isAnkiSpace) {
                     modelName = model.modelName
-                    field1 = model.field1
-                    field2 = model.field2
+                    fields = model.fields
                 }
 
 
 
             });
 
+            // 处理 fields 中的动态变量
+
             return {
                 'modelName': modelName,
-                'field1': field1,
-                'field2': field2
+                'fields': fields,
             }
 
         }
@@ -365,7 +425,7 @@ export function Nav(props: NavProps) {
             const ankiInfo = setAnkiInfo(userInfo?.anki)
 
             // 添加到 Anki 中
-            addToAnki(thisDeck, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+            addToAnki(thisDeck, ankiInfo.modelName!, ankiInfo.fields)
 
         } else {
 
@@ -377,7 +437,7 @@ export function Nav(props: NavProps) {
                     const ankiInfo = setAnkiInfo(result.data)
                     const thisDeck = deck ? deck : userInfo?.anki.defaultDeckName
                     // 添加到 Anki 中
-                    addToAnki(thisDeck!, ankiInfo.modelName!, ankiInfo.field1!, ankiInfo.field2!)
+                    addToAnki(thisDeck!, ankiInfo.modelName!, ankiInfo.fields)
 
 
                 } else {

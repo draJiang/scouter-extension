@@ -7,8 +7,8 @@ import { Button, ConfigProvider } from 'antd';
 import { ArrowLeftOutlined, ArrowRightOutlined, BulbOutlined } from '@ant-design/icons';
 import { StyleProvider } from '@ant-design/cssinjs';
 
-import { ContextMenu } from '../Options/General/ContextMenu';
-import { LanguageSettings } from '../Options/General/LanguageSettings'
+import { ContextMenu } from '../Options/section/General/ContextMenu';
+import { LanguageSettings } from '../Options/section/General/LanguageSettings'
 import { getSettings, saveOptions } from '../Options/util'
 
 import '../Options/index.css'

@@ -1,11 +1,19 @@
 export const freeModels = [
     {
-        'name': 'Google: Gemma 7B (free)',
-        'id': 'google/gemma-7b-it:free'
+        'name': 'Google: Gemma 2 9B (free)',
+        'id': 'google/gemma-2-9b-it:free'
     },
     {
-        'name': 'Meta: Llama 3 8B Instruct (free)',
-        'id': 'meta-llama/llama-3-8b-instruct:free'
+        'name': 'Meta: Llama 3.1 8B Instruct (free)',
+        'id': 'meta-llama/llama-3.1-8b-instruct:free'
+    },
+    {
+        'name': 'Phi-3 Mini 128K Instruct (free)',
+        'id': 'microsoft/phi-3-mini-128k-instruct:free'
+    },
+    {
+        'name': 'Phi-3 Medium 128K Instruct (free)',
+        'id': 'microsoft/phi-3-medium-128k-instruct:free'
     },
     {
         'name': 'OpenChat 3.5 (free)',

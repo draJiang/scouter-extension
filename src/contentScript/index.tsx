@@ -94,7 +94,7 @@ let port = browser.runtime.connect({
 })
 
 // 用户付费状态等信息、用户的 Anki 信息
-let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false, showYoutubeButton: true }
+let USER_INFO: userInfoType = { userId: 'unknow', verified: false, contextMenu: false, showYoutubeButton: true, contentEditable: false }
 let ANKI_INFO: AnkiInfoType = { defaultDeckName: '', decks: [], models: [] }
 let executedPromptHistoryInToolBar = [dictionaryPrompt]
 let showYoutubeButton = true
@@ -258,7 +258,6 @@ const checkIsClickedInsideShortcutButton = (event: any): boolean => {
 }
 
 const handleMouseup = async (event: any) => {
-  console.log('handleMouseup=====');
   // 是否在窗口中触发
   const isInShadow = MyBox === event.target || MyBox?.contains(event.target as Node)
   // 是否在快捷按钮上触发
@@ -379,8 +378,6 @@ const handleMouseup = async (event: any) => {
                   // y: 10
                 }}
                 handleShortcutButtonClick={(runPrompt: boolean) => {
-                  console.log('handleShortcutButtonClick=====');
-                  console.log(lastSelection);
 
                   // event.stopPropagation(); // 阻止事件冒泡
                   if (lastSelection) {

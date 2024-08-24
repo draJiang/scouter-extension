@@ -21,7 +21,6 @@ import { Selection } from "./Selection"
 import { ErroTips } from "./ErroTips"
 
 import { Skeleton, Input, message, ConfigProvider, theme, Result, Select, Drawer, Space, Form, Button } from 'antd';
-import { SendOutlined, LoadingOutlined } from '@ant-design/icons';
 
 
 import { useCurrentLanguage } from '../../lib/locale'

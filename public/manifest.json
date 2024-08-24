@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Scouter - Language Learning",
     "description": "Help you complete immersive language learning.",
-    "version": "0.23.92",
+    "version": "0.25.00",
     "action": {
         "default_icon": "icon48.png",
         "default_popup": "popup.html"
@@ -43,7 +43,8 @@
     },
     "permissions": [
         "storage",
-        "contextMenus"
+        "contextMenus",
+        "clipboardRead"
     ],
     "host_permissions": [
         "<all_urls>",

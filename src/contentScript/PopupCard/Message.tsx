@@ -23,6 +23,8 @@ import { getUnsplashImages } from './util'
 import { ImageType } from "../../types"
 import settingGuideImage from '../../assets/settingGuide.png'
 
+import { userInfoType, AnkiInfoType } from '../../types'
+import { useUserInfoContext } from '../../lib/userInfo'
 
 interface MessageProps {
     message: ChatMessage;
@@ -58,6 +60,8 @@ function Message(props: MessageProps) {
     const [images, setImages] = useState<Array<ImageType>>([])
     const [messageIndex, setMessageIndex] = useState(props.message.content.length - 1)
     const [isMessageHover, setIsMessageHover] = useState(false)
+
+
 
     useEffect(() => {
 
@@ -276,13 +280,7 @@ function Message(props: MessageProps) {
 
 
 
-                </MessageBox>
-
-
-
-
-
-
+                </MessageBox >
 
 
             </Skeleton >
@@ -293,9 +291,11 @@ function Message(props: MessageProps) {
 
 export function MessagesList(props: MessagesListProps) {
 
+    const userInfo: { user: userInfoType, anki: AnkiInfoType } | null = useUserInfoContext()
+
     return (
         <div
-            // contentEditable
+            contentEditable={userInfo?.user.contentEditable && userInfo.user.verified}
             // onInput={(e) => console.log(e)}
             className='messages'
             style={{

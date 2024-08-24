@@ -1076,7 +1076,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       }
 
-      const response = { 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu, 'showYoutubeButton': result.showYoutubeButton }
+      const response = { 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu, 'showYoutubeButton': result.showYoutubeButton,'contentEditable':result.contentEditable }
       console.log('response:');
       console.log(response);
 
@@ -1088,6 +1088,45 @@ export const getUserInfo = (): Promise<userInfoType> => {
   });
 
 };
+
+interface Dictionary {
+  [key: string]: any;
+}
+
+interface NoteFields {
+  note: string;
+  fields: Dictionary;
+}
+
+export function handleAnkiDynamicVariable(
+  fields: NoteFields,
+  dynamicVariable: { Selection: string, Sentence: string, Content: string, Audio: any, Image: string, Source: string }
+) {
+
+  let audioFields: string[] = []
+  const f = fields.fields
+  console.log('f:');
+  console.log(f);
+
+  const newFields = Object.keys(f).reduce((newObj: Dictionary, key) => {
+    // 处理哪些 field 需要显示 audio
+    if (f[key].indexOf('{{Audio}}') > -1) {
+      audioFields.push(key)
+    }
+
+    newObj[key] = f[key].replace(/{{Selection}}/g, dynamicVariable.Selection)
+      .replace(/{{Sentence}}/g, `<blockquote>${dynamicVariable.Sentence}</blockquote>`)
+      .replace(/{{Audio}}/g, '')
+      .replace(/{{Definition}}/g, dynamicVariable.Content)
+      .replace(/{{Image}}/g, dynamicVariable.Image)
+      .replace(/{{Source}}/g, dynamicVariable.Source)
+    return newObj;
+  }, {});
+
+  return ({ fields: newFields, audioFields: audioFields })
+
+}
+
 
 /* 卡片样式可能随着版本迭代不断更新，(删掉括号内的文字可以暂停自动更新) | Card styles may be updated with each version iteration, (deleting the text in the parentheses can pause the auto-update). */
 
