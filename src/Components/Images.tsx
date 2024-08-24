@@ -381,6 +381,7 @@ export function Images(props: ImagesProps) {
                           style={{
                             display: "flex",
                             alignItems: "center",
+                            gap: "8px",
                           }}
                         >
                           <Tooltip
@@ -392,7 +393,7 @@ export function Images(props: ImagesProps) {
                             }
                           >
                             <Button
-                              disabled={!userInfo?.user.verified}
+                              
                               type="text"
                               size="small"
                               style={{
@@ -400,7 +401,7 @@ export function Images(props: ImagesProps) {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                marginRight: "10px",
+                                cursor: userInfo?.user.verified ? "pointer" : "not-allowed",
                                 opacity: !userInfo?.user.verified ? "0.7" : "1",
                               }}
                               onClick={handleSearchBtnClick}
@@ -433,18 +434,27 @@ export function Images(props: ImagesProps) {
                             />
                           </Tooltip> */}
 
-                          <Button
-                            type="text"
-                            size="small"
-                            style={{
-                              color: "#fff",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                            onClick={() => setChangeImageStatus(false)}
-                            icon={<CloseOutlined />}
-                          />
+                          <Tooltip
+                            placement="bottom"
+                            title={"Chancel"}
+                            arrow={false}
+                            getPopupContainer={() =>
+                              imageBoxElement.current || document.body
+                            }
+                          >
+                            <Button
+                              type="text"
+                              size="small"
+                              style={{
+                                color: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                              onClick={() => setChangeImageStatus(false)}
+                              icon={<CloseOutlined />}
+                            />
+                          </Tooltip>
                         </div>
                       </div>
                     ) : (
@@ -553,7 +563,6 @@ export function Images(props: ImagesProps) {
                               }
                             >
                               <Button
-                                disabled={!userInfo?.user.verified}
                                 type="text"
                                 size="small"
                                 style={{
@@ -561,7 +570,7 @@ export function Images(props: ImagesProps) {
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-
+                                  cursor: userInfo?.user.verified ? "pointer" : "not-allowed",
                                   opacity: !userInfo?.user.verified
                                     ? "0.7"
                                     : "1",
@@ -590,7 +599,7 @@ export function Images(props: ImagesProps) {
 
                             <Tooltip
                               placement="bottom"
-                              title={"Edit"}
+                              title={"Search"}
                               arrow={false}
                               getPopupContainer={() =>
                                 imageBoxElement.current || document.body
@@ -606,7 +615,7 @@ export function Images(props: ImagesProps) {
                                   justifyContent: "center",
                                 }}
                                 onClick={() => handleEditImagesClick()}
-                                icon={<FormOutlined />}
+                                icon={<SearchOutlined />}
                               />
                             </Tooltip>
                           </div>
@@ -632,7 +641,8 @@ export function Images(props: ImagesProps) {
                       }}
                     >
                       {images[imageIndex].type === "ai" ||
-                      images[imageIndex].type === "youtube" || images[imageIndex].type === "clipboard" ? (
+                      images[imageIndex].type === "youtube" ||
+                      images[imageIndex].type === "clipboard" ? (
                         <>Photo by {images[imageIndex].user.name}</>
                       ) : (
                         <>

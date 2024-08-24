@@ -251,7 +251,7 @@ table th {
 /* 滚动条 */
 ::-webkit-scrollbar-thumb:horizontal { /*水平滚动条的样式*/
   width: 4px;
-  background-color: #C1C1C1;
+  background-color: #DEDEDE;
   -webkit-border-radius: 6px;
 }
 ::-webkit-scrollbar-track-piece {
@@ -264,7 +264,7 @@ table th {
 }
 ::-webkit-scrollbar-thumb:vertical { /*垂直滚动条的样式*/
   height: 50px;
-  background-color: rgba(0,0,0,.25);
+  background-color: #DEDEDE;
   -webkit-border-radius: 4px;
   outline: 2px solid #fff;
   outline-offset: -2px;
@@ -272,7 +272,7 @@ table th {
 }
 ::-webkit-scrollbar-thumb:hover { /*滚动条的hover样式*/
   height: 50px;
-  background-color: #9f9f9f;
+  background-color: #DEDEDE;
   -webkit-border-radius: 4px;
 }
 
