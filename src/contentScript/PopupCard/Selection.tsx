@@ -158,7 +158,8 @@ export function Selection(props: SelectionProps) {
         contentEditable={userInfo?.user.contentEditable && userInfo.user.verified}
         style={{
           margin: '14px 0',
-          lineHeight: '1.5'
+          lineHeight: '1.5',
+          outline: "none"
         }}
       >
 

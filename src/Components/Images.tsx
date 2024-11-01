@@ -240,7 +240,8 @@ export function Images(props: ImagesProps) {
     <>
       <div
         className="images"
-        ref={imageBoxElement}
+        ref={imageBoxElement}        
+        contentEditable={false}
         style={{
           position: "relative",
           lineHeight: "0",

@@ -2,7 +2,7 @@ import browser from 'webextension-polyfill'
 
 import React, { useEffect, useState, useRef, createContext, useContext } from "react";
 
-import { userInfoType, addToAnkiStatusType, langType, AnkiInfoType, AnkiModelType } from '../../types'
+import { userInfoType, addToAnkiStatusType, langType, AnkiInfoType } from '../../types'
 
 import { v4 as uuidv4 } from 'uuid';
 

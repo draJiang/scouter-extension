@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Switch, Form, Select, Button } from 'antd';
+import { Switch, Form, Button } from 'antd';
 
-import { getDefaultDeckName } from '../../../util'
 import { FormPropsType, userInfoType, AnkiInfoType } from '../../../types'
-import { lang } from "../../../lib/lang"
 import { LanguageSettings } from "./LanguageSettings";
 import { ContextMenu } from "./ContextMenu";
 import { useUserInfoContext } from '../../../lib/userInfo'
@@ -70,7 +68,6 @@ const General: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
             <Form
                 labelWrap={true}
                 labelAlign="left"
-                // onFinish={}
                 onValuesChange={handleFormChange}
                 form={form}
                 labelCol={{ span: 4 }}

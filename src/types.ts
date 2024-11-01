@@ -33,16 +33,20 @@ export type BackgroundToPopup = {
     chatId: string
 }
 
-export type AnkiModelType = {
-    modelName: string,
-    fields: any,
-    isAnkiSpace: boolean
+export type AnkiSettingType = {
+    
+        ankiDeckName:string,
+        ankiFields:Record<string, string>[],
+        ankiNoteName:string
+    
 }
 
 export type AnkiInfoType = {
-    defaultDeckName: string,
-    decks: Array<string>,
-    models: Array<AnkiModelType>
+    // defaultDeckName: string,
+    // decks: Array<string>,
+    // models: Array<AnkiModelType>
+    deckAndNoteList:AnkiSettingType[]
+    deckNames:string[]
 }
 
 

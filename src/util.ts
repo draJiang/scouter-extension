@@ -1089,41 +1089,83 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
 };
 
-interface Dictionary {
-  [key: string]: any;
-}
+// interface Dictionary {
+//   [key: string]: any;
+// }
 
-interface NoteFields {
-  note: string;
-  fields: Dictionary;
-}
+// interface NoteFields {
+//   note: string;
+//   fields: Dictionary;
+// }
 
 export function handleAnkiDynamicVariable(
-  fields: NoteFields,
+  fields: Record<string, string>[],
   dynamicVariable: { Selection: string, Sentence: string, Content: string, Audio: any, Image: string, Source: string }
 ) {
 
   let audioFields: string[] = []
-  const f = fields.fields
+  const f = fields
   console.log('f:');
   console.log(f);
 
-  const newFields = Object.keys(f).reduce((newObj: Dictionary, key) => {
-    // 处理哪些 field 需要显示 audio
-    if (f[key].indexOf('{{Audio}}') > -1) {
-      audioFields.push(key)
-    }
+  // const newFields = f.map(((obj: Record<string, string>, index) => {
+  //   return Object.keys(obj).reduce((newObj: Record<string, string>, key) => {
+  //     // 处理哪些 field 需要显示 audio
+  //     if (obj[key].indexOf('{{Audio}}') > -1) {
+  //       audioFields.push(key);
+  //     }
 
-    newObj[key] = f[key].replace(/{{Selection}}/g, dynamicVariable.Selection)
-      .replace(/{{Sentence}}/g, `<blockquote>${dynamicVariable.Sentence}</blockquote>`)
-      .replace(/{{Audio}}/g, '')
-      .replace(/{{Definition}}/g, dynamicVariable.Content)
-      .replace(/{{Image}}/g, dynamicVariable.Image)
-      .replace(/{{Source}}/g, dynamicVariable.Source)
-    return newObj;
-  }, {});
+  //     newObj[key] = obj[key].replace(/{{Selection}}/g, dynamicVariable.Selection)
+  //       .replace(/{{Sentence}}/g, `<blockquote>${dynamicVariable.Sentence}</blockquote>`)
+  //       .replace(/{{Audio}}/g, '')
+  //       .replace(/{{Definition}}/g, dynamicVariable.Content)
+  //       .replace(/{{Image}}/g, dynamicVariable.Image)
+  //       .replace(/{{Source}}/g, dynamicVariable.Source);
+  //     return newObj; // Return the accumulator
+  //   }, {} as Record<string, string>); // Initialize as an empty object
+  // }), {});
+
+  const newFields = f.reduce((accumulator: Record<string, string>, obj: Record<string, string>)=>{
+
+    Object.keys(obj).forEach((key)=>{
+        // 处理哪些 field 需要显示 audio
+        if (obj[key].indexOf('{{Audio}}') > -1) {
+          audioFields.push(key);
+        }
+        // 替换模板变量
+        accumulator[key] = obj[key]
+          .replace(/{{Selection}}/g, dynamicVariable.Selection)
+          .replace(/{{Sentence}}/g, `<blockquote>${dynamicVariable.Sentence}</blockquote>`)
+          .replace(/{{Audio}}/g, '')
+          .replace(/{{Definition}}/g, dynamicVariable.Content)
+          .replace(/{{Image}}/g, dynamicVariable.Image)
+          .replace(/{{Source}}/g, dynamicVariable.Source);
+
+
+    })
+
+    return accumulator; // 返回累加器
+
+  },{} as Record<string, string>)
 
   return ({ fields: newFields, audioFields: audioFields })
+
+  // const newFields2 = Object.keys(f).reduce((newObj: Record<string, string>, key:string) => {
+  //   // 处理哪些 field 需要显示 audio
+  //   if (f[key].indexOf('{{Audio}}') > -1) {
+  //     audioFields.push(key)
+  //   }
+
+  //   newObj[key] = f[key].replace(/{{Selection}}/g, dynamicVariable.Selection)
+  //     .replace(/{{Sentence}}/g, `<blockquote>${dynamicVariable.Sentence}</blockquote>`)
+  //     .replace(/{{Audio}}/g, '')
+  //     .replace(/{{Definition}}/g, dynamicVariable.Content)
+  //     .replace(/{{Image}}/g, dynamicVariable.Image)
+  //     .replace(/{{Source}}/g, dynamicVariable.Source)
+  //   return newObj;
+  // }, {});
+
+  // return ({ fields: newFields, audioFields: audioFields })
 
 }
 

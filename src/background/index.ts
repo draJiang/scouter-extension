@@ -17,7 +17,7 @@ import { cardStyle, fetchSSE, getChatGPTSession } from '../util';
 
 import { getUserInfo, getBalance, getAIParameter, generationsImages } from '../util'
 
-import { userInfoType, aiParameterType, AnkiModelType,ImageType } from '../types'
+import { userInfoType, aiParameterType,ImageType } from '../types'
 
 // content script 关闭窗口时，将此值设为 false 以中断数据渲染
 // let isContinue = true
@@ -370,66 +370,63 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
   // 获取用户设置的牌组和模板
   if (request.type === 'setModel') {
 
-    const isAnkiSpace = request.messages.isAnkiSpace
+    // const isAnkiSpace = request.messages.isAnkiSpace
 
-
-    // 获取 DeckName
-    getDefaultDeckName().then(async (result: any) => {
-
-      let defaultDeckName = result.defaultDeckName
-
-      if (defaultDeckName === '' || defaultDeckName === undefined) {
-        defaultDeckName = 'Default'
-      }
-
-      // 获取用户保存的 fields
+    // 获取用户设置的 ankiSettings
+    (async()=>{
       const settings = await getSettings()
-      const ankiFields = settings.ankiFields
-      const ankiNoteName = settings.ankiNoteName
-      const fields = ankiFields.find((item: any) => item.note === ankiNoteName)
+      let deckNames
+      try {
+        // 获取用户的所有 decks 名称
+        const getdeckNamesResult = await ankiAction('deckNames', 6)  
+        if(!(getdeckNamesResult as any).error){
+          deckNames = getdeckNamesResult as any
+        }
+      } catch (error:any) {
+        asyncSendResponse({ type: 'setModel', result: 'failure', error: error.error });
+      }
+      
+      
+      // 如果包含默认的 Scouter note
+      if(settings.ankiSettings.some((setting: any) => 
+        setting.ankiNoteName === 'Scouter' || setting.ankiNoteName === 'Scouter Cloze Text'
+      )){
+        // 需要检查 anki 中是否有对应的 note
+        
+        
+        // 获取用户的所有 model 名称
+        const modelNames: any = await ankiAction('modelNames', 6)
 
-      if (ankiFields.length > 0 && ankiNoteName) {
-        // 有自定义的 fields
-        const modelData: Array<AnkiModelType> = [
-          { 'modelName': ankiNoteName, 'fields': fields, 'isAnkiSpace': false }
-        ]
-        console.log('modelData:');
-        console.log(modelData);
-        asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
+        if (!modelNames.error) {
+          const hasScouterNote = modelNames.result.filter((name: string) => 
+            name === 'Scouter')
+        const hasScouterClozeNote = modelNames.result.filter((name: string) => 
+          name === 'Scouter Cloze Text')
 
-      } else {
-        // 没有自定义的 fields，使用默认的
+          if(hasScouterNote.length<1){
+            // 没有默认的 Scouter note 则需要新建
+            ankiAction('createModel', 6, {
+              'modelName': 'Scouter',
+              'inOrderFields': ["Front", "Back"],
+              'cardTemplates': [
 
-        try {
-
-          // 获取用户的所有 model 名称
-          const modelNames: any = await ankiAction('modelNames', 6)
-
-          console.log('modelNames:');
-          console.log(modelNames);
-
-          if (!modelNames.error) {
-
-            const models = [
-              {
-                'modelName': 'Scouter',
-                'cardTemplates': [
-                  {
-                    'name': 'Card1',
-                    'Front': '{{Front}}',
-                    'Back': `{{Front}}
-                    <hr id=answer>
-                    {{Back}}`
-
-                  }
-                ],
-                'inOrderFields': ["Front", "Back"],
-                'isAnkiSpace': false
-
-              },
-              {
-                'modelName': 'Scouter Cloze Text',
-                'cardTemplates': [
+                {'name': 'Card1',
+                'Front': '{{Front}}',
+                'Back': `{{Front}}
+                <hr id=answer>
+                {{Back}}`}
+            ],
+              'isCloze': false,
+              'css': cardStyle
+            })
+  
+          }
+          if(hasScouterClozeNote.length<1){
+            // 没有默认的 Scouter Cloze Text note 则需要新建
+            ankiAction('createModel', 6, {
+              'modelName': 'Scouter Cloze Text',
+              'inOrderFields': ["Text", "More"],
+              'cardTemplates': [
                   {
                     'name': 'Card2',
                     'Front': '{{cloze:Text}}',
@@ -437,103 +434,192 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
                               <br>{{More}}`
                   }
                 ],
-                'inOrderFields': ["Text", "More"],
-                'isAnkiSpace': true
-              }
-            ]
-
-            // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
-
-            // 用于存储 model 相关的数据，返回给 content 将笔记添加到 Anki
-            let modelData: Array<AnkiModelType> = []
-
-            let promises = models.map((model) => {
-
-              return new Promise<void>((resolve, reject) => {
-
-                if (modelNames.result.includes(model.modelName)) {
-
-                  // 如果有 Scouter Model 则获取 Model 的字段
-                  ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
-                    const modelFieldNames = result.result
-                    if (modelFieldNames.length < 2) {
-                      // 字段少于 2 个时无法添加笔记，引导用户修改
-
-                      modelData.push(
-                        { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
-                      )
-
-                    } else {
-
-                      modelData.push(
-                        { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
-                      )
-
-                    }
-
-                    resolve(); // Resolve the Promise
-
-                  })
-
-                } else {
-                  // 如果没有 Scouter 默认的 Model，则创建
-
-                  ankiAction('createModel', 6, {
-                    'modelName': model.modelName,
-                    'inOrderFields': model.inOrderFields,
-                    'cardTemplates': model.cardTemplates,
-                    'isCloze': model.isAnkiSpace,
-                    'css': cardStyle
-                  }).then((result: any) => {
-
-                    if (!result.error) {
-
-                      // Scouter 默认的 model 则不处理 fields
-                      const fields = {}
-
-                      modelData.push(
-                        { 'modelName': model.modelName, 'fields': fields, 'isAnkiSpace': model.isAnkiSpace }
-                      )
-
-                    }
-
-                    resolve(); // Resolve the Promise
-                  })
-
-                }
-
-
-              })
-
-
-
+              'isCloze': false,
+              'css': cardStyle
             })
-
-            // 等待所有 Promise 完成
-            Promise.all(promises).then(() => {
-              console.log(modelData);
-              asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
-            }).catch((error) => {
-              console.error('Error:', error);
-            });
-
-
-
           }
 
-        } catch (error) {
-
-          asyncSendResponse({ type: 'setModel', result: 'failure', error: error });
+        }else{
+          // 请求出错需要反馈
+          asyncSendResponse({ type: 'setModel', result: 'failure', error: modelNames.error });
 
         }
+        
+
+        // 检查 default deck 是否存在
+        if(true){
+          // 不存在则获取 deck，取 deck[0] 作为 deck
+        }
+        
+      }else{
+        // 如果非 Scouter note
+        // 直接返回 settings 给用户
+        
       }
 
+      asyncSendResponse({ type: 'setModel', result: 'success', data: {deckAndNoteList:settings.ankiSettings,deckNames:deckNames.result}});
+
+    })()
+    
+      
+      
+      
+    
 
 
 
 
+    // 获取 DeckName
+    // getDefaultDeckName().then(async (result: any) => {
 
-    })
+    //   let defaultDeckName = result.defaultDeckName
+
+    //   if (defaultDeckName === '' || defaultDeckName === undefined) {
+    //     defaultDeckName = 'Default'
+    //   }
+
+    //   // 获取用户保存的 fields
+    //   const settings = await getSettings()
+    //   const ankiFields = settings.ankiFields
+    //   const ankiNoteName = settings.ankiNoteName
+    //   const fields = ankiFields.find((item: any) => item.note === ankiNoteName)
+
+    //   if (ankiFields.length > 0 && ankiNoteName) {
+    //     // 有自定义的 fields
+    //     const modelData: Array<AnkiModelType> = [
+    //       { 'modelName': ankiNoteName, 'fields': fields, 'isAnkiSpace': false }
+    //     ]
+    //     console.log('modelData:');
+    //     console.log(modelData);
+    //     asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
+
+    //   } else {
+    //     // 没有自定义的 fields，使用默认的
+
+    //     try {
+
+    //       // 获取用户的所有 model 名称
+    //       const modelNames: any = await ankiAction('modelNames', 6)
+
+    //       console.log('modelNames:');
+    //       console.log(modelNames);
+
+    //       if (!modelNames.error) {
+
+    //         const models = [
+    //           {
+    //             'modelName': 'Scouter',
+    //             'cardTemplates': [
+    //               {
+    //                 'name': 'Card1',
+    //                 'Front': '{{Front}}',
+    //                 'Back': `{{Front}}
+    //                 <hr id=answer>
+    //                 {{Back}}`
+
+    //               }
+    //             ],
+    //             'inOrderFields': ["Front", "Back"],
+    //             'isAnkiSpace': false
+
+    //           },
+    //           {
+    //             'modelName': 'Scouter Cloze Text',
+    //             'cardTemplates': [
+    //               {
+    //                 'name': 'Card2',
+    //                 'Front': '{{cloze:Text}}',
+    //                 'Back': `{{cloze:Text}}
+    //                           <br>{{More}}`
+    //               }
+    //             ],
+    //             'inOrderFields': ["Text", "More"],
+    //             'isAnkiSpace': true
+    //           }
+    //         ]
+
+    //         // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
+
+    //         // 用于存储 model 相关的数据，返回给 content 将笔记添加到 Anki
+    //         let modelData: Array<AnkiModelType> = []
+
+    //         let promises = models.map((model) => {
+
+    //           return new Promise<void>((resolve, reject) => {
+
+    //             if (modelNames.result.includes(model.modelName)) {
+
+    //               // 如果有 Scouter Model 则获取 Model 的字段
+    //               ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
+    //                 const modelFieldNames = result.result
+    //                 if (modelFieldNames.length < 2) {
+    //                   // 字段少于 2 个时无法添加笔记，引导用户修改
+
+    //                   modelData.push(
+    //                     { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
+    //                   )
+
+    //                 } else {
+
+    //                   modelData.push(
+    //                     { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
+    //                   )
+
+    //                 }
+
+    //                 resolve(); // Resolve the Promise
+
+    //               })
+
+    //             } else {
+    //               // 如果没有 Scouter 默认的 Model，则创建
+
+    //               ankiAction('createModel', 6, {
+    //                 'modelName': model.modelName,
+    //                 'inOrderFields': model.inOrderFields,
+    //                 'cardTemplates': model.cardTemplates,
+    //                 'isCloze': model.isAnkiSpace,
+    //                 'css': cardStyle
+    //               }).then((result: any) => {
+
+    //                 if (!result.error) {
+
+    //                   // Scouter 默认的 model 则不处理 fields
+    //                   const fields = {}
+
+    //                   modelData.push(
+    //                     { 'modelName': model.modelName, 'fields': fields, 'isAnkiSpace': model.isAnkiSpace }
+    //                   )
+
+    //                 }
+
+    //                 resolve(); // Resolve the Promise
+    //               })
+
+    //             }
+
+    //           })
+
+    //         })
+
+    //         // 等待所有 Promise 完成
+    //         Promise.all(promises).then(() => {
+    //           console.log(modelData);
+    //           asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
+    //         }).catch((error) => {
+    //           console.error('Error:', error);
+    //         });
+
+    //       }
+
+    //     } catch (error) {
+
+    //       asyncSendResponse({ type: 'setModel', result: 'failure', error: error });
+
+    //     }
+    //   }
+
+    // })
 
     // browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
 
@@ -631,61 +717,6 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
   }
 
-  if (request.type === 'handlePasteImage') {
-
-    const convertBlobToBase64 = (blob: Blob) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    };
-
-    (async()=>{
-      try {
-        // 检查浏览器是否支持 clipboard API
-        if (navigator.clipboard && navigator.clipboard.read) {
-          const items = await navigator.clipboard.read();
-          console.log(items);
-  
-          for (const item of items) {
-            // 检查 item 是否是图片
-            if (item.types.includes("image/png")) {
-              const blob = await item.getType("image/png");
-              const url = await convertBlobToBase64(blob);
-              console.log(url);
-              const imageObj: ImageType = {
-                type: "Clipboard",
-                id: "clipboard",
-                urls: {
-                  small: url as string,
-                },
-                links: {
-                  download_location: "",
-                },
-                description: "",
-                user: {
-                  username: "Clipboard",
-                  name: "Clipboard",
-                },
-              };
-              // setImages((oldList) => {
-              //   return [imageObj, ...oldList];
-              // });
-              console.log(url);
-            }
-          }
-        } else {
-          console.log("Clipboard API is not supported in this browser.");
-        }
-      } catch (error) {
-        console.error("Error reading clipboard contents: ", error);
-      }
-    })()
-    
-
-  }
 
   if (request.type === 'getUserInfo') {
 

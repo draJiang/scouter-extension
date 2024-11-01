@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill'
 import { models, freeModels } from "./models"
-import { v4 as uuidv4 } from 'uuid';
+import {AnkiInfoType} from "../types"
 
 export async function getSettings() {
     let items = await browser.storage.sync.get({
@@ -9,6 +9,23 @@ export async function getSettings() {
         "unsplashApiKey": '',                               // upsplansh 的 API Key
         "currentLanguage": 'Chinese Simplified',            // 当前语言
         "targetLanguage": 'United States',                  // 目标语言
+        "ankiSettings":[{
+            ankiDeckName:'Default',
+            ankiFields:[
+                {'Front': 'The default note is not editable'},
+                {'Back': `The default note is not editable`}
+            ],
+            ankiNoteName:'Scouter'
+        },
+        {
+            ankiDeckName:'Default',
+            ankiFields:[
+                {'Front': 'The default note is not editable'},
+                {'Back': `The default note is not editable`}
+            ],
+            ankiNoteName:'Scouter Cloze Text'
+        }
+    ],                                                 // anki 设置
         "ankiDeckName": '',                                 // 默认的 Anki deck
         "ankiNoteName": 'Scouter',                          // 默认的 Anki note
         "ankiFields": [],                                   // 用户编辑的 Fields 设置
