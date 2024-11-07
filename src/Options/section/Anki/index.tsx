@@ -54,10 +54,17 @@ const Anki: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
         //   ankiDeckName: settings.ankiDeckName,
         //   ankiNoteName: settings.ankiNoteName,
         // });
+        console.log(settings);
 
+        let ankiSettings = settings.ankiSettings;
+
+        
         // 设置默认值
+        console.log("设置默认值 ankiSettings:");
+        console.log(ankiSettings);
+
         form.setFieldsValue({
-          ankiSettings: settings.ankiSettings,
+          ankiSettings: ankiSettings,
         });
 
         // formForField.setFieldsValue({
@@ -304,12 +311,6 @@ const Anki: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                     name={[name, "ankiNoteName"]}
                     label="Note Name"
                     initialValue={undefined}
-                    // extra={
-                    //   fieldsStatus?.status !== "loading" &&
-                    //   fieldsStatus?.status !== "ready" && (
-                    //     <p style={{ color: "red" }}>{fieldsStatus?.msg}</p>
-                    //   )
-                    // }
                   >
                     <Select
                       placeholder="Anki Note Name"

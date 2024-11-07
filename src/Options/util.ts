@@ -3,31 +3,15 @@ import { models, freeModels } from "./models"
 import {AnkiInfoType} from "../types"
 
 export async function getSettings() {
-    let items = await browser.storage.sync.get({
+    let settings = await browser.storage.sync.get({
         "openApiKey": '',                                   // Open AI、Azure 等 API Key
         "openApiEndpoint": 'https://api.openai.com',        // Open AI、Azure 等端口的链接
         "unsplashApiKey": '',                               // upsplansh 的 API Key
         "currentLanguage": 'Chinese Simplified',            // 当前语言
         "targetLanguage": 'United States',                  // 目标语言
-        "ankiSettings":[{
-            ankiDeckName:'Default',
-            ankiFields:[
-                {'Front': 'The default note is not editable'},
-                {'Back': `The default note is not editable`}
-            ],
-            ankiNoteName:'Scouter'
-        },
-        {
-            ankiDeckName:'Default',
-            ankiFields:[
-                {'Front': 'The default note is not editable'},
-                {'Back': `The default note is not editable`}
-            ],
-            ankiNoteName:'Scouter Cloze Text'
-        }
-    ],                                                 // anki 设置
+        "ankiSettings":[],                                                 // anki 设置
         "ankiDeckName": '',                                 // 默认的 Anki deck
-        "ankiNoteName": 'Scouter',                          // 默认的 Anki note
+        "ankiNoteName": '',                          // 默认的 Anki note
         "ankiFields": [],                                   // 用户编辑的 Fields 设置
         "licenseKey": '',                                   // OpenRouter 的 API Key
         "showYoutubeButton": true,                          // 显示 YouTube 字幕的按钮
@@ -41,7 +25,43 @@ export async function getSettings() {
         "userId": '',                                       // 用户 ID
         "contentEditable":false                             // Scouter 窗口中的内容能否编辑
     })
-    return items
+
+    let ankiSettings = settings.ankiSettings;
+    // 如果 ankiSettings 为空则设置默认值
+    if (settings.ankiSettings.length === 0) {
+        ankiSettings = [
+          {
+            ankiDeckName: "Default",
+            ankiFields: [
+              { Front: "The default note is not editable" },
+              { Back: `The default note is not editable` },
+            ],
+            ankiNoteName: "Scouter",
+          },
+          {
+            ankiDeckName: "Default",
+            ankiFields: [
+              { Front: "The default note is not editable" },
+              { Back: `The default note is not editable` },
+            ],
+            ankiNoteName: "Scouter Cloze Text",
+          },
+        ];
+
+        if (settings.ankiDeckName !== "" && settings.ankiNoteName !== "") {
+          // 如果存在历史旧数据，则保留旧数据
+          const oldAnkiSettings = {
+            ankiDeckName: settings.ankiDeckName,
+            ankiFields: Object.entries(settings.ankiFields).map(
+              ([key, value]) => ({ [key]: value })
+            ),
+            ankiNoteName: settings.ankiNoteName,
+          };
+          ankiSettings.unshift(oldAnkiSettings);
+        }
+      }
+    settings.ankiSettings = [...ankiSettings]
+    return settings
 }
 
 export async function saveOptions(values: any) {
