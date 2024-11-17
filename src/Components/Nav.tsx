@@ -114,6 +114,20 @@ export function Nav(props: NavProps) {
     });
   }
 
+  // items.push({ key: "deck1", label: "deck1" });
+  // items.push({ key: "deck2", label: "deck2" });
+  // items.push({ key: "deck3", label: "deck3" });
+  // items.push({ key: "deck4", label: "deck4" });
+  // items.push({ key: "deck5", label: "deck5" });
+  // items.push({ key: "deck6", label: "dec6k" });
+  // items.push({ key: "deck", label: "deck" });
+  // items.push({ key: "deck", label: "deck" });
+  // items.push({ key: "deck", label: "deck" });
+  // items.push({ key: "deck", label: "deck" });
+  // items.push({ key: "deck", label: "deck" });
+  // items.push({ key: "deck", label: "deck" });
+  // items.push({ key: "deck", label: "deck" });
+
   const menuProps = {
     items,
     onClick: handleMenuClick,
@@ -771,12 +785,20 @@ export function Nav(props: NavProps) {
               ) : (
                 <Dropdown.Button
                   size="small"
-                  overlayStyle={{ width: "50%" }}
-                  getPopupContainer={() => navElement.current as HTMLDivElement}
-                  style={{
-                    fontSize: "13.2px",
-                    width: "auto",
+                  overlayStyle={{
+                    width: "50%",
+                    maxHeight: "400px",
+                    overflow: "auto",
+                    borderRadius: "8px",
+                    boxShadow:
+                      "0 6px 16px 0 rgba(0, 0, 0, 0.08),0 3px 6px -4px rgba(0, 0, 0, 0.12),0 9px 28px 8px rgba(0, 0, 0, 0.05)",
                   }}
+                  getPopupContainer={() => navElement.current as HTMLDivElement}
+                  // style={{
+                  //   fontSize: "13.2px",
+                  //   width: "auto",
+                  //   maxHeight: "10%",
+                  // }}
                   // icon={<PlusSquareOutlined />}
                   disabled={
                     addToAnkiStatus.status === "standby" ||
