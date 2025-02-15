@@ -268,6 +268,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
       const currentLanguage = result.currentLanguage
       const targetLanguage = result.targetLanguage
       const model = result.model
+      const customizeApiModel =  result.openApiModel.replace(/ /g, '');
       const freeModel = result.freeModel
 
       let openApiEndpoint: string = result.openApiEndpoint
@@ -416,6 +417,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           })
 
           break;
+
         case 'myOwnOpenAiKey':
           // 使用用户自己的 Key
 
@@ -436,7 +438,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
             headers = { 'api-key': openApiKey, 'Content-Type': 'application/json', }
             body = {
-              "model": "gpt-35-turbo",
+              "model": customizeApiModel,
               "messages": messages,
               "temperature": 0.7,
               "max_tokens": 420,
@@ -506,11 +508,15 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             }
 
             imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
-            openApiEndpoint += '/v1/chat/completions'
+            if(openApiEndpoint.indexOf('/chat/completions')< 0){
+              //如果 URL 中没有包含后缀，则自动添加
+              openApiEndpoint += '/v1/chat/completions';
+            }
+            
 
 
             body = {
-              "model": "gpt-3.5-turbo",
+              "model": customizeApiModel,
               "messages": messages,
               "temperature": 0.7,
               "max_tokens": 420,

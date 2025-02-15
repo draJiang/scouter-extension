@@ -6,12 +6,13 @@ export async function getSettings() {
     let settings = await browser.storage.sync.get({
         "openApiKey": '',                                   // Open AI、Azure 等 API Key
         "openApiEndpoint": 'https://api.openai.com',        // Open AI、Azure 等端口的链接
+        "openApiModel": 'gpt-4o-mini',                      // Open AI、Azure 等 API 选择的 Model
         "unsplashApiKey": '',                               // upsplansh 的 API Key
         "currentLanguage": 'Chinese Simplified',            // 当前语言
         "targetLanguage": 'United States',                  // 目标语言
-        "ankiSettings":[],                                                 // anki 设置
+        "ankiSettings":[],                                  // anki 设置
         "ankiDeckName": '',                                 // 默认的 Anki deck
-        "ankiNoteName": '',                          // 默认的 Anki note
+        "ankiNoteName": '',                                 // 默认的 Anki note
         "ankiFields": [],                                   // 用户编辑的 Fields 设置
         "licenseKey": '',                                   // OpenRouter 的 API Key
         "showYoutubeButton": true,                          // 显示 YouTube 字幕的按钮
