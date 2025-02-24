@@ -60,7 +60,7 @@ export function unsplashSearchPhotos(API_KEY: string, query: string) {
 }
 
 // 获取词典数据
-export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPopup> => {
+export const getDictionaryData = async (keyWord: string): Promise<string> => {
 
   // 获取用户语言
   const Settings = await getSettings()
@@ -76,12 +76,12 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
 
   url.search = new URLSearchParams(params).toString();
   const ErrorMsg = '🥲 Sorry, No Results Found for this Word.';
-  const ErrorResult = { 'type': 'sendGPTData', 'status': 'error', 'content': ErrorMsg, 'chatId': '' };
+  // const ErrorResult = { 'type': 'sendGPTData', 'status': 'error', 'content': ErrorMsg, 'chatId': '' };
 
   return fetch(url)
     .then(response => {
       if (!response.ok) {
-        return ErrorResult;
+        return ErrorMsg;
       }
       return response.json(); // 返回一个包含响应数据的 JSON 对象
     })
@@ -97,9 +97,9 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
           }
 
           if ('multle' in data || 'fanyi' in data) {
-            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+            return msg;
           } else {
-            return ErrorResult;
+            return ErrorMsg;
           }
         case 'French':
           if ('fc' in data) {
@@ -109,26 +109,26 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
           }
 
           if ('fc' in data || 'fanyi' in data) {
-            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+            return msg;
           } else {
-            return ErrorResult;
+            return ErrorMsg;
           }
         case 'Japanese':
           if ('jc' in data) {
             msg = keyWord + ' /' + data.jc.word[0]["return-phrase"].l.i + '/' + '\n' + data.jc.word[0].trs[0].tr[0].l.i[0];
-            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+            return msg;
           } else if ('fanyi' in data) {
             msg = data.fanyi.tran;
-            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+            return msg;
           } else if ('jaTransPjm' in data) {
             msg = data.jaTransPjm.fanyi.tran;
-            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+            return msg;
           }
           else if ('newjc' in data) {
             msg = data.newjc.word.sense[0].phrList[0].jmsy;
-            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+            return msg;
           } else {
-            return ErrorResult;
+            return ErrorMsg;
           }
 
           break;
@@ -142,9 +142,9 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
           }
 
           if ('ec' in data || 'fanyi' in data) {
-            return { 'type': 'sendGPTData', 'status': 'done', 'content': msg, 'chatId': '' };
+            return msg;
           } else {
-            return ErrorResult;
+            return ErrorMsg;
           }
           break;
       }
@@ -154,7 +154,7 @@ export const getDictionaryData = async (keyWord: string): Promise<BackgroundToPo
     })
     .catch(error => {
       console.log(error);
-      return ErrorResult
+      return ErrorMsg
     });
 }
 

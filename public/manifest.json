@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Scouter - Language Learning",
     "description": "Help you complete immersive language learning.",
-    "version": "0.27.60",
+    "version": "0.28.00",
     "action": {
         "default_icon": "icon48.png",
         "default_popup": "popup.html"

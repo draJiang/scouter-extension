@@ -153,10 +153,27 @@ browser.runtime.onConnect.addListener(port => {
 
     if (msg.type === 'getKnowledge') {
 
+      
+      if(msg.option && msg.option.dictionary){
+        // 查询词典数据
+        console.log(msg)
+        const dictionary = msg.option.dictionary
+        for (const d of dictionary) {
+          switch (d) {
+            case 'youdao':
+              const result = await getDictionaryData(msg.keyWord)
+              console.log(result);
+              port.postMessage({ 'type': 'sendGPTData', 'status': 'process', 'content': `${result}\n\n---\n` })
+              break;
+            default:
+              break;
+          }
+        };
+      }
+
       // 获取 API Key 等存储的数据
       // let openApiKey: string, apiKeySelection: string, model: string, licenseKey: string, currentLanguage, openApiEndpoint: string, targetLanguage = ''
-      getSettings().then((result) => {
-
+      // const result = await getSettings();
         // 请求  GPT 数据
 
         controller.abort();
@@ -164,8 +181,8 @@ browser.runtime.onConnect.addListener(port => {
 
         // let messages = msg.messages
         console.log('getAIParameter:');
-        getAIParameter(msg.messages).then((result: aiParameterType) => {
-
+        try {
+          const result:aiParameterType = await getAIParameter(msg.messages);
           const openApiEndpoint = result.data?.chatCompletions.url
 
           if (!result.data || openApiEndpoint === undefined) {
@@ -200,19 +217,8 @@ browser.runtime.onConnect.addListener(port => {
 
                   // 处理接收到的数据
 
-                  // if (ApiType === 'chatGPTWeb') {
-
-                  //   if ('is_completion' in data !== true) {
-                  //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.message.content.parts[0] })
-                  //   }
-
-                  // } else {
-                  //   if (data.choices[0].finish_reason !== 'stop') {
-                  //     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
-                  //   }
-                  // }
-                  console.log('fetchSSE data:');
-                  console.log(data);
+                  // console.log('fetchSSE data:');
+                  // console.log(data);
                   
                   if (ApiType === 'ollama') {
                     port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data })
@@ -220,7 +226,6 @@ browser.runtime.onConnect.addListener(port => {
                     if (data.choices.length > 0) {
                       const finish_reason = data.choices[0].finish_reason
                       
-  
                         if (finish_reason !== 'stop') {
                           port.postMessage({ 'type': 'sendGPTData', 'ApiType': ApiType, 'status': 'process', 'content': data.choices[0].delta.content ? data.choices[0].delta.content : '' })
                         }
@@ -236,7 +241,6 @@ browser.runtime.onConnect.addListener(port => {
                 onEnd: () => {
                   // 处理 SSE 连接结束的逻辑
                   port.postMessage({ 'type': 'sendGPTData', 'status': 'done', 'content': '' })
-
                 },
                 onError: error => {
                   // 处理错误的逻辑
@@ -262,17 +266,9 @@ browser.runtime.onConnect.addListener(port => {
 
 
           }
-
-        }).catch((error) => {
-
+        } catch (error) {
           port.postMessage({ 'type': 'sendGPTData', 'status': 'error', 'content': error ? '🥲 ' + error : '🥲 Something went wrong, please try again later.' })
-        })
-        //
-
-
-
-
-      })
+        }
 
     }
 
@@ -280,7 +276,7 @@ browser.runtime.onConnect.addListener(port => {
 
       // 获取词典数据
       const result = await getDictionaryData(msg.keyWord)
-      port.postMessage(result)
+      port.postMessage({ 'type': 'sendGPTData', 'status': 'done', 'content': result })
 
     }
 

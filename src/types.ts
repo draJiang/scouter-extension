@@ -3,6 +3,7 @@ export type PromptType = {
     getUnsplashImages: boolean;
     userPrompt: string;
     id: string;
+    dictionary?:string[];
 };
 
 export type FormPropsType = {
