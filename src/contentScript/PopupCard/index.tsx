@@ -76,7 +76,7 @@ getAnkiCards()
 
 // 初始化 Anki 的 Model，为后续导入到 Anki 提速
 
-const { TextArea } = Input;
+// const { TextArea } = Input;
 
 // const AnkiContext = createContext(null);
 
@@ -85,8 +85,8 @@ const ScouterDiv = styled.div`
   top: 10;
 
   font-family: sans-serif;
-  width: 390px;
-  height: 560px;
+  width: 380px;
+  height: 500px;
   color: rgb(0 0 0 / 80%);
   position: fixed;
   display: flex;

@@ -284,7 +284,7 @@ export function Images(props: ImagesProps) {
                       }
                       src={images[imageIndex].urls.small}
                       alt={images[imageIndex]["description"]}
-                      height={240}
+                      height={220}
                       width={"100%"}
                       preview={false}
                       placeholder

@@ -42,7 +42,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
   // 保存 Prompt
   const savePrompt = async (values: any) => {
     console.log(values);
-    
+
     // 关闭表单
     props.openCustomPromptForm({
       isOpen: false,
@@ -77,9 +77,9 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
     } else {
       newPrompts = [{ ...values, id: timestamp }, ...promptList];
     }
-    console.log('newPrompts:');
+    console.log("newPrompts:");
     console.log(newPrompts);
-    
+
     // 将 Prompt 保存下来
     browser.storage.sync
       .set({
@@ -145,6 +145,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
     <div ref={formBoxElement}>
       <Form
         onFinish={savePrompt}
+        style={{ marginBottom: "5rem" }}
         // layout='horizontal'
         labelCol={{
           xs: { span: 6 },
@@ -185,7 +186,7 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
             mode="tags"
             options={[
               { value: "youdao", label: "--> Chinese" },
-            //   { value: "english", label: "--> Englishe" },
+              //   { value: "english", label: "--> Englishe" },
             ]}
           />
         </Form.Item>
@@ -225,7 +226,18 @@ export function CustomPromptForm(props: CustomPromptFormProps) {
           />
         </Form.Item>
 
-        <Form.Item style={{ margin: "0" }}>
+        <Form.Item
+          style={{
+            margin: "0px",
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            background: "#fff",
+            padding: "1rem",
+            width: "100%",
+            borderTop: "1px solid rgba(5, 5, 5, 0.06)",
+          }}
+        >
           {props.data.id !== "" && (
             <Button
               style={{

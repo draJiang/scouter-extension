@@ -44,6 +44,11 @@ const MessageBox = styled.div`
   &:hover {
     // background-color: rgb(0,0,0,0.04);
   }
+
+  hr {
+    margin: 1rem 0;
+  }
+
 `;
 
 function Message(props: MessageProps) {

@@ -1,5 +1,13 @@
 export const freeModels = [
     {
+        'name': 'Google: Gemini Flash Lite 2.0 Preview (free)',
+        'id': 'google/gemini-2.0-flash-lite-preview-02-05:free'
+    },
+    {
+        'name': 'Meta: Llama 3.3 70B Instruct (free)',
+        'id': 'meta-llama/llama-3.3-70b-instruct:free'
+    },
+    {
         'name': 'Google: Gemma 2 9B (free)',
         'id': 'google/gemma-2-9b-it:free'
     },
@@ -27,6 +35,19 @@ export const freeModels = [
 
 export const models = [
     ...freeModels,
+    {
+        'name': 'OpenAI: o3 Mini',
+        'id': 'openai/o3-mini'
+    },
+    {
+        'name': 'Anthropic: Claude 3.5 Haiku',
+        'id': 'anthropic/claude-3.5-haiku'
+    },
+    {
+        'name': 'OpenAI: o1-mini (2024-09-12)',
+        'id': 'openai/o1-mini-2024-09-12'
+    },
+
     {
         'name': 'gpt-3.5-turbo',
         'id': 'openai/gpt-3.5-turbo'
