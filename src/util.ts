@@ -297,7 +297,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             "model": freeModel,
             "messages": messages,
             "temperature": 0.7,
-            "max_tokens": 420,
+            "max_tokens": 620,
             "top_p": 1,
             "frequency_penalty": 0,
             "presence_penalty": 2,
@@ -350,7 +350,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             "model": model,
             "messages": messages,
             "temperature": 0.7,
-            "max_tokens": 420,
+            "max_tokens": 620,
             "top_p": 1,
             "frequency_penalty": 0,
             "presence_penalty": 2,
@@ -392,7 +392,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             "model": result.ollamaModel,
             "messages": messages,
             // "temperature": 0.7,
-            // "max_tokens": 420,
+            // "max_tokens": 620,
             // "top_p": 1,
             // "frequency_penalty": 0,
             // "presence_penalty": 2,
@@ -419,7 +419,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
           break;
 
         case 'myOwnOpenAiKey':
-          // 使用用户自己的 Key
+          //  用户自定义 API
 
           if (openApiKey.length < 5) {
             resolve({
@@ -441,7 +441,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
               "model": customizeApiModel,
               "messages": messages,
               "temperature": 0.7,
-              "max_tokens": 420,
+              "max_tokens": 620,
               "top_p": 1,
               "frequency_penalty": 0,
               "presence_penalty": 2,
@@ -473,7 +473,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
               "model": model,
               "messages": messages,
               "temperature": 0.7,
-              "max_tokens": 420,
+              "max_tokens": 620,
               "top_p": 1,
               "frequency_penalty": 0,
               "presence_penalty": 2,
@@ -497,29 +497,27 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
             })
 
-          } else {
+          } else{
 
             // OpenAI
             headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
 
-            // 去除端点末尾的 \ 符号
-            if (openApiEndpoint.slice(-1) === "/") {
-              openApiEndpoint = openApiEndpoint.slice(0, -1);
-            }
+            // // 去除端点末尾的 \ 符号
+            // if (openApiEndpoint.slice(-1) === "/") {
+            //   openApiEndpoint = openApiEndpoint.slice(0, -1);
+            // }
 
-            imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
-            if(openApiEndpoint.indexOf('/chat/completions')< 0){
-              //如果 URL 中没有包含后缀，则自动添加
-              openApiEndpoint += '/v1/chat/completions';
-            }
+            // imgOpenApiEndpoint = openApiEndpoint + '/v1/images/generations'
+            // if(openApiEndpoint.indexOf('/chat/completions')< 0){
+            //   //如果 URL 中没有包含后缀，则自动添加
+            //   openApiEndpoint += '/v1/chat/completions';
+            // }
             
-
-
             body = {
               "model": customizeApiModel,
               "messages": messages,
               "temperature": 0.7,
-              "max_tokens": 420,
+              "max_tokens": 620,
               "top_p": 1,
               "frequency_penalty": 0,
               "presence_penalty": 2,
@@ -1082,7 +1080,11 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       }
 
-      const response = { 'userId': uniqueId!, 'verified': verified, 'contextMenu': result.contextMenu, 'showYoutubeButton': result.showYoutubeButton,'contentEditable':result.contentEditable }
+      const response = { 'userId': uniqueId!,
+         'verified': verified,
+         'contextMenu': result.contextMenu,
+         'contextMenuBlackList':result.contextMenuBlackList,
+         'showYoutubeButton': result.showYoutubeButton,'contentEditable':result.contentEditable }
       console.log('response:');
       console.log(response);
 

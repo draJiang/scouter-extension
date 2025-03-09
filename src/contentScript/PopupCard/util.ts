@@ -1,8 +1,24 @@
 import browser from 'webextension-polyfill'
-import { ankiAction } from '../../util'
+import { Defuddle } from 'defuddle';
+// import { ankiAction } from '../../util'
 import { getSettings } from '../../Options/util'
-
+import { getDocumentContent } from "../util"
 import { PromptType } from '../../types'
+
+export const summarizePrompt: PromptType = {
+    title: 'Summarize',
+    id: 'summarize',
+    getUnsplashImages: false,
+    userPrompt: `Summarize this text in {targetLanguage} using simple language that explains only the key points:
+
+                "{article}"
+
+                Requirements:
+                - Keep it under 300 words
+                - Focus only on essential information
+                - Use basic formatting for readability
+                - Maintain the author's core message`
+}
 
 export const dictionaryPrompt: PromptType = {
     title: 'Dictionary',
@@ -50,7 +66,7 @@ export const windowInitialization = (
     const elementHeight = data.windowElement.current.clientHeight;
 
     // 设置窗口的默认位置
-    if (isYoutube && !data.isPin) {
+    if ((isYoutube && !data.isPin) || !data.selection) {
         data.windowElement.current.style.left = `${windowWidth - elementWidth - 10}px`;
         data.windowElement.current.style.top = "10px";
 
@@ -184,6 +200,14 @@ export const handlePromptVariables = async (promptStr: string, keyWord: string, 
     newPromptStr = newPromptStr.replace(/\{nativeLanguage\}/g, Lang['current']['name'])
     newPromptStr = newPromptStr.replace(/\{currentLanguage\}/g, Lang['current']['name'])
     newPromptStr = newPromptStr.replace(/\{targetLanguage\}/g, Lang['target']['name'])
+
+    // 处理网页全文
+    if (newPromptStr.indexOf('{article}') >= 0){
+
+        const document = await getDocumentContent()
+        const content = document.content
+        newPromptStr = newPromptStr.replace(/\{article\}/g, content)
+    }
 
     // 处理 Anki 单词
     if (newPromptStr.indexOf('{ankiCards}') >= 0) {
@@ -449,7 +473,7 @@ export const getDefaultPrompt = (keyWord: string, currentLanguage: string) => {
     }
 
     // 关键字长度较长时，按照句子进行处理
-    if (keyWord.length > 20) {
+    if (keyWord && keyWord.length > 20) {
 
         getUnsplashImages = false
         userPrompt = `
@@ -556,7 +580,7 @@ export const getInitialPrompt = async (keyWord: string, currentLanguage: string)
 
     if (isSetKey) {
 
-        const defaultPrompt = getDefaultPrompt(keyWord, currentLanguage)
+        const defaultPrompt = getDefaultPrompt(keyWord||"", currentLanguage)
         return defaultPrompt
 
     } else {

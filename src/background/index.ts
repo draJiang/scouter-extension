@@ -1,11 +1,11 @@
 
 
-import browser from 'webextension-polyfill'
+import browser, { action } from 'webextension-polyfill'
 
-import { ChatGPTUnofficialProxyAPI } from 'chatgpt'
+// import { ChatGPTUnofficialProxyAPI } from 'chatgpt'
 
-import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
-import { v4 as uuidv4 } from 'uuid';
+// import { createParser, ParsedEvent, ReconnectInterval } from 'eventsource-parser'
+// import { v4 as uuidv4 } from 'uuid';
 import { ankiAction, unsplashSearchPhotos, getDefaultDeckName, getDictionaryData } from "../util";
 import { createApi } from 'unsplash-js';
 
@@ -81,6 +81,16 @@ browser.contextMenus.create({
     browser.runtime.lastError
   });
 
+// 总结网页
+browser.contextMenus.create({
+  id: "3",
+  title: "Summarize",
+  contexts: ["page"],
+},
+  () => {
+    browser.runtime.lastError
+  });
+
 
 // 右键菜单点击事件
 browser.contextMenus.onClicked.addListener(async function (info, _tab) {
@@ -88,7 +98,7 @@ browser.contextMenus.onClicked.addListener(async function (info, _tab) {
 
   const runPrompt = info.menuItemId === '2' ? true : false
 
-  sendMessageToContent(runPrompt)
+  sendMessageToContent(info.menuItemId,runPrompt)
 
 })
 
@@ -119,7 +129,7 @@ browser.commands.onCommand.addListener(function (command) {
 
   if (command === 'Open') {
     // 执行相关代码
-    sendMessageToContent(false)
+    sendMessageToContent('',false)
   }
 });
 
@@ -456,173 +466,6 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
       asyncSendResponse({ type: 'setModel', result: 'success', data: {deckAndNoteList:settings.ankiSettings,deckNames:deckNames.result}});
 
     })()
-    
-      
-      
-      
-    
-
-
-
-
-    // 获取 DeckName
-    // getDefaultDeckName().then(async (result: any) => {
-
-    //   let defaultDeckName = result.defaultDeckName
-
-    //   if (defaultDeckName === '' || defaultDeckName === undefined) {
-    //     defaultDeckName = 'Default'
-    //   }
-
-    //   // 获取用户保存的 fields
-    //   const settings = await getSettings()
-    //   const ankiFields = settings.ankiFields
-    //   const ankiNoteName = settings.ankiNoteName
-    //   const fields = ankiFields.find((item: any) => item.note === ankiNoteName)
-
-    //   if (ankiFields.length > 0 && ankiNoteName) {
-    //     // 有自定义的 fields
-    //     const modelData: Array<AnkiModelType> = [
-    //       { 'modelName': ankiNoteName, 'fields': fields, 'isAnkiSpace': false }
-    //     ]
-    //     console.log('modelData:');
-    //     console.log(modelData);
-    //     asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
-
-    //   } else {
-    //     // 没有自定义的 fields，使用默认的
-
-    //     try {
-
-    //       // 获取用户的所有 model 名称
-    //       const modelNames: any = await ankiAction('modelNames', 6)
-
-    //       console.log('modelNames:');
-    //       console.log(modelNames);
-
-    //       if (!modelNames.error) {
-
-    //         const models = [
-    //           {
-    //             'modelName': 'Scouter',
-    //             'cardTemplates': [
-    //               {
-    //                 'name': 'Card1',
-    //                 'Front': '{{Front}}',
-    //                 'Back': `{{Front}}
-    //                 <hr id=answer>
-    //                 {{Back}}`
-
-    //               }
-    //             ],
-    //             'inOrderFields': ["Front", "Back"],
-    //             'isAnkiSpace': false
-
-    //           },
-    //           {
-    //             'modelName': 'Scouter Cloze Text',
-    //             'cardTemplates': [
-    //               {
-    //                 'name': 'Card2',
-    //                 'Front': '{{cloze:Text}}',
-    //                 'Back': `{{cloze:Text}}
-    //                           <br>{{More}}`
-    //               }
-    //             ],
-    //             'inOrderFields': ["Text", "More"],
-    //             'isAnkiSpace': true
-    //           }
-    //         ]
-
-    //         // 遍历模型数组，如果存在则返回给 content，如果不存在则新建
-
-    //         // 用于存储 model 相关的数据，返回给 content 将笔记添加到 Anki
-    //         let modelData: Array<AnkiModelType> = []
-
-    //         let promises = models.map((model) => {
-
-    //           return new Promise<void>((resolve, reject) => {
-
-    //             if (modelNames.result.includes(model.modelName)) {
-
-    //               // 如果有 Scouter Model 则获取 Model 的字段
-    //               ankiAction('modelFieldNames', 6, { 'modelName': model.modelName }).then((result: any) => {
-    //                 const modelFieldNames = result.result
-    //                 if (modelFieldNames.length < 2) {
-    //                   // 字段少于 2 个时无法添加笔记，引导用户修改
-
-    //                   modelData.push(
-    //                     { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
-    //                   )
-
-    //                 } else {
-
-    //                   modelData.push(
-    //                     { 'modelName': model.modelName, 'fields': modelFieldNames, 'isAnkiSpace': model.isAnkiSpace }
-    //                   )
-
-    //                 }
-
-    //                 resolve(); // Resolve the Promise
-
-    //               })
-
-    //             } else {
-    //               // 如果没有 Scouter 默认的 Model，则创建
-
-    //               ankiAction('createModel', 6, {
-    //                 'modelName': model.modelName,
-    //                 'inOrderFields': model.inOrderFields,
-    //                 'cardTemplates': model.cardTemplates,
-    //                 'isCloze': model.isAnkiSpace,
-    //                 'css': cardStyle
-    //               }).then((result: any) => {
-
-    //                 if (!result.error) {
-
-    //                   // Scouter 默认的 model 则不处理 fields
-    //                   const fields = {}
-
-    //                   modelData.push(
-    //                     { 'modelName': model.modelName, 'fields': fields, 'isAnkiSpace': model.isAnkiSpace }
-    //                   )
-
-    //                 }
-
-    //                 resolve(); // Resolve the Promise
-    //               })
-
-    //             }
-
-    //           })
-
-    //         })
-
-    //         // 等待所有 Promise 完成
-    //         Promise.all(promises).then(() => {
-    //           console.log(modelData);
-    //           asyncSendResponse({ type: 'setModel', result: 'success', data: { 'defaultDeckName': defaultDeckName, 'modelData': modelData }, error: result.error });
-    //         }).catch((error) => {
-    //           console.error('Error:', error);
-    //         });
-
-    //       }
-
-    //     } catch (error) {
-
-    //       asyncSendResponse({ type: 'setModel', result: 'failure', error: error });
-
-    //     }
-    //   }
-
-    // })
-
-    // browser.storage.sync.get({ 'ankiDeckName': 'Default' }).then((result) => {
-
-
-    // })
-
-
 
     return true;
 
@@ -745,11 +588,35 @@ function handleMessage(request: any, sender: any, sendResponse: any) {
 
 }
 
-const sendMessageToContent = (runPrompt?: boolean) => {
+const sendMessageToContent = (id?:string|number,runPrompt?: boolean) => {
 
   let needToRunPrompt = runPrompt
+  let actionId = id;
   if (needToRunPrompt === undefined) {
     needToRunPrompt = true
+  }
+  if(actionId===undefined){
+    actionId = ''
+  }
+
+  if(actionId==='3'){
+    // Summarize
+    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+
+      const activeTab = tabs[0]
+      let tID = activeTab.id ?? -1
+  
+      if (activeTab && activeTab.id !== undefined) {
+  
+        let b = browser.tabs.sendMessage(tID, { type: 'summarize'})
+  
+      }
+  
+  
+    })
+
+    return;
+  
   }
 
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
@@ -759,7 +626,7 @@ const sendMessageToContent = (runPrompt?: boolean) => {
 
     if (activeTab && activeTab.id !== undefined) {
 
-      let b = browser.tabs.sendMessage(tID, { type: 'open-scouter', runPrompt: needToRunPrompt })
+      let b = browser.tabs.sendMessage(tID, { type: 'open-scouter',actionId:actionId, runPrompt: needToRunPrompt })
 
       // 已知情况：刚安装插件时直接使用会报错（刷新页面后使用则正常），此时需要载入 content_script.js 才行
       // b.catch(e => {

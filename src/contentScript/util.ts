@@ -1,7 +1,7 @@
 import browser from 'webextension-polyfill'
 import { userInfoType, AnkiInfoType } from '../types'
 import { dictionaryPrompt } from './PopupCard/util'
-import { cardStyle } from '../util'
+import { Defuddle } from 'defuddle';
 
 // 获取用户信息
 export const thisGetUserInfo = async () => {
@@ -29,6 +29,21 @@ export const thisGetUserInfo = async () => {
     }
 
 
+}
+
+export const getDocumentContent = async ()=>{
+    const article = new Defuddle(document).parse();
+
+    // Use the extracted content and metadata
+    // console.log(article.content);  // HTML string of the main content
+    // console.log(article.title);    // Title of the article
+
+    // 创建一个临时的 div 元素
+    const temp = document.createElement('div');
+    // 设置 div 的 innerHTML 为传入的 HTML
+    temp.innerHTML = article.content;
+    const content = temp.textContent || temp.innerText || '';
+    return {content:content,title:article.title}
 }
 
 // 获取 Anki 信息

@@ -155,6 +155,7 @@ export function Caption() {
     const thisWord = word.trim();
     openScouter(
       {
+        actionId: "youtube",
         runPrompt: true,
       },
       true,
@@ -173,6 +174,7 @@ export function Caption() {
 
     openScouter(
       {
+        actionId: "youtube",
         runPrompt: false,
       },
       true,

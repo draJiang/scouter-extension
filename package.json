@@ -33,6 +33,7 @@
         "canvas-confetti": "^1.9.3",
         "chatgpt": "^5.2.5",
         "clipboardy": "^3.0.0",
+        "defuddle": "^0.1.1",
         "dotenv-webpack": "^8.0.1",
         "draft-js": "^0.11.7",
         "eventsource-parser": "^0.1.0",

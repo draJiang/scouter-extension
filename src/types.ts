@@ -136,6 +136,7 @@ export type userInfoType = {
     userId: string,
     verified: boolean,
     contextMenu: boolean,
+    contextMenuBlackList:string,
     showYoutubeButton: boolean,
     contentEditable: boolean
 };

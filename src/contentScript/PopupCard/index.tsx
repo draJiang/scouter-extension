@@ -29,7 +29,7 @@ import Notice from "../../Components/Notice";
 import { RegenerateButton } from "./RegenerateButton";
 import { UserMessageInput } from "./UserMessageInput";
 import { Selection } from "./Selection";
-import { ErroTips } from "./ErroTips";
+import { summarizePrompt } from "./util";
 
 import {
   Skeleton,
@@ -83,8 +83,9 @@ getAnkiCards()
 const ScouterDiv = styled.div`
   left: 10;
   top: 10;
-
-  font-family: sans-serif;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont,
+    "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji",
+    Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
   width: 380px;
   height: 500px;
   color: rgb(0 0 0 / 80%);
@@ -97,7 +98,10 @@ const ScouterDiv = styled.div`
   overflow: hidden;
   box-shadow: 0px 8px 28px rgba(0, 0, 0, 0.16);
   border-radius: 6px;
-  border: 1px solid rgba(5, 5, 5, 0.06) h1, h2, h2 {
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  h1,
+  h2,
+  h2 {
     font-weight: bold;
   }
 
@@ -111,6 +115,7 @@ const ScouterDiv = styled.div`
 `;
 
 export function PopupCard(props: {
+  actionId: string;
   data: { keyWord: string; Sentence: string };
   selection: any;
   options: {
@@ -234,45 +239,55 @@ export function PopupCard(props: {
 
     // 重复添加到 Anki 按钮的状态
     // setAddToAnkiStatus({ 'status': 'normal', 'noteId': 0 })
+    const actionId = props.actionId;
+    switch (actionId) {
+      case "3":
+        // summarize
+        console.log("summarize");
+        executivePrompt(summarizePrompt);
+        break;
 
-    if (props.options.runPrompt || props.options.runPrompt === undefined) {
-      // 获取最近一次执行的 Prompt
-      browser.storage.local
-        .get({ lastExecutedPrompt: "" })
-        .then(async (item) => {
-          if (item.lastExecutedPrompt === "") {
-            // 执行默认 Prompt、获取 Unsplash 图片
-            const pormpt = await getInitialPrompt(
-              props.data.keyWord,
-              currentLanguage
-            );
-            executivePrompt(pormpt);
-          } else {
-            // 执行 Prompt、获取 Unsplash 图片
-            if (item.lastExecutedPrompt.id === "Default") {
-              const pormpt = await getInitialPrompt(
-                props.data.keyWord,
-                currentLanguage
-              );
-              executivePrompt(pormpt);
-            } else {
-              executivePrompt(item.lastExecutedPrompt);
-            }
-          }
-        });
-    } else {
-      // 不执行任何 Prompt，由用户自行选择
+      default:
+        if (props.options.runPrompt || props.options.runPrompt === undefined) {
+          // 获取最近一次执行的 Prompt
+          browser.storage.local
+            .get({ lastExecutedPrompt: "" })
+            .then(async (item) => {
+              if (item.lastExecutedPrompt === "") {
+                // 执行默认 Prompt、获取 Unsplash 图片
+                const pormpt = await getInitialPrompt(
+                  props.data.keyWord,
+                  currentLanguage
+                );
+                executivePrompt(pormpt);
+              } else {
+                // 执行 Prompt、获取 Unsplash 图片
+                if (item.lastExecutedPrompt.id === "Default") {
+                  const pormpt = await getInitialPrompt(
+                    props.data.keyWord,
+                    currentLanguage
+                  );
+                  executivePrompt(pormpt);
+                } else {
+                  executivePrompt(item.lastExecutedPrompt);
+                }
+              }
+            });
+        } else {
+          // 不执行任何 Prompt，由用户自行选择
 
-      executivePrompt(
-        {
-          title: "Default",
-          getUnsplashImages: true,
-          userPrompt: `Word:"{{keyWord}}", sentence: "{{sentence}}"`,
-          id: "Default",
-        },
-        "no"
-      );
-      // setIsOpenMenu(true)
+          executivePrompt(
+            {
+              title: "Default",
+              getUnsplashImages: true,
+              userPrompt: `Word:"{{keyWord}}", sentence: "{{sentence}}"`,
+              id: "Default",
+            },
+            "no"
+          );
+          // setIsOpenMenu(true)
+        }
+        break;
     }
 
     // 设置窗口的默认位置、添加滚动事件，让消息列表自动滚动到底部
@@ -416,6 +431,8 @@ export function PopupCard(props: {
   ) => {
     // 设置加载状态
     // setIsLoading(true)
+    console.log("executivePrompt:");
+    console.log(props);
 
     let needToRunPrompt = runPrompt;
     if (needToRunPrompt === undefined) {
@@ -1054,7 +1071,7 @@ export function PopupCard(props: {
               ref={messagesList}
               style={{}}
             >
-              <Selection text={props.data.keyWord} />
+              {props.data.keyWord && <Selection text={props.data.keyWord} />}
 
               <MessagesList messages={messages} />
 

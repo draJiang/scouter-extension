@@ -27,6 +27,7 @@ import { userInfoType, AnkiInfoType } from "../types";
 
 import { thisGetUserInfo } from "./util";
 
+import Summarize from "./summarize";
 import { popupCardStyle } from "./PopupCard/style";
 import { ShortcutButton } from "./ShortcutButton";
 import { YouTubeButton } from "./youtube/YouTubeButton";
@@ -100,6 +101,7 @@ let USER_INFO: userInfoType = {
   userId: "unknow",
   verified: false,
   contextMenu: false,
+  contextMenuBlackList: "",
   showYoutubeButton: true,
   contentEditable: false,
 };
@@ -108,13 +110,14 @@ let executedPromptHistoryInToolBar = [dictionaryPrompt];
 let showYoutubeButton = true;
 
 export const openScouter = (
-  msg?: any,
+  msg?: { actionId: string; runPrompt: boolean },
   isYoutube?: boolean,
   youtubeData?: { keyWord: string; sencence: string; image: string }
 ) => {
   // 处理窗口
   if (msg === undefined) {
     msg = {
+      actionId: "",
       runPrompt: false,
     };
   }
@@ -145,7 +148,7 @@ export const openScouter = (
     // 移除旧内容，避免 2 次渲染混杂在一起
     // container.parentNode?.removeChild(container);
   } else {
-    // console.log('不存在 Box 容器');
+    // 不存在 Box 容器
     container = document.createElement("div");
     container.className = CONTAINER_CLASSNAME;
     shadowRoot?.appendChild(container);
@@ -158,6 +161,7 @@ export const openScouter = (
   // 显示窗口
   if (isYoutube && youtubeData) {
     showPopupCard(
+      msg.actionId,
       { keyWord: youtubeData.keyWord, Sentence: youtubeData.sencence },
       window.getSelection(),
       container,
@@ -170,27 +174,29 @@ export const openScouter = (
       }
     );
   } else {
-    if (selection && selection.keyWord !== "") {
-      showPopupCard(
-        {
-          keyWord: selection?.keyWord,
-          Sentence: selection.sentence,
-        },
-        window.getSelection(),
-        container,
-        shadowRoot,
-        {
-          isPin: isPin,
-          runPrompt: msg.runPrompt,
-          isYoutube: false,
-        }
-      );
-    }
+    // if (selection && selection.keyWord !== "") {
+    showPopupCard(
+      msg.actionId,
+      {
+        keyWord: selection?.keyWord,
+        Sentence: selection?.sentence || "",
+      },
+      window.getSelection(),
+      container,
+      shadowRoot,
+      {
+        isPin: isPin,
+        runPrompt: msg.runPrompt,
+        isYoutube: false,
+      }
+    );
+    // }
   }
 };
 
 // 显示应用窗口
 async function showPopupCard(
+  actionId: string,
   data: { keyWord: string; Sentence: string },
   selection: any,
   MyBox: any,
@@ -219,6 +225,7 @@ async function showPopupCard(
           <StyleProvider container={shadowRoot}>
             <StyleSheetManager target={shadowRoot}>
               <PopupCard
+                actionId={actionId}
                 data={data}
                 selection={selection}
                 options={thisOptions}
@@ -366,6 +373,7 @@ const handleMouseup = async (event: any) => {
       }
 
       showPopupCard(
+        "",
         {
           keyWord: selection?.keyWord,
           Sentence: selection.sentence,
@@ -381,14 +389,25 @@ const handleMouseup = async (event: any) => {
       );
     }
 
+    // 判断当前网站是否为黑名单
+    const currentUrl = window.location.href;
+    const blackList = USER_INFO.contextMenuBlackList.split("\n");
+    let isInBlackList = blackList.some((blackStr: string) =>
+      currentUrl.includes(blackStr)
+    );
+    if (USER_INFO.contextMenuBlackList === "") {
+      isInBlackList = false;
+    }
+
     if (
       isTextSelected &&
       !isClickedInsideShortcutButton &&
       USER_INFO.contextMenu &&
       !isInShadow &&
-      !isPin
+      !isPin &&
+      !isInBlackList
     ) {
-      // 如果不存在按钮
+      // 如果不存在 contextMenu
       if (
         MyBox?.shadowRoot?.querySelector("." + SHORTCUT_BUTTON_CLASSNAME) ===
         null
@@ -433,6 +452,7 @@ const handleMouseup = async (event: any) => {
 
                     // 显示窗口
                     showPopupCard(
+                      "",
                       {
                         keyWord: lastSelection?.keyWord,
                         Sentence: lastSelection!.sentence,
@@ -711,6 +731,56 @@ async function initialize() {
       openScouter(msg);
     }
 
+    if (msg.type === "summarize") {
+      const existingSummarizeBox = document.querySelector(".scouter_summarize");
+      if (existingSummarizeBox) {
+        existingSummarizeBox.remove();
+      }
+
+      const shadowContainer = document.createElement("div");
+      shadowContainer.className = "scouter_summarize";
+      shadowContainer.attachShadow({ mode: "open" });
+
+      const summarizeBox = document.createElement("div");
+      
+      if (shadowContainer.shadowRoot) {
+        shadowContainer.shadowRoot.appendChild(summarizeBox);
+      }
+
+      document.body.appendChild(shadowContainer);
+
+      (async () => {
+        let lang = await fetchcurrentLanguage();
+        ReactDOM.render(
+          <React.StrictMode>
+            <CurrentLanguageContext.Provider value={lang}>
+              <UserInfoContext.Provider
+                value={{ user: USER_INFO, anki: ANKI_INFO }}
+              >
+                <StyleProvider container={shadowRoot}>
+                  <StyleSheetManager target={shadowRoot}>
+                    <Summarize
+                      onClose={() => {
+                        const existingSummarizeBox =
+                          document.querySelector(".scouter_summarize");
+                        if (existingSummarizeBox) {
+                          existingSummarizeBox.remove();
+                        }
+                      }}
+                    />
+                  </StyleSheetManager>
+                </StyleProvider>
+              </UserInfoContext.Provider>
+            </CurrentLanguageContext.Provider>
+
+            {/* <PopupCardContext data={data} selection={msg} runPrompt={runPrompt} /> */}
+          </React.StrictMode>,
+
+          summarizeBox
+        );
+      })();
+    }
+
     if (msg.type === "tabOnUpdated") {
       if (msg.data.locateInYouTube) {
         setYoutubeButton();
@@ -728,8 +798,8 @@ async function initialize() {
     messages: {},
   });
   ANKI_INFO = r.data;
-  console.log("获取 Anki 信息:");
-  console.log(ANKI_INFO);
+  // console.log("获取 Anki 信息:");
+  // console.log(ANKI_INFO);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

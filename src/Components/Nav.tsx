@@ -15,6 +15,7 @@ import { DropdownMenuItem } from "./DropdownMenuItem";
 import {
   getDefaultPrompt,
   dictionaryPrompt,
+  summarizePrompt
 } from "../contentScript/PopupCard/util";
 import {
   PromptType,
@@ -702,6 +703,21 @@ export function Nav(props: NavProps) {
                   >
                     {dictionaryPrompt.title}
                   </DropdownMenuItem>
+
+                  {/* 总结网页 */}
+                  {/* <DropdownMenuItem
+                    key={summarizePrompt.id}
+                    data={summarizePrompt}
+                    onSelect={() => handleMenuItemClick(summarizePrompt)}
+                    handleEditPrompt={() =>
+                      openCustomPromptForm({
+                        isOpen: true,
+                        data: summarizePrompt,
+                      })
+                    }
+                  >
+                    {summarizePrompt.title}
+                  </DropdownMenuItem> */}
 
                   <Divider style={{ margin: "8px 0" }} />
 

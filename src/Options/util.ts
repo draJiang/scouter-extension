@@ -21,6 +21,7 @@ export async function getSettings() {
         "apiKeySelection": 'scouterFreeAI',                 // 当前选择的 AI API 类型，有 Open AI、ollama 等选项
         "newLicenseKey": '',                                // Scouter Pro 版本激活码
         "contextMenu": false,                               // 是否显示划词后的上下文菜单
+        "contextMenuBlackList":'',                          // 上下文菜单的黑名单
         "ollamaModel": 'llama2',                            // ollama 模型名称
         "ollamaApiEndpoint": 'http://localhost:11434',      // ollama 端口地址
         "userId": '',                                       // 用户 ID

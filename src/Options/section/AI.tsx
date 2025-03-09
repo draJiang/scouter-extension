@@ -133,7 +133,7 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
               </p>
             }
           >
-            <Input placeholder="https://api.openai.com" type="url" />
+            <Input placeholder="https://api.openai.com/v1/chat/completions" type="url" />
           </Form.Item>
 
           <Form.Item name="openApiKey" label="🔑 Your Open API Key">
@@ -144,7 +144,7 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
           </Form.Item>
           <Form.Item name="openApiModel" label="🤖 Model">
             <Input
-              placeholder="We will not use your Key for any other purposes."
+              placeholder="gpt-4o-mini"
               type="text"
             />
           </Form.Item>
