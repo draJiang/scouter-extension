@@ -173,9 +173,21 @@ const Summarize: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            flexDirection: "column",
           }}
         >
           🚀 Subscribe to Unlock
+          <a
+            target="_blank"
+            href="https://jiangzilong.notion.site/1b1596b28b348073b66dd6d91b3fe60a?pvs=4"
+            style={{
+              color: "#fff",
+              textDecoration: "underline",
+              padding: "0.25rem",
+            }}
+          >
+            Learn More
+          </a>
         </div>
       )}
     </div>
