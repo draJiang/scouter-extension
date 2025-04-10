@@ -546,12 +546,12 @@ export const getSelection = (isInShadow?: boolean) => {
     if (range.startOffset >= 1) {
       const charBefore =
         range.startContainer.textContent[range.startOffset - 1];
-      startOffsetShift = /[。.！!?？]/.test(charBefore) ? 0 : 3;
+      startOffsetShift = /[。！!?？]|[.!?]\s/.test(charBefore) ? 0 : 3;
     }
 
     if (range.endOffset < range.endContainer.textContent.length - 1) {
       const charAfter = range.endContainer.textContent[range.endOffset];
-      endOffsetShift = /[。.！!?？]/.test(charAfter) ? 0 : 3;
+      endOffsetShift = /[。！!?？]|[.!?]\s/.test(charAfter) ? 0 : 3;
     }
 
     if (range.endOffset === 0 || isInShadow) {
@@ -590,7 +590,7 @@ export const getSelection = (isInShadow?: boolean) => {
       sentence = selection.anchorNode.data;
     }
 
-    // console.log({ 'selection': selection, 'keyWord': keyWord, 'sentence': sentence });
+    console.log({ 'selection': selection, 'keyWord': keyWord, 'sentence': sentence });
     return { selection: selection, keyWord: keyWord, sentence: sentence };
   } else {
     return null;
@@ -603,7 +603,7 @@ export const getSelection = (isInShadow?: boolean) => {
     let plainText = tempDiv.innerText;
 
     // 对英文和日语的处理
-    let sentences = plainText.split(/[。.！!?？]/);
+    let sentences = plainText.split(/[。！!?？]|[.!?]\s/);
 
     // 删除空句子
     sentences = sentences.filter((sentence) => sentence.trim() !== "");

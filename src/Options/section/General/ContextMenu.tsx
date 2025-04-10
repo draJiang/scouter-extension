@@ -67,7 +67,7 @@ export const ContextMenu: React.FC<ContextMenuType> = ({
         </Form.Item>
         <Form.Item
           name="contextMenuBlackList"
-          label="Black list"
+          label="🚫 Black list"
           extra={<div></div>}
         >
           <TextArea
