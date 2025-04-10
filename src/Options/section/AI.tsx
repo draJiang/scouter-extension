@@ -133,7 +133,10 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
               </p>
             }
           >
-            <Input placeholder="https://api.openai.com/v1/chat/completions" type="url" />
+            <Input
+              placeholder="https://api.openai.com/v1/chat/completions"
+              type="url"
+            />
           </Form.Item>
 
           <Form.Item name="openApiKey" label="🔑 Your Open API Key">
@@ -143,10 +146,7 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
             />
           </Form.Item>
           <Form.Item name="openApiModel" label="🤖 Model">
-            <Input
-              placeholder="gpt-4o-mini"
-              type="text"
-            />
+            <Input placeholder="gpt-4o-mini" type="text" />
           </Form.Item>
         </div>
 
@@ -200,7 +200,7 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
             />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             name="model"
             label="🤖Model"
             initialValue={models[0]["name"]}
@@ -212,7 +212,31 @@ const AI: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
                 </Option>
               ))}
             </Select>
+          </Form.Item> */}
+
+          <Form.Item
+            name="model"
+            label="🤖Model"
+            extra={
+              <p
+                style={{
+                  // color: "#666",
+                  padding:'8px'
+                }}
+              >
+                {" "}
+                <a
+                  target="__blank"
+                  href="https://jiangzilong.notion.site/Set-up-your-API-Key-API-Key-96266d5236fa462ca707683d9bb275c6"
+                >
+                  Learn More↗️
+                </a>
+              </p>
+            }
+          >
+            <Input placeholder="google/gemma-2-9b-it:free" type="text" />
           </Form.Item>
+
         </div>
 
         {/* chatGPTWeb */}
