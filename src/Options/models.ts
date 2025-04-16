@@ -1,9 +1,5 @@
 export const freeModels = [
     {
-        'name': 'Google: Gemini Flash Lite 2.0 Preview (free)',
-        'id': 'google/gemini-2.0-flash-lite-preview-02-05:free'
-    },
-    {
         'name': 'Meta: Llama 3.3 70B Instruct (free)',
         'id': 'meta-llama/llama-3.3-70b-instruct:free'
     },
