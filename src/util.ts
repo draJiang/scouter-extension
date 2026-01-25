@@ -268,7 +268,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
       const currentLanguage = result.currentLanguage
       const targetLanguage = result.targetLanguage
       const model = result.model
-      const customizeApiModel =  result.openApiModel.replace(/ /g, '');
+      const customizeApiModel = result.openApiModel.replace(/ /g, '');
       const freeModel = result.freeModel
 
       let openApiEndpoint: string = result.openApiEndpoint
@@ -497,7 +497,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
 
             })
 
-          } else{
+          } else {
 
             // OpenAI
             headers = { 'Authorization': 'Bearer ' + openApiKey, 'Content-Type': 'application/json', }
@@ -512,7 +512,7 @@ export function getAIParameter(messages: MessageForGPTType[]): Promise<aiParamet
             //   //如果 URL 中没有包含后缀，则自动添加
             //   openApiEndpoint += '/v1/chat/completions';
             // }
-            
+
             body = {
               "model": customizeApiModel,
               "messages": messages,
@@ -1080,11 +1080,13 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
       }
 
-      const response = { 'userId': uniqueId!,
-         'verified': verified,
-         'contextMenu': result.contextMenu,
-         'contextMenuBlackList':result.contextMenuBlackList,
-         'showYoutubeButton': result.showYoutubeButton,'contentEditable':result.contentEditable }
+      const response = {
+        'userId': uniqueId!,
+        'verified': verified,
+        'contextMenu': result.contextMenu,
+        'contextMenuBlackList': result.contextMenuBlackList,
+        'showYoutubeButton': result.showYoutubeButton, 'contentEditable': result.contentEditable
+      }
       console.log('response:');
       console.log(response);
 
@@ -1108,7 +1110,7 @@ export const getUserInfo = (): Promise<userInfoType> => {
 
 export function handleAnkiDynamicVariable(
   fields: Record<string, string>[],
-  dynamicVariable: { Selection: string, Sentence: string, Content: string, Audio: any, Image: string, Source: string }
+  dynamicVariable: { Selection: string, Sentence: string, Content: string, Audio: any, Image: string, Source: string, Title: string, Description: string, Url: string }
 ) {
 
   let audioFields: string[] = []
@@ -1133,28 +1135,30 @@ export function handleAnkiDynamicVariable(
   //   }, {} as Record<string, string>); // Initialize as an empty object
   // }), {});
 
-  const newFields = f.reduce((accumulator: Record<string, string>, obj: Record<string, string>)=>{
+  const newFields = f.reduce((accumulator: Record<string, string>, obj: Record<string, string>) => {
 
-    Object.keys(obj).forEach((key)=>{
-        // 处理哪些 field 需要显示 audio
-        if (obj[key].indexOf('{{Audio}}') > -1) {
-          audioFields.push(key);
-        }
-        // 替换模板变量
-        accumulator[key] = obj[key]
-          .replace(/{{Selection}}/g, dynamicVariable.Selection)
-          .replace(/{{Sentence}}/g, `<blockquote>${dynamicVariable.Sentence}</blockquote>`)
-          .replace(/{{Audio}}/g, '')
-          .replace(/{{Definition}}/g, dynamicVariable.Content)
-          .replace(/{{Image}}/g, dynamicVariable.Image)
-          .replace(/{{Source}}/g, dynamicVariable.Source);
+    Object.keys(obj).forEach((key) => {
+      // 处理哪些 field 需要显示 audio
+      if (obj[key].indexOf('{{Audio}}') > -1) {
+        audioFields.push(key);
+      }
+      // 替换模板变量
+      accumulator[key] = obj[key]
+        .replace(/{{Selection}}/gi, dynamicVariable.Selection)
+        .replace(/{{Sentence}}/gi, `<blockquote>${dynamicVariable.Sentence}</blockquote>`)
+        .replace(/{{Audio}}/gi, '')
+        .replace(/{{Definition}}/gi, dynamicVariable.Content)
+        .replace(/{{Image}}/gi, dynamicVariable.Image)
+        .replace(/{{Title}}/gi, dynamicVariable.Title)
+        .replace(/{{Description}}/gi, dynamicVariable.Description)
+        .replace(/{{Url}}/gi, `<a href="${dynamicVariable.Url}">${dynamicVariable.Url}</a>`);
 
 
     })
 
     return accumulator; // 返回累加器
 
-  },{} as Record<string, string>)
+  }, {} as Record<string, string>)
 
   return ({ fields: newFields, audioFields: audioFields })
 

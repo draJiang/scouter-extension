@@ -461,6 +461,15 @@ const Anki: React.FC<FormPropsType> = ({ settings, saveOptions }) => {
             <h3 className=" font-semibold">{"{{Source}}"}</h3>
             <p>Link to the current website</p>
 
+            <h3 className=" font-semibold">{"{{Url}}"}</h3>
+            <p>URL of the current website</p>
+
+            <h3 className=" font-semibold">{"{{Title}}"}</h3>
+            <p>Title of the current website</p>
+
+            <h3 className=" font-semibold">{"{{Description}}"}</h3>
+            <p>Description of the current website</p>
+
             {/* <li>{"{{Sentence}}: Sentence containing the selected text"}</li> */}
             {/* <li>{"{{Audio}}: Pronunciation of the selected content"}</li> */}
             {/* <li>{"{{Image}}: Picture"}</li> */}

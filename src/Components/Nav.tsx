@@ -388,6 +388,9 @@ export function Nav(props: NavProps) {
         Audio: audio,
         Image: images,
         Source: source,
+        Title: document.title || "",
+        Description: document.querySelector('meta[name="description"]')?.getAttribute('content') || "",
+        Url: window.location.href,
       });
 
       const audioFields = nf.audioFields;
